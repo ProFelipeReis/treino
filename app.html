@@ -11,6 +11,9 @@
   <meta name="apple-mobile-web-app-title" content="FORGE"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Firebase SDK loaded early so login can query Firestore immediately -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -37,9 +40,10 @@
       --shadow-md: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
     }
     html { scroll-behavior: smooth; }
-    /* Prevent zoom */
-    html { touch-action: pan-x pan-y; }
+    /* Prevent zoom and horizontal scroll */
+    html { touch-action: pan-x pan-y; overflow-x: hidden; }
     * { touch-action: manipulation; }
+    body { overflow-x: hidden; }
 
     body { font-family: var(--body); background: var(--bg); color: var(--text); min-height: 100vh; }
     button { cursor: pointer; border: none; font-family: inherit; }
@@ -152,12 +156,13 @@
     .plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); overflow: hidden; transition: all .2s; box-shadow: var(--shadow); }
     .plan-card:hover { border-color: var(--border2); box-shadow: var(--shadow-md); }
     .plan-card.expired { opacity: .6; }
-    .plan-card-header { display: flex; align-items: center; gap: 14px; padding: 16px 18px; }
-    .plan-letter { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; background: var(--accent-dim); border: 1px solid var(--accent-soft); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 800; font-size: 1rem; color: #111110; }
+    .plan-card-header { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; }
+    .plan-card-header-top { display: flex; align-items: center; gap: 12px; }
+    .plan-letter { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; background: var(--accent-dim); border: 1px solid var(--accent-soft); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 800; font-size: 1rem; color: #111110; }
     .plan-info { flex: 1; min-width: 0; }
-    .plan-title { font-weight: 700; font-size: .96rem; color: var(--text); }
-    .plan-meta { font-size: .74rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
-    .plan-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
+    .plan-title { font-weight: 700; font-size: .93rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .plan-meta { font-size: .73rem; color: var(--text3); margin-top: 2px; font-weight: 500; }
+    .plan-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
     .plan-workouts { border-top: 1px solid var(--border); padding: 12px 18px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
     .workout-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; }
     .workout-row-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -214,7 +219,43 @@
     .yt-fallback { display: none; margin-top: 8px; }
     .yt-fallback-btn { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #ff0000; color: white; border-radius: var(--r); text-decoration: none; font-weight: 700; font-size: .82rem; }
 
-    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 60px auto; }
+    /* Three-dots context menu */
+    .ctx-menu-wrap { position: relative; }
+    .ctx-menu-btn { background: var(--surface2); border: 1.5px solid var(--border); width: 28px; height: 28px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: .95rem; transition: all .15s; font-weight: 900; letter-spacing: .5px; line-height: 1; }
+    .ctx-menu-btn:hover { background: var(--surface3); color: var(--text); }
+    .ctx-menu { position: absolute; right: 0; top: calc(100% + 5px); background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow-md); z-index: 500; min-width: 170px; overflow: hidden; animation: ctxIn .15s cubic-bezier(.22,1,.36,1); }
+    @keyframes ctxIn { from { opacity:0; transform: scale(.95) translateY(-4px); } to { opacity:1; transform: scale(1) translateY(0); } }
+    .ctx-menu-item { display: flex; align-items: center; gap: 9px; padding: 11px 15px; font-size: .83rem; font-weight: 700; color: var(--text2); cursor: pointer; transition: background .1s; white-space: nowrap; }
+    .ctx-menu-item:hover { background: var(--surface2); color: var(--text); }
+
+    /* Notification bell */
+    .notif-btn { position: relative; background: none; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 1.1rem; transition: all .15s; }
+    .notif-btn:hover { background: rgba(255,255,255,.1); }
+    .notif-badge { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; background: #e03e3e; border-radius: 50%; font-size: .6rem; font-weight: 800; color: white; display: flex; align-items: center; justify-content: center; border: 2px solid #111110; }
+    .notif-panel { position: absolute; right: 0; top: calc(100% + 10px); background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r2); box-shadow: var(--shadow-md); z-index: 600; width: 320px; max-height: 420px; overflow-y: auto; }
+    .notif-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: .82rem; font-weight: 700; color: var(--text); }
+    .notif-panel-empty { padding: 32px 16px; text-align: center; color: var(--text3); font-size: .82rem; }
+    .notif-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); animation: toastIn .25s; }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item.unread { background: rgba(245,200,0,.05); }
+    .notif-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--accent-dim); border: 1px solid var(--accent-soft); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .notif-text { flex: 1; }
+    .notif-title { font-size: .82rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+    .notif-sub { font-size: .74rem; color: var(--text3); margin-top: 2px; font-weight: 500; }
+    .notif-wrap-rel { position: relative; }
+
+    /* Confirm save modal */
+    .confirm-modal { max-width: 360px; }
+
+    /* Clone modal */
+    .clone-student-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+    .clone-student-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--r); cursor: pointer; transition: all .15s; }
+    .clone-student-item:hover { border-color: var(--accent-soft); background: var(--accent-dim); }
+    .clone-student-item.selected { border-color: var(--accent); background: var(--accent-dim); }
+
+    @media(max-width:768px){
+      .notif-panel { width: calc(100vw - 32px); right: -8px; }
+    } border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 60px auto; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 8px 0 env(safe-area-inset-bottom); z-index: 100; box-shadow: 0 -2px 16px rgba(0,0,0,.06); }
@@ -224,12 +265,32 @@
     .mobile-nav-item .ni { font-size: 1.2rem; }
     @media(max-width:768px){
       .sidebar { display: none; }
-      .main-content { padding: 16px; padding-bottom: 90px; }
+      .main-content { padding: 14px; padding-bottom: 90px; }
       .mobile-nav { display: block; }
       .students-grid { grid-template-columns: 1fr; }
       .exercise-controls { grid-template-columns: 1fr 1fr; }
       .modal-body { padding: 16px; }
-      .plan-actions { justify-content: flex-end; }
+      .detail-header { gap: 12px; }
+
+      /* Plan card: botões em duas colunas no mobile */
+      .plan-card-header-top { flex-wrap: wrap; }
+      .plan-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 2px; }
+      .plan-actions .btn { justify-content: center; font-size: .75rem; padding: 8px 6px; }
+
+      /* Detail header compacto */
+      .detail-header { flex-direction: row; align-items: center; }
+      .detail-avatar { width: 50px; height: 50px; font-size: 1.2rem; border-radius: 12px; }
+      .detail-info h2 { font-size: 1.15rem; }
+
+      /* Search box full width */
+      .search-input { width: 100%; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .page-header > div { width: 100%; }
+      .search-wrap { width: 100%; }
+
+      /* Botões WhatsApp/Excluir do detail */
+      .detail-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+      .detail-actions .btn { justify-content: center; }
     }
   </style>
 </head>
@@ -247,23 +308,82 @@
   </div>
 </div>
 <script>
-function doLogin(){
+// ── Multi-manager login ──
+async function doLogin(){
   var user=document.getElementById('login-user').value.trim();
   var pass=document.getElementById('login-pass').value;
-  if(user==='felipereis'&&pass==='Epil3004@'){
-    try{ localStorage.setItem('forge_gestor_session','logged'); }catch(e){}
-    document.getElementById('screen-login').style.display='none';
-    document.getElementById('screen-dashboard').style.cssText='display:flex;flex-direction:column;';
-    // Espera loadStudents estar disponível (Firebase pode ainda estar carregando)
-    (function waitLoad(){
-      if(window.loadStudents){ window.loadStudents(); }
-      else { setTimeout(waitLoad, 100); }
-    })();
-    var t=document.createElement('div');t.className='toast success';t.textContent='✅ Acesso concedido.';document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
-  } else {
-    var t=document.createElement('div');t.className='toast error';t.textContent='❌ Credenciais inválidas.';document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
+  if(!user||!pass){ showLoginError('Preencha usuário e senha.'); return; }
+
+  // Master check (instant, no Firestore needed)
+  if(user==='felipereis' && pass==='Epil3004@'){
+    _loginSuccess(user, true);
+    return;
+  }
+
+  // Other managers → query Firestore directly via compat SDK
+  var btn = document.querySelector('#login-form button[type=button]');
+  if(btn){ btn.textContent='Verificando...'; btn.disabled=true; }
+  try {
+    // Wait for Firebase compat SDK to be ready (loaded via <script> tags below dashboard HTML)
+    var attempts=0;
+    while((!window.firebase || !window.firebase.firestore) && attempts<40){
+      await new Promise(r=>setTimeout(r,100)); attempts++;
+    }
+    if(!window.firebase || !window.firebase.firestore){
+      showLoginError('Erro de conexão. Tente novamente.'); return;
+    }
+
+    var db = firebase.firestore();
+    var snap = await db.collection('managers').where('username','==',user).get();
+    if(snap.empty){ showLoginError('Credenciais inválidas.'); return; }
+    var mgr = snap.docs[0].data();
+    if(mgr.password !== pass){ showLoginError('Credenciais inválidas.'); return; }
+    _loginSuccess(user, !!mgr.isMaster, mgr.name||user);
+  } catch(e) {
+    showLoginError('Erro: '+e.message);
+  } finally {
+    if(btn){ btn.textContent='Acessar painel →'; btn.disabled=false; }
   }
 }
+
+function showLoginError(msg){
+  var t=document.createElement('div');t.className='toast error';t.textContent='❌ '+msg;
+  document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
+}
+
+function _loginSuccess(username, isMaster, displayName){
+  try{
+    localStorage.setItem('forge_gestor_session', JSON.stringify({username, isMaster: !!isMaster, displayName: displayName||username}));
+  }catch(e){}
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('screen-dashboard').style.cssText='display:flex;flex-direction:column;';
+  window.CURRENT_USER = {username, isMaster: !!isMaster, displayName: displayName||username};
+  _applyUserUI();
+  (function waitLoad(){
+    if(window.loadStudents){ window.loadStudents(); }
+    else { setTimeout(waitLoad, 100); }
+  })();
+  // Start notification polling after firebase is ready
+  (function waitNotif(){
+    if(window.startNotifPolling){ window.startNotifPolling(); }
+    else { setTimeout(waitNotif, 200); }
+  })();
+  var t=document.createElement('div');t.className='toast success';t.textContent='✅ Acesso concedido.';
+  document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
+}
+
+function _applyUserUI(){
+  var u = window.CURRENT_USER||{};
+  // topbar pill
+  var pill = document.getElementById('topbar-user-pill');
+  if(pill) pill.textContent = u.displayName||u.username||'gestor';
+  // show/hide Gestores tab
+  var show = !!u.isMaster;
+  document.querySelectorAll('.sidebar-item-gestores, .mobile-nav-item-gestores').forEach(function(el){
+    el.classList.toggle('hidden', !show);
+  });
+}
+
 document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('login-form').addEventListener('keydown',function(e){
     if(e.key==='Enter') doLogin();
@@ -271,17 +391,25 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
+
 <!-- DASHBOARD -->
 <div id="screen-dashboard">
   <div class="topbar">
     <div class="topbar-brand"><div class="dot"></div>FORGE</div>
     <div class="topbar-right">
-      <div class="user-pill">felipereis</div>
+      <div class="notif-wrap-rel">
+        <button class="notif-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notificações">🔔<span class="notif-badge hidden" id="notif-badge">0</span></button>
+        <div class="notif-panel hidden" id="notif-panel">
+          <div class="notif-panel-header"><span>Notificações</span><button class="btn btn-ghost btn-sm" onclick="markAllNotifsRead()">Marcar lidas</button></div>
+          <div id="notif-list"><div class="notif-panel-empty">Nenhuma notificação</div></div>
+        </div>
+      </div>
+      <div class="user-pill" id="topbar-user-pill">felipereis</div>
       <button class="logout-btn" onclick="logoutGestor()">Sair</button>
     </div>
   </div>
   <div class="app-layout">
-    <div class="sidebar">
+    <div class="sidebar" id="main-sidebar">
       <div class="sidebar-section">Principal</div>
       <div class="sidebar-item active" data-tab="tab-dashboard" onclick="switchTab('tab-dashboard',this)">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -290,6 +418,10 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="sidebar-item" data-tab="tab-alunos" onclick="switchTab('tab-alunos',this)">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Alunos
+      </div>
+      <div class="sidebar-item sidebar-item-gestores hidden" data-tab="tab-gestores" onclick="switchTab('tab-gestores',this)">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><circle cx="19" cy="8" r="2"/><path d="M22 14c0-2-1.3-3.5-3-4"/></svg>
+        Gestores
       </div>
     </div>
     <div class="main-content">
@@ -324,12 +456,17 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
         <div id="student-detail-view" class="hidden"></div>
       </div>
+      <div id="tab-gestores" class="tab-panel">
+        <div class="page-header"><div class="page-title">Gestores</div><button class="btn btn-primary btn-sm" onclick="openAddManagerModal()">+ Novo gestor</button></div>
+        <div id="managers-grid" class="students-grid"><div class="spinner"></div></div>
+      </div>
     </div>
   </div>
   <div class="mobile-nav">
     <div class="mobile-nav-items">
       <div class="mobile-nav-item active" data-tab="tab-dashboard" onclick="switchTab('tab-dashboard',this)"><span class="ni">📊</span>Dashboard</div>
       <div class="mobile-nav-item" data-tab="tab-alunos" onclick="switchTab('tab-alunos',this)"><span class="ni">👥</span>Alunos</div>
+      <div class="mobile-nav-item mobile-nav-item-gestores hidden" data-tab="tab-gestores" onclick="switchTab('tab-gestores',this)"><span class="ni">🛡️</span>Gestores</div>
     </div>
   </div>
 </div>
@@ -370,12 +507,60 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </div>
 
+<!-- MODAL: CONFIRMAR FECHAR PLANO -->
+<div id="modal-confirm-close" class="modal-overlay hidden">
+  <div class="modal confirm-modal">
+    <div class="modal-header"><h3>Fechar sem salvar?</h3><button class="close-btn" onclick="closeModal('modal-confirm-close')">✕</button></div>
+    <div class="modal-body" style="padding-bottom:0;">
+      <p style="font-size:.88rem;color:var(--text2);">Você tem alterações não salvas no plano. O que deseja fazer?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="discardPlanAndClose()">Descartar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm-close')">Continuar editando</button>
+      <button class="btn btn-primary" onclick="savePlan();closeModal('modal-confirm-close')">Salvar</button>
+    </div>
+  </div>
+</div>
 
+<!-- MODAL: CLONAR TREINO -->
+<div id="modal-clone" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>Clonar plano de treino</h3><button class="close-btn" onclick="closeModal('modal-clone')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px;">Selecione o aluno que irá <strong>receber</strong> uma cópia deste plano:</p>
+      <div id="clone-student-list" class="clone-student-list"></div>
+      <div id="clone-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:18px;margin-top:10px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-clone')">Cancelar</button>
+      <button id="btn-do-clone" class="btn btn-primary" onclick="doClonePlan()">Clonar plano</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVO GESTOR -->
+<div id="modal-add-manager" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3 id="manager-modal-title">Cadastrar gestor</h3><button class="close-btn" onclick="closeModal('modal-add-manager')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Usuário *</label><input id="new-manager-user" class="form-control" type="text" placeholder="Ex: joao123" autocomplete="off"/></div>
+      <div class="form-group"><label>Senha *</label><input id="new-manager-pass" class="form-control" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
+      <div class="form-group"><label>Nome (opcional)</label><input id="new-manager-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
+      <label class="checkbox-label" id="manager-master-wrap"><input type="checkbox" id="new-manager-master"/> Dar privilégios de <strong>master</strong> (pode cadastrar outros gestores)</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-manager')">Cancelar</button>
+      <button id="btn-save-manager" class="btn btn-primary" onclick="saveManager()">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PLANO DE TREINO -->
 <div id="modal-plan" class="modal-overlay hidden">
   <div class="modal">
     <div class="modal-header">
       <h3 id="plan-modal-title">Criar plano de treino</h3>
-      <button class="close-btn" onclick="closeModal('modal-plan')">✕</button>
+      <button class="close-btn" onclick="confirmClosePlan()">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-row">
@@ -390,7 +575,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div id="plan-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:18px;margin-top:8px;"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-plan')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="confirmClosePlan()">Cancelar</button>
       <button id="btn-save-plan" class="btn btn-primary" onclick="savePlan()">Salvar plano</button>
     </div>
   </div>
@@ -408,8 +593,6 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
 <script>
 const _app = firebase.initializeApp({
   apiKey:"AIzaSyBVhMJfE1Zj9sVHztDXHUtsC_Y2WIikrkU",
@@ -437,9 +620,10 @@ window.ST={students:[],currentStudentId:null,planStudentId:null,editPlanId:null,
 
 // ── LocalStorage session ──
 const LS_GESTOR='forge_gestor_session';
-function saveSession(){ try{ localStorage.setItem(LS_GESTOR,'logged'); }catch(e){} }
+function saveSession(data){ try{ localStorage.setItem(LS_GESTOR, typeof data==='string'?data:JSON.stringify(data)); }catch(e){} }
 function clearSession(){ try{ localStorage.removeItem(LS_GESTOR); }catch(e){} }
-function hasSession(){ try{ return localStorage.getItem(LS_GESTOR)==='logged'; }catch(e){ return false; } }
+function hasSession(){ try{ return !!localStorage.getItem(LS_GESTOR); }catch(e){ return false; } }
+function getSession(){ try{ var v=localStorage.getItem(LS_GESTOR); if(!v) return null; try{ return JSON.parse(v); }catch(e){ return v==='logged'?{username:'felipereis',isMaster:true,displayName:'felipereis'}:null; } }catch(e){ return null; } }
 
 const toast=(msg,type='success')=>{const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;document.getElementById('toast-container').appendChild(t);setTimeout(()=>t.remove(),3500)};
 window.openModal=id=>document.getElementById(id).classList.remove('hidden');
@@ -454,12 +638,16 @@ const ytEmbed=url=>{const id=ytId(url);return id?`https://www.youtube-nocookie.c
 window.showDashboard=function(){
   document.getElementById('screen-login').style.display='none';
   document.getElementById('screen-dashboard').style.cssText='display:flex;flex-direction:column;';
+  _applyUserUI();
   loadStudents();
+  startNotifPolling();
 };
 
 // Login handled by doLogin() in inline script above
 window.logoutGestor=()=>{
   clearSession();
+  window.CURRENT_USER=null;
+  if(window._notifInterval){ clearInterval(window._notifInterval); window._notifInterval=null; }
   document.getElementById('screen-dashboard').style.display='none';
   document.getElementById('screen-login').style.display='flex';
   toast('Sessão encerrada.');
@@ -470,13 +658,25 @@ window.switchTab=(tabId,el)=>{
   document.querySelectorAll('.sidebar-item,.mobile-nav-item').forEach(i=>i.classList.remove('active'));
   document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(i=>i.classList.add('active'));
   if(tabId==='tab-alunos') showStudentsList();
+  if(tabId==='tab-gestores') loadManagers();
 };
 window.goToAlunos=()=>switchTab('tab-alunos',document.querySelector('[data-tab="tab-alunos"]'));
 
 window.loadStudents=async()=>{
   try{
-    const snap=await _getDocs(_query(_col(_db,'students'),_orderBy('createdAt','desc')));
-    ST.students=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const u=window.CURRENT_USER||{};
+    let q;
+    if(u.isMaster && u.username==='felipereis'){
+      // Master felipereis vê todos os alunos
+      q=_query(_col(_db,'students'),_orderBy('createdAt','desc'));
+    } else {
+      // Gestor normal — sem _orderBy para evitar índice composto; ordena em JS
+      q=_query(_col(_db,'students'),_where('managerId','==',u.username));
+    }
+    const snap=await _getDocs(q);
+    ST.students=snap.docs
+      .map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
     renderStudentsGrid(ST.students);
     updateStats();
   }catch(err){
@@ -490,7 +690,11 @@ window.renderStudentsGrid=list=>{
     g.innerHTML=`<div class="empty-state"><div class="ei">👤</div><p>Nenhum aluno cadastrado.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAddStudentModal()">+ Primeiro aluno</button></div>`;
     return;
   }
-  g.innerHTML=list.map(s=>`
+
+  const u=window.CURRENT_USER||{};
+  const isMaster=u.isMaster && u.username==='felipereis';
+
+  const cardHTML=s=>`
     <div class="student-card" onclick="openStudentDetail('${s.id}')">
       <div class="student-card-top">
         <div class="avatar">${initials(s.name)}</div>
@@ -504,14 +708,50 @@ window.renderStudentsGrid=list=>{
           ${s.phone?`<span style="font-size:.75rem;color:var(--text3);font-weight:500;">📱 ${s.phone}</span>`:''}
           ${s.obs?`<span style="font-size:.75rem;color:var(--text2);">${s.obs}</span>`:''}
           <span class="badge badge-active">ativo</span>
+          ${isMaster&&s.managerId&&s.managerId!=='felipereis'&&s.managerName?`<span style="font-size:.72rem;color:var(--text3);font-weight:600;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;">👤 ${s.managerName}</span>`:''}
         </div>
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditStudentModal('${s.id}')" style="flex-shrink:0;">✏️ Editar</button>
       </div>
-    </div>`).join('');
+    </div>`;
+
+  if(!isMaster){
+    // Gestor normal: lista simples
+    g.innerHTML=list.map(cardHTML).join('');
+    return;
+  }
+
+  // Master: separa próprios alunos (sem managerId ou managerId=felipereis) dos de outros gestores
+  const mine=list.filter(s=>!s.managerId||s.managerId==='felipereis');
+  const others=list.filter(s=>s.managerId&&s.managerId!=='felipereis');
+
+  let html='';
+
+  if(mine.length){
+    html+=mine.map(cardHTML).join('');
+  } else {
+    html+=`<div class="empty-state" style="grid-column:1/-1;padding:40px 20px;"><div class="ei">👤</div><p>Você ainda não cadastrou alunos.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAddStudentModal()">+ Primeiro aluno</button></div>`;
+  }
+
+  if(others.length){
+    // Separador de seção
+    html+=`<div style="grid-column:1/-1;margin-top:12px;margin-bottom:4px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;">Alunos de outros gestores</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:.72rem;font-weight:600;color:var(--text3);white-space:nowrap;">${others.length} aluno${others.length!==1?'s':''}</span>
+      </div>
+    </div>`;
+    html+=others.map(cardHTML).join('');
+  }
+
+  g.innerHTML=html;
 };
 window.filterStudents=()=>{
   const q=document.getElementById('search-students').value.toLowerCase();
-  renderStudentsGrid(ST.students.filter(s=>s.name.toLowerCase().includes(q)||s.code.toLowerCase().includes(q)));
+  const filtered=q
+    ? ST.students.filter(s=>s.name.toLowerCase().includes(q)||s.code.toLowerCase().includes(q)||(s.managerName||'').toLowerCase().includes(q))
+    : ST.students;
+  renderStudentsGrid(filtered);
 };
 window.openAddStudentModal=()=>{
   document.getElementById('new-student-name').value='';
@@ -530,7 +770,13 @@ window.addStudent=async()=>{
     const obs=document.getElementById('new-student-obs').value.trim();
     let code,exists=true;
     while(exists){code=genCode();const s=await _getDocs(_query(_col(_db,'students'),_where('code','==',code)));exists=!s.empty;}
-    await _setDoc(_doc(_db,'students',Date.now().toString()),{name,code,phone,obs,createdAt:Date.now()});
+    const u=window.CURRENT_USER||{};
+    await _setDoc(_doc(_db,'students',Date.now().toString()),{
+      name,code,phone,obs,
+      managerId: u.username||'felipereis',
+      managerName: u.displayName||u.username||'felipereis',
+      createdAt:Date.now()
+    });
     closeModal('modal-add-student');
     toast(`✅ Aluno cadastrado · Código: ${code}`);
     await loadStudents();
@@ -566,8 +812,15 @@ window.saveEditStudent=async()=>{
 };
 window.updateStats=async()=>{
   document.getElementById('stat-alunos').textContent=ST.students.length;
+  // Count plans only for the students already loaded (filtered by manager)
+  const studentIds=ST.students.map(s=>s.id);
+  if(!studentIds.length){
+    document.getElementById('stat-planos').textContent=0;
+    document.getElementById('stat-expired').textContent=0;
+    return;
+  }
   const snap=await _getDocs(_col(_db,'plans'));
-  const ps=snap.docs.map(d=>d.data());
+  const ps=snap.docs.map(d=>d.data()).filter(p=>studentIds.includes(p.studentId));
   document.getElementById('stat-planos').textContent=ps.filter(p=>!isExpired(p)).length;
   document.getElementById('stat-expired').textContent=ps.filter(p=>isExpired(p)).length;
 };
@@ -593,7 +846,7 @@ window.openStudentDetail=async sid=>{
         ${s.phone?`<div style="font-size:.82rem;color:var(--text2);margin-top:6px;font-weight:500;">📱 ${s.phone}</div>`:''}
         ${s.obs?`<div style="font-size:.82rem;color:var(--text2);margin-top:4px;">${s.obs}</div>`:''}
       </div>
-      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
+      <div class="detail-actions" style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
         ${s.phone?`<button class="btn btn-whatsapp btn-sm" onclick="contactWhatsApp('${s.phone}','${s.name}')">📱 WhatsApp</button>`:''}
         <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">Excluir aluno</button>
       </div>
@@ -823,17 +1076,25 @@ const planCardHTML=(p,sid,idx,exp=false)=>{
   return `
   <div class="plan-card ${exp?'expired':''}">
     <div class="plan-card-header">
-      <div class="plan-letter">${String.fromCharCode(65+idx)}</div>
-      <div class="plan-info">
-        <div class="plan-title">${p.title}</div>
-        <div class="plan-meta">${p.expiry?`Validade · ${new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR')}`:'Sem validade'} · ${(p.workouts||[]).length} treino(s)</div>
+      <div class="plan-card-header-top">
+        <div class="plan-letter">${String.fromCharCode(65+idx)}</div>
+        <div class="plan-info">
+          <div class="plan-title">${p.title}</div>
+          <div class="plan-meta">${p.expiry?`Validade · ${new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR')}`:'Sem validade'} · ${(p.workouts||[]).length} treino(s)</div>
+        </div>
+        <span class="badge ${exp?'badge-expired':'badge-active'}" style="flex-shrink:0;">${exp?'Vencido':'Ativo'}</span>
+        <div class="ctx-menu-wrap">
+          <button class="ctx-menu-btn" onclick="event.stopPropagation();toggleCtxMenu('ctx_${p.id}')" title="Mais opções">•••</button>
+          <div class="ctx-menu hidden" id="ctx_${p.id}">
+            <div class="ctx-menu-item" onclick="event.stopPropagation();closeAllCtxMenus();openCloneModal('${p.id}','${sid}')">📋 Clonar treino</div>
+          </div>
+        </div>
       </div>
       <div class="plan-actions">
-        <span class="badge ${exp?'badge-expired':'badge-active'}">${exp?'Vencido':'Ativo'}</span>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewPlan('${p.id}','${sid}')">Ver</button>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPlanModal('${sid}','${p.id}')">Editar</button>
-        <button class="btn btn-whatsapp btn-sm" onclick="event.stopPropagation();sharePlanWhatsApp('${p.id}','${student.name||''}','${student.phone||''}')">📱</button>
-        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePlan('${p.id}','${sid}')">Excluir</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewPlan('${p.id}','${sid}')">👁 Ver</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPlanModal('${sid}','${p.id}')">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();exportPlanPDF('${p.id}','${student.name||''}')">📄 Exportar PDF</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePlan('${p.id}','${sid}')">🗑 Excluir</button>
       </div>
     </div>
     <div class="plan-workouts">
@@ -890,8 +1151,7 @@ window.viewPlan=async(pid,sid)=>{
           </div>`).join('')}
       </div>`).join('')}`;
   document.getElementById('pv-footer').innerHTML=`
-    <button class="btn btn-ghost" onclick="closeModal('modal-plan-view')">Fechar</button>
-    <button class="btn btn-whatsapp" onclick="sharePlanWhatsApp('${p.id}','${student.name||''}','${student.phone||''}')">📱 WhatsApp</button>
+    <button class="btn btn-whatsapp" onclick="sendWhatsAppPlan('${sid}','${p.id}')">📱 WhatsApp</button>
     <button class="btn btn-ghost" onclick="closeModal('modal-plan-view');exportPlanPDF('${p.id}','${student.name||''}')">📄 PDF</button>
     <button class="btn btn-primary" onclick="closeModal('modal-plan-view');openPlanModal('${sid}','${p.id}')">✏️ Editar</button>
     <button class="btn btn-danger" onclick="deletePlan('${p.id}','${sid}')">Excluir</button>`;
@@ -1069,6 +1329,204 @@ window.updateRepsSerie=(bi,ei,si,val)=>{
   ex.reps=ex.repsArr.join(', ');
 };
 
+// ── Three-dots context menu helpers ──
+window.toggleCtxMenu=function(id){
+  const menu=document.getElementById(id);
+  if(!menu) return;
+  const isHidden=menu.classList.contains('hidden');
+  closeAllCtxMenus();
+  if(isHidden) menu.classList.remove('hidden');
+};
+window.closeAllCtxMenus=function(){
+  document.querySelectorAll('.ctx-menu').forEach(m=>m.classList.add('hidden'));
+};
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.ctx-menu-wrap')) closeAllCtxMenus();
+});
+
+// ── WhatsApp: send plan link with student code ──
+window.sendWhatsAppPlan=function(sid, planId){
+  const student=ST.students.find(s=>s.id===sid)||{};
+  const name=student.name||'';
+  const code=student.code||'';
+  const phone=student.phone||'';
+  const msg=`Olá *${name}*, seu treino está pronto. 🏋️\n\n*https://profelipereis.github.io/treino*\n\n*Código de acesso:* \`${code}\``;
+  const encoded=encodeURIComponent(msg);
+  let url='https://wa.me/';
+  if(phone){
+    const cleaned=phone.replace(/\D/g,'');
+    let num=cleaned;
+    if(!num.startsWith('55')) num='55'+num;
+    url+=num;
+  }
+  url+=`?text=${encoded}`;
+  window.open(url,'_blank');
+  toast('Abrindo WhatsApp...');
+};
+
+// ── Clone plan ──
+window._clonePlanId=null;
+window._cloneFromSid=null;
+window._cloneTargetSid=null;
+
+window.openCloneModal=function(planId, sid){
+  window._clonePlanId=planId;
+  window._cloneFromSid=sid;
+  window._cloneTargetSid=null;
+  document.getElementById('clone-error').textContent='';
+  // Render list of other students
+  const fromStudent=ST.students.find(s=>s.id===sid)||{};
+  const others=ST.students.filter(s=>s.id!==sid);
+  const list=document.getElementById('clone-student-list');
+  if(!others.length){
+    list.innerHTML='<p style="font-size:.83rem;color:var(--text3);padding:12px 0;">Não há outros alunos cadastrados.</p>';
+  } else {
+    list.innerHTML=others.map(s=>`
+      <div class="clone-student-item" id="cloneitem_${s.id}" onclick="selectCloneTarget('${s.id}')">
+        <div class="avatar" style="width:34px;height:34px;font-size:.82rem;">${(s.name||'?').slice(0,2).toUpperCase()}</div>
+        <div>
+          <div style="font-weight:700;font-size:.88rem;">${s.name}</div>
+          <div style="font-size:.72rem;color:var(--text3);font-weight:600;">${s.code}</div>
+        </div>
+      </div>`).join('');
+  }
+  openModal('modal-clone');
+};
+
+window.selectCloneTarget=function(sid){
+  window._cloneTargetSid=sid;
+  document.querySelectorAll('.clone-student-item').forEach(el=>el.classList.remove('selected'));
+  const el=document.getElementById('cloneitem_'+sid);
+  if(el) el.classList.add('selected');
+  document.getElementById('clone-error').textContent='';
+};
+
+window.doClonePlan=async function(){
+  if(!window._cloneTargetSid){ document.getElementById('clone-error').textContent='Selecione um aluno.'; return; }
+  const plan=window.__gestorPlans&&window.__gestorPlans[window._clonePlanId];
+  if(!plan){ document.getElementById('clone-error').textContent='Plano não encontrado.'; return; }
+  const btn=document.getElementById('btn-do-clone');
+  btn.classList.add('btn-loading'); btn.textContent='Clonando...';
+  try{
+    const targetStudent=ST.students.find(s=>s.id===window._cloneTargetSid)||{};
+    const newData={
+      ...plan,
+      studentId: window._cloneTargetSid,
+      title: plan.title+' (cópia)',
+      createdAt: Date.now()
+    };
+    delete newData.id;
+    await _setDoc(_doc(_db,'plans','plan_'+Date.now()), newData);
+    toast(`✅ Plano clonado para ${targetStudent.name||'aluno'}!`);
+    closeModal('modal-clone');
+    await loadStudents();
+  }catch(e){
+    document.getElementById('clone-error').textContent='Erro: '+e.message;
+  } finally {
+    btn.classList.remove('btn-loading'); btn.textContent='Clonar plano';
+  }
+};
+
+// ── Confirm close modal-plan ──
+window.confirmClosePlan=function(){
+  // Only show confirm if there's actual content being edited
+  if(ST.workoutBlocks && ST.workoutBlocks.length > 0){
+    openModal('modal-confirm-close');
+  } else {
+    closeModal('modal-plan');
+  }
+};
+
+window.discardPlanAndClose=function(){
+  ST.workoutBlocks=[];
+  closeModal('modal-confirm-close');
+  closeModal('modal-plan');
+};
+
+// ── Notifications ──
+window._notifData=[];
+window._notifPanelOpen=false;
+
+window.toggleNotifPanel=function(){
+  const panel=document.getElementById('notif-panel');
+  window._notifPanelOpen=!window._notifPanelOpen;
+  panel.classList.toggle('hidden',!window._notifPanelOpen);
+  if(window._notifPanelOpen) renderNotifPanel();
+  // Close on outside click
+  if(window._notifPanelOpen){
+    setTimeout(()=>{
+      function outsideClick(e){
+        if(!e.target.closest('.notif-wrap-rel')){ panel.classList.add('hidden'); window._notifPanelOpen=false; document.removeEventListener('click',outsideClick); }
+      }
+      document.addEventListener('click',outsideClick);
+    },10);
+  }
+};
+
+window.renderNotifPanel=function(){
+  const list=document.getElementById('notif-list');
+  if(!window._notifData.length){
+    list.innerHTML='<div class="notif-panel-empty">Nenhuma notificação ainda</div>';
+    return;
+  }
+  list.innerHTML=window._notifData.slice(0,20).map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}">
+      <div class="notif-icon">🏆</div>
+      <div class="notif-text">
+        <div class="notif-title"><strong>${n.studentName}</strong> concluiu o treino!</div>
+        <div class="notif-sub">${n.workoutTitle||n.planTitle||''} · ${n.date||''}</div>
+      </div>
+    </div>`).join('');
+};
+
+window.markAllNotifsRead=async function(){
+  window._notifData.forEach(n=>n.read=true);
+  renderNotifPanel();
+  updateNotifBadge();
+  // Mark read in Firestore using already-loaded ids
+  try{
+    for(const n of window._notifData){
+      if(n.id) await _updateDoc(_doc(_db,'notifications',n.id),{read:true});
+    }
+  }catch(e){ console.warn('markAllNotifsRead:',e.message); }
+};
+
+window.updateNotifBadge=function(){
+  const unread=window._notifData.filter(n=>!n.read).length;
+  const badge=document.getElementById('notif-badge');
+  if(badge){
+    badge.textContent=unread>9?'9+':unread;
+    badge.classList.toggle('hidden',unread===0);
+  }
+};
+
+window.pollNotifications=async function(){
+  try{
+    const snap=await _getDocs(_col(_db,'notifications'));
+    const prev=window._notifData.length;
+    window._notifData=snap.docs
+      .map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+    const newUnread=window._notifData.filter(n=>!n.read);
+    updateNotifBadge();
+    // Show toast for any new unread that appeared since last poll
+    if(prev>0 && newUnread.length > (window._lastUnreadCount||0)){
+      const newest=window._notifData[0];
+      if(newest&&!newest.read) toast(`🏆 ${newest.studentName} concluiu "${newest.workoutTitle||newest.planTitle}"!`);
+    }
+    window._lastUnreadCount=newUnread.length;
+    if(window._notifPanelOpen) renderNotifPanel();
+  }catch(e){ console.warn('pollNotifications:',e.message); }
+};
+
+// Start polling every 30 seconds when dashboard is active
+window._notifInterval=null;
+window.startNotifPolling=function startNotifPolling(){
+  if(window._notifInterval) clearInterval(window._notifInterval);
+  pollNotifications();
+  window._notifInterval=setInterval(pollNotifications,30000);
+}
+
 window.savePlan=async()=>{
   const title=document.getElementById('plan-title').value.trim();
   document.getElementById('plan-error').textContent='';
@@ -1086,9 +1544,121 @@ window.savePlan=async()=>{
   finally{btn.classList.remove('btn-loading');btn.textContent='Salvar plano';}
 };
 
+// ── Manager CRUD ──
+window._applyUserUI=function(){
+  var u=window.CURRENT_USER||{};
+  var pill=document.getElementById('topbar-user-pill');
+  if(pill) pill.textContent=u.displayName||u.username||'gestor';
+  var show=!!u.isMaster;
+  document.querySelectorAll('.sidebar-item-gestores,.mobile-nav-item-gestores').forEach(function(el){
+    el.classList.toggle('hidden',!show);
+  });
+};
+
+window.openAddManagerModal=function(editData){
+  document.getElementById('manager-modal-title').textContent=editData?'Editar gestor':'Cadastrar gestor';
+  document.getElementById('new-manager-user').value=editData?editData.username:'';
+  document.getElementById('new-manager-user').disabled=!!editData;
+  document.getElementById('new-manager-pass').value='';
+  document.getElementById('new-manager-name').value=editData?editData.name||'':'';
+  document.getElementById('new-manager-master').checked=editData?!!editData.isMaster:false;
+  var btn=document.getElementById('btn-save-manager');
+  btn.textContent=editData?'Salvar':'Cadastrar';
+  btn.dataset.editId=editData?editData.id:'';
+  openModal('modal-add-manager');
+  setTimeout(()=>document.getElementById(editData?'new-manager-name':'new-manager-user').focus(),100);
+};
+
+window.saveManager=async function(){
+  var btn=document.getElementById('btn-save-manager');
+  var editId=btn.dataset.editId||'';
+  var username=document.getElementById('new-manager-user').value.trim().toLowerCase();
+  var pass=document.getElementById('new-manager-pass').value;
+  var name=document.getElementById('new-manager-name').value.trim();
+  var isMaster=document.getElementById('new-manager-master').checked;
+
+  if(!username){toast('Usuário obrigatório!','error');return;}
+  if(!editId&&!pass){toast('Senha obrigatória!','error');return;}
+  if(username==='felipereis'){toast('Esse nome de usuário é reservado.','error');return;}
+
+  btn.classList.add('btn-loading');btn.textContent='Salvando...';
+  try{
+    if(editId){
+      var upd={name,isMaster};
+      if(pass) upd.password=pass;
+      await _updateDoc(_doc(_db,'managers',editId),upd);
+      toast('✅ Gestor atualizado!');
+    } else {
+      // Check if username exists
+      var exists=await _getDocs(_query(_col(_db,'managers'),_where('username','==',username)));
+      if(!exists.empty){toast('Usuário já existe!','error');return;}
+      await _setDoc(_doc(_db,'managers','mgr_'+Date.now()),{username,password:pass,name,isMaster,createdAt:Date.now()});
+      toast('✅ Gestor cadastrado!');
+    }
+    closeModal('modal-add-manager');
+    await loadManagers();
+  }catch(e){toast('Erro: '+e.message,'error');}
+  finally{btn.classList.remove('btn-loading');btn.textContent=editId?'Salvar':'Cadastrar';}
+};
+
+window.loadManagers=async function(){
+  var g=document.getElementById('managers-grid');
+  if(!g) return;
+  g.innerHTML='<div class="spinner"></div>';
+  try{
+    var snap=await _getDocs(_query(_col(_db,'managers'),_orderBy('createdAt','desc')));
+    var managers=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderManagersGrid(managers);
+  }catch(e){
+    g.innerHTML=`<div style="padding:20px;color:red;font-size:12px;grid-column:1/-1;">Erro: ${e.message}</div>`;
+  }
+};
+
+window.renderManagersGrid=function(list){
+  var g=document.getElementById('managers-grid');
+  if(!list.length){
+    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><div class="ei">🛡️</div><p>Nenhum gestor cadastrado além do master.</p></div>`;
+    return;
+  }
+  g.innerHTML=list.map(m=>`
+    <div class="student-card">
+      <div class="student-card-top">
+        <div class="avatar" style="${m.isMaster?'background:var(--accent-dim);border-color:var(--accent-soft);':''}">${(m.name||m.username||'?').slice(0,2).toUpperCase()}</div>
+        <div>
+          <div class="student-name">${m.name||m.username}</div>
+          <div class="student-code">@${m.username}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:4px;">
+        <span class="badge ${m.isMaster?'badge-active':''}">
+          ${m.isMaster?'⭐ Master':'Gestor'}
+        </span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="openAddManagerModal(${JSON.stringify(m).replace(/"/g,'&quot;')})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteManager('${m.id}','${m.username}')">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+};
+
+window.deleteManager=async function(id, username){
+  if(!confirm(`Excluir o gestor @${username}?`)) return;
+  await _deleteDoc(_doc(_db,'managers',id));
+  toast('Gestor excluído.');
+  await loadManagers();
+};
+
 // ── Auto login from localStorage ──
 (function init(){
-  if(hasSession()){ window.showDashboard(); }
+  if(hasSession()){
+    var sess=getSession();
+    if(sess){
+      window.CURRENT_USER=sess;
+      window.showDashboard();
+    } else {
+      clearSession();
+    }
+  }
 })();
 </script>
 
