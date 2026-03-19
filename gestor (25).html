@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FORGE — Painel do Gestor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f7f7f5;
+      --bg2: #ffffff;
+      --surface: #ffffff;
+      --surface2: #f0f0ed;
+      --surface3: #e8e8e4;
+      --border: #e4e4e0;
+      --border2: #d0d0cb;
+      --accent: #f5c800;
+      --accent2: #e0b400;
+      --accent-dim: rgba(245,200,0,.10);
+      --accent-soft: rgba(245,200,0,.25);
+      --red: #e03e3e; --red-dim: rgba(224,62,62,.08);
+      --green: #2e7d52; --green-dim: rgba(46,125,82,.08); --green-soft: rgba(46,125,82,.15);
+      --text: #111110;
+      --text2: #555550;
+      --text3: #999990;
+      --head: 'Nunito', sans-serif;
+      --body: 'Plus Jakarta Sans', sans-serif;
+      --r: 12px; --r2: 16px;
+      --shadow: 0 2px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+      --shadow-md: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--body); background: var(--bg); color: var(--text); min-height: 100vh; }
+    button { cursor: pointer; border: none; font-family: inherit; }
+    input, select, textarea { font-family: inherit; }
+    .hidden { display: none !important; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
+
+    #toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: var(--surface); color: var(--text); padding: 13px 18px; border-radius: var(--r); font-size: .82rem; font-weight: 600; border: 1px solid var(--border); min-width: 240px; position: relative; animation: toastIn .25s cubic-bezier(.22,1,.36,1); box-shadow: var(--shadow-md); }
+    .toast.success::before { content: ''; position: absolute; left: 0; top: 0; width: 3px; height: 100%; background: var(--green); border-radius: 3px 0 0 3px; }
+    .toast.error::before { content: ''; position: absolute; left: 0; top: 0; width: 3px; height: 100%; background: var(--red); border-radius: 3px 0 0 3px; }
+    @keyframes toastIn { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.35); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 760px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-md); }
+    .modal-sm { max-width: 460px; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; border-radius: 20px 20px 0 0; }
+    .modal-header h3 { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: var(--text); }
+    .modal-body { padding: 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+    .close-btn { background: var(--surface2); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: .95rem; transition: all .15s; }
+    .close-btn:hover { background: var(--surface3); color: var(--text); }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: .75rem; font-weight: 700; color: var(--text2); margin-bottom: 7px; text-transform: uppercase; letter-spacing: .06em; }
+    .form-control { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--r); font-size: .88rem; transition: all .15s; background: var(--bg); color: var(--text); }
+    .form-control:focus { outline: none; border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(245,200,0,.15); }
+    .form-control option { background: var(--surface); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media(max-width:520px){ .form-row { grid-template-columns: 1fr; } }
+
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: var(--r); font-size: .85rem; font-weight: 700; transition: all .15s; cursor: pointer; border: none; font-family: var(--body); }
+    .btn-primary { background: var(--accent); color: #111110; box-shadow: 0 4px 14px rgba(245,200,0,.3); }
+    .btn-primary:hover { transform: translateY(-1px); background: #ffd700; box-shadow: 0 6px 20px rgba(245,200,0,.4); }
+    .btn-ghost { background: var(--surface2); color: var(--text2); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--surface3); }
+    .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.25); }
+    .btn-danger:hover { background: rgba(224,62,62,.15); }
+    .btn-whatsapp { background: rgba(37,211,102,.08); color: #128c4a; border: 1px solid rgba(37,211,102,.25); }
+    .btn-whatsapp:hover { background: rgba(37,211,102,.15); }
+    .btn-sm { padding: 6px 13px; font-size: .78rem; }
+    .btn-loading { opacity: .5; pointer-events: none; }
+
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: .72rem; font-weight: 700; }
+    .badge-active { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,125,82,.2); }
+    .badge-expired { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); }
+
+    #screen-login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; background: linear-gradient(135deg, #f7f7f5 0%, #fffef0 50%, #f7f7f5 100%); }
+    .login-card { width: 100%; max-width: 340px; background: #ffffff; border: 1px solid #e4e4e0; border-radius: 24px; padding: 36px 32px; box-shadow: 0 8px 40px rgba(0,0,0,.1); }
+
+    #screen-dashboard { display: none; flex-direction: column; min-height: 100vh; }
+    .topbar { background: #111110; border-bottom: 1px solid #2e2e2a; padding: 0 24px; height: 62px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.3); }
+    .topbar-brand { font-family: var(--head); font-size: 1.2rem; font-weight: 800; color: #ffffff; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
+    .topbar-brand .dot { width: 8px; height: 8px; border-radius: 50%; background: #ffffff; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .user-pill { background: rgba(245,200,0,.12); border: 1px solid rgba(245,200,0,.3); border-radius: 8px; padding: 5px 14px; font-size: .78rem; font-weight: 700; color: var(--accent); }
+    .logout-btn { background: none; color: #555550; font-size: .78rem; padding: 6px 12px; border-radius: 8px; font-weight: 600; transition: all .15s; }
+    .logout-btn:hover { color: var(--red); background: var(--red-dim); }
+
+    .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); }
+    .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 10px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-section { font-size: .68rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .12em; padding: 14px 12px 8px; }
+    .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--r); font-size: .88rem; font-weight: 600; color: var(--text2); cursor: pointer; transition: all .15s; position: relative; }
+    .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+    .sidebar-item.active { background: var(--accent-dim); color: #111110; font-weight: 700; }
+    .sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 60%; background: var(--accent); border-radius: 0 3px 3px 0; }
+
+    .main-content { flex: 1; overflow-y: auto; padding: 28px; background: var(--bg); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+    .page-title { font-family: var(--head); font-size: 1.5rem; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
+    .search-wrap { position: relative; }
+    .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .4; pointer-events: none; }
+    .search-input { padding: 9px 14px 9px 38px; border: 1.5px solid var(--border); border-radius: var(--r); font-size: .84rem; width: 230px; background: var(--surface); color: var(--text); font-weight: 500; transition: border-color .15s; }
+    .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,200,0,.12); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 22px; box-shadow: var(--shadow); position: relative; overflow: hidden; transition: box-shadow .2s; }
+    .stat-card:hover { box-shadow: var(--shadow-md); }
+    .stat-card::after { content: ''; position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; border-radius: 50%; background: var(--accent-dim); }
+    .stat-num { font-family: var(--head); font-size: 2.6rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-num.green { color: var(--green); }
+    .stat-num.red { color: var(--red); }
+    .stat-lbl { font-size: .76rem; color: var(--text3); margin-top: 6px; font-weight: 600; }
+    .quick-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 24px; box-shadow: var(--shadow); }
+    .quick-card h3 { font-family: var(--head); font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--text2); }
+
+    .students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+    .student-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 20px; cursor: pointer; transition: all .2s; box-shadow: var(--shadow); }
+    .student-card:hover { border-color: var(--accent-soft); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .student-card-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .avatar { width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0; background: var(--accent-dim); border: 1px solid var(--accent-soft); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 800; font-size: 1rem; color: #111110; }
+    .student-name { font-weight: 700; font-size: .96rem; color: var(--text); }
+    .student-code { font-size: .74rem; color: var(--text3); margin-top: 2px; font-weight: 600; letter-spacing: .07em; }
+
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--text2); font-size: .84rem; cursor: pointer; background: none; border: none; margin-bottom: 22px; font-weight: 600; transition: color .15s; padding: 0; }
+    .back-btn:hover { color: #111110; }
+    .detail-header { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 28px; flex-wrap: wrap; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .detail-avatar { width: 64px; height: 64px; border-radius: 16px; flex-shrink: 0; background: var(--accent-dim); border: 1px solid var(--accent-soft); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 800; font-size: 1.5rem; color: #111110; }
+    .detail-info h2 { font-family: var(--head); font-size: 1.4rem; font-weight: 800; color: var(--text); }
+    .detail-info .code { font-size: .76rem; color: var(--text3); margin-top: 4px; font-weight: 600; letter-spacing: .08em; }
+    .section-label { font-size: .72rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 14px; margin-top: 4px; display: flex; align-items: center; gap: 10px; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .plans-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); overflow: hidden; transition: all .2s; box-shadow: var(--shadow); }
+    .plan-card:hover { border-color: var(--border2); box-shadow: var(--shadow-md); }
+    .plan-card.expired { opacity: .6; }
+    .plan-card-header { display: flex; align-items: center; gap: 14px; padding: 16px 18px; }
+    .plan-letter { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; background: var(--accent-dim); border: 1px solid var(--accent-soft); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 800; font-size: 1rem; color: #111110; }
+    .plan-info { flex: 1; min-width: 0; }
+    .plan-title { font-weight: 700; font-size: .96rem; color: var(--text); }
+    .plan-meta { font-size: .74rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
+    .plan-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
+    .plan-workouts { border-top: 1px solid var(--border); padding: 12px 18px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
+    .workout-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; }
+    .workout-row-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .workout-row-tag { background: var(--accent-dim); color: #111110; border: 1px solid var(--accent-soft); border-radius: 6px; padding: 2px 9px; font-size: .72rem; font-weight: 700; flex-shrink: 0; }
+    .workout-row-title { font-weight: 700; font-size: .88rem; flex: 1; }
+    .workout-days { display: flex; gap: 4px; flex-wrap: wrap; }
+    .day-chip { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; padding: 3px 8px; font-size: .72rem; font-weight: 600; }
+    .workout-excount { font-size: .74rem; color: var(--text3); margin-top: 6px; font-weight: 500; }
+    .add-plan-btn { border: 2px dashed var(--border2); background: transparent; color: var(--text3); border-radius: var(--r2); padding: 20px; width: 100%; font-size: .88rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all .2s; font-family: var(--body); }
+    .add-plan-btn:hover { border-color: var(--accent); color: #111110; background: var(--accent-dim); }
+    .empty-center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; gap: 16px; }
+    .empty-icon { width: 68px; height: 68px; border-radius: 18px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); grid-column: 1/-1; }
+    .empty-state .ei { font-size: 2.5rem; margin-bottom: 10px; }
+
+    .workouts-editor { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+    .workout-block { background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--r2); overflow: hidden; }
+    .workout-block-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .wb-letter { width: 28px; height: 28px; border-radius: 7px; background: var(--accent-dim); border: 1px solid var(--accent-soft); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 800; font-size: .85rem; color: #111110; flex-shrink: 0; }
+    .wb-title-input { flex: 1; padding: 7px 11px; border: 1.5px solid var(--border); border-radius: 8px; font-size: .88rem; background: var(--bg); color: var(--text); font-weight: 700; }
+    .wb-title-input:focus { outline: none; border-color: var(--accent); }
+    .remove-block-btn { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); border-radius: 7px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .85rem; flex-shrink: 0; }
+    .workout-block-body { padding: 14px 16px; }
+    .days-selector { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .day-toggle { padding: 7px 13px; border-radius: var(--r); border: 1.5px solid var(--border); background: var(--surface); font-size: .78rem; font-weight: 700; cursor: pointer; transition: all .15s; color: var(--text2); }
+    .day-toggle.selected { background: var(--accent); border-color: var(--accent2); color: #111110; box-shadow: 0 2px 8px rgba(245,200,0,.35); }
+    .exercises-list { display: flex; flex-direction: column; gap: 8px; }
+    .exercise-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 14px; transition: box-shadow .15s, opacity .15s; position: relative; }
+    .exercise-item.drag-over { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .exercise-item.dragging { opacity: .4; }
+    .exercise-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .drag-handle { cursor: grab; color: var(--text3); padding: 2px 4px; border-radius: 4px; display: flex; align-items: center; flex-shrink: 0; transition: color .15s; user-select: none; }
+    .drag-handle:hover { color: var(--text2); background: var(--surface2); }
+    .drag-handle:active { cursor: grabbing; }
+    .ex-num { width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0; background: var(--surface2); color: var(--text3); display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; border: 1px solid var(--border); }
+    .exercise-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .ctrl-label { font-size: .7rem; font-weight: 700; color: var(--text3); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .07em; }
+    .remove-ex-btn { margin-left: auto; background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; flex-shrink: 0; }
+    .add-ex-btn { width: 100%; padding: 9px; border: 2px dashed var(--border2); background: transparent; color: var(--text3); border-radius: var(--r); font-weight: 700; font-size: .82rem; cursor: pointer; margin-top: 8px; transition: all .15s; }
+    .add-ex-btn:hover { border-color: var(--accent); color: #111110; background: var(--accent-dim); }
+    .add-workout-block-btn { border: 2px dashed var(--border2); background: transparent; color: var(--text2); border-radius: var(--r); padding: 14px; width: 100%; font-size: .86rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all .15s; font-family: var(--body); }
+    .add-workout-block-btn:hover { border-color: var(--accent); color: #111110; background: var(--accent-dim); }
+    .checkbox-label { display: flex; align-items: center; gap: 7px; font-size: .82rem; color: var(--text2); cursor: pointer; user-select: none; margin-top: 8px; font-weight: 600; }
+    .checkbox-label input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
+
+    .pv-workout { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 12px; }
+    .pv-workout-title { font-weight: 700; margin-bottom: 10px; font-size: .95rem; display: flex; align-items: center; gap: 8px; color: var(--text); }
+    .pv-days { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+    .pv-ex { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 6px; }
+    .pv-ex-name { font-weight: 700; font-size: .9rem; margin-bottom: 5px; color: var(--text); }
+    .pv-ex-meta { font-size: .77rem; color: var(--text2); line-height: 1.7; font-weight: 500; }
+    .yt-embed { border-radius: var(--r); overflow: hidden; margin-top: 8px; }
+    .yt-embed iframe { width: 100%; aspect-ratio: 16/9; display: block; border: none; }
+    .yt-fallback { display: none; margin-top: 8px; }
+    .yt-fallback-btn { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #ff0000; color: white; border-radius: var(--r); text-decoration: none; font-weight: 700; font-size: .82rem; }
+
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 60px auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 8px 0 env(safe-area-inset-bottom); z-index: 100; box-shadow: 0 -2px 16px rgba(0,0,0,.06); }
+    .mobile-nav-items { display: flex; justify-content: space-around; }
+    .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .68rem; font-weight: 700; color: var(--text3); cursor: pointer; padding: 6px 20px; border-radius: 8px; transition: color .15s; }
+    .mobile-nav-item.active { color: #111110; }
+    .mobile-nav-item .ni { font-size: 1.2rem; }
+    @media(max-width:768px){
+      .sidebar { display: none; }
+      .main-content { padding: 16px; padding-bottom: 90px; }
+      .mobile-nav { display: block; }
+      .students-grid { grid-template-columns: 1fr; }
+      .exercise-controls { grid-template-columns: 1fr 1fr; }
+      .modal-body { padding: 16px; }
+      .plan-actions { justify-content: flex-end; }
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- LOGIN -->
+<div id="screen-login">
+  <div class="login-card">
+    <form id="login-form" onsubmit="return false;">
+      <div class="form-group"><label>Usuário</label><input id="login-user" class="form-control" type="text" placeholder="felipereis" required autocomplete="username"/></div>
+      <div class="form-group"><label>Senha</label><input id="login-pass" class="form-control" type="password" placeholder="••••••••" required autocomplete="current-password"/></div>
+      <button type="button" onclick="doLogin()" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">Acessar painel →</button>
+    </form>
+  </div>
+</div>
+<script>
+function doLogin(){
+  var user=document.getElementById('login-user').value.trim();
+  var pass=document.getElementById('login-pass').value;
+  if(user==='felipereis'&&pass==='Epil3004@'){
+    try{ localStorage.setItem('forge_gestor_session','logged'); }catch(e){}
+    document.getElementById('screen-login').style.display='none';
+    document.getElementById('screen-dashboard').style.cssText='display:flex;flex-direction:column;';
+    // Espera loadStudents estar disponível (Firebase pode ainda estar carregando)
+    (function waitLoad(){
+      if(window.loadStudents){ window.loadStudents(); }
+      else { setTimeout(waitLoad, 100); }
+    })();
+    var t=document.createElement('div');t.className='toast success';t.textContent='✅ Acesso concedido.';document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
+  } else {
+    var t=document.createElement('div');t.className='toast error';t.textContent='❌ Credenciais inválidas.';document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
+  }
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('login-form').addEventListener('keydown',function(e){
+    if(e.key==='Enter') doLogin();
+  });
+});
+</script>
+
+<!-- DASHBOARD -->
+<div id="screen-dashboard">
+  <div class="topbar">
+    <div class="topbar-brand"><div class="dot"></div>FORGE</div>
+    <div class="topbar-right">
+      <div class="user-pill">felipereis</div>
+      <button class="logout-btn" onclick="logoutGestor()">Sair</button>
+    </div>
+  </div>
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-section">Principal</div>
+      <div class="sidebar-item active" data-tab="tab-dashboard" onclick="switchTab('tab-dashboard',this)">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="sidebar-item" data-tab="tab-alunos" onclick="switchTab('tab-alunos',this)">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Alunos
+      </div>
+    </div>
+    <div class="main-content">
+      <div id="tab-dashboard" class="tab-panel active">
+        <div class="page-header"><div class="page-title">Dashboard</div></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="stat-alunos">—</div><div class="stat-lbl">Alunos cadastrados</div></div>
+          <div class="stat-card"><div class="stat-num green" id="stat-planos">—</div><div class="stat-lbl">Planos ativos</div></div>
+          <div class="stat-card"><div class="stat-num red" id="stat-expired">—</div><div class="stat-lbl">Planos vencidos</div></div>
+        </div>
+        <div class="quick-card">
+          <h3>Ações rápidas</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick="goToAlunos()">👥 Ver alunos</button>
+            <button class="btn btn-primary" onclick="openAddStudentModal()">+ Novo aluno</button>
+          </div>
+        </div>
+      </div>
+      <div id="tab-alunos" class="tab-panel">
+        <div id="students-list-view">
+          <div class="page-header">
+            <div class="page-title">Alunos</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <div class="search-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input class="search-input" type="text" id="search-students" placeholder="Buscar aluno..." oninput="filterStudents()"/>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Novo</button>
+            </div>
+          </div>
+          <div id="students-grid" class="students-grid"><div class="spinner"></div></div>
+        </div>
+        <div id="student-detail-view" class="hidden"></div>
+      </div>
+    </div>
+  </div>
+  <div class="mobile-nav">
+    <div class="mobile-nav-items">
+      <div class="mobile-nav-item active" data-tab="tab-dashboard" onclick="switchTab('tab-dashboard',this)"><span class="ni">📊</span>Dashboard</div>
+      <div class="mobile-nav-item" data-tab="tab-alunos" onclick="switchTab('tab-alunos',this)"><span class="ni">👥</span>Alunos</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVO ALUNO -->
+<div id="modal-add-student" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>Cadastrar aluno</h3><button class="close-btn" onclick="closeModal('modal-add-student')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nome completo *</label><input id="new-student-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
+      <div class="form-group"><label>Telefone / WhatsApp</label><input id="new-student-phone" class="form-control" type="tel" placeholder="Ex: (27) 99999-9999"/></div>
+      <div class="form-group"><label>Observações (opcional)</label><input id="new-student-obs" class="form-control" type="text" placeholder="Ex: treina manhã, restrição no joelho..."/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-student')">Cancelar</button>
+      <button id="btn-add-student" class="btn btn-primary" onclick="addStudent()">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR ALUNO -->
+<div id="modal-edit-student" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>Editar aluno</h3><button class="close-btn" onclick="closeModal('modal-edit-student')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Código de acesso</label>
+        <input id="edit-student-code-display" class="form-control" type="text" disabled style="opacity:.5;cursor:not-allowed;background:var(--surface2);"/>
+      </div>
+      <div class="form-group"><label>Nome completo *</label><input id="edit-student-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
+      <div class="form-group"><label>Telefone / WhatsApp</label><input id="edit-student-phone" class="form-control" type="tel" placeholder="Ex: (27) 99999-9999"/></div>
+      <div class="form-group"><label>Observações (opcional)</label><input id="edit-student-obs" class="form-control" type="text" placeholder="Ex: treina manhã, restrição no joelho..."/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-student')">Cancelar</button>
+      <button id="btn-save-edit-student" class="btn btn-primary" onclick="saveEditStudent()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="modal-plan" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="plan-modal-title">Criar plano de treino</h3>
+      <button class="close-btn" onclick="closeModal('modal-plan')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Nome do plano *</label><input id="plan-title" class="form-control" type="text" placeholder="Ex: Plano Junho 2025"/></div>
+        <div class="form-group"><label>Validade (opcional)</label><input id="plan-expiry" class="form-control" type="date"/></div>
+      </div>
+      <div class="form-group" style="margin-top:4px;">
+        <label>Treinos do plano</label>
+        <div id="workouts-editor" class="workouts-editor"></div>
+        <button type="button" class="add-workout-block-btn" style="margin-top:10px;" onclick="addWorkoutBlock()">+ Adicionar treino ao plano</button>
+      </div>
+      <div id="plan-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:18px;margin-top:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-plan')">Cancelar</button>
+      <button id="btn-save-plan" class="btn btn-primary" onclick="savePlan()">Salvar plano</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VER PLANO -->
+<div id="modal-plan-view" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="pv-title">Plano</h3>
+      <button class="close-btn" onclick="closeModal('modal-plan-view')">✕</button>
+    </div>
+    <div class="modal-body" id="pv-body"></div>
+    <div class="modal-footer" id="pv-footer"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+<script>
+const _app = firebase.initializeApp({
+  apiKey:"AIzaSyBVhMJfE1Zj9sVHztDXHUtsC_Y2WIikrkU",
+  authDomain:"fichasacademia-8717d.firebaseapp.com",
+  projectId:"fichasacademia-8717d",
+  storageBucket:"fichasacademia-8717d.firebasestorage.app",
+  messagingSenderId:"501312058117",
+  appId:"1:501312058117:web:1b9ea06882050deeb33d6c"
+});
+const _db = firebase.firestore();
+const _col = (db, path) => db.collection(path);
+const _doc = (db, path, id) => db.collection(path).doc(id);
+const _setDoc = (ref, data) => ref.set(data);
+const _getDoc = (ref) => ref.get();
+const _getDocs = (query) => query.get();
+const _updateDoc = (ref, data) => ref.update(data);
+const _deleteDoc = (ref) => ref.delete();
+const _query = (col, ...constraints) => { let q = col; constraints.forEach(fn => { q = fn(q); }); return q; };
+const _where = (field, op, val) => (q) => q.where(field, op, val);
+const _orderBy = (field, dir) => (q) => q.orderBy(field, dir||'asc');
+
+window.EX_LIB={"Peito":["Supino reto","Supino inclinado","Supino declinado","Supino com halteres","Supino Articulado","Supino na Polia","Crucifixo reto","Crucifixo inclinado","Crossover Superior","Crossover Medial","Crossover Inferior","Voador Peitoral","Flexão de braço","Flexão inclinada","Flexão declinada","Pullover"],"Costas":["Puxada na frente","Barra fixa","Remada curvada","Remada baixa","Remada cavalinho","Pulldown aberto","Pulldown fechado","Levantamento terra","Pulldown na polia"],"Quadríceps":["Agachamento livre","Agachamento no Smith","Leg press","Cadeira extensora","Avanço","Afundo","Hack machine","Agachamento búlgaro","Step-up"],"Posterior de coxa":["Mesa flexora","Cadeira flexora","Stiff","Terra romeno","Good morning"],"Glúteos":["Cadeira Abdutora","Abdução de Quadril na Polia","Agachamento Livre","Agachamento Smith","Agachamento Búlgaro","Agachamento Sumo","Agachamento Taça","Agachamento Hack","Afundo","Stiff","Elevação pélvica","Coice na polia"],"Adutores":["Cadeira Adutora","Adução de Quadril na Polia","Adução de Quadril com Caneleira"],"Panturrilha":["Elevação em pé","Elevação sentado","Panturrilha no leg press","Panturrilha unilateral"],"Bíceps":["Rosca direta barra W","Rosca Direta barra reta","Rosca alternada","Rosca martelo","Rosca concentrada","Rosca Banco Scott","Rosca na Polia com Corda","Rosca na Polia com Barra Reta"],"Tríceps":["Tríceps testa","Tríceps Testa na Polia","Tríceps corda","Tríceps pulley","Tríceps banco","Tríceps francês","Tríceps Frances com Halter","Tríceps coice na Polia","Tríceps Coice com Halter","Triceps Scott","Paralelas"],"Ombro":["Elevação frontal","Elevação Frontal na Polia","Desenvolvimento Máquina","Desenvolvimento com Halter","Desenvolvimento com Barra","Arnold press","Elevação lateral","Elevação lateral na polia","Crucifixo invertido","Face pull","Reverse fly"],"Abdômen":["Abdominal reto","Abdominal infra","Abdominal oblíquo","Prancha","Prancha lateral","Elevação de pernas","Abdominal na máquina","Crunch","Bicicleta"],"Lombar":["Hiperextensão lombar","Good morning","Levantamento terra","Superman"]};
+window.DAYS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+window.ST={students:[],currentStudentId:null,planStudentId:null,editPlanId:null,workoutBlocks:[]};
+
+// ── LocalStorage session ──
+const LS_GESTOR='forge_gestor_session';
+function saveSession(){ try{ localStorage.setItem(LS_GESTOR,'logged'); }catch(e){} }
+function clearSession(){ try{ localStorage.removeItem(LS_GESTOR); }catch(e){} }
+function hasSession(){ try{ return localStorage.getItem(LS_GESTOR)==='logged'; }catch(e){ return false; } }
+
+const toast=(msg,type='success')=>{const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;document.getElementById('toast-container').appendChild(t);setTimeout(()=>t.remove(),3500)};
+window.openModal=id=>document.getElementById(id).classList.remove('hidden');
+window.closeModal=id=>document.getElementById(id).classList.add('hidden');
+const genCode=()=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('')};
+const initials=n=>{const p=n.trim().split(' ');return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():n.slice(0,2).toUpperCase()};
+
+window.isExpired=p=>{if(!p.expiry)return false;return new Date(p.expiry)<new Date(new Date().toDateString())};
+const ytId=url=>{if(!url)return '';const m=url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:''};
+const ytEmbed=url=>{const id=ytId(url);return id?`https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1`:''};
+
+window.showDashboard=function(){
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('screen-dashboard').style.cssText='display:flex;flex-direction:column;';
+  loadStudents();
+};
+
+// Login handled by doLogin() in inline script above
+window.logoutGestor=()=>{
+  clearSession();
+  document.getElementById('screen-dashboard').style.display='none';
+  document.getElementById('screen-login').style.display='flex';
+  toast('Sessão encerrada.');
+};
+window.switchTab=(tabId,el)=>{
+  document.querySelectorAll('.tab-panel').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelectorAll('.sidebar-item,.mobile-nav-item').forEach(i=>i.classList.remove('active'));
+  document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(i=>i.classList.add('active'));
+  if(tabId==='tab-alunos') showStudentsList();
+};
+window.goToAlunos=()=>switchTab('tab-alunos',document.querySelector('[data-tab="tab-alunos"]'));
+
+window.loadStudents=async()=>{
+  try{
+    const snap=await _getDocs(_query(_col(_db,'students'),_orderBy('createdAt','desc')));
+    ST.students=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderStudentsGrid(ST.students);
+    updateStats();
+  }catch(err){
+    document.getElementById('students-grid').innerHTML=`<div style="padding:20px;color:red;font-family:monospace;font-size:12px;background:#fff3f3;border-radius:8px;border:1px solid red;grid-column:1/-1;"><b>ERRO Firebase:</b><br>${err.code||''}: ${err.message}</div>`;
+    console.error('loadStudents error:',err);
+  }
+};
+window.renderStudentsGrid=list=>{
+  const g=document.getElementById('students-grid');
+  if(!list.length){
+    g.innerHTML=`<div class="empty-state"><div class="ei">👤</div><p>Nenhum aluno cadastrado.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAddStudentModal()">+ Primeiro aluno</button></div>`;
+    return;
+  }
+  g.innerHTML=list.map(s=>`
+    <div class="student-card" onclick="openStudentDetail('${s.id}')">
+      <div class="student-card-top">
+        <div class="avatar">${initials(s.name)}</div>
+        <div>
+          <div class="student-name">${s.name}</div>
+          <div class="student-code">${s.code}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:4px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          ${s.phone?`<span style="font-size:.75rem;color:var(--text3);font-weight:500;">📱 ${s.phone}</span>`:''}
+          ${s.obs?`<span style="font-size:.75rem;color:var(--text2);">${s.obs}</span>`:''}
+          <span class="badge badge-active">ativo</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditStudentModal('${s.id}')" style="flex-shrink:0;">✏️ Editar</button>
+      </div>
+    </div>`).join('');
+};
+window.filterStudents=()=>{
+  const q=document.getElementById('search-students').value.toLowerCase();
+  renderStudentsGrid(ST.students.filter(s=>s.name.toLowerCase().includes(q)||s.code.toLowerCase().includes(q)));
+};
+window.openAddStudentModal=()=>{
+  document.getElementById('new-student-name').value='';
+  document.getElementById('new-student-phone').value='';
+  document.getElementById('new-student-obs').value='';
+  openModal('modal-add-student');
+  setTimeout(()=>document.getElementById('new-student-name').focus(),100);
+};
+window.addStudent=async()=>{
+  const name=document.getElementById('new-student-name').value.trim();
+  if(!name){toast('Nome obrigatório!','error');return;}
+  const btn=document.getElementById('btn-add-student');
+  btn.classList.add('btn-loading');btn.textContent='Aguarde...';
+  try{
+    const phone=document.getElementById('new-student-phone').value.trim();
+    const obs=document.getElementById('new-student-obs').value.trim();
+    let code,exists=true;
+    while(exists){code=genCode();const s=await _getDocs(_query(_col(_db,'students'),_where('code','==',code)));exists=!s.empty;}
+    await _setDoc(_doc(_db,'students',Date.now().toString()),{name,code,phone,obs,createdAt:Date.now()});
+    closeModal('modal-add-student');
+    toast(`✅ Aluno cadastrado · Código: ${code}`);
+    await loadStudents();
+  }catch(e){toast('Erro: '+e.message,'error');}
+  finally{btn.classList.remove('btn-loading');btn.textContent='Cadastrar';}
+};
+window.openEditStudentModal=sid=>{
+  const s=ST.students.find(x=>x.id===sid);
+  if(!s) return;
+  document.getElementById('edit-student-code-display').value=s.code;
+  document.getElementById('edit-student-name').value=s.name||'';
+  document.getElementById('edit-student-phone').value=s.phone||'';
+  document.getElementById('edit-student-obs').value=s.obs||'';
+  document.getElementById('btn-save-edit-student').dataset.sid=sid;
+  openModal('modal-edit-student');
+  setTimeout(()=>document.getElementById('edit-student-name').focus(),100);
+};
+window.saveEditStudent=async()=>{
+  const btn=document.getElementById('btn-save-edit-student');
+  const sid=btn.dataset.sid;
+  const name=document.getElementById('edit-student-name').value.trim();
+  if(!name){toast('Nome obrigatório!','error');return;}
+  btn.classList.add('btn-loading');btn.textContent='Salvando...';
+  try{
+    const phone=document.getElementById('edit-student-phone').value.trim();
+    const obs=document.getElementById('edit-student-obs').value.trim();
+    await _updateDoc(_doc(_db,'students',sid),{name,phone,obs});
+    closeModal('modal-edit-student');
+    toast('✅ Aluno atualizado!');
+    await loadStudents();
+  }catch(e){toast('Erro: '+e.message,'error');}
+  finally{btn.classList.remove('btn-loading');btn.textContent='Salvar';}
+};
+window.updateStats=async()=>{
+  document.getElementById('stat-alunos').textContent=ST.students.length;
+  const snap=await _getDocs(_col(_db,'plans'));
+  const ps=snap.docs.map(d=>d.data());
+  document.getElementById('stat-planos').textContent=ps.filter(p=>!isExpired(p)).length;
+  document.getElementById('stat-expired').textContent=ps.filter(p=>isExpired(p)).length;
+};
+window.showStudentsList=()=>{
+  document.getElementById('students-list-view').classList.remove('hidden');
+  document.getElementById('student-detail-view').classList.add('hidden');
+};
+
+window.openStudentDetail=async sid=>{
+  const s=ST.students.find(x=>x.id===sid);if(!s)return;ST.currentStudentId=sid;
+  const snap=await _getDocs(_query(_col(_db,'plans'),_where('studentId','==',sid)));
+  const plans=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.createdAt-a.createdAt);
+  const active=plans.filter(p=>!isExpired(p)),expired=plans.filter(p=>isExpired(p));
+  document.getElementById('students-list-view').classList.add('hidden');
+  const dv=document.getElementById('student-detail-view');dv.classList.remove('hidden');
+  dv.innerHTML=`
+    <button class="back-btn" onclick="showStudentsList()">← Voltar</button>
+    <div class="detail-header">
+      <div class="detail-avatar">${initials(s.name)}</div>
+      <div class="detail-info">
+        <h2>${s.name}</h2>
+        <div class="code">Código: ${s.code}</div>
+        ${s.phone?`<div style="font-size:.82rem;color:var(--text2);margin-top:6px;font-weight:500;">📱 ${s.phone}</div>`:''}
+        ${s.obs?`<div style="font-size:.82rem;color:var(--text2);margin-top:4px;">${s.obs}</div>`:''}
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
+        ${s.phone?`<button class="btn btn-whatsapp btn-sm" onclick="contactWhatsApp('${s.phone}','${s.name}')">📱 WhatsApp</button>`:''}
+        <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">Excluir aluno</button>
+      </div>
+    </div>
+    ${plans.length===0?`<div class="empty-center"><div class="empty-icon">🏋️</div><p>Nenhum plano cadastrado.</p><button class="btn btn-primary" style="margin-top:4px;" onclick="openPlanModal('${sid}')">+ Criar plano</button></div>`:`
+      ${active.length?`<div class="section-label">Planos ativos</div><div class="plans-list">${active.map((p,i)=>planCardHTML(p,sid,i)).join('')}</div>`:''}
+      ${expired.length?`<div class="section-label">Planos vencidos</div><div class="plans-list">${expired.map((p,i)=>planCardHTML(p,sid,i,true)).join('')}</div>`:''}
+      <button class="add-plan-btn" onclick="openPlanModal('${sid}')">+ Adicionar plano de treino</button>
+    `}`;
+};
+
+// WhatsApp direct contact
+window.contactWhatsApp=function(phone, name){
+  const cleaned=phone.replace(/\D/g,'');
+  let num=cleaned;
+  if(!num.startsWith('55')) num='55'+num;
+  const msg=encodeURIComponent(`Olá ${name}! Aqui é seu treinador. 💪`);
+  window.open(`https://wa.me/${num}?text=${msg}`,'_blank');
+};
+
+// PDF Export for gestor — professional layout
+window.exportPlanPDF=function(planId, studentName){
+  const p=window.__gestorPlans&&window.__gestorPlans[planId];
+  if(!p){toast('Plano não encontrado.','error');return;}
+  const DAYS2=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  const DAYS_FULL=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+  const expired=isExpired(p);
+  const expiryStr=p.expiry?new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'Sem data de validade';
+  const today=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+  let exercisesHTML='';
+  (p.workouts||[]).forEach((w,wi)=>{
+    const daysStr=(w.days||[]).map(d=>DAYS2[d]).join(', ')||'Sem dias definidos';
+    let exRows='';
+    (w.exercises||[]).forEach((ex,ei)=>{
+      const repsArr=Array.isArray(ex.repsArr)?ex.repsArr:(ex.reps?ex.reps.split(',').map(s=>s.trim()):[ex.reps||'']);
+      const uniqueReps=[...new Set(repsArr)];
+      const repsDisplay=uniqueReps.length===1?uniqueReps[0]:repsArr.join(' / ');
+      const tags=[];
+      if(ex.biset) tags.push('Bi-set: '+ex.biset);
+      if(ex.unilateral) tags.push('Unilateral');
+      exRows+=`<tr>
+        <td class="ex-num">${ei+1}</td>
+        <td class="ex-name-cell">
+          <strong>${ex.name}</strong>
+          ${tags.length?'<div class="ex-tags">'+tags.map(t=>'<span class="tag">'+t+'</span>').join('')+'</div>':''}
+          ${ex.obs?'<div class="ex-obs">'+ex.obs+'</div>':''}
+        </td>
+        <td class="ex-stat">${ex.series}</td>
+        <td class="ex-stat">${repsDisplay}</td>
+      </tr>`;
+    });
+    exercisesHTML+=`
+      <div class="workout-block">
+        <div class="workout-header">
+          <div class="workout-badge">${String.fromCharCode(65+wi)}</div>
+          <div class="workout-info">
+            <div class="workout-title">${w.title||'Treino '+(wi+1)}</div>
+            <div class="workout-days">${daysStr}</div>
+          </div>
+          <div class="workout-count">${(w.exercises||[]).length} exercício${(w.exercises||[]).length!==1?'s':''}</div>
+        </div>
+        <table class="ex-table">
+          <thead><tr>
+            <th class="th-num">#</th>
+            <th class="th-name">Exercício</th>
+            <th class="th-stat">Séries</th>
+            <th class="th-stat">Reps</th>
+          </tr></thead>
+          <tbody>${exRows}</tbody>
+        </table>
+      </div>`;
+  });
+
+  const html=`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ficha de Treino — ${studentName}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#fff;color:#111110;font-size:13px;line-height:1.5;}
+
+  /* PAGE */
+  .page{max-width:720px;margin:0 auto;padding:36px 32px;}
+
+  /* HEADER */
+  .header{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:20px;border-bottom:2px solid #111110;margin-bottom:24px;}
+  .header-left{}
+  .brand{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#999990;margin-bottom:6px;}
+  .student{font-size:22px;font-weight:800;color:#111110;letter-spacing:-.02em;line-height:1.1;}
+  .plan-name{font-size:14px;font-weight:600;color:#555550;margin-top:4px;}
+  .header-right{text-align:right;}
+  .validity-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#999990;margin-bottom:3px;}
+  .validity{font-size:13px;font-weight:700;color:${expired?'#e03e3e':'#2e7d52'};}
+  .generated{font-size:10px;color:#bbbbbb;margin-top:6px;}
+
+  /* STATUS BADGE */
+  .status-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;margin-bottom:20px;font-size:12px;font-weight:700;${expired?'background:#fef2f2;border:1px solid #fecaca;color:#e03e3e;':'background:#f0faf5;border:1px solid #bbf0d5;color:#2e7d52;'}}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+  /* WORKOUT BLOCK */
+  .workout-block{margin-bottom:20px;border:1px solid #e4e4e0;border-radius:12px;overflow:hidden;page-break-inside:avoid;}
+  .workout-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f7f7f5;border-bottom:1px solid #e4e4e0;}
+  .workout-badge{width:32px;height:32px;border-radius:8px;background:#f5c800;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#111110;flex-shrink:0;}
+  .workout-info{flex:1;}
+  .workout-title{font-weight:800;font-size:14px;color:#111110;}
+  .workout-days{font-size:11px;color:#888880;font-weight:600;margin-top:2px;}
+  .workout-count{font-size:11px;font-weight:700;color:#999990;white-space:nowrap;}
+
+  /* TABLE */
+  .ex-table{width:100%;border-collapse:collapse;}
+  .ex-table thead tr{background:#fafafa;}
+  .ex-table th{padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999990;border-bottom:1px solid #e4e4e0;text-align:left;}
+  .th-num{width:32px;text-align:center;}
+  .th-stat{width:68px;text-align:center;}
+  .ex-table tbody tr{border-bottom:1px solid #f0f0ed;}
+  .ex-table tbody tr:last-child{border-bottom:none;}
+  .ex-table tbody tr:nth-child(even){background:#fafaf8;}
+  .ex-num{text-align:center;font-weight:700;font-size:11px;color:#bbbbbb;padding:10px 6px;}
+  .ex-name-cell{padding:10px 10px 10px 6px;}
+  .ex-name-cell strong{font-weight:700;font-size:13px;color:#111110;}
+  .ex-stat{text-align:center;font-weight:800;font-size:14px;color:#111110;padding:10px 6px;}
+  .ex-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+  .tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#fef9e0;color:#8a6c00;border:1px solid #f5e080;}
+  .ex-obs{font-size:11px;color:#888880;font-style:italic;margin-top:4px;line-height:1.4;}
+
+  /* FOOTER */
+  .footer{margin-top:28px;padding-top:14px;border-top:1px solid #e4e4e0;display:flex;justify-content:space-between;align-items:center;}
+  .footer-left{font-size:10px;color:#cccccc;font-weight:600;}
+  .footer-right{font-size:10px;color:#cccccc;}
+
+  /* PRINT */
+  @media print{
+    body{font-size:12px;}
+    .page{padding:20px;}
+    .workout-block{page-break-inside:avoid;}
+    @page{margin:16mm 12mm;}
+  }
+  @media(max-width:600px){
+    .page{padding:20px 16px;}
+    .header{flex-direction:column;gap:12px;}
+    .header-right{text-align:left;}
+    .th-stat,.ex-stat{width:52px;font-size:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="brand">Sistema de Treinamento</div>
+      <div class="student">${studentName}</div>
+      <div class="plan-name">${p.title}</div>
+    </div>
+    <div class="header-right">
+      <div class="validity-label">Validade</div>
+      <div class="validity">${expiryStr}${expired?' · Vencido':''}</div>
+      <div class="generated">Gerado em ${today}</div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span>${expired?'Plano vencido — solicite uma atualização ao treinador':'Plano ativo'}</span>
+  </div>
+
+  ${exercisesHTML}
+
+  <div class="footer">
+    <div class="footer-left">Sistema de Treinamento · Ficha gerada automaticamente</div>
+    <div class="footer-right">${today}</div>
+  </div>
+
+</div>
+<scr'+'ipt>window.onload=function(){window.print();}<\/script>
+</body>
+</html>`;
+
+  const win=window.open('','_blank');
+  if(win){ win.document.write(html); win.document.close(); toast('📄 PDF pronto para imprimir!'); }
+  else { toast('Permita pop-ups para exportar PDF.','error'); }
+};
+
+// WhatsApp plan share
+window.sharePlanWhatsApp=function(planId, studentName, studentPhone){
+  const p=window.__gestorPlans&&window.__gestorPlans[planId];
+  if(!p){toast('Plano não encontrado.','error');return;}
+  const DAYS2=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  let msg=`🏋️ *FORGE — Ficha de Treino*\n👤 *${studentName}*\n📋 *${p.title}*\n`;
+  if(p.expiry) msg+=`📅 Válido até ${new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR')}\n`;
+  msg+=`\n`;
+  (p.workouts||[]).forEach((w,wi)=>{
+    msg+=`*${String.fromCharCode(65+wi)}. ${w.title||'Treino '+(wi+1)}*\n`;
+    if(w.days&&w.days.length) msg+=`📆 ${w.days.map(d=>DAYS2[d]).join(', ')}\n`;
+    (w.exercises||[]).forEach((ex,ei)=>{
+      msg+=`  ${ei+1}. ${ex.name} — ${ex.series}x${ex.reps}`;
+      if(ex.unilateral) msg+=` (Unilateral)`;
+      if(ex.biset) msg+=` + ${ex.biset}`;
+      msg+=`\n`;
+      if(ex.obs) msg+=`     _${ex.obs}_\n`;
+    });
+    msg+=`\n`;
+  });
+  msg+=`_Enviado via FORGE_ ⚡`;
+  const encoded=encodeURIComponent(msg);
+  let url='https://wa.me/';
+  if(studentPhone){
+    const cleaned=studentPhone.replace(/\D/g,'');
+    let num=cleaned;
+    if(!num.startsWith('55')) num='55'+num;
+    url+=num;
+  }
+  url+=`?text=${encoded}`;
+  window.open(url,'_blank');
+  toast('Abrindo WhatsApp...');
+};
+
+const planCardHTML=(p,sid,idx,exp=false)=>{
+  window.__gestorPlans=window.__gestorPlans||{};
+  window.__gestorPlans[p.id]=p;
+  const student=ST.students.find(s=>s.id===sid)||{};
+  return `
+  <div class="plan-card ${exp?'expired':''}">
+    <div class="plan-card-header">
+      <div class="plan-letter">${String.fromCharCode(65+idx)}</div>
+      <div class="plan-info">
+        <div class="plan-title">${p.title}</div>
+        <div class="plan-meta">${p.expiry?`Validade · ${new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR')}`:'Sem validade'} · ${(p.workouts||[]).length} treino(s)</div>
+      </div>
+      <div class="plan-actions">
+        <span class="badge ${exp?'badge-expired':'badge-active'}">${exp?'Vencido':'Ativo'}</span>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewPlan('${p.id}','${sid}')">Ver</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPlanModal('${sid}','${p.id}')">Editar</button>
+        <button class="btn btn-whatsapp btn-sm" onclick="event.stopPropagation();sharePlanWhatsApp('${p.id}','${student.name||''}','${student.phone||''}')">📱</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePlan('${p.id}','${sid}')">Excluir</button>
+      </div>
+    </div>
+    <div class="plan-workouts">
+      ${(p.workouts||[]).map((w,wi)=>`
+        <div class="workout-row">
+          <div class="workout-row-header">
+            <div class="workout-row-tag">T${wi+1}</div>
+            <div class="workout-row-title">${w.title||'Sem título'}</div>
+          </div>
+          <div class="workout-days">${(w.days||[]).map(d=>`<span class="day-chip">${DAYS[d]}</span>`).join('')}</div>
+          <div class="workout-excount">${(w.exercises||[]).length} exercício(s)</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+};
+
+window.deleteStudent=async id=>{
+  if(!confirm('Excluir aluno e todos os planos?'))return;
+  const snap=await _getDocs(_query(_col(_db,'plans'),_where('studentId','==',id)));
+  for(const d of snap.docs) await _deleteDoc(_doc(_db,'plans',d.id));
+  await _deleteDoc(_doc(_db,'students',id));
+  toast('Aluno excluído.');
+  await loadStudents();
+  showStudentsList();
+};
+window.deletePlan=async(pid,sid)=>{
+  if(!confirm('Excluir este plano?'))return;
+  await _deleteDoc(_doc(_db,'plans',pid));
+  toast('Plano excluído.');
+  await openStudentDetail(sid);
+};
+
+window.viewPlan=async(pid,sid)=>{
+  const snap=await _getDoc(_doc(_db,'plans',pid));if(!snap.exists)return;
+  const p={id:snap.id,...snap.data()};
+  window.__gestorPlans=window.__gestorPlans||{};
+  window.__gestorPlans[p.id]=p;
+  const student=ST.students.find(s=>s.id===sid)||{};
+  const expired=isExpired(p);
+  document.getElementById('pv-title').textContent=p.title;
+  document.getElementById('pv-body').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:13px 16px;border-radius:var(--r);background:${expired?'var(--red-dim)':'var(--green-dim)'};border:1px solid ${expired?'rgba(229,62,62,.2)':'rgba(56,161,105,.2)'};font-size:.82rem;font-weight:600;color:${expired?'var(--red)':'var(--green)'};">
+      <div style="width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0;"></div>
+      ${p.expiry?`Plano ${expired?'venceu em':'válido até'} ${new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}`:'Plano sem data de validade'}
+    </div>
+    ${(p.workouts||[]).map((w,wi)=>`
+      <div class="pv-workout">
+        <div class="pv-workout-title"><span style="background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-soft);border-radius:6px;padding:2px 9px;font-size:.75rem;font-weight:700;">T${wi+1}</span>${w.title||'Sem título'}</div>
+        <div class="pv-days">${(w.days||[]).map(d=>`<span class="day-chip">${DAYS[d]}</span>`).join('')}</div>
+        ${(w.exercises||[]).map((ex,ei)=>`
+          <div class="pv-ex">
+            <div class="pv-ex-name">${ei+1}. ${ex.name}</div>
+            <div class="pv-ex-meta">${ex.series} série(s) × ${ex.repsArr&&ex.repsArr.length>1?ex.repsArr.join(', '):ex.reps} rep${ex.unilateral?' · Unilateral':''}${ex.biset?' · Bi-set':''}${ex.obs?`<div style='margin-top:6px;padding:7px 10px;background:var(--surface2);border-radius:7px;border-left:3px solid var(--accent-soft);font-size:.78rem;color:var(--text2);font-style:italic;'>${ex.obs}</div>`:''}</div>
+          </div>`).join('')}
+      </div>`).join('')}`;
+  document.getElementById('pv-footer').innerHTML=`
+    <button class="btn btn-ghost" onclick="closeModal('modal-plan-view')">Fechar</button>
+    <button class="btn btn-whatsapp" onclick="sharePlanWhatsApp('${p.id}','${student.name||''}','${student.phone||''}')">📱 WhatsApp</button>
+    <button class="btn btn-ghost" onclick="closeModal('modal-plan-view');exportPlanPDF('${p.id}','${student.name||''}')">📄 PDF</button>
+    <button class="btn btn-primary" onclick="closeModal('modal-plan-view');openPlanModal('${sid}','${p.id}')">✏️ Editar</button>
+    <button class="btn btn-danger" onclick="deletePlan('${p.id}','${sid}')">Excluir</button>`;
+  openModal('modal-plan-view');
+};
+
+window.openPlanModal=async(sid,editId=null)=>{
+  ST.planStudentId=sid;ST.editPlanId=editId;ST.workoutBlocks=[];
+  document.getElementById('plan-title').value='';document.getElementById('plan-expiry').value='';document.getElementById('plan-error').textContent='';
+  document.getElementById('plan-modal-title').textContent=editId?'Editar plano':'Criar plano de treino';
+  if(editId){const snap=await _getDoc(_doc(_db,'plans',editId));if(snap.exists){const p=snap.data();document.getElementById('plan-title').value=p.title||'';document.getElementById('plan-expiry').value=p.expiry||'';ST.workoutBlocks=(p.workouts||[]).map(w=>({...w,exercises:(w.exercises||[]).map(e=>({...e}))}));}}
+  else{ST.workoutBlocks=[{title:'Treino A',days:[],exercises:[{}]}];}
+  renderWorkoutsEditor();openModal('modal-plan');
+};
+
+window.addWorkoutBlock=()=>{ST.workoutBlocks.push({title:`Treino ${String.fromCharCode(65+ST.workoutBlocks.length)}`,days:[],exercises:[{}]});renderWorkoutsEditor()};
+window.removeWorkoutBlock=bi=>{ST.workoutBlocks.splice(bi,1);renderWorkoutsEditor()};
+window.updateBlockTitle=(bi,v)=>ST.workoutBlocks[bi].title=v;
+window.toggleBlockDay=(bi,d,btn)=>{const arr=ST.workoutBlocks[bi].days;const i=arr.indexOf(d);if(i===-1){arr.push(d);btn.classList.add('selected');}else{arr.splice(i,1);btn.classList.remove('selected');}};
+window.addExToBlock=bi=>{ST.workoutBlocks[bi].exercises.push({});renderWorkoutsEditor();setTimeout(()=>{const m=document.querySelector('#modal-plan .modal');if(m)m.scrollTop=m.scrollHeight;},50)};
+window.removeExFromBlock=(bi,ei)=>{ST.workoutBlocks[bi].exercises.splice(ei,1);renderWorkoutsEditor()};
+window.updateExInBlock=(bi,ei,f,v)=>{ST.workoutBlocks[bi].exercises[ei][f]=v};
+
+window.renderWorkoutsEditor=()=>{
+  document.getElementById('workouts-editor').innerHTML=ST.workoutBlocks.map((wb,bi)=>{
+    const daysHTML=DAYS.map((d,di)=>`<button type="button" class="day-toggle ${(wb.days||[]).includes(di)?'selected':''}" onclick="toggleBlockDay(${bi},${di},this)">${d}</button>`).join('');
+    const exHTML=wb.exercises.map((ex,ei)=>{
+      const opts=Object.entries(EX_LIB).map(([cat,list])=>`<optgroup label="${cat}">${list.map(e=>`<option value="${e}" ${ex.name===e?'selected':''}>${e}</option>`).join('')}</optgroup>`).join('');
+      // biset: full EX_LIB list so any exercise can be paired
+      const bisets=Object.entries(EX_LIB).map(([cat,list])=>
+        `<optgroup label="${cat}">${list.map(e=>`<option value="${e}" ${ex.biset===e?'selected':''}>${e}</option>`).join('')}</optgroup>`
+      ).join('');
+      // series reps: if series > 1, show individual reps fields
+      const seriesCount=Number(ex.series)||1;
+      // parse existing reps array or string
+      let repsArr=[];
+      if(Array.isArray(ex.repsArr)){ repsArr=ex.repsArr; }
+      else if(ex.reps){ repsArr=[ex.reps]; }
+      while(repsArr.length<seriesCount) repsArr.push(repsArr[repsArr.length-1]||'12');
+      repsArr=repsArr.slice(0,seriesCount);
+      const repsFields=repsArr.map((r,si)=>`
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+          <span style="font-size:.7rem;color:var(--text3);font-weight:600;min-width:52px;">Série ${si+1}</span>
+          <input type="text" class="form-control" style="flex:1;" value="${r}" placeholder="12" oninput="updateRepsSerie(${bi},${ei},${si},this.value)"/>
+        </div>`).join('');
+      return `<div class="exercise-item" data-bi="${bi}" data-ei="${ei}">
+        <div class="exercise-item-header">
+          <div class="drag-handle" title="Arraste para reordenar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+          </div>
+          <div class="ex-num">${ei+1}</div>
+          <select class="form-control" style="flex:1;" onchange="updateExInBlock(${bi},${ei},'name',this.value);renderWorkoutsEditor()"><option value="">— exercício —</option>${opts}</select>
+          <button type="button" class="remove-ex-btn" onclick="removeExFromBlock(${bi},${ei})">✕</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <span class="ctrl-label">Número de séries</span>
+            <input type="number" class="form-control" min="1" max="20" value="${seriesCount}" oninput="updateSeriesCount(${bi},${ei},this.value)"/>
+          </div>
+          <div>
+            <span class="ctrl-label">Bi-set com</span>
+            <select class="form-control" onchange="updateExInBlock(${bi},${ei},'biset',this.value)">
+              <option value="">Nenhum</option>${bisets}
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <span class="ctrl-label">Repetições por série</span>
+          ${repsFields}
+        </div>
+        <div style="margin-bottom:8px;"><span class="ctrl-label">URL YouTube</span><input type="url" class="form-control" placeholder="https://youtube.com/watch?v=..." value="${ex.videoUrl||''}" onchange="updateExInBlock(${bi},${ei},'videoUrl',this.value)"/></div>
+        <label class="checkbox-label"><input type="checkbox" ${ex.unilateral?'checked':''} onchange="updateExInBlock(${bi},${ei},'unilateral',this.checked)"/> Unilateral</label>
+        <div style="margin-top:8px;"><span class="ctrl-label">Observações / Técnicas</span><textarea class="form-control" rows="2" placeholder="Ex: Cadência 2-0-2, descanso 60s, drop-set na última série..." style="resize:vertical;min-height:56px;" oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs||''}</textarea></div>
+      </div>`;
+    }).join('');
+    return `<div class="workout-block">
+      <div class="workout-block-header">
+        <div class="wb-letter">${String.fromCharCode(65+bi)}</div>
+        <input class="wb-title-input" type="text" value="${wb.title||''}" placeholder="Nome do treino..." onchange="updateBlockTitle(${bi},this.value)"/>
+        ${ST.workoutBlocks.length>1?`<button type="button" class="remove-block-btn" onclick="removeWorkoutBlock(${bi})">✕</button>`:''}
+      </div>
+      <div class="workout-block-body">
+        <div style="margin-bottom:8px;"><span class="ctrl-label">Dias da semana</span><div class="days-selector">${daysHTML}</div></div>
+        <div><span class="ctrl-label">Exercícios</span><div class="exercises-list">${exHTML}</div><button type="button" class="add-ex-btn" onclick="addExToBlock(${bi})">+ exercício</button></div>
+      </div>
+    </div>`;
+  }).join('');
+  // Activate drag-and-drop after render
+  setTimeout(initDragDrop, 0);
+};
+
+// ── Drag-and-drop reordering ──
+window.initDragDrop=function(){
+  // Only allow drag when initiated from the handle
+  let _dragAllowed = false;
+
+  document.querySelectorAll('.exercise-item').forEach(item=>{
+    const handle = item.querySelector('.drag-handle');
+
+    // Enable drag only on handle mousedown/touchstart
+    if(handle){
+      handle.addEventListener('mousedown', ()=>{ _dragAllowed=true; item.draggable=true; });
+      handle.addEventListener('touchstart', ()=>{ _dragAllowed=true; item.draggable=true; }, {passive:true});
+    }
+
+    // Disable drag on mouseup anywhere (covers click-to-select text in inputs)
+    item.addEventListener('mouseup', ()=>{ _dragAllowed=false; item.draggable=false; });
+    item.addEventListener('mouseleave', ()=>{ if(!_dragAllowed){ item.draggable=false; } });
+
+    // Prevent drag starting from inputs, selects, textareas
+    item.addEventListener('dragstart', e=>{
+      const tag = (e.target.tagName||'').toLowerCase();
+      if(!_dragAllowed || ['input','select','textarea','label'].includes(tag)){
+        e.preventDefault();
+        item.draggable=false;
+        return;
+      }
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain', JSON.stringify({
+        bi: +item.dataset.bi,
+        ei: +item.dataset.ei
+      }));
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', ()=>{
+      _dragAllowed=false;
+      item.draggable=false;
+      item.classList.remove('dragging');
+      document.querySelectorAll('.exercise-item').forEach(i=>i.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      document.querySelectorAll('.exercise-item').forEach(i=>i.classList.remove('drag-over'));
+      item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', ()=>{
+      item.classList.remove('drag-over');
+    });
+    item.addEventListener('drop', e=>{
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      try{
+        const {bi: fromBi, ei: fromEi} = JSON.parse(e.dataTransfer.getData('text/plain'));
+        const toBi = +item.dataset.bi;
+        const toEi = +item.dataset.ei;
+        if(fromBi !== toBi || fromEi === toEi) return;
+        const exs = ST.workoutBlocks[fromBi].exercises;
+        const [moved] = exs.splice(fromEi, 1);
+        exs.splice(toEi, 0, moved);
+        renderWorkoutsEditor();
+      }catch(err){}
+    });
+  });
+};
+
+// Update series count → rebuild repsArr and re-render
+window.updateSeriesCount=(bi,ei,val)=>{
+  const n=Math.max(1,Math.min(20,parseInt(val)||1));
+  const ex=ST.workoutBlocks[bi].exercises[ei];
+  ex.series=n;
+  let arr=Array.isArray(ex.repsArr)?[...ex.repsArr]:[(ex.reps||'12')];
+  while(arr.length<n) arr.push(arr[arr.length-1]||'12');
+  arr=arr.slice(0,n);
+  ex.repsArr=arr;
+  // Update display reps string
+  ex.reps=arr.join(', ');
+  renderWorkoutsEditor();
+};
+
+window.updateRepsSerie=(bi,ei,si,val)=>{
+  const ex=ST.workoutBlocks[bi].exercises[ei];
+  if(!Array.isArray(ex.repsArr)) ex.repsArr=[(ex.reps||'12')];
+  ex.repsArr[si]=val;
+  ex.reps=ex.repsArr.join(', ');
+};
+
+window.savePlan=async()=>{
+  const title=document.getElementById('plan-title').value.trim();
+  document.getElementById('plan-error').textContent='';
+  if(!title){document.getElementById('plan-error').textContent='Nome do plano obrigatório.';return;}
+  if(!ST.workoutBlocks.length){document.getElementById('plan-error').textContent='Adicione ao menos um treino.';return;}
+  for(const wb of ST.workoutBlocks){if(!wb.exercises.filter(e=>e.name).length){document.getElementById('plan-error').textContent=`"${wb.title}" precisa de ao menos um exercício.`;return;}}
+  const btn=document.getElementById('btn-save-plan');btn.classList.add('btn-loading');btn.textContent='Salvando...';
+  const workouts=ST.workoutBlocks.map(wb=>({title:wb.title,days:wb.days||[],exercises:wb.exercises.filter(e=>e.name).map(e=>({name:e.name,series:Number(e.series)||1,reps:e.reps||'12',repsArr:e.repsArr||[e.reps||'12'],videoUrl:e.videoUrl||'',unilateral:!!e.unilateral,biset:e.biset||'',bisetName:e.biset||'',obs:e.obs||''}))}));
+  const data={title,expiry:document.getElementById('plan-expiry').value||'',workouts,studentId:ST.planStudentId,createdAt:Date.now()};
+  try{
+    if(ST.editPlanId){await _updateDoc(_doc(_db,'plans',ST.editPlanId),data);toast('✅ Plano atualizado.');}
+    else{await _setDoc(_doc(_db,'plans','plan_'+Date.now()),data);toast('✅ Plano criado!');}
+    closeModal('modal-plan');await openStudentDetail(ST.planStudentId);
+  }catch(e){document.getElementById('plan-error').textContent='Erro: '+e.message;toast('Erro ao salvar.','error');}
+  finally{btn.classList.remove('btn-loading');btn.textContent='Salvar plano';}
+};
+
+// ── Auto login from localStorage ──
+(function init(){
+  if(hasSession()){ window.showDashboard(); }
+})();
+</script>
+</body>
+</html>
