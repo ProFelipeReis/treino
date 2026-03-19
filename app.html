@@ -4,7 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>FORGE — Painel do Gestor</title>
-  <link rel="icon" type="image/png" href="https://i.imgur.com/M9aamh7.png"/>
+  <link rel="icon" type="image/png" href="https://wsrv.nl/?url=i.imgur.com/M9aamh7.png&w=180&h=180"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="https://wsrv.nl/?url=i.imgur.com/M9aamh7.png&w=180&h=180"/>
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="https://wsrv.nl/?url=i.imgur.com/M9aamh7.png&w=180&h=180"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="FORGE"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -769,6 +773,24 @@ window.exportPlanPDF=function(planId, studentName){
 
 </div>
 <scr'+'ipt>window.onload=function(){window.print();}<\/script>
+
+<script>
+// Block all zoom gestures on iOS
+document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, {passive:false});
+document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, {passive:false});
+document.addEventListener('gestureend', function(e){ e.preventDefault(); }, {passive:false});
+// Block double-tap zoom
+var lastTap=0;
+document.addEventListener('touchend', function(e){
+  var now=Date.now();
+  if(now-lastTap<300){ e.preventDefault(); }
+  lastTap=now;
+}, {passive:false});
+// Block pinch zoom
+document.addEventListener('touchmove', function(e){
+  if(e.touches.length>1){ e.preventDefault(); }
+}, {passive:false});
+</script>
 </body>
 </html>`;
 
@@ -1085,6 +1107,24 @@ window.savePlan=async()=>{
 (function init(){
   if(hasSession()){ window.showDashboard(); }
 })();
+</script>
+
+<script>
+// Block all zoom gestures on iOS
+document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, {passive:false});
+document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, {passive:false});
+document.addEventListener('gestureend', function(e){ e.preventDefault(); }, {passive:false});
+// Block double-tap zoom
+var lastTap=0;
+document.addEventListener('touchend', function(e){
+  var now=Date.now();
+  if(now-lastTap<300){ e.preventDefault(); }
+  lastTap=now;
+}, {passive:false});
+// Block pinch zoom
+document.addEventListener('touchmove', function(e){
+  if(e.touches.length>1){ e.preventDefault(); }
+}, {passive:false});
 </script>
 </body>
 </html>
