@@ -657,60 +657,34 @@ window.sendFeedback=async function(){
 function refreshWorkoutLockState(planId, wi, started){
   const container=document.getElementById(`exercises-body-${planId}-${wi}`);
   if(!container) return;
-  // Check/uncheck buttons
-  container.querySelectorAll('.check-btn,.lock-icon').forEach(el=>{
-    if(started){
-      if(el.classList.contains('lock-icon')){
-        // Replace lock with check
-        const newBtn=document.createElement('button');
-        newBtn.className='check-btn';
-        newBtn.id=el.id;
-        newBtn.innerHTML='✓';
-        const d=el.dataset;
-        Object.assign(newBtn.dataset, d);
-        newBtn.onclick=function(){ handleCheckBtn(this); };
-        el.replaceWith(newBtn);
-      }
-    } else {
-      if(el.classList.contains('check-btn')){
-        const newLock=document.createElement('div');
-        newLock.className='lock-icon';
-        newLock.id=el.id;
-        newLock.innerHTML='🔒';
-        newLock.title='Inicie o treino primeiro';
-        newLock.onclick=function(){ toast('Você deve iniciar o treino para continuar.','error'); };
-        const d=el.dataset;
-        Object.assign(newLock.dataset, d);
-        el.replaceWith(newLock);
-      }
+
+  // ── Buttons: lock-icon → check-btn ──
+  container.querySelectorAll('.lock-icon, .check-btn').forEach(el=>{
+    if(started && el.classList.contains('lock-icon')){
+      // Build a real button with all data already stored in the lock div
+      const btn=document.createElement('button');
+      btn.className='check-btn';
+      btn.id=el.id;
+      btn.innerHTML='✓';
+      // Copy all data-* attributes
+      Array.from(el.attributes).forEach(a=>{ if(a.name.startsWith('data-')) btn.setAttribute(a.name, a.value); });
+      btn.onclick=function(){ handleCheckBtn(this); };
+      el.replaceWith(btn);
     }
   });
-  // Video links
-  container.querySelectorAll('.yt-link-btn,.yt-lock-overlay').forEach(el=>{
+
+  // ── Videos: yt-lock-overlay → yt-link-btn ──
+  container.querySelectorAll('.yt-lock-overlay').forEach(el=>{
     if(started){
-      if(el.classList.contains('yt-lock-overlay')){
-        // Find the href stored in dataset
-        const href=el.dataset.href||'#';
-        const newA=document.createElement('a');
-        newA.href=href; newA.target='_blank'; newA.className='yt-link-btn';
-        newA.innerHTML=el.innerHTML.replace('yt-lock-overlay','yt-link-btn');
-        // rebuild properly from scratch using stored href
-        const url=el.dataset.yturl||'';
-        if(url){
-          newA.innerHTML=el.dataset.innerhtml||el.innerHTML;
-          newA.href='https://www.youtube.com/watch?v='+ytId(url);
-        }
-        el.replaceWith(newA);
-      }
-    } else {
-      if(el.classList.contains('yt-link-btn') && el.tagName==='A'){
-        const lockDiv=document.createElement('div');
-        lockDiv.className='yt-lock-overlay';
-        lockDiv.dataset.yturl=el.href;
-        lockDiv.innerHTML='🔒 <span>Inicie o treino para ver o vídeo</span>';
-        lockDiv.onclick=()=>toast('Você deve iniciar o treino para continuar.','error');
-        el.replaceWith(lockDiv);
-      }
+      const url=el.dataset.yturl||'';
+      const vidId=ytId(url);
+      if(!vidId) return;
+      const thumbUrl=`https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
+      const ytUrl=`https://www.youtube.com/watch?v=${vidId}`;
+      const a=document.createElement('a');
+      a.href=ytUrl; a.target='_blank'; a.className='yt-link-btn';
+      a.innerHTML=`<img src="${thumbUrl}" class="yt-thumb" alt="Ver exercício"/><div class="yt-play-overlay"><svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg><span>Ver no YouTube</span></div>`;
+      el.replaceWith(a);
     }
   });
 }
@@ -935,10 +909,11 @@ function renderPlan(p){
         }
       }
 
-      // Right side: check or lock
+      // Right side: check or lock — lock always stores all data for later unlock
+      const checkDataAttrs=`data-plan="${p.id}" data-wi="${wi}" data-ei="${ei}" data-total="${total}" data-prog="${progressId}" data-ptitle="${(p.title||'').replace(/"/g,'&quot;')}" data-wtitle="${(w.title||'Treino '+(wi+1)).replace(/"/g,'&quot;')}" data-sname="${((_currentStudent&&_currentStudent.name)||'Aluno').replace(/"/g,'&quot;')}"`;
       const rightHtml=alreadyStarted
-        ?`<button class="check-btn" id="chkbtn_${p.id}_${wi}_${ei}" data-plan="${p.id}" data-wi="${wi}" data-ei="${ei}" data-total="${total}" data-prog="${progressId}" data-ptitle="${(p.title||'').replace(/"/g,'&quot;')}" data-wtitle="${(w.title||'Treino '+(wi+1)).replace(/"/g,'&quot;')}" data-sname="${((_currentStudent&&_currentStudent.name)||'Aluno').replace(/"/g,'&quot;')}" onclick="handleCheckBtn(this)">✓</button>`
-        :`<div class="lock-icon" title="Inicie o treino primeiro" onclick="toast('Você deve iniciar o treino para continuar.','error')">🔒</div>`;
+        ?`<button class="check-btn" id="chkbtn_${p.id}_${wi}_${ei}" ${checkDataAttrs} onclick="handleCheckBtn(this)">✓</button>`
+        :`<div class="lock-icon" id="chkbtn_${p.id}_${wi}_${ei}" ${checkDataAttrs} title="Inicie o treino primeiro" onclick="toast('Você deve iniciar o treino para continuar.','error')">🔒</div>`;
 
       return `
       <div class="exercise-row" id="exrow_${p.id}_${wi}_${ei}">
