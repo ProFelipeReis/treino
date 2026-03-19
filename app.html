@@ -93,7 +93,7 @@
     .badge-active { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,125,82,.2); }
     .badge-expired { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); }
 
-    #screen-login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; background: linear-gradient(135deg, #f7f7f5 0%, #fffef0 50%, #f7f7f5 100%); }
+    #screen-login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; background: linear-gradient(135deg, #f0f0ef 0%, #e8e8e7 50%, #f0f0ef 100%); }
     .login-card { width: 100%; max-width: 340px; background: #ffffff; border: 1px solid #e4e4e0; border-radius: 24px; padding: 36px 32px; box-shadow: 0 8px 40px rgba(0,0,0,.1); }
 
     #screen-dashboard { display: none; flex-direction: column; min-height: 100vh; }
@@ -312,10 +312,13 @@
 <!-- LOGIN -->
 <div id="screen-login">
   <div class="login-card">
+    <div style="text-align:center;margin-bottom:28px;">
+      <img src="https://i.imgur.com/QkqxLei.png" alt="Trainly" style="height:64px;width:auto;object-fit:contain;"/>
+    </div>
     <form id="login-form" onsubmit="return false;">
       <div class="form-group"><label>Usuário</label><input id="login-user" class="form-control" type="text" placeholder="Usuário" required autocomplete="username"/></div>
       <div class="form-group"><label>Senha</label><input id="login-pass" class="form-control" type="password" placeholder="••••••••" required autocomplete="current-password"/></div>
-      <button type="button" onclick="doLogin()" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">Acessar painel →</button>
+      <button type="button" onclick="doLogin()" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;background:#111110;color:var(--accent);box-shadow:0 4px 20px rgba(0,0,0,.25);">Acessar painel →</button>
     </form>
   </div>
 </div>
@@ -408,7 +411,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- DASHBOARD -->
 <div id="screen-dashboard">
   <div class="topbar">
-    <div class="topbar-brand"><div class="dot"></div>Trainly</div>
+    <div class="topbar-brand"><img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly" style="height:32px;width:auto;object-fit:contain;"/></div>
     <div class="topbar-right">
       <div class="notif-wrap-rel">
         <button class="notif-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notificações">🔔<span class="notif-badge hidden" id="notif-badge">0</span></button>
