@@ -33,9 +33,10 @@
       --shadow-md: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
     }
     html { scroll-behavior: smooth; }
-    /* Prevent zoom */
-    html { touch-action: pan-x pan-y; }
+    /* Prevent zoom and horizontal scroll */
+    html { touch-action: pan-x pan-y; overflow-x: hidden; }
     * { touch-action: manipulation; }
+    body { overflow-x: hidden; }
 
     body { font-family: var(--body); background: var(--bg); color: var(--text); min-height: 100vh; }
     button { cursor: pointer; border: none; font-family: inherit; }
@@ -343,6 +344,10 @@
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
+  <div id="trainer-bar" class="hidden" style="background:#1a1a18;border-bottom:1px solid #2e2e2a;padding:7px 20px;display:flex;align-items:center;gap:8px;">
+    <span style="font-size:.72rem;color:#999990;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">Treinador</span>
+    <span id="trainer-name" style="font-size:.82rem;font-weight:800;color:var(--accent);letter-spacing:.01em;">—</span>
+  </div>
   <div class="greeting-wrap"><div class="greeting" id="greeting-text">Olá! 👋</div></div>
   <div id="plan-status-wrap"></div>
   <div id="today-wrap"></div>
@@ -351,7 +356,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 const db = getFirestore(initializeApp({
   apiKey:"AIzaSyBVhMJfE1Zj9sVHztDXHUtsC_Y2WIikrkU",
@@ -391,16 +396,26 @@ window.handleLogin=async e=>{
 };
 
 function showApp(student){
+  _currentStudent=student;
   document.getElementById('screen-login').style.display='none';
   document.getElementById('screen-app').style.cssText='display:flex;flex-direction:column;';
   document.getElementById('student-pill').textContent=student.name;
   const first=student.name.trim().split(' ')[0];
   document.getElementById('greeting-text').innerHTML=`Olá, <span>${first}</span>! 👋`;
+  // Show trainer name if available
+  const trainerName = student.managerName || student.managerId || null;
+  const trainerBar = document.getElementById('trainer-bar');
+  if(trainerName && trainerBar){
+    document.getElementById('trainer-name').textContent = trainerName;
+    trainerBar.classList.remove('hidden');
+    trainerBar.style.display='flex';
+  }
   loadPlans(student);
 }
 
 window.doLogout=()=>{
   clearSession();
+  _currentStudent=null;
   document.getElementById('screen-app').style.display='none';
   document.getElementById('screen-login').style.display='flex';
   document.getElementById('login-code').value='';
@@ -408,6 +423,8 @@ window.doLogout=()=>{
   document.getElementById('plan-status-wrap').innerHTML='';
   document.getElementById('today-wrap').innerHTML='';
   document.getElementById('greeting-text').innerHTML='Olá! 👋';
+  const tb=document.getElementById('trainer-bar');
+  if(tb){ tb.classList.add('hidden'); tb.style.display='none'; }
 };
 
 async function loadPlans(student){
@@ -454,8 +471,9 @@ async function loadPlans(student){
 
 // ── Check state (in-memory per session) ──
 const checkState={};
+let _currentStudent=null; // set when showApp is called
 
-window.toggleCheck=function(planId,wi,ei,total,progressId){
+window.toggleCheck=async function(planId,wi,ei,total,progressId,planTitle,workoutTitle,studentName){
   const key=`${planId}_${wi}_${ei}`;
   checkState[key]=!checkState[key];
   const row=document.getElementById(`exrow_${planId}_${wi}_${ei}`);
@@ -478,9 +496,35 @@ window.toggleCheck=function(planId,wi,ei,total,progressId){
     pw.querySelector('.progress-bar-fill').style.width=pct+'%';
     pw.querySelector('.progress-label').textContent=`${done}/${total} exercícios`;
     const banner=pw.querySelector('.completed-banner');
-    if(pct===100){ banner.style.display='flex'; toast('🏆 Treino concluído!'); }
-    else { banner.style.display='none'; }
+    const notifKey=`notif_${planId}_${wi}`;
+    if(pct===100){
+      banner.style.display='flex';
+      toast('🏆 Treino concluído! Ótimo trabalho!');
+      // Fire notification to gestor (only once per session per workout)
+      if(!checkState[notifKey]){
+        checkState[notifKey]=true;
+        try{
+          const today=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+          await addDoc(collection(db,'notifications'),{
+            type:'workout_done',
+            studentName: studentName||(_currentStudent&&_currentStudent.name)||'Aluno',
+            planTitle: planTitle||'',
+            workoutTitle: workoutTitle||'',
+            date: today,
+            timestamp: Date.now(),
+            read: false
+          });
+        }catch(e){ console.warn('Notification write failed:',e.message); }
+      }
+    }else{
+      banner.style.display='none';
+    }
   }
+};
+
+window.handleCheckBtn=function(btn){
+  const d=btn.dataset;
+  toggleCheck(d.plan,+d.wi,+d.ei,+d.total,d.prog,d.ptitle,d.wtitle,d.sname);
 };
 
 function renderPlan(p){
@@ -531,7 +575,13 @@ function renderPlan(p){
           ${videoHtml}
         </div>
         <div class="ex-right">
-          <button class="check-btn" id="chkbtn_${p.id}_${wi}_${ei}" onclick="toggleCheck('${p.id}',${wi},${ei},${total},'${progressId}')">✓</button>
+          <button class="check-btn" id="chkbtn_${p.id}_${wi}_${ei}"
+            data-plan="${p.id}" data-wi="${wi}" data-ei="${ei}" data-total="${total}"
+            data-prog="${progressId}"
+            data-ptitle="${(p.title||'').replace(/"/g,'&quot;')}"
+            data-wtitle="${(w.title||'Treino '+(wi+1)).replace(/"/g,'&quot;')}"
+            data-sname="${((_currentStudent&&_currentStudent.name)||'Aluno').replace(/"/g,'&quot;')}"
+            onclick="handleCheckBtn(this)">✓</button>
         </div>
       </div>`;
     }).join('');
