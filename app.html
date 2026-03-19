@@ -253,9 +253,19 @@
     .clone-student-item:hover { border-color: var(--accent-soft); background: var(--accent-dim); }
     .clone-student-item.selected { border-color: var(--accent); background: var(--accent-dim); }
 
+    /* On mobile, panel goes full-width fixed below topbar so it never overflows */
     @media(max-width:768px){
-      .notif-panel { width: calc(100vw - 32px); right: -8px; }
-    } border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 60px auto; }
+      .notif-panel {
+        position: fixed !important;
+        top: 62px;
+        left: 12px;
+        right: 12px;
+        width: auto !important;
+        max-height: 60vh;
+      }
+    }
+
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 60px auto; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 8px 0 env(safe-area-inset-bottom); z-index: 100; box-shadow: 0 -2px 16px rgba(0,0,0,.06); }
