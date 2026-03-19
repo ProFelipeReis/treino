@@ -63,7 +63,7 @@
     /* COMPLETION MODAL */
     .completion-modal { max-width: 360px; }
     .completion-title { font-family: var(--head); font-size: 1.4rem; font-weight: 800; color: var(--text); text-align: center; margin-bottom: 6px; }
-    .completion-time { text-align: center; font-size: 2.2rem; font-family: var(--head); font-weight: 800; color: var(--accent); margin: 12px 0 4px; letter-spacing: .04em; }
+    .completion-time { text-align: center; font-size: 2.2rem; font-family: var(--head); font-weight: 800; color: var(--text); margin: 12px 0 4px; letter-spacing: .04em; }
     .completion-time-label { text-align: center; font-size: .75rem; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; }
     #feedback-area { margin-top: 16px; }
     #feedback-text { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--r); font-size: .88rem; resize: vertical; min-height: 90px; background: var(--bg); color: var(--text); transition: border-color .15s; }
@@ -71,18 +71,16 @@
 
     /* CRONÔMETRO */
     #workout-timer-bar {
-      position: sticky; top: 60px; z-index: 90;
-      background: #111110; color: #fff;
-      padding: 8px 20px; display: flex; align-items: center; gap: 12px;
-      border-bottom: 1px solid #2e2e2a;
-      animation: slideDown .3s cubic-bezier(.22,1,.36,1);
+      background: #111110;
+      padding: 9px 20px; display: flex; align-items: center; gap: 12px;
+      border-top: 1px solid #2e2e2a;
+      width: 100%;
     }
-    @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .timer-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; animation: pulse 1.5s ease-in-out infinite; }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
-    .timer-label { font-size: .72rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .1em; }
-    .timer-value { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: var(--accent); letter-spacing: .06em; }
-    .timer-workout-name { font-size: .76rem; color: #aaa; font-weight: 600; margin-left: 4px; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+    .timer-label { font-size: .68rem; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: .12em; }
+    .timer-value { font-family: var(--head); font-size: 1.15rem; font-weight: 800; color: var(--accent); letter-spacing: .08em; }
+    .timer-workout-name { font-size: .74rem; color: #777; font-weight: 600; margin-left: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 
     /* LOGIN */
     #screen-login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; background: linear-gradient(135deg, #f0f0ef 0%, #e8e8e7 50%, #f0f0ef 100%); }
@@ -97,7 +95,8 @@
 
     /* APP */
     #screen-app { display: none; flex-direction: column; min-height: 100vh; }
-    .topbar { background: #111110; border-bottom: 1px solid #2e2e2a; padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.3); }
+    .topbar { background: #111110; border-bottom: 1px solid #2e2e2a; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.3); display: flex; flex-direction: column; }
+    .topbar-main { padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
     .topbar-brand { font-family: var(--head); font-size: 1.1rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 10px; letter-spacing: -.01em; }
     .student-pill { background: rgba(245,200,0,.12); border: 1px solid rgba(245,200,0,.3); border-radius: 8px; padding: 5px 12px; font-size: .78rem; font-weight: 700; color: var(--accent); }
     .logout-btn { background: none; color: #555550; font-size: .78rem; padding: 6px 12px; border-radius: 8px; transition: all .15s; font-weight: 600; }
@@ -337,21 +336,22 @@
 <!-- APP -->
 <div id="screen-app">
   <div class="topbar">
-    <div class="topbar-brand">
-      <img src="https://i.imgur.com/b0pH0qy.png" alt="Trainly" style="height:30px;width:auto;object-fit:contain;"/>
+    <div class="topbar-main">
+      <div class="topbar-brand">
+        <img src="https://i.imgur.com/b0pH0qy.png" alt="Trainly" style="height:30px;width:auto;object-fit:contain;"/>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="student-pill" id="student-pill">—</div>
+        <button class="logout-btn" onclick="doLogout()">Sair</button>
+      </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div class="student-pill" id="student-pill">—</div>
-      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    <!-- TIMER BAR (hidden until workout started) -->
+    <div id="workout-timer-bar" style="display:none;">
+      <div class="timer-dot"></div>
+      <span class="timer-label">Em treino</span>
+      <span class="timer-value" id="timer-display">00:00</span>
+      <span class="timer-workout-name" id="timer-workout-name"></span>
     </div>
-  </div>
-
-  <!-- TIMER BAR (hidden until workout started) -->
-  <div id="workout-timer-bar" class="hidden">
-    <div class="timer-dot"></div>
-    <span class="timer-label">Em treino</span>
-    <span class="timer-value" id="timer-display">00:00</span>
-    <span class="timer-workout-name" id="timer-workout-name"></span>
   </div>
 
   <div id="trainer-bar" class="hidden" style="background:#1a1a18;border-bottom:1px solid #2e2e2a;padding:7px 20px;display:flex;align-items:center;gap:8px;">
@@ -459,13 +459,13 @@ function startTimerTick(){
 function showTimerBar(workoutTitle){
   const bar=document.getElementById('workout-timer-bar');
   const nameEl=document.getElementById('timer-workout-name');
-  if(bar){ bar.classList.remove('hidden'); }
+  if(bar){ bar.style.display='flex'; }
   if(nameEl){ nameEl.textContent=workoutTitle?`· ${workoutTitle}`:''; }
 }
 
 function hideTimerBar(){
   const bar=document.getElementById('workout-timer-bar');
-  if(bar) bar.classList.add('hidden');
+  if(bar) bar.style.display='none';
 }
 
 // ── Modal: iniciar treino ──
