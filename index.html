@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="referrer" content="strict-origin-when-cross-origin"/>
   <title>Sistema de Treinamento — Aluno</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,6 +33,10 @@
       --shadow-md: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
     }
     html { scroll-behavior: smooth; }
+    /* Prevent zoom */
+    html { touch-action: pan-x pan-y; }
+    * { touch-action: manipulation; }
+
     body { font-family: var(--body); background: var(--bg); color: var(--text); min-height: 100vh; }
     button { cursor: pointer; border: none; font-family: inherit; }
     input { font-family: inherit; }
