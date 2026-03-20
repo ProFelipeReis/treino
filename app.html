@@ -157,7 +157,7 @@
     .gear-btn { background: none; color: #888880; padding: 6px 8px; border-radius: 8px; font-size: 1.1rem; transition: all .2s; line-height: 1; border: none; cursor: pointer; }
     .gear-btn:hover { color: var(--accent); background: rgba(245,200,0,.1); transform: rotate(45deg); }
 
-    .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); }
+    .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); min-height: 0; }
     .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 10px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; overflow-y: auto; }
     .sidebar-section { font-size: .68rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .12em; padding: 14px 12px 8px; }
     .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--r); font-size: .88rem; font-weight: 600; color: var(--text2); cursor: pointer; transition: all .15s; position: relative; }
@@ -165,9 +165,11 @@
     .sidebar-item.active { background: var(--accent-dim); color: #111110; font-weight: 700; }
     .sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 60%; background: var(--accent); border-radius: 0 3px 3px 0; }
 
-    .main-content { flex: 1; overflow-y: auto; padding: 28px; background: var(--bg); }
+    .main-content { flex: 1; overflow-y: auto; padding: 28px; background: var(--bg); display: flex; flex-direction: column; }
     .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    .tab-panel.active { display: block; flex: 1; }
+    /* O tab de chat precisa de flex para distribuir altura */
+    #tab-chat.active { display: flex; flex-direction: column; flex: 1; }
 
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
     .page-title { font-family: var(--head); font-size: 1.5rem; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
@@ -356,7 +358,142 @@
       /* Botões WhatsApp/Excluir do detail */
       .detail-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
       .detail-actions .btn { justify-content: center; }
+
+      /* No mobile, o painel de chat usa altura fixa baseada na viewport menos nav */
+      #chat-detail-panel {
+        flex: none;
+        height: calc(100dvh - 200px);
+      }
     }
+
+    /* ── CHAT TAB (gestor) ── */
+    .sidebar-item-chat-badge {
+      margin-left: auto;
+      background: var(--accent); color: #111110;
+      border-radius: 99px; min-width: 20px; height: 20px;
+      padding: 0 5px;
+      font-size: .65rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .mobile-nav-chat-badge {
+      position: absolute; top: 2px; right: 8px;
+      background: var(--accent); color: #111110;
+      border-radius: 99px; min-width: 16px; height: 16px;
+      padding: 0 4px;
+      font-size: .58rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chat-list { display: flex; flex-direction: column; gap: 10px; }
+    .chat-list-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r2); padding: 0; cursor: pointer;
+      transition: all .2s; box-shadow: var(--shadow); overflow: hidden;
+    }
+    .chat-list-item:hover { border-color: var(--accent-soft); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .chat-list-item.active-chat { border-color: var(--accent); }
+    .chat-list-item-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px;
+    }
+    .chat-list-avatar {
+      width: 40px; height: 40px; border-radius: 11px;
+      background: var(--accent-dim); border: 1px solid var(--accent-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--head); font-weight: 800; font-size: .9rem; color: #111110;
+      flex-shrink: 0;
+    }
+    .chat-list-name { font-weight: 600; font-size: .9rem; color: var(--text); }
+    .chat-list-preview { font-size: .76rem; color: var(--text3); margin-top: 2px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .chat-list-time { font-size: .7rem; color: var(--text3); font-weight: 500; margin-left: auto; flex-shrink: 0; }
+    /* Estado não lido: nome em negrito forte, preview mais escuro */
+    .chat-list-item.has-unread { border-color: rgba(245,200,0,.3); background: rgba(245,200,0,.04); }
+    .chat-list-item.has-unread .chat-list-name { font-weight: 800; color: #111110; }
+    .chat-list-item.has-unread .chat-list-preview { color: var(--text2); font-weight: 600; }
+    .chat-list-item.has-unread .chat-list-time { color: var(--text); font-weight: 700; }
+    .chat-unread-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0; margin-left: 6px;
+    }
+    .chat-delete-btn {
+      background: var(--red-dim); color: var(--red);
+      border: 1px solid rgba(224,62,62,.2); border-radius: 8px;
+      width: 30px; height: 30px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; font-size: .85rem;
+      transition: all .15s; flex-shrink: 0;
+    }
+    .chat-delete-btn:hover { background: rgba(224,62,62,.18); }
+
+    /* ── CHAT TAB LAYOUT ── */
+    #tab-chat {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+    #tab-chat.active {
+      display: flex;
+    }
+    #tab-chat .page-header { flex-shrink: 0; }
+    #chat-list-gestor { flex-shrink: 0; }
+
+    /* ── CHAT DETAIL PANEL (gestor) ── */
+    #chat-detail-panel {
+      display: none; flex-direction: column;
+      /* Ocupa o espaço restante dentro do tab, sem ultrapassar */
+      flex: 1; min-height: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r2); overflow: hidden; box-shadow: var(--shadow);
+      margin-top: 16px;
+    }
+    #chat-detail-panel.visible { display: flex; }
+    .chat-detail-head {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0; background: var(--surface);
+    }
+    .chat-detail-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      background: var(--bg);
+    }
+    .chat-msg { display: flex; flex-direction: column; max-width: 75%; }
+    .chat-msg.mine { align-self: flex-end; align-items: flex-end; }
+    .chat-msg.theirs { align-self: flex-start; align-items: flex-start; }
+    .chat-bubble {
+      padding: 9px 13px; border-radius: 14px;
+      font-size: .84rem; line-height: 1.45; font-weight: 500;
+    }
+    .chat-msg.mine .chat-bubble {
+      background: linear-gradient(135deg, #3d3830 0%, #1a1610 100%);
+      color: #fff; border-bottom-right-radius: 4px;
+    }
+    .chat-msg.theirs .chat-bubble {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-bottom-left-radius: 4px;
+    }
+    .chat-time-label { font-size: .65rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
+    .chat-detail-input-wrap {
+      display: flex; align-items: flex-end; gap: 8px;
+      padding: 12px 14px; border-top: 1px solid var(--border); flex-shrink: 0;
+    }
+    .chat-gestor-input {
+      flex: 1; padding: 10px 14px; border: 1.5px solid var(--border);
+      border-radius: 20px; font-size: .88rem; resize: none;
+      max-height: 100px; background: var(--bg); color: var(--text);
+      transition: border-color .15s; font-family: var(--body); line-height: 1.4;
+    }
+    .chat-gestor-input:focus { outline: none; border-color: var(--accent); }
+    .chat-send-btn-g {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #3d3830 0%, #1a1610 100%);
+      color: white; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s; border: 1px solid rgba(245,200,0,.25);
+    }
+    .chat-send-btn-g:hover { transform: scale(1.07); }
+    .chat-empty-state { text-align: center; color: var(--text3); font-size: .85rem; padding: 60px 20px; font-weight: 600; }
+
+    /* ── CRIAR ALERTA MODAL ── */
+    #modal-create-alert .modal { max-width: 460px; }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png"/>
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png"/>
@@ -656,6 +793,11 @@ document.addEventListener('DOMContentLoaded',function(){
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         Feedbacks
       </div>
+      <div class="sidebar-item" data-tab="tab-chat" onclick="switchTab('tab-chat',this)">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        Chat
+        <span class="sidebar-item-chat-badge hidden" id="chat-sidebar-badge">0</span>
+      </div>
     </div>
     <div class="main-content">
       <div id="tab-dashboard" class="tab-panel active">
@@ -670,6 +812,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-ghost" onclick="goToAlunos()">👥 Ver alunos</button>
             <button class="btn btn-primary" onclick="openAddStudentModal()">+ Novo aluno</button>
+            <button class="btn btn-ghost" onclick="openCreateAlertModal()" style="background:rgba(245,200,0,.1);border-color:rgba(245,200,0,.4);color:#8a6c00;font-weight:800;">📢 Criar Alerta</button>
           </div>
         </div>
       </div>
@@ -697,6 +840,32 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="page-header"><div class="page-title">Feedbacks</div></div>
         <div id="feedbacks-list"><div class="spinner"></div></div>
       </div>
+      <div id="tab-chat" class="tab-panel">
+        <div class="page-header">
+          <div class="page-title">Chat</div>
+        </div>
+        <div id="chat-list-gestor" class="chat-list"><div class="spinner"></div></div>
+        <div id="chat-detail-panel">
+          <div class="chat-detail-head">
+            <div class="chat-list-avatar" id="chat-detail-avatar">?</div>
+            <div style="flex:1;">
+              <div style="font-weight:800;font-size:.95rem;" id="chat-detail-name">Aluno</div>
+              <div style="font-size:.74rem;color:var(--text3);font-weight:500;" id="chat-detail-code"></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="closeChatDetail()">← Voltar</button>
+          </div>
+          <div class="chat-detail-messages" id="chat-detail-messages">
+            <div class="chat-empty-state">Carregando...</div>
+          </div>
+          <div class="chat-detail-input-wrap">
+            <textarea class="chat-gestor-input" id="chat-gestor-input" placeholder="Mensagem..." rows="1"
+              onkeydown="chatGestorKeydown(event)" oninput="autoResizeChatGestor(this)"></textarea>
+            <button class="chat-send-btn-g" onclick="sendChatMessageGestor()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="mobile-nav">
@@ -705,6 +874,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="mobile-nav-item" data-tab="tab-alunos" onclick="switchTab('tab-alunos',this)"><span class="ni">👥</span>Alunos</div>
       <div class="mobile-nav-item mobile-nav-item-gestores hidden" data-tab="tab-gestores" onclick="switchTab('tab-gestores',this)"><span class="ni">🛡️</span>Gestores</div>
       <div class="mobile-nav-item" data-tab="tab-feedbacks" onclick="switchTab('tab-feedbacks',this)"><span class="ni">💬</span>Feedbacks</div>
+      <div class="mobile-nav-item" data-tab="tab-chat" onclick="switchTab('tab-chat',this)" style="position:relative;"><span class="ni">🗨️</span>Chat<span class="mobile-nav-chat-badge hidden" id="chat-mobile-badge">0</span></div>
     </div>
   </div>
 </div>
@@ -907,6 +1077,34 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div class="modal-body" id="pv-body"></div>
     <div class="modal-footer" id="pv-footer"></div>
+  </div>
+</div>
+
+<!-- MODAL: CRIAR ALERTA -->
+<div id="modal-create-alert" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>📢 Criar Alerta para Aluno</h3>
+      <button class="close-btn" onclick="closeModal('modal-create-alert')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.83rem;color:var(--text2);margin-bottom:16px;line-height:1.6;">O aluno verá esta mensagem como um pop-up na próxima vez que abrir o app de treinos.</p>
+      <div class="form-group">
+        <label>Selecionar aluno *</label>
+        <select id="alert-student-select" class="form-control">
+          <option value="">— Selecione um aluno —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Mensagem do alerta *</label>
+        <textarea id="alert-message-text" class="form-control" rows="4" placeholder="Ex: Sua ficha foi atualizada! Confira os novos exercícios..." style="resize:vertical;min-height:100px;"></textarea>
+      </div>
+      <div id="alert-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:18px;margin-top:4px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-create-alert')">Cancelar</button>
+      <button id="btn-send-alert" class="btn btn-primary" onclick="sendAlert()" style="background:linear-gradient(135deg,#8a6c00,#5a4600);border-color:rgba(245,200,0,.4);">📢 Enviar alerta</button>
+    </div>
   </div>
 </div>
 
@@ -1134,6 +1332,11 @@ window.showDashboard=function(){
   _applyUserUI();
   loadStudents();
   startNotifPolling();
+  // Inicia polling do badge de chat
+  (function waitChat(){
+    if(window.startChatBadgePolling){ window.startChatBadgePolling(); }
+    else { setTimeout(waitChat, 200); }
+  })();
   // Refresh manager phone from Firestore (in case it changed since last session)
   var u=window.CURRENT_USER||{};
   if(u.username && u.username!=='felipereis'){
@@ -1152,6 +1355,8 @@ window.logoutGestor=()=>{
   clearSession();
   window.CURRENT_USER=null;
   if(window._notifInterval){ clearInterval(window._notifInterval); window._notifInterval=null; }
+  // Cancela listeners de chat em tempo real
+  if(window._chatSnapshotUnsubs){ window._chatSnapshotUnsubs.forEach(function(fn){ try{fn();}catch(e){} }); window._chatSnapshotUnsubs=[]; }
   document.getElementById('screen-dashboard').style.display='none';
   document.getElementById('screen-login').style.display='flex';
   toast('Sessão encerrada.');
@@ -1164,6 +1369,7 @@ window.switchTab=(tabId,el)=>{
   if(tabId==='tab-alunos') showStudentsList();
   if(tabId==='tab-gestores') loadManagers();
   if(tabId==='tab-feedbacks') loadFeedbacks();
+  if(tabId==='tab-chat'){ loadChatList(); closeChatDetail(); }
 };
 window.goToAlunos=()=>switchTab('tab-alunos',document.querySelector('[data-tab="tab-alunos"]'));
 
@@ -2442,6 +2648,281 @@ window.deleteManager=async function(id, username){
     }
   }
 })();
+
+// ═══════════════════════════════════════════
+// CHAT — GESTOR
+// ═══════════════════════════════════════════
+window._chatActiveSid = null;
+window._chatPollGestor = null;
+window._chatUnreadTotal = 0;
+
+window.loadChatList = async function() {
+  var el = document.getElementById('chat-list-gestor');
+  if(!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  try {
+    var u = window.CURRENT_USER||{};
+    // Get all students for this manager
+    var q;
+    if(u.isMaster && u.username==='felipereis'){
+      q = _query(_col(_db,'students'), _orderBy('createdAt','desc'));
+    } else {
+      q = _query(_col(_db,'students'), _where('managerId','==',u.username));
+    }
+    var snap = await _getDocs(q);
+    var students = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+
+    // For each student, get latest message and unread count
+    var chatItems = [];
+    for(var s of students) {
+      try {
+        var msgsSnap = await _db.collection('chats').doc(s.id).collection('messages').orderBy('ts','desc').limit(1).get();
+        if(!msgsSnap.empty) {
+          var lastMsg = Object.assign({id:msgsSnap.docs[0].id}, msgsSnap.docs[0].data());
+          var unreadSnap = await _db.collection('chats').doc(s.id).collection('messages')
+            .where('sender','==','student').where('readByManager','==',false).get();
+          chatItems.push({ student: s, lastMsg: lastMsg, unread: unreadSnap.size });
+        }
+      } catch(e) {}
+    }
+
+    // Sort by latest message timestamp
+    chatItems.sort(function(a,b){ return (b.lastMsg.ts||0)-(a.lastMsg.ts||0); });
+
+    if(!chatItems.length) {
+      el.innerHTML = '<div class="empty-state"><div class="ei">💬</div><p>Nenhuma conversa ainda.<br>Os alunos podem iniciar o chat pelo app.</p></div>';
+      return;
+    }
+
+    el.innerHTML = chatItems.map(function(item) {
+      var s = item.student;
+      var m = item.lastMsg;
+      var unread = item.unread;
+      var preview = m.sender==='student' ? m.text : ('Você: '+(m.text||''));
+      var timeStr = m.ts ? new Date(m.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+      return '<div class="chat-list-item'+(unread>0?' has-unread':'')+'" id="chatitem_'+s.id+'" onclick="openChatDetail(\''+s.id+'\')">'
+        + '<div class="chat-list-item-header">'
+        + '<div class="chat-list-avatar">'+(s.name||'?').slice(0,2).toUpperCase()+'</div>'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div style="display:flex;align-items:center;gap:6px;">'
+        + '<div class="chat-list-name">'+escHtml(s.name||s.code||'Aluno')+'</div>'
+        + (unread>0?'<div class="chat-unread-dot"></div>':'')
+        + '</div>'
+        + '<div class="chat-list-preview">'+escHtml((preview||'').slice(0,60))+'</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">'
+        + '<div class="chat-list-time">'+timeStr+'</div>'
+        + '<button class="chat-delete-btn" title="Limpar conversa" onclick="event.stopPropagation();deleteChatGestor(\''+s.id+'\',\''+escHtml(s.name||s.code||'Aluno')+'\')">🗑</button>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--red);font-size:.82rem;padding:20px;">Erro: '+e.message+'</div>';
+  }
+};
+
+window.openChatDetail = async function(sid) {
+  window._chatActiveSid = sid;
+  var panel = document.getElementById('chat-detail-panel');
+  panel.classList.add('visible');
+
+  var student = ST.students.find(function(s){ return s.id===sid; })||{id:sid,name:sid};
+  document.getElementById('chat-detail-name').textContent = student.name||student.code||sid;
+  document.getElementById('chat-detail-code').textContent = student.code?('#'+student.code):'';
+  document.getElementById('chat-detail-avatar').textContent = (student.name||'?').slice(0,2).toUpperCase();
+
+  // Highlight selected e remove indicador de não lido imediatamente
+  document.querySelectorAll('.chat-list-item').forEach(function(el){ el.classList.remove('active-chat'); });
+  var item = document.getElementById('chatitem_'+sid);
+  if(item) {
+    item.classList.add('active-chat');
+    item.classList.remove('has-unread');
+    var dot = item.querySelector('.chat-unread-dot');
+    if(dot) dot.remove();
+  }
+
+  await window.loadChatDetailMessages();
+
+  if(window._chatPollGestor) clearInterval(window._chatPollGestor);
+  window._chatPollGestor = setInterval(window.loadChatDetailMessages, 4000);
+};
+
+window.loadChatDetailMessages = async function() {
+  if(!window._chatActiveSid) return;
+  try {
+    var snap = await _db.collection('chats').doc(window._chatActiveSid).collection('messages').orderBy('ts','asc').get();
+    var msgs = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+
+    var el = document.getElementById('chat-detail-messages');
+    if(!msgs.length) {
+      el.innerHTML = '<div class="chat-empty-state">Nenhuma mensagem. Diga olá! 👋</div>';
+      return;
+    }
+    var html = msgs.map(function(m) {
+      var mine = m.sender === 'manager';
+      var time = m.ts ? new Date(m.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+      return '<div class="chat-msg '+(mine?'mine':'theirs')+'">'
+        + '<div class="chat-bubble">'+escHtml(m.text)+'</div>'
+        + '<div class="chat-time-label">'+time+'</div>'
+        + '</div>';
+    }).join('');
+    el.innerHTML = html;
+    el.scrollTop = el.scrollHeight;
+
+    // Mark messages from student as read by manager
+    var hadUnread = false;
+    for(var m of msgs) {
+      if(m.sender==='student' && !m.readByManager) {
+        hadUnread = true;
+        _db.collection('chats').doc(window._chatActiveSid).collection('messages').doc(m.id).update({readByManager:true}).catch(function(){});
+      }
+    }
+    // Atualiza badge imediatamente se havia não lidos
+    if(hadUnread) window.updateChatBadge();
+  } catch(e) { console.warn('loadChatDetailMessages:', e.message); }
+};
+
+window.closeChatDetail = function() {
+  window._chatActiveSid = null;
+  if(window._chatPollGestor){ clearInterval(window._chatPollGestor); window._chatPollGestor=null; }
+  var panel = document.getElementById('chat-detail-panel');
+  if(panel) panel.classList.remove('visible');
+};
+
+window.sendChatMessageGestor = async function() {
+  var inp = document.getElementById('chat-gestor-input');
+  var text = (inp.value||'').trim();
+  if(!text || !window._chatActiveSid) return;
+  inp.value = ''; inp.style.height = '';
+  try {
+    await _db.collection('chats').doc(window._chatActiveSid).collection('messages').add({
+      text: text, sender: 'manager', ts: Date.now(), readByManager: true, readByStudent: false
+    });
+    window.loadChatDetailMessages();
+    window.loadChatList();
+  } catch(e) { toast('Erro ao enviar: '+e.message,'error'); }
+};
+
+window.chatGestorKeydown = function(e) {
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); window.sendChatMessageGestor(); }
+};
+
+window.autoResizeChatGestor = function(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100)+'px';
+};
+
+window.deleteChatGestor = async function(sid, name) {
+  if(!confirm('Limpar a conversa com '+name+'? Isso apagará todas as mensagens e a conversa sairá da lista.')) return;
+  try {
+    var snap = await _db.collection('chats').doc(sid).collection('messages').get();
+    for(var d of snap.docs) {
+      await _db.collection('chats').doc(sid).collection('messages').doc(d.id).delete();
+    }
+    toast('✅ Conversa limpa!');
+    if(window._chatActiveSid === sid) window.closeChatDetail();
+    window.loadChatList();
+  } catch(e) { toast('Erro: '+e.message,'error'); }
+};
+
+// ── Badge de chat em tempo real (onSnapshot) ──
+window._chatSnapshotUnsubs = []; // guarda os unsubscribes dos listeners
+
+window.startChatBadgePolling = async function() {
+  // Cancela listeners anteriores se existirem
+  window._chatSnapshotUnsubs.forEach(function(fn){ try{ fn(); }catch(e){} });
+  window._chatSnapshotUnsubs = [];
+  window._chatUnreadCounts = {}; // { studentId: count }
+
+  var u = window.CURRENT_USER||{};
+  if(!u.username) return;
+
+  // Busca lista de alunos deste gestor
+  var q;
+  if(u.isMaster && u.username==='felipereis'){
+    q = _query(_col(_db,'students'), _orderBy('createdAt','desc'));
+  } else {
+    q = _query(_col(_db,'students'), _where('managerId','==',u.username));
+  }
+
+  try {
+    var snap = await _getDocs(q);
+    snap.docs.forEach(function(d) {
+      var sid = d.id;
+      // Listener em tempo real para mensagens não lidas deste aluno
+      // Evita índice composto: filtra só por sender, checa readByManager em JS
+      var unsub = _db.collection('chats').doc(sid).collection('messages')
+        .where('sender','==','student')
+        .onSnapshot(function(msgSnap) {
+          var unread = msgSnap.docs.filter(function(m){
+            return m.data().readByManager === false;
+          }).length;
+          window._chatUnreadCounts[sid] = unread;
+          window._applyBadgeCount();
+        }, function(e){ console.warn('chat snapshot err:', e.message); });
+      window._chatSnapshotUnsubs.push(unsub);
+    });
+  } catch(e) { console.error('startChatBadgePolling:', e); }
+};
+
+window._applyBadgeCount = function() {
+  var total = Object.values(window._chatUnreadCounts||{}).reduce(function(a,b){ return a+b; }, 0);
+  window._chatUnreadTotal = total;
+  var sb = document.getElementById('chat-sidebar-badge');
+  var mb = document.getElementById('chat-mobile-badge');
+  var label = total > 9 ? '9+' : String(total);
+  if(sb){ sb.textContent = label; sb.classList.toggle('hidden', total === 0); }
+  if(mb){ mb.textContent = label; mb.classList.toggle('hidden', total === 0); }
+};
+
+// Mantém updateChatBadge como alias para chamadas existentes (ex: após marcar como lido)
+window.updateChatBadge = function() {
+  window._applyBadgeCount();
+};
+
+function escHtml(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ═══════════════════════════════════════════
+// CRIAR ALERTA — GESTOR
+// ═══════════════════════════════════════════
+window.openCreateAlertModal = function() {
+  var sel = document.getElementById('alert-student-select');
+  sel.innerHTML = '<option value="">— Selecione um aluno —</option>';
+  var students = ST.students||[];
+  students.forEach(function(s){
+    var opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name || s.code || s.id;
+    sel.appendChild(opt);
+  });
+  document.getElementById('alert-message-text').value = '';
+  document.getElementById('alert-error').textContent = '';
+  openModal('modal-create-alert');
+};
+
+window.sendAlert = async function() {
+  var sid = document.getElementById('alert-student-select').value;
+  var msg = document.getElementById('alert-message-text').value.trim();
+  var errEl = document.getElementById('alert-error');
+  errEl.textContent = '';
+  if(!sid){ errEl.textContent='Selecione um aluno.'; return; }
+  if(!msg){ errEl.textContent='Digite a mensagem do alerta.'; return; }
+  var btn = document.getElementById('btn-send-alert');
+  btn.classList.add('btn-loading'); btn.textContent = 'Enviando...';
+  try {
+    await _setDoc(_doc(_db,'alerts',sid), { message: msg, ts: Date.now() });
+    toast('✅ Alerta enviado! O aluno verá ao abrir o app.');
+    closeModal('modal-create-alert');
+  } catch(e) {
+    errEl.textContent = 'Erro: '+e.message;
+  } finally {
+    btn.classList.remove('btn-loading');
+    btn.textContent = '📢 Enviar alerta';
+  }
+};
 </script>
 
 <script>
