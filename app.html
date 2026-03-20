@@ -78,8 +78,9 @@
     @media(max-width:520px){ .form-row { grid-template-columns: 1fr; } }
 
     .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: var(--r); font-size: .85rem; font-weight: 700; transition: all .15s; cursor: pointer; border: none; font-family: var(--body); }
-    .btn-primary { background: var(--accent); color: #111110; box-shadow: 0 4px 14px rgba(245,200,0,.3); }
-    .btn-primary:hover { transform: translateY(-1px); background: #ffd700; box-shadow: 0 6px 20px rgba(245,200,0,.4); }
+    .btn-primary { background: linear-gradient(135deg, #3d3830 0%, #28231a 50%, #1a1610 100%); color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,.2); font-weight: 800; letter-spacing: .02em; border: 1px solid rgba(245,200,0,.18); }
+    .btn-primary:hover { transform: translateY(-1px); background: linear-gradient(135deg, #4d4838 0%, #332d20 50%, #221d14 100%); box-shadow: 0 4px 14px rgba(0,0,0,.22); }
+    .btn-primary:active { transform: translateY(0); box-shadow: 0 1px 4px rgba(0,0,0,.2); }
     .btn-ghost { background: var(--surface2); color: var(--text2); border: 1.5px solid var(--border); }
     .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--surface3); }
     .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.25); }
@@ -93,8 +94,57 @@
     .badge-active { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,125,82,.2); }
     .badge-expired { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); }
 
-    #screen-login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; background: linear-gradient(135deg, #f0f0ef 0%, #e8e8e7 50%, #f0f0ef 100%); }
-    .login-card { width: 100%; max-width: 340px; background: #ffffff; border: 1px solid #e4e4e0; border-radius: 24px; padding: 36px 32px; box-shadow: 0 8px 40px rgba(0,0,0,.1); }
+        #screen-login {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px;
+      background: #f0f0ef;
+      position: relative; overflow: hidden;
+    }
+    #login-bg-canvas {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    }
+    .login-card { position: relative; z-index: 2; }
+    #login-bg-canvas {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    }
+    .login-card { position: relative; z-index: 2; }
+    .login-card {
+      width: 100%; max-width: 340px;
+      background: rgba(255,255,255,0.22);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 28px;
+      padding: 36px 32px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.28), 0 1.5px 0 rgba(255,255,255,0.18) inset, 0 -1px 0 rgba(0,0,0,0.12) inset;
+      overflow: hidden;
+    }
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 52%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 60%, transparent 100%);
+      border-radius: 28px 28px 60% 60% / 28px 28px 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .login-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .login-card > * { position: relative; z-index: 1; }
+
+    /* Login card glass overrides */
+    #screen-login .form-group label { color: rgba(255,255,255,0.75); }
+    #screen-login .form-control { background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1.5px solid rgba(255,255,255,0.22); color: #ffffff; }
+    #screen-login .form-control::placeholder { color: rgba(255,255,255,0.38); }
+    #screen-login .form-control:focus { border-color: rgba(245,200,0,0.6); background: rgba(255,255,255,0.18); box-shadow: 0 0 0 3px rgba(245,200,0,.15); color: #ffffff; }
 
     #screen-dashboard { display: none; flex-direction: column; min-height: 100vh; }
     .topbar { background: #111110; border-bottom: 1px solid #2e2e2a; padding: 0 24px; height: 62px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.3); }
@@ -316,15 +366,172 @@
 
 <!-- LOGIN -->
 <div id="screen-login">
-  <div class="login-card">
-    <div style="text-align:center;margin-bottom:28px;">
-      <img src="https://i.imgur.com/QkqxLei.png" alt="Trainly" style="height:64px;width:auto;object-fit:contain;"/>
+<canvas id="login-bg-canvas"></canvas>
+<script>
+(function(){
+  const canvas=document.getElementById('login-bg-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,squares,animId;
+
+  // Preload background photo
+  const bgImg=new Image();
+  bgImg.crossOrigin='anonymous';
+  bgImg.src='https://i.imgur.com/Fjj25UX.jpeg';
+  let bgLoaded=false;
+  bgImg.onload=function(){ bgLoaded=true; };
+
+  function resize(){
+    W=canvas.width=window.innerWidth;
+    H=canvas.height=window.innerHeight;
+  }
+
+  function mkSquare(){
+    const size=28+Math.random()*68;
+    return {
+      x: Math.random()*W,
+      y: Math.random()*H,
+      size,
+      rot: Math.random()*Math.PI*2,
+      rotSpeed: (Math.random()-0.5)*0.007,
+      alpha: 0.05+Math.random()*0.12,
+      dx: (Math.random()-0.5)*0.35,
+      dy: -(0.25+Math.random()*0.45),
+    };
+  }
+
+  function init(){
+    resize();
+    squares=Array.from({length:40},mkSquare);
+  }
+
+  // Triangle: top-left corner → top-right corner → one point dipping down in the middle
+  function getTrianglePoints(){
+    const dipX=W*0.5;       // peak dips at center
+    const dipY=H*0.62;      // how far down the center point goes
+    const leftY=H*0.40;     // left edge height
+    const rightY=H*0.44;    // right edge height (slightly different = less symmetric)
+    return [
+      {x:0,      y:0},
+      {x:W,      y:0},
+      {x:W,      y:rightY},
+      {x:dipX,   y:dipY},
+      {x:0,      y:leftY},
+    ];
+  }
+
+  function isAboveTriangle(px,py){
+    const pts=getTrianglePoints();
+    // Use the bottom edge segments only: leftY→dipY→rightY
+    // Segment 1: left edge (0,leftY) → center (dipX,dipY)
+    const leftY=pts[4].y, dipY=pts[3].y, rightY=pts[2].y;
+    const dipX=pts[3].x;
+    let wy;
+    if(px<=dipX){
+      const t=px/dipX;
+      wy=leftY+t*(dipY-leftY);
+    } else {
+      const t=(px-dipX)/(W-dipX);
+      wy=dipY+t*(rightY-dipY);
+    }
+    return py<wy;
+  }
+
+  function drawBg(){
+    const pts=getTrianglePoints();
+
+    // 1. Fill black triangle base
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x,pts[0].y);
+    pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.closePath();
+    ctx.fillStyle='#111110';
+    ctx.fill();
+
+    // 2. Draw photo clipped to the triangle, with transparency
+    if(bgLoaded){
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x,pts[0].y);
+      pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));
+      ctx.closePath();
+      ctx.clip();
+      const iw=bgImg.naturalWidth, ih=bgImg.naturalHeight;
+      const scale=Math.max(W/iw, pts[3].y/ih);
+      const dw=iw*scale, dh=ih*scale;
+      const dx=(W-dw)/2, dy=-dh*0.18;
+      ctx.globalAlpha=0.18;
+      ctx.drawImage(bgImg,dx,dy,dw,dh);
+      ctx.globalAlpha=1;
+      ctx.restore();
+    }
+
+    // 3. Edge glow
+    const dipX=pts[3].x, dipY=pts[3].y, leftY=pts[4].y, rightY=pts[2].y;
+    ctx.beginPath();
+    ctx.moveTo(0,leftY);
+    ctx.lineTo(dipX,dipY);
+    ctx.lineTo(W,rightY);
+    ctx.strokeStyle='rgba(255,255,255,0.10)';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+  }
+
+  function drawSquare(s){
+    const above=isAboveTriangle(s.x,s.y);
+    ctx.save();
+    ctx.translate(s.x,s.y);
+    ctx.rotate(s.rot);
+    ctx.globalAlpha=s.alpha;
+    if(above){
+      ctx.strokeStyle='rgba(255,255,255,0.18)';
+      ctx.fillStyle='rgba(46,46,42,0.30)';
+    } else {
+      ctx.strokeStyle='rgba(17,17,16,0.22)';
+      ctx.fillStyle='rgba(46,46,42,0.08)';
+    }
+    ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.rect(-s.size/2,-s.size/2,s.size,s.size);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function step(){
+    ctx.clearRect(0,0,W,H);
+    drawBg();
+    squares.forEach(s=>{
+      s.x+=s.dx; s.y+=s.dy; s.rot+=s.rotSpeed;
+      if(s.y+s.size<0){ s.y=H+s.size; s.x=Math.random()*W; }
+      if(s.x-s.size>W) s.x=-s.size;
+      if(s.x+s.size<0) s.x=W+s.size;
+      drawSquare(s);
+    });
+    animId=requestAnimationFrame(step);
+  }
+
+  init();
+  step();
+  window.addEventListener('resize',()=>{ resize(); });
+
+  const loginEl=document.getElementById('screen-login');
+  if(loginEl){
+    const obs=new MutationObserver(()=>{
+      if(loginEl.style.display==='none') cancelAnimationFrame(animId);
+    });
+    obs.observe(loginEl,{attributes:true,attributeFilter:['style']});
+  }
+})();
+</script>
+  <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px;position:relative;z-index:2;margin-top:-140px;">
+    <img src="https://i.imgur.com/orva0oM.png" alt="Trainly" style="height:180px;width:auto;max-width:100%;object-fit:contain;margin-bottom:48px;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.5));"/>
+    <div class="login-card" style="width:100%;">
+      <form id="login-form" onsubmit="return false;">
+        <div class="form-group"><label>Usuário</label><input id="login-user" class="form-control" type="text" placeholder="Usuário" required autocomplete="username"/></div>
+        <div class="form-group"><label>Senha</label><input id="login-pass" class="form-control" type="password" placeholder="••••••••" required autocomplete="current-password"/></div>
+        <button type="button" onclick="doLogin()" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">Acessar painel →</button>
+      </form>
     </div>
-    <form id="login-form" onsubmit="return false;">
-      <div class="form-group"><label>Usuário</label><input id="login-user" class="form-control" type="text" placeholder="Usuário" required autocomplete="username"/></div>
-      <div class="form-group"><label>Senha</label><input id="login-pass" class="form-control" type="password" placeholder="••••••••" required autocomplete="current-password"/></div>
-      <button type="button" onclick="doLogin()" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;background:#111110;color:var(--accent);box-shadow:0 4px 20px rgba(0,0,0,.25);">Acessar painel →</button>
-    </form>
   </div>
 </div>
 <script>
@@ -724,7 +931,183 @@ const _query = (col, ...constraints) => { let q = col; constraints.forEach(fn =>
 const _where = (field, op, val) => (q) => q.where(field, op, val);
 const _orderBy = (field, dir) => (q) => q.orderBy(field, dir||'asc');
 
-window.EX_LIB={"Peito":["Supino reto","Supino inclinado","Supino declinado","Supino com halteres","Supino Articulado","Supino na Polia","Crucifixo reto","Crucifixo inclinado","Crossover Superior","Crossover Medial","Crossover Inferior","Voador Peitoral","Flexão de braço","Flexão inclinada","Flexão declinada","Pullover"],"Costas":["Puxada na frente","Barra fixa","Remada curvada","Remada baixa","Remada cavalinho","Pulldown aberto","Pulldown fechado","Levantamento terra","Pulldown na polia"],"Quadríceps":["Agachamento livre","Agachamento no Smith","Leg press","Cadeira extensora","Avanço","Afundo","Hack machine","Agachamento búlgaro","Step-up"],"Posterior de coxa":["Mesa flexora","Cadeira flexora","Stiff","Terra romeno","Good morning"],"Glúteos":["Cadeira Abdutora","Abdução de Quadril na Polia","Agachamento Livre","Agachamento Smith","Agachamento Búlgaro","Agachamento Sumo","Agachamento Taça","Agachamento Hack","Afundo","Stiff","Elevação pélvica","Coice na polia"],"Adutores":["Cadeira Adutora","Adução de Quadril na Polia","Adução de Quadril com Caneleira"],"Panturrilha":["Elevação em pé","Elevação sentado","Panturrilha no leg press","Panturrilha unilateral"],"Bíceps":["Rosca direta barra W","Rosca Direta barra reta","Rosca alternada","Rosca martelo","Rosca concentrada","Rosca Banco Scott","Rosca na Polia com Corda","Rosca na Polia com Barra Reta"],"Tríceps":["Tríceps testa","Tríceps Testa na Polia","Tríceps corda","Tríceps pulley","Tríceps banco","Tríceps francês","Tríceps Frances com Halter","Tríceps coice na Polia","Tríceps Coice com Halter","Triceps Scott","Paralelas"],"Ombro":["Elevação frontal","Elevação Frontal na Polia","Desenvolvimento Máquina","Desenvolvimento com Halter","Desenvolvimento com Barra","Arnold press","Elevação lateral","Elevação lateral na polia","Crucifixo invertido","Face pull","Reverse fly"],"Abdômen":["Abdominal reto","Abdominal infra","Abdominal oblíquo","Prancha","Prancha lateral","Elevação de pernas","Abdominal na máquina","Crunch","Bicicleta"],"Lombar":["Hiperextensão lombar","Good morning","Levantamento terra","Superman"]};
+window.EX_LIB={
+  "Peito":["Supino Reto","Supino Reto no Smith","Supino Reto com Halter","Supino Inclinado","Supino Inclinado no Smith","Supino Inclinado com Halter","Supino Declinado","Supino Declinado com Halter","Supino Articulado","Supino na Polia","Crucifixo Reto","Crucifixo Inclinado","Crossover Superior","Crossover Medial","Crossover Inferior","Voador Peitoral","Flexão de Braço","Pullover com Barra","Pullover com Halter"],
+  "Tríceps":["Tríceps Testa com Barra","Tríceps Testa com Halter","Tríceps Testa na Polia com Barra","Tríceps Testa na Polia com Corda","Tríceps Testa Unilateral na Polia","Tríceps Corda","Tríceps Pulley","Tríceps Pulley Barra V","Tríceps Banco","Tríceps Francês na Polia","Tríceps Francês com Halter","Tríceps Coice na Polia","Tríceps Coice com Halter","Tríceps Paralela","Tríceps Máquina Paralela","Tríceps Pegada Unilateral","Tríceps Pegada Unilateral Inverso","Tríceps Inverso na Polia"],
+  "Costas":["Puxada na Frente Pronada","Puxada na Frente Supinada","Puxada na Frente Barra Romana","Puxada na Frente com Triângulo","Barra Fixa","Remada Curvada Pronada","Remada Curvada Supinada","Remada Curvada Serrote","Remada Serrote na Polia","Remada Baixa Aberta","Remada Baixa Supinada","Remada Baixa com Triângulo","Remada Baixa Máquina Neutra","Remada Baixa Máquina Pronada","Remada Baixa Máquina Supinada","Remada Cavalinho","Pulldown Aberto","Pulldown Fechado","Pulldown Hammer Pronada","Levantamento Terra"],
+  "Bíceps":["Rosca Direta Barra W","Rosca Direta Barra Reta","Rosca Banco 45° Alternada","Rosca Alternada","Rosca Martelo","Rosca Martelo Alternada","Rosca Concentrada","Rosca Banco Scott","Rosca Banco Scott com Halter","Rosca Banco Scott com Barra","Rosca na Polia com Corda","Rosca na Polia com Barra Reta","Rosca Unilateral na Polia","Rosca Inversa na Barra","Rosca Inversa na Polia"],
+  "Ombro":["Elevação Frontal","Elevação Frontal com Barra","Elevação Frontal com Anilha","Elevação Frontal na Polia","Elevação Frontal Alternada","Elevação Frontal Inversa com Barra","Desenvolvimento Máquina","Desenvolvimento com Halter","Desenvolvimento com Barra","Remada Alta na Polia","Remada Alta na Barra W","Arnold Press","Elevação Lateral","Elevação Lateral no Banco 45°","Elevação Lateral na Polia","Crucifixo Invertido na Polia","Crucifixo Invertido","Face Pull","Voador Inverso","Encolhimento de Ombros no Smith","Encolhimento de Ombros com Halter","Encolhimento de Ombros com Barra"],
+  "Quadríceps":["Agachamento Livre","Agachamento Sumo","Agachamento no Smith","Leg Press 90° no Smith","Leg Press 45°","Leg Press 45° Unilateral","Leg Press Horizontal","Leg Press Horizontal Unilateral","Cadeira Extensora","Cadeira Extensora Unilateral","Avanço com Barra","Afundo com Halter","Afundo com Caneleira","Afundo com Barra","Afundo no Smith","Afundo com Salto","Agachamento Hack","Agachamento Búlgaro","Step-up","Levantamento Terra Sumô"],
+  "Posteriores":["Mesa Flexora","Mesa Flexora Unilateral","Cadeira Flexora","Cadeira Flexora Unilateral","Stiff","Stiff no Smith","Good Morning"],
+  "Glúteos":["Cadeira Abdutora","Abdução de Quadril na Polia","Abdução de Quadril com Caneleira","Agachamento Livre","Agachamento no Smith","Agachamento Búlgaro","Agachamento Sumo","Agachamento Taça","Agachamento Hack","Levantamento Terra Sumô","Afundo com Halter","Stiff","Elevação Pélvica","Elevação Pélvica na Bola","Coice na Polia","Glúteo 4 Apoios no Smith","Glúteo 4 Apoios com Caneleira","Glúteo 4 Apoios Perna Estendida"],
+  "Adutores":["Cadeira Adutora","Adução de Quadril na Polia","Adução de Quadril com Caneleira"],
+  "Panturrilha":["Elevação em Pé","Panturrilha no Leg Press","Panturrilha Unilateral"],
+  "Abdômen":["Abdominal Supra","Abdominal Remador","Abdominal na Polia","Abdominal Infra","Abdominal Oblíquo","Abdominal Oblíquo na Polia","Prancha","Abdominal Infra na Paralela","Abdominal Bicicleta"],
+  "Lombar":["Hiperextensão Lombar","Good Morning","Levantamento Terra"]
+};
+
+window.EX_URLS={
+  // Peito
+  "Supino Reto":"https://www.youtube.com/watch?v=72UUJVBuT7o",
+  "Supino Reto no Smith":"https://www.youtube.com/watch?v=FwOpfxDqvqE",
+  "Supino Reto com Halter":"https://www.youtube.com/watch?v=V74Ls-mDYyE",
+  "Supino Inclinado":"https://www.youtube.com/watch?v=0KWsZPMoZQs",
+  "Supino Inclinado no Smith":"https://www.youtube.com/watch?v=sL8kVUI5oxU",
+  "Supino Inclinado com Halter":"https://www.youtube.com/watch?v=JOVGGEwfhIk",
+  "Supino Declinado":"https://www.youtube.com/watch?v=BEx_YCR1Hhs",
+  "Supino Declinado com Halter":"https://www.youtube.com/watch?v=TRsrOnLu30E",
+  "Supino Articulado":"https://www.youtube.com/watch?v=DKX5i7A_y_A",
+  "Supino na Polia":"https://www.youtube.com/watch?v=VtoX4CHhszg",
+  "Crucifixo Reto":"https://www.youtube.com/watch?v=gYh3r3x4tis",
+  "Crucifixo Inclinado":"https://www.youtube.com/watch?v=5myBHdzU_E0",
+  "Crossover Superior":"https://www.youtube.com/watch?v=lJHwF5_qd2U",
+  "Crossover Medial":"https://www.youtube.com/watch?v=2mKYuMGDUYM",
+  "Crossover Inferior":"https://www.youtube.com/watch?v=CTgac4QY9DQ",
+  "Voador Peitoral":"https://www.youtube.com/watch?v=lSV3-8mlUnc",
+  "Flexão de Braço":"https://www.youtube.com/watch?v=rmNKuZ_LlGc",
+  "Pullover com Barra":"https://www.youtube.com/watch?v=pg-xDHdn_nU",
+  "Pullover com Halter":"https://www.youtube.com/watch?v=SmrBx_wA_40",
+  // Tríceps
+  "Tríceps Testa com Barra":"https://www.youtube.com/watch?v=Dey4opMDq8g",
+  "Tríceps Testa com Halter":"https://www.youtube.com/watch?v=KDbl_-rHmbw",
+  "Tríceps Testa na Polia com Barra":"https://www.youtube.com/watch?v=DomiE2asOv8",
+  "Tríceps Testa na Polia com Corda":"https://www.youtube.com/watch?v=7Ubzh8qmYIc",
+  "Tríceps Testa Unilateral na Polia":"https://www.youtube.com/watch?v=68KIR4_k1TA",
+  "Tríceps Corda":"https://www.youtube.com/watch?v=U88oGUP-QIw",
+  "Tríceps Pulley":"https://www.youtube.com/watch?v=xkmY5D5orJ8",
+  "Tríceps Pulley Barra V":"https://www.youtube.com/watch?v=gHdb4a1lsSA",
+  "Tríceps Banco":"https://www.youtube.com/watch?v=V8nX8nsjpws",
+  "Tríceps Francês na Polia":"https://www.youtube.com/watch?v=XYjcAZFNPnc",
+  "Tríceps Francês com Halter":"https://www.youtube.com/watch?v=qLnV4qPXeSw",
+  "Tríceps Coice na Polia":"https://www.youtube.com/watch?v=2CON6BzMT84",
+  "Tríceps Coice com Halter":"https://www.youtube.com/watch?v=IbDymv4eTFw",
+  "Tríceps Paralela":"https://www.youtube.com/watch?v=S2QL00FVBz4",
+  "Tríceps Máquina Paralela":"https://www.youtube.com/watch?v=2CSkCiB_NHg",
+  "Tríceps Pegada Unilateral":"https://www.youtube.com/watch?v=qrzkrTLQRUE",
+  "Tríceps Pegada Unilateral Inverso":"https://www.youtube.com/watch?v=N01XPgv9JcE",
+  "Tríceps Inverso na Polia":"https://www.youtube.com/watch?v=_ZKBsc7uJY0",
+  // Costas
+  "Puxada na Frente Pronada":"https://www.youtube.com/watch?v=kF5HN1aky2E",
+  "Puxada na Frente Supinada":"https://www.youtube.com/watch?v=ocX3Ett6LWg",
+  "Puxada na Frente Barra Romana":"https://www.youtube.com/watch?v=UDtThMDqshM",
+  "Puxada na Frente com Triângulo":"https://www.youtube.com/watch?v=4zJ2GFRz_Ig",
+  "Barra Fixa":"https://www.youtube.com/watch?v=30zgaYKWP2s",
+  "Remada Curvada Pronada":"https://www.youtube.com/watch?v=PoFFS_UMf8c",
+  "Remada Curvada Supinada":"https://www.youtube.com/watch?v=TD00shuX6hA",
+  "Remada Curvada Serrote":"https://www.youtube.com/watch?v=Bb3SMb-ki-4",
+  "Remada Serrote na Polia":"https://www.youtube.com/watch?v=n_at3YBkFoI",
+  "Remada Baixa Aberta":"https://www.youtube.com/watch?v=hYuhnv9B-Gk",
+  "Remada Baixa Supinada":"https://www.youtube.com/watch?v=6uSkfRxfrmM",
+  "Remada Baixa com Triângulo":"https://www.youtube.com/watch?v=dXdQWGYI_Lo",
+  "Remada Baixa Máquina Neutra":"https://www.youtube.com/watch?v=R1lvbDeZv1E",
+  "Remada Baixa Máquina Pronada":"https://www.youtube.com/watch?v=tuFHB3yIwS0",
+  "Remada Baixa Máquina Supinada":"https://www.youtube.com/watch?v=WbHTHcfRLeE",
+  "Remada Cavalinho":"https://www.youtube.com/watch?v=WE0so-WCMrY",
+  "Pulldown Aberto":"https://www.youtube.com/watch?v=PtruvATHY5Q",
+  "Pulldown Fechado":"https://www.youtube.com/watch?v=PtruvATHY5Q",
+  "Pulldown Hammer Pronada":"https://www.youtube.com/watch?v=kBJaJI7tg1s",
+  "Levantamento Terra":"https://www.youtube.com/watch?v=apDhA48NlpY",
+  // Bíceps
+  "Rosca Direta Barra W":"https://www.youtube.com/watch?v=1N43ZJT7yiM",
+  "Rosca Direta Barra Reta":"https://www.youtube.com/watch?v=TtIJUCHLSVM",
+  "Rosca Banco 45° Alternada":"https://www.youtube.com/watch?v=KIlwB0fJh6k",
+  "Rosca Alternada":"https://www.youtube.com/watch?v=8_cMKLgDgpo",
+  "Rosca Martelo":"https://www.youtube.com/watch?v=jadLjlrgugY",
+  "Rosca Martelo Alternada":"https://www.youtube.com/watch?v=ITRfzXEcBz0",
+  "Rosca Concentrada":"https://www.youtube.com/watch?v=DtwsKDsuRGk",
+  "Rosca Banco Scott":"https://www.youtube.com/watch?v=LIcKp31AvQY",
+  "Rosca Banco Scott com Halter":"https://www.youtube.com/watch?v=0FPOPvuXDp8",
+  "Rosca Banco Scott com Barra":"https://www.youtube.com/watch?v=v9AekFhVB4E",
+  "Rosca na Polia com Corda":"https://www.youtube.com/watch?v=wgY_YV6fGeU",
+  "Rosca na Polia com Barra Reta":"https://www.youtube.com/watch?v=e-wrb3jz_LA",
+  "Rosca Unilateral na Polia":"https://www.youtube.com/watch?v=gkbpR6JoXlM",
+  "Rosca Inversa na Barra":"https://www.youtube.com/watch?v=SXtGXEp-dVA",
+  "Rosca Inversa na Polia":"https://www.youtube.com/watch?v=haORNZZq0vs",
+  // Ombro
+  "Elevação Frontal":"https://www.youtube.com/watch?v=ZbNxceb1VqU",
+  "Elevação Frontal com Barra":"https://www.youtube.com/watch?v=uoxivRqpzoA",
+  "Elevação Frontal com Anilha":"https://www.youtube.com/watch?v=gdLsIcKcNtE",
+  "Elevação Frontal na Polia":"https://www.youtube.com/watch?v=gZmmCMD8f68",
+  "Elevação Frontal Alternada":"https://www.youtube.com/watch?v=Y8EgXrLByFA",
+  "Elevação Frontal Inversa com Barra":"https://www.youtube.com/watch?v=p6igMADVwd4",
+  "Desenvolvimento Máquina":"https://www.youtube.com/watch?v=TUgm9SNRjUo",
+  "Desenvolvimento com Halter":"https://www.youtube.com/watch?v=0-UNSkfq-Vw",
+  "Desenvolvimento com Barra":"https://www.youtube.com/watch?v=jpQhfOXoqXg",
+  "Remada Alta na Polia":"https://www.youtube.com/watch?v=yDEmuUfkT1A",
+  "Remada Alta na Barra W":"https://www.youtube.com/watch?v=5KdpqOkaHto",
+  "Arnold Press":"https://www.youtube.com/watch?v=166waxYDZhg",
+  "Elevação Lateral":"https://www.youtube.com/watch?v=NJbQthqtYjA",
+  "Elevação Lateral no Banco 45°":"https://www.youtube.com/watch?v=4tmlCK76bP8",
+  "Elevação Lateral na Polia":"https://www.youtube.com/watch?v=xNM9hqpQl34",
+  "Crucifixo Invertido na Polia":"https://www.youtube.com/watch?v=iBNp5-oTRYo",
+  "Crucifixo Invertido":"https://www.youtube.com/watch?v=5P0DUzvhITA",
+  "Face Pull":"https://www.youtube.com/watch?v=0Po47vvj9g4",
+  "Voador Inverso":"https://www.youtube.com/watch?v=ZZTf3KsL9WE",
+  "Encolhimento de Ombros no Smith":"https://www.youtube.com/watch?v=ga68Df24nOw",
+  "Encolhimento de Ombros com Halter":"https://www.youtube.com/watch?v=aVjapCzICRI",
+  "Encolhimento de Ombros com Barra":"https://www.youtube.com/watch?v=vAiDKER9I5I",
+  // Quadríceps
+  "Agachamento Livre":"https://www.youtube.com/watch?v=fYvifUC5Nac",
+  "Agachamento Sumo":"https://www.youtube.com/watch?v=3jdJwJY3FXA",
+  "Agachamento no Smith":"https://www.youtube.com/watch?v=qK20YwHpwyI",
+  "Leg Press 90° no Smith":"https://www.youtube.com/watch?v=JHqLUVUt2ZM",
+  "Leg Press 45°":"https://www.youtube.com/watch?v=NcmQ-wVlQdc",
+  "Leg Press 45° Unilateral":"https://www.youtube.com/watch?v=pVxzkjC11Js",
+  "Leg Press Horizontal":"https://www.youtube.com/watch?v=JxwOJQ9KG8E",
+  "Leg Press Horizontal Unilateral":"https://www.youtube.com/watch?v=87y6SF8WsGw",
+  "Cadeira Extensora":"https://www.youtube.com/watch?v=A1Cah1KDAlo",
+  "Cadeira Extensora Unilateral":"https://www.youtube.com/watch?v=A1Cah1KDAlo",
+  "Avanço com Barra":"https://www.youtube.com/watch?v=xM506kR6qIc",
+  "Afundo com Halter":"https://www.youtube.com/watch?v=vjxuL0I0UZs",
+  "Afundo com Caneleira":"https://www.youtube.com/watch?v=UcZ8keJOLTk",
+  "Afundo com Barra":"https://www.youtube.com/watch?v=b79c_7baRIk",
+  "Afundo no Smith":"https://www.youtube.com/watch?v=qoB-mdm4hYU",
+  "Afundo com Salto":"https://www.youtube.com/watch?v=EALAfKY7h3I",
+  "Agachamento Hack":"https://www.youtube.com/watch?v=5Ix3fjf4w9o",
+  "Agachamento Búlgaro":"https://www.youtube.com/watch?v=In8oM_i5AhY",
+  "Step-up":"https://www.youtube.com/watch?v=XAewOU3HNaw",
+  "Levantamento Terra Sumô":"https://www.youtube.com/watch?v=wNi5Ztdnfgw",
+  // Posteriores
+  "Mesa Flexora":"https://www.youtube.com/watch?v=KAdhX6otnng",
+  "Mesa Flexora Unilateral":"https://www.youtube.com/watch?v=Ymb82A_eMO4",
+  "Cadeira Flexora":"https://www.youtube.com/watch?v=W5T_LubhXHU",
+  "Cadeira Flexora Unilateral":"https://www.youtube.com/watch?v=jQszh3iuu3g",
+  "Stiff":"https://www.youtube.com/watch?v=mmW5_F7i9sY",
+  "Stiff no Smith":"https://www.youtube.com/watch?v=bFmE7Z9mSQs",
+  "Good Morning":"https://www.youtube.com/watch?v=5MBULzHe4hI",
+  // Glúteos
+  "Cadeira Abdutora":"https://www.youtube.com/watch?v=fWFmbyZUf9Y",
+  "Abdução de Quadril na Polia":"https://www.youtube.com/watch?v=VGqR1S0nwmU",
+  "Abdução de Quadril com Caneleira":"https://www.youtube.com/watch?v=zaGi82UOVIc",
+  "Agachamento Taça":"https://www.youtube.com/watch?v=E5sAEa7CLKM",
+  "Elevação Pélvica":"https://www.youtube.com/watch?v=SY1eYXrCPzg",
+  "Elevação Pélvica na Bola":"https://www.youtube.com/watch?v=deK86DRClM4",
+  "Coice na Polia":"https://www.youtube.com/watch?v=8wN0YCs_rUc",
+  "Glúteo 4 Apoios no Smith":"https://www.youtube.com/watch?v=I0M2yvMqAqI",
+  "Glúteo 4 Apoios com Caneleira":"https://www.youtube.com/watch?v=8rqYQCNqb8E",
+  "Glúteo 4 Apoios Perna Estendida":"https://www.youtube.com/watch?v=phJW24tjOjg",
+  // Adutores
+  "Cadeira Adutora":"https://www.youtube.com/watch?v=gRrJV6LO7Dk",
+  "Adução de Quadril na Polia":"https://www.youtube.com/watch?v=LPhvX2T7IF0",
+  "Adução de Quadril com Caneleira":"https://www.youtube.com/watch?v=9wRg96gSk3M",
+  // Panturrilha
+  "Elevação em Pé":"https://www.youtube.com/watch?v=QNWzxdQSD8g",
+  "Panturrilha no Leg Press":"https://www.youtube.com/watch?v=BsA2ERb35FQ",
+  "Panturrilha Unilateral":"https://www.youtube.com/watch?v=xUoJNbNvWPo",
+  // Abdômen
+  "Abdominal Supra":"https://www.youtube.com/watch?v=J2FSl4fU2qY",
+  "Abdominal Remador":"https://www.youtube.com/watch?v=jpy2EjYm35U",
+  "Abdominal na Polia":"https://www.youtube.com/watch?v=C68dbYflq2w",
+  "Abdominal Infra":"https://www.youtube.com/watch?v=SoX3_liHpZE",
+  "Abdominal Oblíquo":"https://www.youtube.com/watch?v=jRuHF2ylJng",
+  "Abdominal Oblíquo na Polia":"https://www.youtube.com/watch?v=czfaGYer30o",
+  "Prancha":"https://www.youtube.com/watch?v=bgY0m1KJdE4",
+  "Abdominal Infra na Paralela":"https://www.youtube.com/watch?v=2U1t-R3QcnY",
+  "Abdominal Bicicleta":"https://www.youtube.com/watch?v=mnj9NLbS1nE",
+  // Lombar
+  "Hiperextensão Lombar":"https://www.youtube.com/watch?v=nCgA_yKLjZw",
+  "Levantamento Terra":"https://www.youtube.com/watch?v=apDhA48NlpY"
+};
 window.DAYS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 window.ST={students:[],currentStudentId:null,planStudentId:null,editPlanId:null,workoutBlocks:[]};
 
@@ -1019,6 +1402,8 @@ window.exportPlanPDF=function(planId, studentName){
       const tags=[];
       if(ex.biset) tags.push('Bi-set: '+ex.biset);
       if(ex.unilateral) tags.push('Unilateral');
+      if(ex.isometria) tags.push('Isometria'+(ex.isometriaSegs?' '+ex.isometriaSegs+'s':''));
+      if(ex.restPause) tags.push('Rest-pause');
       exRows+=`<tr>
         <td class="ex-num">${ei+1}</td>
         <td class="ex-name-cell">
@@ -1278,7 +1663,7 @@ window.viewPlan=async(pid,sid)=>{
         ${(w.exercises||[]).map((ex,ei)=>`
           <div class="pv-ex">
             <div class="pv-ex-name">${ei+1}. ${ex.name}</div>
-            <div class="pv-ex-meta">${ex.series} série(s) × ${ex.repsArr&&ex.repsArr.length>1?ex.repsArr.join(', '):ex.reps} rep${ex.unilateral?' · Unilateral':''}${ex.biset?' · Bi-set':''}${ex.obs?`<div style='margin-top:6px;padding:7px 10px;background:var(--surface2);border-radius:7px;border-left:3px solid var(--accent-soft);font-size:.78rem;color:var(--text2);font-style:italic;'>${ex.obs}</div>`:''}</div>
+            <div class="pv-ex-meta">${ex.series} série(s) × ${ex.repsArr&&ex.repsArr.length>1?ex.repsArr.join(', '):ex.reps} rep${ex.unilateral?' · Unilateral':''}${ex.isometria?' · Isometria'+(ex.isometriaSegs?' '+ex.isometriaSegs+'s':''):''}${ex.restPause?' · Rest-pause':''}${ex.biset?' · Bi-set':''}${ex.obs?`<div style='margin-top:6px;padding:7px 10px;background:var(--surface2);border-radius:7px;border-left:3px solid var(--accent-soft);font-size:.78rem;color:var(--text2);font-style:italic;'>${ex.obs}</div>`:''}</div>
           </div>`).join('')}
       </div>`).join('')}`;
   document.getElementById('pv-footer').innerHTML=`
@@ -1306,6 +1691,22 @@ window.toggleBlockDay=(bi,d,btn)=>{const arr=ST.workoutBlocks[bi].days;const i=a
 window.addExToBlock=bi=>{ST.workoutBlocks[bi].exercises.push({});renderWorkoutsEditor();setTimeout(()=>{const m=document.querySelector('#modal-plan .modal');if(m)m.scrollTop=m.scrollHeight;},50)};
 window.removeExFromBlock=(bi,ei)=>{ST.workoutBlocks[bi].exercises.splice(ei,1);renderWorkoutsEditor()};
 window.updateExInBlock=(bi,ei,f,v)=>{ST.workoutBlocks[bi].exercises[ei][f]=v};
+window.onExNameSelect=(bi,ei,val)=>{
+  ST.workoutBlocks[bi].exercises[ei].name=val;
+  if(val!=='__custom__') ST.workoutBlocks[bi].exercises[ei].customName='';
+  // Auto-fill video URL if available
+  if(val && val!=='__custom__' && window.EX_URLS && window.EX_URLS[val]){
+    ST.workoutBlocks[bi].exercises[ei].videoUrl=window.EX_URLS[val];
+  } else if(val!=='__custom__'){
+    ST.workoutBlocks[bi].exercises[ei].videoUrl='';
+  }
+  renderWorkoutsEditor();
+};
+window.updateIsometria=(bi,ei,checked)=>{
+  ST.workoutBlocks[bi].exercises[ei].isometria=checked;
+  if(!checked) ST.workoutBlocks[bi].exercises[ei].isometriaSegs='';
+  renderWorkoutsEditor();
+};
 
 window.renderWorkoutsEditor=()=>{
   document.getElementById('workouts-editor').innerHTML=ST.workoutBlocks.map((wb,bi)=>{
@@ -1329,15 +1730,21 @@ window.renderWorkoutsEditor=()=>{
           <span style="font-size:.7rem;color:var(--text3);font-weight:600;min-width:52px;">Série ${si+1}</span>
           <input type="text" class="form-control" style="flex:1;" value="${r}" placeholder="12" oninput="updateRepsSerie(${bi},${ei},${si},this.value)"/>
         </div>`).join('');
+      const isCustom=ex.name==='__custom__';
       return `<div class="exercise-item" data-bi="${bi}" data-ei="${ei}">
         <div class="exercise-item-header">
           <div class="drag-handle" title="Arraste para reordenar">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
           </div>
           <div class="ex-num">${ei+1}</div>
-          <select class="form-control" style="flex:1;" onchange="updateExInBlock(${bi},${ei},'name',this.value);renderWorkoutsEditor()"><option value="">— exercício —</option>${opts}</select>
+          <select class="form-control" style="flex:1;" onchange="onExNameSelect(${bi},${ei},this.value)">
+            <option value="">— exercício —</option>
+            <option value="__custom__" ${isCustom?'selected':''}>✏️ Personalizado</option>
+            ${opts}
+          </select>
           <button type="button" class="remove-ex-btn" onclick="removeExFromBlock(${bi},${ei})">✕</button>
         </div>
+        ${isCustom?`<div style="margin-bottom:8px;"><input type="text" class="form-control" placeholder="Nome do exercício personalizado..." value="${(ex.customName||'').replace(/"/g,'&quot;')}" oninput="updateExInBlock(${bi},${ei},'customName',this.value)"/></div>`:''}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
           <div>
             <span class="ctrl-label">Número de séries</span>
@@ -1354,8 +1761,13 @@ window.renderWorkoutsEditor=()=>{
           <span class="ctrl-label">Repetições por série</span>
           ${repsFields}
         </div>
-        <div style="margin-bottom:8px;"><span class="ctrl-label">URL YouTube</span><input type="url" class="form-control" placeholder="https://youtube.com/watch?v=..." value="${ex.videoUrl||''}" onchange="updateExInBlock(${bi},${ei},'videoUrl',this.value)"/></div>
-        <label class="checkbox-label"><input type="checkbox" ${ex.unilateral?'checked':''} onchange="updateExInBlock(${bi},${ei},'unilateral',this.checked)"/> Unilateral</label>
+        <div style="margin-bottom:8px;"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;margin-top:4px;">
+          <label class="checkbox-label"><input type="checkbox" ${ex.unilateral?'checked':''} onchange="updateExInBlock(${bi},${ei},'unilateral',this.checked)"/> Unilateral</label>
+          <label class="checkbox-label"><input type="checkbox" ${ex.isometria?'checked':''} onchange="updateIsometria(${bi},${ei},this.checked)"/> Isometria</label>
+          <label class="checkbox-label"><input type="checkbox" ${ex.restPause?'checked':''} onchange="updateExInBlock(${bi},${ei},'restPause',this.checked)"/> Rest-pause</label>
+        </div>
+        ${ex.isometria?`<div style="margin-top:8px;display:flex;align-items:center;gap:8px;"><span class="ctrl-label" style="margin-bottom:0;white-space:nowrap;">Tempo isometria (seg)</span><input type="number" class="form-control" style="max-width:110px;" min="1" placeholder="Ex: 30" value="${ex.isometriaSegs||''}" oninput="updateExInBlock(${bi},${ei},'isometriaSegs',this.value)"/></div>`:''}
         <div style="margin-top:8px;"><span class="ctrl-label">Observações / Técnicas</span><textarea class="form-control" rows="2" placeholder="Ex: Cadência 2-0-2, descanso 60s, drop-set na última série..." style="resize:vertical;min-height:56px;" oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs||''}</textarea></div>
       </div>`;
     }).join('');
@@ -1831,7 +2243,7 @@ window.savePlan=async()=>{
   if(!ST.workoutBlocks.length){document.getElementById('plan-error').textContent='Adicione ao menos um treino.';return;}
   for(const wb of ST.workoutBlocks){if(!wb.exercises.filter(e=>e.name).length){document.getElementById('plan-error').textContent=`"${wb.title}" precisa de ao menos um exercício.`;return;}}
   const btn=document.getElementById('btn-save-plan');btn.classList.add('btn-loading');btn.textContent='Salvando...';
-  const workouts=ST.workoutBlocks.map(wb=>({title:wb.title,days:wb.days||[],exercises:wb.exercises.filter(e=>e.name).map(e=>({name:e.name,series:Number(e.series)||1,reps:e.reps||'12',repsArr:e.repsArr||[e.reps||'12'],videoUrl:e.videoUrl||'',unilateral:!!e.unilateral,biset:e.biset||'',bisetName:e.biset||'',obs:e.obs||''}))}));
+  const workouts=ST.workoutBlocks.map(wb=>({title:wb.title,days:wb.days||[],exercises:wb.exercises.filter(e=>e.name).map(e=>({name:e.name==='__custom__'?(e.customName||'Personalizado'):e.name,series:Number(e.series)||1,reps:e.reps||'12',repsArr:e.repsArr||[e.reps||'12'],videoUrl:e.videoUrl||'',unilateral:!!e.unilateral,biset:e.biset||'',bisetName:e.biset||'',isometria:!!e.isometria,isometriaSegs:e.isometriaSegs||'',restPause:!!e.restPause,obs:e.obs||''}))}));
   const data={title,expiry:document.getElementById('plan-expiry').value||'',workouts,studentId:ST.planStudentId,createdAt:Date.now()};
   try{
     if(ST.editPlanId){await _updateDoc(_doc(_db,'plans',ST.editPlanId),data);toast('✅ Plano atualizado.');}
