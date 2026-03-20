@@ -291,10 +291,262 @@
       .login-card { padding: 32px 24px; }
     }
     @media (min-width: 601px) { .content { padding-bottom: 100px; } }
+
+    /* ── CHAT BUTTON (aluno) ── */
+    #chat-fab {
+      position: fixed; bottom: 24px; right: 24px; z-index: 500;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #3d3830 0%, #1a1610 100%);
+      border: 2px solid rgba(245,200,0,.35);
+      box-shadow: 0 4px 20px rgba(0,0,0,.35);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: box-shadow .2s, border-color .2s;
+    }
+    /* No desktop, sobe um pouco para não ficar sobre a taskbar */
+    @media (min-width: 601px) {
+      #chat-fab { bottom: 28px; right: 24px; }
+    }
+    #chat-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,0,0,.4); }
+    #chat-fab svg { width: 24px; height: 24px; color: #fff; }
+
+    /* Badge amarelo */
+    #chat-fab-badge {
+      position: absolute; top: -6px; right: -6px;
+      background: var(--accent); color: #111110;
+      border-radius: 99px; min-width: 22px; height: 22px;
+      padding: 0 5px;
+      font-size: .7rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--bg);
+      box-shadow: 0 2px 8px rgba(245,200,0,.5);
+    }
+
+    /* Estado com não lidas: chacoalha + pulsa amarelo */
+    #chat-fab.has-unread {
+      border-color: var(--accent);
+      animation: fabShake 1.8s ease-in-out infinite;
+    }
+    #chat-fab.has-unread #chat-fab-badge {
+      animation: badgePop .4s cubic-bezier(.22,1,.36,1);
+    }
+
+    @keyframes fabShake {
+      0%   { transform: rotate(0deg)   scale(1);    box-shadow: 0 4px 20px rgba(0,0,0,.35), 0 0 0 0   rgba(245,200,0,.5); }
+      10%  { transform: rotate(-12deg) scale(1.06); }
+      20%  { transform: rotate(12deg)  scale(1.06); }
+      30%  { transform: rotate(-10deg) scale(1.04); }
+      40%  { transform: rotate(10deg)  scale(1.04); }
+      50%  { transform: rotate(-6deg)  scale(1.02); box-shadow: 0 4px 20px rgba(0,0,0,.35), 0 0 0 10px rgba(245,200,0,.0); }
+      60%  { transform: rotate(6deg)   scale(1.02); }
+      70%  { transform: rotate(0deg)   scale(1); }
+      100% { transform: rotate(0deg)   scale(1);    box-shadow: 0 4px 20px rgba(0,0,0,.35), 0 0 0 0   rgba(245,200,0,.5); }
+    }
+    @keyframes badgePop {
+      0%   { transform: scale(0); }
+      70%  { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    /* ── CHAT DRAWER (aluno) ── */
+    #chat-drawer {
+      position: fixed; bottom: 0; right: 0; z-index: 600;
+      width: 100%; max-width: 400px;
+      height: min(520px, calc(100dvh - 80px));
+      background: var(--surface); border-radius: 20px 20px 0 0;
+      box-shadow: 0 -4px 40px rgba(0,0,0,.2);
+      border-top: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transform: translateY(100%); transition: transform .3s cubic-bezier(.22,1,.36,1);
+    }
+    /* No desktop (tela larga), flutua acima do FAB com margem da taskbar */
+    @media (min-width: 601px) {
+      #chat-drawer {
+        bottom: 90px;
+        right: 20px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        height: min(520px, calc(100dvh - 160px));
+        transform: translateY(calc(100% + 90px)) scale(0.95);
+        transform-origin: bottom right;
+      }
+      #chat-drawer.open {
+        transform: translateY(0) scale(1);
+      }
+    }
+    @media (max-width: 600px) {
+      #chat-drawer {
+        max-width: 100%;
+        height: min(72dvh, 520px);
+      }
+    }
+    #chat-drawer.open { transform: translateY(0); }
+    .chat-drawer-head {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .chat-drawer-head .chat-avatar {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--accent-dim); border: 1px solid var(--accent-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--head); font-weight: 800; font-size: .85rem; color: #111110;
+      flex-shrink: 0;
+    }
+    .chat-drawer-name { font-weight: 800; font-size: .92rem; color: var(--text); flex: 1; }
+    .chat-drawer-status { font-size: .72rem; color: var(--green); font-weight: 600; }
+    .chat-close-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      width: 30px; height: 30px; border-radius: 8px; display: flex;
+      align-items: center; justify-content: center; cursor: pointer;
+      color: var(--text2); font-size: .85rem; transition: all .15s;
+    }
+    .chat-close-btn:hover { background: var(--surface3); color: var(--text); }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .chat-msg { display: flex; flex-direction: column; max-width: 78%; }
+    .chat-msg.mine { align-self: flex-end; align-items: flex-end; }
+    .chat-msg.theirs { align-self: flex-start; align-items: flex-start; }
+    .chat-bubble {
+      padding: 9px 13px; border-radius: 14px;
+      font-size: .84rem; line-height: 1.45; font-weight: 500;
+    }
+    .chat-msg.mine .chat-bubble {
+      background: linear-gradient(135deg, #3d3830 0%, #1a1610 100%);
+      color: #fff; border-bottom-right-radius: 4px;
+    }
+    .chat-msg.theirs .chat-bubble {
+      background: var(--surface2); color: var(--text);
+      border: 1px solid var(--border); border-bottom-left-radius: 4px;
+    }
+    .chat-time { font-size: .65rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
+    .chat-empty { text-align: center; color: var(--text3); font-size: .82rem; padding: 40px 20px; font-weight: 600; }
+    .chat-input-wrap {
+      display: flex; align-items: flex-end; gap: 8px;
+      padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border); flex-shrink: 0;
+    }
+    #chat-input-aluno {
+      flex: 1; padding: 10px 14px; border: 1.5px solid var(--border);
+      border-radius: 20px; font-size: .88rem; resize: none;
+      max-height: 100px; background: var(--bg); color: var(--text);
+      transition: border-color .15s; font-family: var(--body); line-height: 1.4;
+    }
+    #chat-input-aluno:focus { outline: none; border-color: var(--accent); }
+    #chat-send-btn {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #3d3830 0%, #1a1610 100%);
+      color: white; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s; border: 1px solid rgba(245,200,0,.25);
+    }
+    #chat-send-btn:hover { transform: scale(1.07); }
+
+    /* ── ALERT POPUP (aluno) ── */
+    #alert-popup-overlay {
+      position: fixed; inset: 0; z-index: 3000;
+      background: rgba(0,0,0,.5); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    #alert-popup-box {
+      background: var(--surface); border-radius: 16px;
+      width: 100%; max-width: 360px;
+      box-shadow: 0 16px 60px rgba(0,0,0,.3);
+      border: none;
+      animation: modalIn .25s cubic-bezier(.22,1,.36,1);
+      overflow: hidden;
+    }
+    /* Header escuro com ícone + título */
+    .alert-popup-header {
+      background: #1a1a1a;
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .alert-popup-header-icon {
+      font-size: 1.2rem; line-height: 1; flex-shrink: 0;
+    }
+    .alert-popup-header-title {
+      font-family: var(--head); font-size: .95rem; font-weight: 800;
+      color: #ffffff; letter-spacing: -.01em;
+    }
+    /* Corpo */
+    .alert-popup-body { padding: 18px 20px 0; }
+    .alert-popup-title {
+      font-size: .7rem; font-weight: 800; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .1em;
+      margin-bottom: 8px;
+    }
+    .alert-popup-msg {
+      font-size: .9rem; color: var(--text); line-height: 1.65;
+      white-space: pre-wrap; word-break: break-word;
+      padding-bottom: 18px;
+    }
+    /* Divisor + footer */
+    .alert-popup-footer {
+      border-top: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex; justify-content: flex-end;
+    }
+    .alert-popup-ok {
+      padding: 10px 28px; border-radius: 10px;
+      background: #111110;
+      color: #fff; font-size: .88rem; font-weight: 800;
+      border: none; cursor: pointer;
+      transition: all .15s; font-family: var(--body);
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+    .alert-popup-ok:hover { background: #2a2a28; transform: translateY(-1px); }
   </style>
 </head>
 <body>
 <div id="toast-container"></div>
+
+<!-- ALERT POPUP (treinador) -->
+<div id="alert-popup-overlay" class="hidden">
+  <div id="alert-popup-box">
+    <div class="alert-popup-header">
+      <span class="alert-popup-header-icon">📣</span>
+      <span class="alert-popup-header-title">Mensagem do seu treinador</span>
+    </div>
+    <div class="alert-popup-body">
+      <div class="alert-popup-title" id="alert-popup-title">Treinador:</div>
+      <div class="alert-popup-msg" id="alert-popup-msg"></div>
+    </div>
+    <div class="alert-popup-footer">
+      <button class="alert-popup-ok" onclick="dismissAlert()">Ok</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT FAB -->
+<button id="chat-fab" class="hidden" onclick="toggleChatDrawer()" title="Chat com treinador">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  <span id="chat-fab-badge" class="hidden">0</span>
+</button>
+
+<!-- CHAT DRAWER (aluno) -->
+<div id="chat-drawer">
+  <div class="chat-drawer-head">
+    <div class="chat-avatar" id="chat-trainer-avatar">TR</div>
+    <div style="flex:1;">
+      <div class="chat-drawer-name" id="chat-trainer-name">Treinador</div>
+      <div class="chat-drawer-status">Chat com seu treinador</div>
+    </div>
+    <button class="chat-close-btn" onclick="toggleChatDrawer()">✕</button>
+  </div>
+  <div class="chat-messages" id="chat-messages-aluno">
+    <div class="chat-empty">Nenhuma mensagem ainda.<br>Mande um ola! 👋</div>
+  </div>
+  <div class="chat-input-wrap">
+    <textarea id="chat-input-aluno" placeholder="Mensagem..." rows="1" onkeydown="chatAlunoKeydown(event)" oninput="autoResizeChatInput(this)"></textarea>
+    <button id="chat-send-btn" onclick="sendChatMessageAluno()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
 
 <!-- MODAL: INICIAR TREINO -->
 <div id="modal-start" class="modal-overlay hidden">
@@ -576,7 +828,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, query, orderBy, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 const db = getFirestore(initializeApp({
   apiKey:"AIzaSyBVhMJfE1Zj9sVHztDXHUtsC_Y2WIikrkU",
@@ -586,6 +838,20 @@ const db = getFirestore(initializeApp({
   messagingSenderId:"501312058117",
   appId:"1:501312058117:web:1b9ea06882050deeb33d6c"
 }));
+
+// Expõe funções modulares para o script não-modular do chat/alert
+window._fsColl = collection;
+window._fsDoc = doc;
+window._fsGetDoc = getDoc;
+window._fsGetDocs = getDocs;
+window._fsAddDoc = addDoc;
+window._fsSetDoc = setDoc;
+window._fsUpdateDoc = updateDoc;
+window._fsDeleteDoc = deleteDoc;
+window._fsQuery = query;
+window._fsOrderBy = orderBy;
+window._fsWhere = where;
+window._fsOnSnapshot = onSnapshot;
 
 const DAYS_ABBR=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const DAYS_FULL=["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
@@ -937,6 +1203,10 @@ function showApp(student){
   // Restore active timer if any
   restoreActiveTimer(student);
   loadPlans(student);
+  // Init chat — usa managerName como nome de exibição do treinador
+  window.initChat(student.id, student.managerId, student.managerName||student.managerId, db);
+  // Check for pending alert from manager
+  window.checkAndShowAlert(student.id, db, student.managerName||student.managerId);
 }
 
 // ── Restore timer on app load ──
@@ -1225,6 +1495,214 @@ window.toast=window.toast||function(msg,type){
   t.textContent=msg;
   document.getElementById('toast-container').appendChild(t);
   setTimeout(()=>t.remove(),3500);
+};
+
+// ── CHAT (ALUNO) — usa Firebase Modular v10 ──
+window._chatDrawerOpen = false;
+window._chatStudentId = null;
+window._chatUnread = 0;
+window._chatPollInterval = null;
+window._chatLastCount = 0;
+window._chatDb = null; // referência ao db modular
+
+// Helpers de acesso à sub-coleção de mensagens
+function _chatMsgsCol(db, studentId) {
+  // collection(db, 'chats', studentId, 'messages')
+  // Firebase modular: collection(db, path, ...pathSegments)
+  return window._fsColl(db, 'chats', studentId, 'messages');
+}
+
+window.initChat = function(studentId, managerId, managerName, db) {
+  window._chatStudentId = studentId;
+  window._chatDb = db;
+  var fab = document.getElementById('chat-fab');
+  if(fab) fab.classList.remove('hidden');
+  var nm = managerName || managerId || 'Treinador';
+  document.getElementById('chat-trainer-name').textContent = nm;
+  document.getElementById('chat-trainer-avatar').textContent = nm.slice(0,2).toUpperCase();
+
+  // Cancela listener anterior
+  if(window._chatUnsub) { try{ window._chatUnsub(); }catch(e){} window._chatUnsub = null; }
+  if(window._chatPollInterval) { clearInterval(window._chatPollInterval); window._chatPollInterval = null; }
+
+  var msgsCol = window._fsColl(db, 'chats', studentId, 'messages');
+  var q = window._fsQuery(msgsCol, window._fsOrderBy('ts', 'asc'));
+
+  // Listener em tempo real
+  window._chatUnsub = window._fsOnSnapshot(q, function(snap) {
+    var msgs = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    renderChatMessagesAluno(msgs);
+    var unread = msgs.filter(function(m){ return m.sender === 'manager' && !m.readByStudent; }).length;
+    if(!window._chatDrawerOpen) {
+      window._chatUnread = unread;
+      window.updateChatFabBadge();
+    } else {
+      msgs.forEach(function(m) {
+        if(m.sender==='manager' && !m.readByStudent) {
+          var ref = window._fsDoc(db, 'chats', studentId, 'messages', m.id);
+          window._fsUpdateDoc(ref, {readByStudent: true}).catch(function(){});
+        }
+      });
+      window._chatUnread = 0;
+      window.updateChatFabBadge();
+    }
+    window._chatLastCount = unread;
+  }, function(e) {
+    console.warn('chat onSnapshot falhou, usando polling:', e.message);
+    window._chatPollInterval = setInterval(window.pollChatAluno, 5000);
+    window.pollChatAluno();
+  });
+};
+
+window.toggleChatDrawer = function() {
+  window._chatDrawerOpen = !window._chatDrawerOpen;
+  var drawer = document.getElementById('chat-drawer');
+  drawer.classList.toggle('open', window._chatDrawerOpen);
+  if(window._chatDrawerOpen) {
+    window._chatUnread = 0;
+    window.updateChatFabBadge(); // remove shake + badge
+    window.pollChatAluno();
+    setTimeout(function(){ scrollChatBottom(); }, 150);
+  }
+};
+
+window.pollChatAluno = async function() {
+  var db = window._chatDb;
+  var sid = window._chatStudentId;
+  if(!sid || !db || !window._fsGetDocs || !window._fsQuery || !window._fsOrderBy) return;
+  try {
+    var msgsCol = window._fsColl(db, 'chats', sid, 'messages');
+    var q = window._fsQuery(msgsCol, window._fsOrderBy('ts','asc'));
+    var snap = await window._fsGetDocs(q);
+    var msgs = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    renderChatMessagesAluno(msgs);
+    var unread = msgs.filter(function(m){ return m.sender === 'manager' && !m.readByStudent; }).length;
+    if(!window._chatDrawerOpen && unread > window._chatLastCount) {
+      window._chatUnread = unread;
+      window.updateChatFabBadge();
+    }
+    window._chatLastCount = unread;
+    if(window._chatDrawerOpen) {
+      for(var m of msgs) {
+        if(m.sender==='manager' && !m.readByStudent) {
+          var msgDocRef = window._fsDoc(db, 'chats', sid, 'messages', m.id);
+          window._fsUpdateDoc(msgDocRef, {readByStudent:true}).catch(function(){});
+        }
+      }
+      window._chatUnread = 0;
+      window.updateChatFabBadge();
+    }
+  } catch(e) { console.warn('pollChatAluno:', e.message); }
+};
+
+window.renderChatMessagesAluno = function(msgs) {
+  var el = document.getElementById('chat-messages-aluno');
+  if(!msgs.length) {
+    el.innerHTML = '<div class="chat-empty">Nenhuma mensagem ainda.<br>Mande um ola! 👋</div>';
+    return;
+  }
+  el.innerHTML = msgs.map(function(m) {
+    var mine = m.sender === 'student';
+    var time = m.ts ? new Date(m.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+    return '<div class="chat-msg '+(mine?'mine':'theirs')+'">'
+      + '<div class="chat-bubble">'+escHtml(m.text)+'</div>'
+      + '<div class="chat-time">'+time+'</div>'
+      + '</div>';
+  }).join('');
+  if(window._chatDrawerOpen) scrollChatBottom();
+};
+
+window.sendChatMessageAluno = async function() {
+  var db = window._chatDb;
+  var sid = window._chatStudentId;
+  var inp = document.getElementById('chat-input-aluno');
+  var text = (inp.value||'').trim();
+  if(!text || !sid || !db || !window._fsAddDoc || !window._fsColl) return;
+  inp.value = ''; inp.style.height = '';
+  try {
+    var msgsCol = window._fsColl(db, 'chats', sid, 'messages');
+    await window._fsAddDoc(msgsCol, {
+      text: text, sender: 'student', ts: Date.now(), readByManager: false, readByStudent: true
+    });
+    window.pollChatAluno();
+  } catch(e) {
+    console.error('sendChatMessageAluno:', e);
+    window.toast('Erro ao enviar mensagem.','error');
+  }
+};
+
+window.chatAlunoKeydown = function(e) {
+  if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); window.sendChatMessageAluno(); }
+};
+
+window.autoResizeChatInput = function(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+};
+
+window.updateChatFabBadge = function() {
+  var fab   = document.getElementById('chat-fab');
+  var badge = document.getElementById('chat-fab-badge');
+  if(!badge || !fab) return;
+  if(window._chatUnread > 0) {
+    var label = window._chatUnread > 9 ? '9+' : String(window._chatUnread);
+    // Só faz pop animation se o número mudou
+    if(badge.textContent !== label) {
+      badge.classList.remove('hidden');
+      badge.textContent = label;
+      // Re-trigger badgePop
+      badge.style.animation = 'none';
+      badge.offsetHeight; // reflow
+      badge.style.animation = '';
+    }
+    badge.classList.remove('hidden');
+    fab.classList.add('has-unread');
+  } else {
+    badge.classList.add('hidden');
+    badge.textContent = '0';
+    fab.classList.remove('has-unread');
+  }
+};
+
+function scrollChatBottom() {
+  var el = document.getElementById('chat-messages-aluno');
+  if(el) el.scrollTop = el.scrollHeight;
+}
+
+function escHtml(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ── ALERT POPUP ──
+window.checkAndShowAlert = async function(studentId, db, trainerName) {
+  if(!studentId || !db || !window._fsDoc || !window._fsGetDoc) return;
+  try {
+    var alertRef = window._fsDoc(db, 'alerts', studentId);
+    var snap = await window._fsGetDoc(alertRef);
+    if(snap.exists()) {
+      var data = snap.data();
+      if(data && data.message) {
+        var nm = trainerName || 'Treinador';
+        document.getElementById('alert-popup-title').textContent = nm + ':';
+        document.getElementById('alert-popup-msg').textContent = data.message;
+        document.getElementById('alert-popup-overlay').classList.remove('hidden');
+        window._pendingAlertDocId = studentId;
+        window._pendingAlertDb = db;
+      }
+    }
+  } catch(e) { console.warn('checkAlert:', e.message); }
+};
+
+window.dismissAlert = async function() {
+  document.getElementById('alert-popup-overlay').classList.add('hidden');
+  if(window._pendingAlertDocId && window._pendingAlertDb && window._fsDoc && window._fsDeleteDoc) {
+    try {
+      var ref = window._fsDoc(window._pendingAlertDb, 'alerts', window._pendingAlertDocId);
+      await window._fsDeleteDoc(ref);
+    } catch(e){}
+  }
+  window._pendingAlertDocId = null;
+  window._pendingAlertDb = null;
 };
 </script>
 </body>
