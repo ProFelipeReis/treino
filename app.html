@@ -3697,6 +3697,19 @@ async function processPaymentWithToken(token) {
   var name        = (document.getElementById('mp-cardholderName').value || '').trim();
   var cpf         = (document.getElementById('mp-docNumber').value || '').replace(/\D/g,'');
 
+  // Busca o managerId real do Firestore caso nao esteja na sessao
+  var managerId = u.id || '';
+  if(!managerId && u.username) {
+    try {
+      var snap = await _getDocs(_query(_col(_db,'managers'), _where('username','==',u.username)));
+      if(!snap.empty) {
+        managerId = snap.docs[0].id;
+        window.CURRENT_USER.id = managerId;
+        try { localStorage.setItem('forge_gestor_session', JSON.stringify(window.CURRENT_USER)); } catch(e) {}
+      }
+    } catch(e) { console.warn('Nao conseguiu buscar managerId:', e); }
+  }
+
   var body = {
     token:        token,
     amount:       amount,
@@ -3709,7 +3722,7 @@ async function processPaymentWithToken(token) {
       first_name:     name
     },
     plan:       _mpSelectedPlan,
-    managerId:  u.id || '',
+    managerId:  managerId,
     username:   u.username || ''
   };
 
@@ -3724,7 +3737,7 @@ async function processPaymentWithToken(token) {
     console.log('MP result:', JSON.stringify(result));
 
     if(result.status === 'approved' || result.status === 'authorized') {
-      await activateSubscription(u.id, _mpSelectedPlan, result);
+      await activateSubscription(managerId, _mpSelectedPlan, result);
       subShowStep('success');
       document.getElementById('sub-success-msg').textContent =
         _mpSelectedPlan === 'annual'
