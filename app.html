@@ -1014,6 +1014,11 @@ document.addEventListener('DOMContentLoaded',function(){
           <input id="mp-docNumber" class="form-control" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" autocomplete="off" oninput="maskCPF(this)"/>
         </div>
 
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">E-mail para recibo</label>
+          <input id="mp-email" class="form-control" type="email" placeholder="seu@email.com" autocomplete="email"/>
+        </div>
+
         <div class="form-group" id="mp-installments-wrap" style="display:none;">
           <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Parcelas</label>
           <select id="mp-installments" class="form-control">
@@ -3638,6 +3643,7 @@ window.submitCardPayment = async function() {
   var cvv       = (document.getElementById('mp-securityCode').value || '').trim();
   var name      = (document.getElementById('mp-cardholderName').value || '').trim();
   var cpf       = (document.getElementById('mp-docNumber').value || '').replace(/\D/g,'');
+  var email     = (document.getElementById('mp-email').value || '').trim();
 
   // ── Validações ──
   if(cardRaw.length < 13) { errEl.textContent = 'Numero do cartao invalido.'; return; }
@@ -3645,6 +3651,7 @@ window.submitCardPayment = async function() {
   if(cvv.length < 3) { errEl.textContent = 'CVV invalido.'; return; }
   if(!name || name.length < 3) { errEl.textContent = 'Informe o nome do titular.'; return; }
   if(cpf.length !== 11) { errEl.textContent = 'CPF invalido (11 digitos).'; return; }
+  if(!email || !email.includes('@')) { errEl.textContent = 'Informe um e-mail valido.'; return; }
 
   if(!_mpInstance) {
     errEl.textContent = 'SDK Mercado Pago nao carregou. Recarregue a pagina.';
@@ -3694,10 +3701,10 @@ async function processPaymentWithToken(token) {
     token:        token,
     amount:       amount,
     installments: installments,
-    payment_method_id: _mpPaymentMethodId || undefined,
+    payment_method_id: _mpPaymentMethodId || '',
     description:  'Trainly ' + (_mpSelectedPlan === 'annual' ? 'Anual' : 'Mensal'),
     payer: {
-      email:          (u.username || 'gestor') + '@trainly.app',
+      email:          (document.getElementById('mp-email').value || '').trim(),
       identification: { type: 'CPF', number: cpf },
       first_name:     name
     },
@@ -3713,6 +3720,8 @@ async function processPaymentWithToken(token) {
       body:    JSON.stringify(body)
     });
     var result = await resp.json();
+
+    console.log('MP result:', JSON.stringify(result));
 
     if(result.status === 'approved' || result.status === 'authorized') {
       await activateSubscription(u.id, _mpSelectedPlan, result);
@@ -3730,14 +3739,9 @@ async function processPaymentWithToken(token) {
       document.getElementById('sub-pay-error').textContent = '❌ ' + detail;
     }
   } catch(backendErr) {
-    // Backend ainda nao configurado — modo demo
-    console.warn('Backend nao configurado, modo demo:', backendErr.message);
-    await activateSubscription(u.id, _mpSelectedPlan, { id: 'demo_' + Date.now(), status: 'approved' });
-    subShowStep('success');
-    document.getElementById('sub-success-msg').textContent =
-      _mpSelectedPlan === 'annual'
-        ? 'Plano anual ativado! Acesso liberado por 12 meses.'
-        : 'Plano mensal ativado! Acesso liberado por 30 dias.';
+    console.warn('Backend erro:', backendErr.message);
+    subShowStep('card');
+    document.getElementById('sub-pay-error').textContent = '❌ Erro de conexao com o servidor. Tente novamente.';
   }
 }
 
