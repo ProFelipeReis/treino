@@ -525,20 +525,28 @@
     #screen-sub-wall {
       display:none; position:fixed; inset:0; z-index:5000;
       background:#f7f7f5; flex-direction:column; align-items:center;
-      justify-content:center; padding:24px; overflow-y:auto;
+      justify-content:flex-start; padding:16px;
+      overflow-y:auto; -webkit-overflow-scrolling:touch;
     }
     .sub-wall-card {
       background:#fff; border:1px solid #e4e4e0; border-radius:24px;
-      width:100%; max-width:480px; overflow:hidden;
+      width:100%; max-width:480px; overflow:visible;
       box-shadow:0 8px 40px rgba(0,0,0,.1);
+      margin:auto 0; flex-shrink:0;
     }
     .sub-wall-head {
-      background:#111110; padding:28px 32px 24px; text-align:center;
+      background:#111110; padding:20px 24px 18px; text-align:center;
+      border-radius:24px 24px 0 0;
     }
-    .sub-wall-head img { height:32px; margin-bottom:16px; }
-    .sub-wall-head h2 { color:#fff; font-family:var(--head); font-size:1.2rem; font-weight:800; margin-bottom:6px; }
-    .sub-wall-head p { color:rgba(255,255,255,.6); font-size:.82rem; }
-    .sub-wall-body { padding:28px 32px; }
+    .sub-wall-head img { height:28px; margin-bottom:12px; }
+    .sub-wall-head h2 { color:#fff; font-family:var(--head); font-size:1.1rem; font-weight:800; margin-bottom:4px; }
+    .sub-wall-head p { color:rgba(255,255,255,.6); font-size:.8rem; }
+    .sub-wall-body { padding:20px 24px; }
+    @media(max-width:520px){
+      #screen-sub-wall { padding:12px; }
+      .sub-wall-body { padding:16px 18px; }
+      .sub-wall-head { padding:16px 18px 14px; }
+    }
     .sub-plans { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
     .sub-plan {
       border:2px solid #e4e4e0; border-radius:16px; padding:18px 16px;
