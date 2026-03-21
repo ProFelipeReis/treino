@@ -4200,7 +4200,7 @@ window.checkInviteOnLoad = function() {
   inviteScreen.style.cssText = 'display:flex!important;position:fixed;inset:0;z-index:6000;background:#f7f7f5;align-items:center;justify-content:center;padding:24px;overflow-y:auto;';
 
   // Valida o token no Firestore
-  _db.collection('invites').where('token','==',token).get().then(function(snap) {
+  firebase.firestore().collection('invites').where('token','==',token).get().then(function(snap) {
     if(snap.empty) {
       _inviteSetError('Link inválido ou expirado.'); return;
     }
@@ -4244,11 +4244,12 @@ window.registerFromInvite = async function() {
 
   try {
     // Verifica se username já existe
-    var existing = await _db.collection('managers').where('username','==',username).get();
+    var fdb = firebase.firestore();
+    var existing = await fdb.collection('managers').where('username','==',username).get();
     if(!existing.empty) { errEl.textContent = 'Este usuário já está em uso.'; return; }
 
     // Re-valida convite
-    var invDoc = await _db.collection('invites').doc(window._inviteDocId).get();
+    var invDoc = await fdb.collection('invites').doc(window._inviteDocId).get();
     if(!invDoc.exists || invDoc.data().used) { errEl.textContent = 'Este convite já foi utilizado.'; return; }
 
     // Cria o gestor
@@ -4256,7 +4257,7 @@ window.registerFromInvite = async function() {
     var trialEndsAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
     var newId       = 'mgr_' + Date.now();
 
-    await _db.collection('managers').doc(newId).set({
+    await fdb.collection('managers').doc(newId).set({
       username,
       passwordHash: passHash,
       role:         'comum',
@@ -4269,7 +4270,7 @@ window.registerFromInvite = async function() {
     });
 
     // Marca convite como usado
-    await _db.collection('invites').doc(window._inviteDocId).update({
+    await fdb.collection('invites').doc(window._inviteDocId).update({
       used: true, usedAt: Date.now(), usedBy: username
     });
 
@@ -4310,7 +4311,7 @@ window.generateInviteLink = async function() {
     crypto.getRandomValues(arr);
     var token = Array.from(arr).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
 
-    await _db.collection('invites').doc('inv_' + Date.now()).set({
+    await firebase.firestore().collection('invites').doc('inv_' + Date.now()).set({
       token,
       createdBy: u.username || '',
       createdAt: Date.now(),
@@ -4341,7 +4342,7 @@ window.copyInviteLink = function() {
 
 // Checa convite assim que o _db estiver pronto
 (function waitDbForInvite(){
-  if(window._db) {
+  if(window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
     window.checkInviteOnLoad();
   } else {
     setTimeout(waitDbForInvite, 80);
