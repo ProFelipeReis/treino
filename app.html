@@ -678,10 +678,11 @@
 <script>
 (function(){
   if(new URLSearchParams(window.location.search).get('invite')){
-    document.write('<style>#screen-login{display:none!important}</style>');
+    document.documentElement.classList.add('has-invite');
   }
 })();
 </script>
+<style>.has-invite #screen-login { display:none !important; }</style>
 
 <!-- LOGIN -->
 <div id="screen-login">
@@ -4195,7 +4196,8 @@ window.checkInviteOnLoad = function() {
 
   // Esconde login e mostra tela de convite
   document.getElementById('screen-login').style.display = 'none';
-  document.getElementById('screen-invite').classList.add('visible');
+  var inviteScreen = document.getElementById('screen-invite');
+  inviteScreen.style.cssText = 'display:flex!important;position:fixed;inset:0;z-index:6000;background:#f7f7f5;align-items:center;justify-content:center;padding:24px;overflow-y:auto;';
 
   // Valida o token no Firestore
   _db.collection('invites').where('token','==',token).get().then(function(snap) {
