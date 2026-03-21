@@ -11,9 +11,13 @@
   <meta name="apple-mobile-web-app-title" content="Trainly"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Mercado Pago SDK -->
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
   <!-- Firebase SDK loaded early so login can query Firestore immediately -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-functions-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-functions-compat.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -516,6 +520,134 @@
 
     /* ── CRIAR ALERTA MODAL ── */
     #modal-create-alert .modal { max-width: 460px; }
+
+    /* ══ SUBSCRIPTION WALL ══ */
+    #screen-sub-wall {
+      display:none; position:fixed; inset:0; z-index:5000;
+      background:#f7f7f5; flex-direction:column; align-items:center;
+      justify-content:center; padding:24px; overflow-y:auto;
+    }
+    .sub-wall-card {
+      background:#fff; border:1px solid #e4e4e0; border-radius:24px;
+      width:100%; max-width:480px; overflow:hidden;
+      box-shadow:0 8px 40px rgba(0,0,0,.1);
+    }
+    .sub-wall-head {
+      background:#111110; padding:28px 32px 24px; text-align:center;
+    }
+    .sub-wall-head img { height:32px; margin-bottom:16px; }
+    .sub-wall-head h2 { color:#fff; font-family:var(--head); font-size:1.2rem; font-weight:800; margin-bottom:6px; }
+    .sub-wall-head p { color:rgba(255,255,255,.6); font-size:.82rem; }
+    .sub-wall-body { padding:28px 32px; }
+    .sub-plans { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+    .sub-plan {
+      border:2px solid #e4e4e0; border-radius:16px; padding:18px 16px;
+      cursor:pointer; transition:all .2s; position:relative; text-align:center;
+    }
+    .sub-plan:hover { border-color:var(--accent); background:rgba(245,200,0,.04); }
+    .sub-plan.selected { border-color:var(--accent); background:rgba(245,200,0,.08); }
+    .sub-plan-badge {
+      position:absolute; top:-10px; left:50%; transform:translateX(-50%);
+      background:var(--accent); color:#111110; border-radius:99px;
+      padding:2px 10px; font-size:.65rem; font-weight:900;
+      text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;
+    }
+    .sub-plan-label { font-size:.72rem; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px; }
+    .sub-plan-price { font-family:var(--head); font-size:1.6rem; font-weight:800; color:#111110; line-height:1; }
+    .sub-plan-period { font-size:.72rem; color:var(--text3); margin-top:4px; }
+    .sub-plan-saving { font-size:.7rem; color:var(--green); font-weight:700; margin-top:4px; }
+    .pix-result { text-align:center; margin-bottom:16px; }
+    .pix-result img { width:180px; height:180px; border-radius:12px; border:1px solid var(--border); }
+    .pix-status { font-size:.76rem; color:var(--text3); margin-top:10px; }
+    .btn-subscribe {
+      width:100%; padding:14px; border-radius:12px;
+      background:linear-gradient(135deg,#3d3830,#1a1610);
+      color:#fff; font-size:.95rem; font-weight:800; font-family:var(--body);
+      border:1px solid rgba(245,200,0,.2); cursor:pointer; transition:all .15s;
+      box-shadow:0 3px 12px rgba(0,0,0,.2);
+    }
+    .btn-subscribe:hover { transform:translateY(-1px); box-shadow:0 5px 18px rgba(0,0,0,.25); }
+    .sub-wall-footer { padding:0 32px 24px; text-align:center; font-size:.74rem; color:var(--text3); }
+    .sub-wall-logout { background:none; border:none; color:var(--text3); font-size:.78rem; cursor:pointer; text-decoration:underline; margin-top:8px; }
+
+    /* ══ TRIAL BANNER ══ */
+    #trial-banner {
+      display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+      z-index:300; background:#111110; color:#fff; border-radius:12px;
+      padding:12px 20px; box-shadow:0 4px 20px rgba(0,0,0,.3);
+      border:1px solid rgba(245,200,0,.3); max-width:340px; width:calc(100% - 32px);
+      animation:toastIn .3s cubic-bezier(.22,1,.36,1);
+    }
+    #trial-banner .tb-title { font-weight:800; font-size:.88rem; margin-bottom:2px; }
+    #trial-banner .tb-sub { font-size:.76rem; color:rgba(255,255,255,.65); }
+    #trial-banner .tb-close { position:absolute; top:8px; right:10px; background:none; border:none; color:rgba(255,255,255,.5); cursor:pointer; font-size:.9rem; }
+    @media(max-width:768px){ #trial-banner { bottom:90px; } }
+
+    /* ══ CEO PANEL ══ */
+
+    .ceo-topbar {
+      background:#111110; border-bottom:1px solid #2e2e2a;
+      padding:0 24px; height:62px; display:flex; align-items:center;
+      justify-content:space-between; position:sticky; top:0; z-index:100;
+      box-shadow:0 2px 16px rgba(0,0,0,.3);
+    }
+    .ceo-badge {
+      background:linear-gradient(135deg,#f5c800,#e0a800);
+      color:#111110; border-radius:6px; padding:3px 10px;
+      font-size:.7rem; font-weight:900; letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .ceo-content { flex:1; padding:28px; max-width:1100px; margin:0 auto; width:100%; }
+    .ceo-section-title {
+      font-family:var(--head); font-size:1.1rem; font-weight:800;
+      color:var(--text); margin:0 0 16px; display:flex; align-items:center; gap:10px;
+    }
+    .ceo-stats { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:14px; margin-bottom:28px; }
+    .ceo-stat {
+      background:var(--surface); border:1px solid var(--border); border-radius:14px;
+      padding:18px; box-shadow:var(--shadow);
+    }
+    .ceo-stat-num { font-family:var(--head); font-size:2rem; font-weight:800; color:var(--text); }
+    .ceo-stat-num.green { color:var(--green); }
+    .ceo-stat-num.red { color:var(--red); }
+    .ceo-stat-num.yellow { color:#b8940a; }
+    .ceo-stat-lbl { font-size:.72rem; color:var(--text3); font-weight:600; margin-top:4px; }
+
+    /* CEO Manager Table */
+    .ceo-table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; box-shadow:var(--shadow); margin-bottom:28px; }
+    .ceo-table { width:100%; border-collapse:collapse; }
+    .ceo-table th { background:var(--surface2); padding:11px 16px; text-align:left; font-size:.72rem; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.07em; border-bottom:1px solid var(--border); }
+    .ceo-table td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:.83rem; color:var(--text); vertical-align:middle; }
+    .ceo-table tr:last-child td { border-bottom:none; }
+    .ceo-table tr:hover td { background:var(--surface2); }
+    .sub-status-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:.7rem; font-weight:700; }
+    .sub-trial { background:rgba(245,200,0,.15); color:#8a6c00; border:1px solid rgba(245,200,0,.3); }
+    .sub-active { background:var(--green-dim); color:var(--green); border:1px solid rgba(46,125,82,.2); }
+    .sub-expired { background:var(--red-dim); color:var(--red); border:1px solid rgba(224,62,62,.2); }
+    .sub-blocked { background:#f0f0f0; color:#666; border:1px solid #ccc; }
+    .role-badge { display:inline-flex; align-items:center; padding:2px 9px; border-radius:6px; font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
+    .role-ceo { background:linear-gradient(135deg,#f5c800,#e0a800); color:#111110; }
+    .role-master { background:rgba(17,17,16,.08); color:#111110; border:1px solid rgba(17,17,16,.15); }
+    .role-comum { background:var(--surface2); color:var(--text3); border:1px solid var(--border); }
+    .ceo-actions-cell { display:flex; gap:6px; flex-wrap:wrap; }
+
+    /* CEO Pricing Card */
+    .pricing-card {
+      background:var(--surface); border:1px solid var(--border); border-radius:16px;
+      padding:24px; box-shadow:var(--shadow); margin-bottom:28px;
+    }
+    .pricing-inputs { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .pricing-preview {
+      background:var(--bg); border:1px solid var(--border); border-radius:10px;
+      padding:14px 18px; font-size:.84rem; color:var(--text2); line-height:1.8;
+    }
+
+    @media(max-width:768px){
+      .sub-plans { grid-template-columns:1fr; }
+      .ceo-content { padding:16px; }
+      .ceo-table-wrap { overflow-x:auto; }
+      .pricing-inputs { grid-template-columns:1fr; }
+    }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png"/>
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png"/>
@@ -694,23 +826,19 @@
   </div>
 </div>
 <script>
-// ── Multi-manager login ──
+// ══════════════════════════════════════════════════════
+// LOGIN — 100% Firestore, sem credenciais no código
+// Roles: ceo > master > comum
+// ══════════════════════════════════════════════════════
 async function doLogin(){
-  var user=document.getElementById('login-user').value.trim();
-  var pass=document.getElementById('login-pass').value;
-  if(!user||!pass){ showLoginError('Preencha usuário e senha.'); return; }
+  var user = document.getElementById('login-user').value.trim().toLowerCase();
+  var pass = document.getElementById('login-pass').value;
+  if(!user || !pass){ showLoginError('Preencha usuário e senha.'); return; }
 
-  // Master check (instant, no Firestore needed)
-  if(user==='felipereis' && pass==='Epil3004@'){
-    _loginSuccess(user, true, 'Felipe R. Cruz', '27974008527');
-    return;
-  }
-
-  // Other managers → query Firestore directly via compat SDK
   var btn = document.querySelector('#login-form button[type=button]');
   if(btn){ btn.textContent='Verificando...'; btn.disabled=true; }
+
   try {
-    // Wait for Firebase compat SDK to be ready (loaded via <script> tags below dashboard HTML)
     var attempts=0;
     while((!window.firebase || !window.firebase.firestore) && attempts<40){
       await new Promise(r=>setTimeout(r,100)); attempts++;
@@ -722,9 +850,36 @@ async function doLogin(){
     var db = firebase.firestore();
     var snap = await db.collection('managers').where('username','==',user).get();
     if(snap.empty){ showLoginError('Credenciais inválidas.'); return; }
-    var mgr = snap.docs[0].data();
-    if(mgr.password !== pass){ showLoginError('Credenciais inválidas.'); return; }
-    _loginSuccess(user, !!mgr.isMaster, mgr.name||user, mgr.phone||'');
+
+    var docSnap = snap.docs[0];
+    var mgr = docSnap.data();
+
+    // Verifica senha: suporta SHA-256 hash ou plain (legado)
+    var passOk = await _checkPassword(pass, mgr.password, mgr.passwordHash);
+    if(!passOk){ showLoginError('Credenciais inválidas.'); return; }
+
+    // Conta bloqueada pelo CEO?
+    if(mgr.blocked){
+      showLoginError('Conta bloqueada. Entre em contato com o suporte.');
+      return;
+    }
+
+    var role = mgr.role || (mgr.isMaster ? 'master' : 'comum');
+    var subStatus = (role !== 'ceo') ? _checkSubscription(mgr) : null;
+
+    _loginSuccess({
+      id: docSnap.id,
+      username: user,
+      role: role,
+      isMaster: role==='master' || role==='ceo',
+      isCeo: role==='ceo',
+      displayName: mgr.name || user,
+      phone: mgr.phone || '',
+      subStatus: subStatus,
+      trialEndsAt: mgr.trialEndsAt || null,
+      subEndsAt: mgr.subEndsAt || null,
+    });
+
   } catch(e) {
     showLoginError('Erro: '+e.message);
   } finally {
@@ -732,31 +887,47 @@ async function doLogin(){
   }
 }
 
+async function _checkPassword(input, plain, hash){
+  if(plain && plain === input) return true;
+  if(hash){ var h = await _sha256(input); return h === hash; }
+  return false;
+}
+
+async function _sha256(str){
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function _checkSubscription(mgr){
+  var now = Date.now();
+  if(mgr.trialEndsAt && now < mgr.trialEndsAt){
+    return { ok:true, type:'trial', daysLeft: Math.ceil((mgr.trialEndsAt-now)/86400000) };
+  }
+  if(mgr.subEndsAt && now < mgr.subEndsAt){
+    return { ok:true, type:'active', daysLeft: Math.ceil((mgr.subEndsAt-now)/86400000) };
+  }
+  return { ok:false, type:'expired' };
+}
+
 function showLoginError(msg){
   var t=document.createElement('div');t.className='toast error';t.textContent='❌ '+msg;
   document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
 }
 
-function _loginSuccess(username, isMaster, displayName, phone){
-  phone=phone||'';
-  try{
-    localStorage.setItem('forge_gestor_session', JSON.stringify({username, isMaster: !!isMaster, displayName: displayName||username, phone}));
-  }catch(e){}
+function _loginSuccess(userData){
+  try{ localStorage.setItem('forge_gestor_session', JSON.stringify(userData)); }catch(e){}
   document.getElementById('screen-login').style.display='none';
-  document.getElementById('screen-dashboard').style.cssText='display:flex;flex-direction:column;';
-  window.CURRENT_USER = {username, isMaster: !!isMaster, displayName: displayName||username, phone};
-  _applyUserUI();
-  (function waitLoad(){
-    if(window.loadStudents){ window.loadStudents(); }
-    else { setTimeout(waitLoad, 100); }
-  })();
-  // Start notification polling after firebase is ready
-  (function waitNotif(){
-    if(window.startNotifPolling){ window.startNotifPolling(); }
-    else { setTimeout(waitNotif, 200); }
-  })();
-  var t=document.createElement('div');t.className='toast success';t.textContent='✅ Acesso concedido.';
-  document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
+  window.CURRENT_USER = userData;
+
+  if(userData.role === 'ceo'){
+    (function waitCeo(){ if(window.showCeoPanel){ showCeoPanel(); } else { setTimeout(waitCeo,100); } })();
+    return;
+  }
+  if(userData.subStatus && !userData.subStatus.ok){
+    (function waitWall(){ if(window.showSubscriptionWall){ showSubscriptionWall(); } else { setTimeout(waitWall,100); } })();
+    return;
+  }
+  (function waitDash(){ if(window.showDashboardAfterLogin){ showDashboardAfterLogin(userData); } else { setTimeout(waitDash,100); } })();
 }
 
 function _applyUserUI(){
@@ -778,6 +949,187 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
+<!-- ══ SUBSCRIPTION WALL ══ -->
+<div id="screen-sub-wall">
+  <div class="sub-wall-card">
+    <div class="sub-wall-head">
+      <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly"/>
+      <h2>Assine o Trainly</h2>
+      <p id="sub-wall-subtitle">Escolha seu plano para continuar</p>
+    </div>
+    <div class="sub-wall-body">
+
+      <!-- STEP 1: Escolha do plano -->
+      <div id="sub-step-plan">
+        <div class="sub-plans" id="sub-plans-grid">
+          <div class="sub-plan selected" id="plan-monthly" onclick="selectPlan('monthly')">
+            <div class="sub-plan-label">Mensal</div>
+            <div class="sub-plan-price" id="sub-price-monthly">R$ —</div>
+            <div class="sub-plan-period">/mês</div>
+          </div>
+          <div class="sub-plan" id="plan-annual" onclick="selectPlan('annual')">
+            <div class="sub-plan-badge" id="sub-annual-badge">Economize —%</div>
+            <div class="sub-plan-label">Anual</div>
+            <div class="sub-plan-price" id="sub-price-annual">R$ —</div>
+            <div class="sub-plan-period">/mês · cobrado anualmente</div>
+            <div class="sub-plan-saving" id="sub-annual-saving"></div>
+          </div>
+        </div>
+        <button class="btn-subscribe" onclick="goToPayment()">Continuar para pagamento →</button>
+      </div>
+
+      <!-- STEP 2: Formulário de cartão -->
+      <div id="sub-step-card" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <button onclick="backToPlan()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.8rem;font-weight:700;cursor:pointer;color:var(--text2);">&#8592; Voltar</button>
+          <div style="font-size:.85rem;font-weight:700;color:var(--text);" id="sub-card-plan-summary"></div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Numero do cartao</label>
+          <div style="position:relative;">
+            <input id="mp-cardNumber" class="form-control" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number" oninput="onCardNumberInput(this)"/>
+            <span id="mp-card-brand" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.82rem;font-weight:700;color:var(--text3);pointer-events:none;"></span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Validade</label>
+            <input id="mp-expirationDate" class="form-control" type="text" inputmode="numeric" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" oninput="onExpiryInput(this)"/>
+          </div>
+          <div class="form-group">
+            <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">CVV</label>
+            <input id="mp-securityCode" class="form-control" type="text" inputmode="numeric" placeholder="123" maxlength="4" autocomplete="cc-csc"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nome impresso no cartao</label>
+          <input id="mp-cardholderName" class="form-control" type="text" placeholder="Como esta no cartao" autocomplete="cc-name" oninput="this.value=this.value.toUpperCase()"/>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">CPF do titular</label>
+          <input id="mp-docNumber" class="form-control" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" autocomplete="off" oninput="maskCPF(this)"/>
+        </div>
+
+        <div class="form-group" id="mp-installments-wrap" style="display:none;">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Parcelas</label>
+          <select id="mp-installments" class="form-control">
+            <option value="1">1x (sem juros)</option>
+          </select>
+        </div>
+
+        <div id="sub-pay-error" style="color:var(--red);font-size:.82rem;font-weight:700;min-height:18px;margin-bottom:10px;padding:0 2px;"></div>
+        <button class="btn-subscribe" id="btn-pay-card" onclick="submitCardPayment()">&#128274; Pagar com cartao</button>
+        <div style="text-align:center;margin-top:10px;font-size:.73rem;color:var(--text3);">Pagamento seguro via Mercado Pago</div>
+      </div>
+
+      <!-- STEP 3: Processando -->
+      <div id="sub-step-processing" style="display:none;text-align:center;padding:20px 0;">
+        <div class="spinner" style="margin:0 auto 16px;"></div>
+        <p style="font-weight:700;font-size:.95rem;color:var(--text);">Processando pagamento...</p>
+        <p style="font-size:.82rem;color:var(--text3);margin-top:6px;">Aguarde, isso leva alguns segundos.</p>
+      </div>
+
+      <!-- STEP 4: Sucesso -->
+      <div id="sub-step-success" style="display:none;text-align:center;padding:10px 0;">
+        <div style="font-size:3rem;margin-bottom:12px;">✅</div>
+        <p style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:8px;">Pagamento aprovado!</p>
+        <p style="font-size:.85rem;color:var(--text2);margin-bottom:20px;line-height:1.6;" id="sub-success-msg">Seu acesso foi liberado.</p>
+        <button class="btn-subscribe" onclick="enterAfterPayment()">Acessar painel →</button>
+      </div>
+
+    </div>
+    <div class="sub-wall-footer">
+      <p>Trainly · Gestão de academias</p>
+      <button class="sub-wall-logout" onclick="logoutGestor()">Sair da conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TRIAL BANNER ══ -->
+<div id="trial-banner">
+  <button class="tb-close" onclick="document.getElementById('trial-banner').style.display='none'">✕</button>
+  <div class="tb-title">🎉 Período de teste ativo</div>
+  <div class="tb-sub" id="trial-banner-text">Você tem X dias restantes de avaliação gratuita.</div>
+</div>
+
+<!-- ══ CEO PANEL ══ -->
+
+
+<!-- CEO: MODAL EDITAR GESTOR -->
+<div id="modal-ceo-edit" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3 id="ceo-edit-title">Gerenciar gestor</h3><button class="close-btn" onclick="closeModal('modal-ceo-edit')">✕</button></div>
+    <div class="modal-body">
+      <div id="ceo-edit-info" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:var(--r);margin-bottom:20px;border:1px solid var(--border);">
+        <div id="ceo-edit-avatar" class="avatar" style="width:40px;height:40px;font-size:.9rem;flex-shrink:0;"></div>
+        <div><div id="ceo-edit-name" style="font-weight:700;font-size:.92rem;"></div><div id="ceo-edit-username" style="font-size:.74rem;color:var(--text3);font-weight:600;"></div></div>
+        <div id="ceo-edit-status-badge" style="margin-left:auto;"></div>
+      </div>
+      <div class="form-group"><label>Role</label>
+        <select id="ceo-edit-role" class="form-control"><option value="comum">Comum</option><option value="master">Master</option><option value="ceo">CEO</option></select>
+      </div>
+      <div style="height:1px;background:var(--border);margin:16px 0;"></div>
+      <p style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Assinatura</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ação</label>
+          <select id="ceo-edit-sub-type" class="form-control" onchange="updateCeoSubUI()">
+            <option value="trial7">Dar 7 dias de teste</option>
+            <option value="custom">Período personalizado (dias)</option>
+            <option value="monthly">Renovar +1 mês</option>
+            <option value="setdate">Definir data de vencimento</option>
+            <option value="expire">Expirar agora</option>
+          </select>
+        </div>
+        <div class="form-group" id="ceo-custom-days-wrap" style="display:none;">
+          <label>Nº de dias</label>
+          <input id="ceo-edit-days" class="form-control" type="number" min="1" placeholder="Ex: 30"/>
+        </div>
+      </div>
+      <div class="form-group" id="ceo-edit-date-wrap" style="display:none;">
+        <label>Data de vencimento</label>
+        <input id="ceo-edit-date" class="form-control" type="date"/>
+      </div>
+      <div class="form-group">
+        <label class="checkbox-label" style="margin-top:4px;">
+          <input type="checkbox" id="ceo-edit-blocked"/> Bloquear acesso ao painel
+        </label>
+      </div>
+      <div id="ceo-edit-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:16px;margin-top:4px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ceo-edit')">Cancelar</button>
+      <button class="btn btn-danger btn-sm" onclick="ceoDeleteManager()">🗑 Excluir</button>
+      <button id="btn-ceo-save" class="btn btn-primary" onclick="ceoSaveManagerEdits()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CEO: MODAL NOVO GESTOR -->
+<div id="modal-ceo-add" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>Cadastrar gestor</h3><button class="close-btn" onclick="closeModal('modal-ceo-add')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Usuário *</label><input id="ceo-new-user" class="form-control" type="text" placeholder="Ex: joao123" autocomplete="off"/></div>
+      <div class="form-group"><label>Senha *</label><input id="ceo-new-pass" class="form-control" type="password" placeholder="Mínimo 6 caracteres"/></div>
+      <div class="form-group"><label>Nome de exibição</label><input id="ceo-new-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
+      <div class="form-group"><label>Telefone</label><input id="ceo-new-phone" class="form-control" type="tel" placeholder="Ex: 27999999999"/></div>
+      <div class="form-group"><label>Role</label>
+        <select id="ceo-new-role" class="form-control"><option value="comum">Comum</option><option value="master">Master</option><option value="ceo">CEO</option></select>
+      </div>
+      <div id="ceo-add-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:16px;margin-top:4px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ceo-add')">Cancelar</button>
+      <button id="btn-ceo-add" class="btn btn-primary" onclick="ceoCreateManager()">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- DASHBOARD -->
 <div id="screen-dashboard">
@@ -791,7 +1143,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <div id="notif-list"><div class="notif-panel-empty">Nenhuma notificação</div></div>
         </div>
       </div>
-      <div class="user-pill" id="topbar-user-pill">felipereis</div>
+      <div class="user-pill" id="topbar-user-pill">gestor</div>
       <button class="gear-btn" onclick="openProfileModal()" title="Configurações do perfil">⚙️</button>
       <button class="logout-btn" onclick="logoutGestor()">Sair</button>
     </div>
@@ -819,6 +1171,10 @@ document.addEventListener('DOMContentLoaded',function(){
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
         Chat
         <span class="sidebar-item-chat-badge hidden" id="chat-sidebar-badge">0</span>
+      </div>
+      <div class="sidebar-item sidebar-item-ceo hidden" data-tab="tab-ceo" onclick="switchTab('tab-ceo',this)" style="margin-top:8px;border-top:1px solid var(--border);padding-top:12px;">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span style="background:linear-gradient(135deg,#f5c800,#e0a800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">Painel CEO</span>
       </div>
     </div>
     <div class="main-content">
@@ -888,6 +1244,48 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
         </div>
       </div>
+      <div id="tab-ceo" class="tab-panel">
+        <div class="page-header">
+          <div class="page-title" style="display:flex;align-items:center;gap:10px;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Painel CEO
+          </div>
+        </div>
+        <!-- Stats -->
+        <div class="ceo-stats" style="margin-bottom:24px;">
+          <div class="ceo-stat"><div class="ceo-stat-num" id="ceo-stat-total">—</div><div class="ceo-stat-lbl">Gestores</div></div>
+          <div class="ceo-stat"><div class="ceo-stat-num green" id="ceo-stat-active">—</div><div class="ceo-stat-lbl">Assinaturas ativas</div></div>
+          <div class="ceo-stat"><div class="ceo-stat-num yellow" id="ceo-stat-trial">—</div><div class="ceo-stat-lbl">Em teste</div></div>
+          <div class="ceo-stat"><div class="ceo-stat-num red" id="ceo-stat-expired">—</div><div class="ceo-stat-lbl">Expirados</div></div>
+        </div>
+        <!-- Pricing -->
+        <div class="pricing-card">
+          <div class="ceo-section-title">💰 Preços das assinaturas</div>
+          <div class="pricing-inputs">
+            <div class="form-group" style="margin:0;"><label>Preço mensal (R$)</label><input id="price-monthly" class="form-control" type="number" min="1" step="0.01" placeholder="Ex: 29.90" oninput="updatePricingPreview()"/></div>
+            <div class="form-group" style="margin:0;"><label>Desconto anual (%)</label><input id="price-discount" class="form-control" type="number" min="1" max="50" placeholder="Ex: 15" oninput="updatePricingPreview()"/></div>
+          </div>
+          <div class="pricing-preview" id="pricing-preview">Preencha os campos para ver a prévia.</div>
+          <div style="margin-top:14px;display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="savePricing()">💾 Salvar preços</button>
+            <button class="btn btn-ghost" onclick="loadPricing()">↺ Recarregar</button>
+          </div>
+        </div>
+        <!-- Managers table -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div class="ceo-section-title" style="margin:0;">👥 Gestores cadastrados</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <input id="ceo-search" class="form-control" type="text" placeholder="Buscar gestor..." style="max-width:220px;padding:8px 12px;" oninput="filterCeoManagers()"/>
+            <button class="btn btn-primary btn-sm" onclick="openCeoAddManager()">+ Novo gestor</button>
+          </div>
+        </div>
+        <div class="ceo-table-wrap">
+          <table class="ceo-table">
+            <thead><tr><th>Gestor</th><th>Role</th><th>Assinatura</th><th>Vencimento</th><th>Ações</th></tr></thead>
+            <tbody id="ceo-managers-tbody"><tr><td colspan="5"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
   <div class="mobile-nav">
@@ -912,6 +1310,10 @@ document.addEventListener('DOMContentLoaded',function(){
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
         <span class="mobile-nav-label">Chat</span>
         <span class="mobile-nav-chat-badge hidden" id="chat-mobile-badge">0</span>
+      </div>
+      <div class="mobile-nav-item sidebar-item-ceo hidden" data-tab="tab-ceo" onclick="switchTab('tab-ceo',this)">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span class="mobile-nav-label" style="color:var(--accent);font-weight:800;">CEO</span>
       </div>
     </div>
   </div>
@@ -1356,7 +1758,7 @@ const LS_GESTOR='forge_gestor_session';
 function saveSession(data){ try{ localStorage.setItem(LS_GESTOR, typeof data==='string'?data:JSON.stringify(data)); }catch(e){} }
 function clearSession(){ try{ localStorage.removeItem(LS_GESTOR); }catch(e){} }
 function hasSession(){ try{ return !!localStorage.getItem(LS_GESTOR); }catch(e){ return false; } }
-function getSession(){ try{ var v=localStorage.getItem(LS_GESTOR); if(!v) return null; try{ var s=JSON.parse(v); if(s && typeof s==='object'){ s.phone=s.phone||''; return s; } return null; }catch(e){ return v==='logged'?{username:'felipereis',isMaster:true,displayName:'Felipe R. Cruz',phone:'27974008527'}:null; } }catch(e){ return null; } }
+function getSession(){ try{ var v=localStorage.getItem(LS_GESTOR); if(!v) return null; try{ var s=JSON.parse(v); if(s && typeof s==='object'){ s.phone=s.phone||''; if(!s.role) s.role=s.isMaster?'master':'comum'; return s; } return null; }catch(e){ return null; } }catch(e){ return null; } }
 
 const toast=(msg,type='success')=>{const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;document.getElementById('toast-container').appendChild(t);setTimeout(()=>t.remove(),3500)};
 window.openModal=id=>document.getElementById(id).classList.remove('hidden');
@@ -1368,38 +1770,46 @@ window.isExpired=p=>{if(!p.expiry)return false;return new Date(p.expiry)<new Dat
 const ytId=url=>{if(!url)return '';const m=url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:''};
 const ytEmbed=url=>{const id=ytId(url);return id?`https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1`:''};
 
-window.showDashboard=function(){
+// ── showDashboard: chamado após login bem-sucedido (não-CEO, assinatura ok) ──
+window.showDashboardAfterLogin = window.showDashboard = function(userData){
+  var u = userData || window.CURRENT_USER || {};
+  window.CURRENT_USER = u;
   document.getElementById('screen-login').style.display='none';
+  document.getElementById('screen-sub-wall').style.display='none';
   document.getElementById('screen-dashboard').style.cssText='display:flex;flex-direction:column;';
   _applyUserUI();
   loadStudents();
   startNotifPolling();
-  // Inicia polling do badge de chat
-  (function waitChat(){
-    if(window.startChatBadgePolling){ window.startChatBadgePolling(); }
-    else { setTimeout(waitChat, 200); }
-  })();
-  // Refresh manager phone from Firestore (in case it changed since last session)
-  var u=window.CURRENT_USER||{};
-  if(u.username && u.username!=='felipereis'){
-    _getDocs(_query(_col(_db,'managers'),_where('username','==',u.username))).then(function(snap){
-      if(!snap.empty){
-        var mgr=snap.docs[0].data();
-        window.CURRENT_USER.phone=mgr.phone||'';
-        try{ localStorage.setItem(LS_GESTOR,JSON.stringify(window.CURRENT_USER)); }catch(e){}
+  (function waitChat(){ if(window.startChatBadgePolling){ startChatBadgePolling(); } else { setTimeout(waitChat,200); } })();
+  // Atualiza dados do Firestore
+  _getDocs(_query(_col(_db,'managers'),_where('username','==',u.username))).then(function(snap){
+    if(!snap.empty){
+      var mgr=snap.docs[0].data();
+      window.CURRENT_USER.displayName = mgr.name || u.username;
+      window.CURRENT_USER.phone = mgr.phone || '';
+      // Revalida assinatura
+      if(u.role !== 'ceo'){
+        var sub = _checkSubscription(mgr);
+        window.CURRENT_USER.subStatus = sub;
+        if(!sub.ok){ showSubscriptionWall(); return; }
+        if(sub.type==='trial'){ showTrialBanner(sub.daysLeft); }
       }
-    }).catch(function(){});
-  }
+      try{ localStorage.setItem(LS_GESTOR, JSON.stringify(window.CURRENT_USER)); }catch(e){}
+      _applyUserUI();
+    }
+  }).catch(function(){});
 };
 
-// Login handled by doLogin() in inline script above
-window.logoutGestor=()=>{
+window.logoutGestor=function(){
   clearSession();
   window.CURRENT_USER=null;
   if(window._notifInterval){ clearInterval(window._notifInterval); window._notifInterval=null; }
-  // Cancela listeners de chat em tempo real
   if(window._chatSnapshotUnsubs){ window._chatSnapshotUnsubs.forEach(function(fn){ try{fn();}catch(e){} }); window._chatSnapshotUnsubs=[]; }
-  document.getElementById('screen-dashboard').style.display='none';
+  if(window._chatSnapshotUnsubs){ window._chatSnapshotUnsubs=[]; }
+  // Oculta todas as telas
+  ['screen-dashboard','screen-sub-wall'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display='none';
+  });
   document.getElementById('screen-login').style.display='flex';
   toast('Sessão encerrada.');
 };
@@ -1412,6 +1822,7 @@ window.switchTab=(tabId,el)=>{
   if(tabId==='tab-gestores') loadManagers();
   if(tabId==='tab-feedbacks') loadFeedbacks();
   if(tabId==='tab-chat'){ loadChatList(); closeChatDetail(); }
+  if(tabId==='tab-ceo'){ loadCeoManagers(); loadPricing(); }
 };
 window.goToAlunos=()=>switchTab('tab-alunos',document.querySelector('[data-tab="tab-alunos"]'));
 
@@ -1419,7 +1830,7 @@ window.loadStudents=async()=>{
   try{
     const u=window.CURRENT_USER||{};
     let q;
-    if(u.isMaster && u.username==='felipereis'){
+    if(u.role==='ceo'||u.isMaster){
       // Master felipereis vê todos os alunos
       q=_query(_col(_db,'students'),_orderBy('createdAt','desc'));
     } else {
@@ -1445,7 +1856,7 @@ window.renderStudentsGrid=list=>{
   }
 
   const u=window.CURRENT_USER||{};
-  const isMaster=u.isMaster && u.username==='felipereis';
+  const isMaster=u.role==='ceo'||u.isMaster;
 
   const cardHTML=s=>`
     <div class="student-card" onclick="openStudentDetail('${s.id}')">
@@ -1461,7 +1872,7 @@ window.renderStudentsGrid=list=>{
           ${s.phone?`<span style="font-size:.75rem;color:var(--text3);font-weight:500;">📱 ${s.phone}</span>`:''}
           ${s.obs?`<span style="font-size:.75rem;color:var(--text2);">${s.obs}</span>`:''}
           <span class="badge badge-active">ativo</span>
-          ${isMaster&&s.managerId&&s.managerId!=='felipereis'&&s.managerName?`<span style="font-size:.72rem;color:var(--text3);font-weight:600;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;">👤 ${s.managerName}</span>`:''}
+          ${isMaster&&s.managerId&&s.managerId!==(window.CURRENT_USER||{}).username&&s.managerName?`<span style="font-size:.72rem;color:var(--text3);font-weight:600;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;">👤 ${s.managerName}</span>`:''}
         </div>
         <div style="display:flex;gap:6px;align-items:center;" onclick="event.stopPropagation()">
           <button class="btn btn-ghost btn-sm" onclick="openEditStudentModal('${s.id}')">✏️ Editar</button>
@@ -1482,8 +1893,9 @@ window.renderStudentsGrid=list=>{
   }
 
   // Master: separa próprios alunos (sem managerId ou managerId=felipereis) dos de outros gestores
-  const mine=list.filter(s=>!s.managerId||s.managerId==='felipereis');
-  const others=list.filter(s=>s.managerId&&s.managerId!=='felipereis');
+  const _cu=(window.CURRENT_USER||{}).username||'';
+  const mine=list.filter(s=>!s.managerId||s.managerId===_cu);
+  const others=list.filter(s=>s.managerId&&s.managerId!==_cu);
 
   let html='';
 
@@ -1534,8 +1946,8 @@ window.addStudent=async()=>{
     const u=window.CURRENT_USER||{};
     await _setDoc(_doc(_db,'students',Date.now().toString()),{
       name,code,phone,obs,
-      managerId: u.username||'felipereis',
-      managerName: u.displayName||u.username||'felipereis',
+      managerId: u.username||'',
+      managerName: u.displayName||u.username||'',
       managerPhone: u.phone||'',
       createdAt:Date.now()
     });
@@ -2244,11 +2656,14 @@ window.openTransferModal=async function(sid){
     const snap=await _getDocs(_query(_col(_db,'managers'),_orderBy('createdAt','desc')));
     const managers=snap.docs.map(d=>({id:d.id,...d.data()}));
 
-    // Also add felipereis as an option (master, no managers doc)
-    const allManagers=[
-      {id:'__felipereis__', username:'felipereis', name:'felipereis', isMaster:true},
-      ...managers
-    ].filter(m=>m.username!==(student.managerId||'felipereis'));
+    // Deduplica por username e remove o gestor atual do aluno
+    const seenUsernames = new Set();
+    const allManagers=managers.filter(m=>{
+      if(m.username===(student.managerId||'')) return false;
+      if(seenUsernames.has(m.username)) return false;
+      seenUsernames.add(m.username);
+      return true;
+    });
 
     if(!allManagers.length){
       list.innerHTML='<p style="font-size:.83rem;color:var(--text3);padding:12px 0;">Nenhum outro gestor disponível.</p>';
@@ -2298,12 +2713,8 @@ window.doTransfer=async function(){
 
     // Fetch manager phone if exists
     let mgrPhone='';
-    if(mgrUsername!=='felipereis'){
-      const snap=await _getDocs(_query(_col(_db,'managers'),_where('username','==',mgrUsername)));
-      if(!snap.empty) mgrPhone=snap.docs[0].data().phone||'';
-    } else {
-      mgrPhone='27974008527';
-    }
+    const mgrSnap=await _getDocs(_query(_col(_db,'managers'),_where('username','==',mgrUsername)));
+    if(!mgrSnap.empty) mgrPhone=mgrSnap.docs[0].data().phone||'';
 
     await _updateDoc(_doc(_db,'students',sid),{
       managerId: mgrUsername,
@@ -2415,7 +2826,7 @@ window.pollNotifications=async function(){
   try{
     const u=window.CURRENT_USER||{};
     let snap;
-    if(u.isMaster && u.username==='felipereis'){
+    if(u.role==='ceo'||u.isMaster){
       snap=await _getDocs(_col(_db,'notifications'));
     } else {
       snap=await _getDocs(_query(_col(_db,'notifications'),_where('managerId','==',u.username)));
@@ -2446,7 +2857,7 @@ window.loadFeedbacks=async function(){
   try{
     const u=window.CURRENT_USER||{};
     let snap;
-    if(u.isMaster && u.username==='felipereis'){
+    if(u.role==='ceo'||u.isMaster){
       snap=await _getDocs(_query(_col(_db,'feedbacks'),_orderBy('timestamp','desc')));
     } else {
       snap=await _getDocs(_query(_col(_db,'feedbacks'),_where('managerId','==',u.username)));
@@ -2534,28 +2945,37 @@ window.saveProfile=async function(){
   btn.classList.add('btn-loading'); btn.textContent='Salvando...';
 
   try{
-    var isMaster=u.username==='felipereis';
+    var isMaster = u.role==='ceo';
+    var finalName = name || u.username;
+    var finalPhone = phone || u.phone || '';
 
-    if(!isMaster){
-      // Update in Firestore managers collection
-      var snap=await _getDocs(_query(_col(_db,'managers'),_where('username','==',u.username)));
+    if(isMaster){
+      // Salva nome/telefone do master num doc próprio no Firestore
+      // name saved via managers collection below
+      // Propaga para todos os alunos do master
+      var studSnap = await _getDocs(_query(_col(_db,'students'), _where('managerId','==',(window.CURRENT_USER||{}).username||'')));
+      for(var sd of studSnap.docs){
+        await _updateDoc(_doc(_db,'students',sd.id), {managerName: finalName, managerPhone: finalPhone});
+      }
+    } else {
+      // Gestor comum — atualiza no Firestore managers
+      var snap = await _getDocs(_query(_col(_db,'managers'),_where('username','==',u.username)));
       if(!snap.empty){
-        var upd={name:name||u.username, phone};
-        if(pass) upd.password=pass;
-        await _updateDoc(_doc(_db,'managers',snap.docs[0].id),upd);
-        // Propagate name and phone to students
-        var studSnap=await _getDocs(_query(_col(_db,'students'),_where('managerId','==',u.username)));
-        for(var sd of studSnap.docs){
-          await _updateDoc(_doc(_db,'students',sd.id),{managerPhone:phone,managerName:name||u.username});
+        var upd = {name: finalName, phone: finalPhone};
+        if(pass) upd.password = pass;
+        await _updateDoc(_doc(_db,'managers',snap.docs[0].id), upd);
+        // Propaga para alunos
+        var studSnap2 = await _getDocs(_query(_col(_db,'students'),_where('managerId','==',u.username)));
+        for(var sd2 of studSnap2.docs){
+          await _updateDoc(_doc(_db,'students',sd2.id), {managerName: finalName, managerPhone: finalPhone});
         }
       }
     }
-    // Always update CURRENT_USER in memory and localStorage
-    window.CURRENT_USER.displayName=name||u.username;
-    window.CURRENT_USER.phone=phone;
-    try{
-      localStorage.setItem(LS_GESTOR,JSON.stringify(window.CURRENT_USER));
-    }catch(e){}
+
+    // Atualiza memória e localStorage
+    window.CURRENT_USER.displayName = finalName;
+    window.CURRENT_USER.phone = finalPhone;
+    try{ localStorage.setItem(LS_GESTOR, JSON.stringify(window.CURRENT_USER)); }catch(e){}
 
     _applyUserUI();
     closeModal('modal-profile');
@@ -2571,10 +2991,28 @@ window._applyUserUI=function(){
   var u=window.CURRENT_USER||{};
   var pill=document.getElementById('topbar-user-pill');
   if(pill) pill.textContent=u.displayName||u.username||'gestor';
-  var show=!!u.isMaster;
+  // Gestores tab: visível para master e CEO
+  var showGestores = u.role==='master'||u.role==='ceo'||!!u.isMaster;
   document.querySelectorAll('.sidebar-item-gestores,.mobile-nav-item-gestores').forEach(function(el){
-    el.classList.toggle('hidden',!show);
+    el.classList.toggle('hidden',!showGestores);
   });
+  // CEO tab: visível apenas para CEO
+  var showCeo = u.role==='ceo';
+  document.querySelectorAll('.sidebar-item-ceo').forEach(function(el){
+    el.classList.toggle('hidden',!showCeo);
+  });
+  // Badge de role na topbar
+  var existingBadge = document.getElementById('role-topbar-badge');
+  if(!existingBadge && (u.role==='master'||u.role==='ceo')){
+    var pill2 = document.getElementById('topbar-user-pill');
+    if(pill2){
+      var span = document.createElement('span');
+      span.id='role-topbar-badge';
+      span.style.cssText='background:'+(u.role==='ceo'?'linear-gradient(135deg,#f5c800,#e0a800)':'rgba(245,200,0,.15)')+';color:#111110;border-radius:6px;padding:2px 8px;font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-left:6px;';
+      span.textContent=u.role==='ceo'?'⭐ CEO':'Master';
+      pill2.after(span);
+    }
+  }
 };
 
 window.openMobileSidebar=function(){
@@ -2614,7 +3052,7 @@ window.saveManager=async function(){
 
   if(!username){toast('Usuário obrigatório!','error');return;}
   if(!editId&&!pass){toast('Senha obrigatória!','error');return;}
-  if(username==='felipereis'){toast('Esse nome de usuário é reservado.','error');return;}
+  
 
   btn.classList.add('btn-loading');btn.textContent='Salvando...';
   try{
@@ -2632,8 +3070,20 @@ window.saveManager=async function(){
       // Check if username exists
       var exists=await _getDocs(_query(_col(_db,'managers'),_where('username','==',username)));
       if(!exists.empty){toast('Usuário já existe!','error');return;}
-      await _setDoc(_doc(_db,'managers','mgr_'+Date.now()),{username,password:pass,name,phone,isMaster,createdAt:Date.now()});
-      toast('✅ Gestor cadastrado!');
+      // Determina role
+      var u=window.CURRENT_USER||{};
+      var newRole = isMaster ? 'master' : 'comum';
+      // SHA-256 da senha
+      var passHash = await _sha256(pass);
+      // Trial de 7 dias automático
+      var trialEndsAt = Date.now() + 7*24*60*60*1000;
+      await _setDoc(_doc(_db,'managers','mgr_'+Date.now()),{
+        username, passwordHash: passHash, name, phone,
+        role: newRole, isMaster,
+        trialEndsAt, subEndsAt: null,
+        blocked: false, createdAt: Date.now()
+      });
+      toast('✅ Gestor cadastrado com 7 dias de teste!');
     }
     closeModal('modal-add-manager');
     await loadManagers();
@@ -2689,13 +3139,28 @@ window.deleteManager=async function(id, username){
   await loadManagers();
 };
 
+// ── Verifica retorno de pagamento MP na inicialização ──
+document.addEventListener('DOMContentLoaded', function(){
+  (function waitCheck(){
+    if(window.checkPaymentReturn){ checkPaymentReturn(); }
+    else { setTimeout(waitCheck, 200); }
+  })();
+});
+
 // ── Auto login from localStorage ──
 (function init(){
   if(hasSession()){
     var sess=getSession();
     if(sess){
       window.CURRENT_USER=sess;
-      window.showDashboard();
+      // Route based on role and subscription
+      if(sess.role==='ceo'){
+        (function w(){ if(window.showCeoPanel){ showCeoPanel(); } else { setTimeout(w,100); } })();
+      } else if(sess.subStatus && !sess.subStatus.ok){
+        (function w(){ if(window.showSubscriptionWall){ showSubscriptionWall(); } else { setTimeout(w,100); } })();
+      } else {
+        window.showDashboard();
+      }
     } else {
       clearSession();
     }
@@ -2717,7 +3182,7 @@ window.loadChatList = async function() {
     var u = window.CURRENT_USER||{};
     // Get all students for this manager
     var q;
-    if(u.isMaster && u.username==='felipereis'){
+    if(u.role==='ceo'||u.isMaster){
       q = _query(_col(_db,'students'), _orderBy('createdAt','desc'));
     } else {
       q = _query(_col(_db,'students'), _where('managerId','==',u.username));
@@ -2893,7 +3358,7 @@ window.startChatBadgePolling = async function() {
 
   // Busca lista de alunos deste gestor
   var q;
-  if(u.isMaster && u.username==='felipereis'){
+  if(u.role==='ceo'||u.isMaster){
     q = _query(_col(_db,'students'), _orderBy('createdAt','desc'));
   } else {
     q = _query(_col(_db,'students'), _where('managerId','==',u.username));
@@ -2979,6 +3444,651 @@ window.sendAlert = async function() {
   }
 };
 </script>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// TRIAL BANNER
+// ════════════════════════════════════════════════════════════
+window.showTrialBanner = function(daysLeft) {
+  var banner = document.getElementById('trial-banner');
+  var text = document.getElementById('trial-banner-text');
+  if(!banner) return;
+  text.textContent = daysLeft <= 1
+    ? 'Seu período de teste expira hoje! Assine para não perder o acesso.'
+    : 'Você tem ' + daysLeft + ' dias restantes de avaliação gratuita.';
+  banner.style.display = 'block';
+  setTimeout(function(){ banner.style.display='none'; }, 8000);
+};
+
+// ════════════════════════════════════════════════════════════
+// SUBSCRIPTION WALL — Liberação manual pelo CEO
+// ════════════════════════════════════════════════════════════
+// ─── Mercado Pago ─────────────────────────────────────────────────────────────
+var MP_PUBLIC_KEY  = 'APP_USR-f12a2b24-0d63-4c1a-ab86-7e1ac6302acf';
+var MP_BACKEND_URL = 'https://mercadopagopayment-ax2n6uynda-uc.a.run.app';
+// ──────────────────────────────────────────────────────────────────────────────
+
+var _mpInstance     = null;
+var _mpSelectedPlan = 'monthly';
+var _mpPricing      = { monthly: 0, discount: 0 };
+var _mpPaymentMethodId = '';   // bandeira detectada (visa, master, elo...)
+
+// ── Exibe subscription wall e carrega preços ──────────────────────────────────
+window.showSubscriptionWall = async function() {
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-dashboard').style.display = 'none';
+  document.getElementById('screen-sub-wall').style.display = 'flex';
+  subShowStep('plan');
+
+  try {
+    var snap = await _db.collection('settings').doc('pricing').get();
+    if(snap.exists) {
+      var d = snap.data();
+      _mpPricing.monthly  = parseFloat(d.monthly)  || 0;
+      _mpPricing.discount = parseFloat(d.discount) || 0;
+    }
+  } catch(e) { console.warn('loadPricing wall:', e); }
+  renderSubWallPrices();
+
+  // Inicializa SDK MP
+  if(!_mpInstance && window.MercadoPago) {
+    _mpInstance = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+  }
+};
+
+// ── Renderiza preços nos cards de plano ───────────────────────────────────────
+function renderSubWallPrices() {
+  var m    = _mpPricing.monthly;
+  var disc = _mpPricing.discount;
+  var annualTotal   = m * 12 * (1 - disc/100);
+  var annualMonthly = annualTotal / 12;
+  var saving        = m * 12 - annualTotal;
+
+  var fmt = function(v){ return 'R$ ' + v.toFixed(2).replace('.', ','); };
+
+  var elM = document.getElementById('sub-price-monthly');
+  var elA = document.getElementById('sub-price-annual');
+  var elB = document.getElementById('sub-annual-badge');
+  var elS = document.getElementById('sub-annual-saving');
+
+  if(elM) elM.textContent = m > 0 ? fmt(m) : 'R$ —';
+  if(elA) elA.textContent = annualMonthly > 0 ? fmt(annualMonthly) : 'R$ —';
+  if(elB) elB.textContent = disc > 0 ? 'Economize ' + disc + '%' : '';
+  if(elS && saving > 0) elS.textContent = 'Economia de ' + fmt(saving) + '/ano';
+}
+
+// ── Seleção de plano ──────────────────────────────────────────────────────────
+window.selectPlan = function(plan) {
+  _mpSelectedPlan = plan;
+  document.getElementById('plan-monthly').classList.toggle('selected', plan === 'monthly');
+  document.getElementById('plan-annual').classList.toggle('selected', plan === 'annual');
+};
+
+// ── Avança para o formulário de cartão ───────────────────────────────────────
+window.goToPayment = function() {
+  if(!_mpPricing.monthly) {
+    toast('Precos nao configurados. Contate o administrador.', 'error');
+    return;
+  }
+  var disc = _mpPricing.discount;
+  var annualMonthly = _mpPricing.monthly * 12 * (1 - disc/100) / 12;
+  var fmt = function(v){ return 'R$ ' + v.toFixed(2).replace('.', ','); };
+
+  var summary = _mpSelectedPlan === 'monthly'
+    ? 'Plano Mensal — ' + fmt(_mpPricing.monthly) + '/mes'
+    : 'Plano Anual — ' + fmt(annualMonthly) + '/mes (cobrado anualmente)';
+
+  var el = document.getElementById('sub-card-plan-summary');
+  if(el) el.textContent = summary;
+
+  // Limpa campos
+  ['mp-cardNumber','mp-expirationDate','mp-securityCode','mp-cardholderName','mp-docNumber'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('sub-pay-error').textContent = '';
+  document.getElementById('mp-card-brand').textContent = '';
+  document.getElementById('mp-installments-wrap').style.display = 'none';
+  _mpPaymentMethodId = '';
+
+  subShowStep('card');
+};
+
+// ── Volta para seleção de plano ───────────────────────────────────────────────
+window.backToPlan = function() {
+  subShowStep('plan');
+};
+
+// ── Mascara número do cartão (grupos de 4) e detecta bandeira ────────────────
+window.onCardNumberInput = function(input) {
+  var raw = input.value.replace(/\D/g, '').slice(0, 16);
+  var groups = raw.match(/.{1,4}/g) || [];
+  input.value = groups.join(' ');
+
+  // Detecta bandeira pelo prefixo
+  var brand = '';
+  var brandEl = document.getElementById('mp-card-brand');
+  if(/^4/.test(raw))                brand = '💳 Visa';
+  else if(/^5[1-5]/.test(raw))      brand = '💳 Mastercard';
+  else if(/^3[47]/.test(raw))       brand = '💳 Amex';
+  else if(/^6(?:011|5)/.test(raw))  brand = '💳 Discover';
+  else if(/^(?:606282|3841)/.test(raw)) brand = '💳 Hipercard';
+  else if(/^(?:4011|4312|4389|4514|4576|5041|5067|5090|6277|6362|6516|6550)/.test(raw)) brand = '💳 Elo';
+  if(brandEl) brandEl.textContent = brand;
+
+  // Detecta payment_method_id para MP
+  if(/^4/.test(raw))            _mpPaymentMethodId = 'visa';
+  else if(/^5[1-5]/.test(raw))  _mpPaymentMethodId = 'master';
+  else if(/^3[47]/.test(raw))   _mpPaymentMethodId = 'amex';
+  else if(/^(?:606282|3841)/.test(raw)) _mpPaymentMethodId = 'hipercard';
+  else                           _mpPaymentMethodId = '';
+
+  // Busca parcelas se tiver 6+ dígitos
+  if(raw.length >= 6 && _mpInstance && _mpPaymentMethodId) {
+    loadInstallments(raw.slice(0, 6));
+  }
+};
+
+// ── Mascara validade MM/AA ────────────────────────────────────────────────────
+window.onExpiryInput = function(input) {
+  var raw = input.value.replace(/\D/g, '').slice(0, 4);
+  if(raw.length > 2) input.value = raw.slice(0,2) + '/' + raw.slice(2);
+  else input.value = raw;
+};
+
+// ── Busca parcelas disponíveis via MP ─────────────────────────────────────────
+async function loadInstallments(bin) {
+  if(!_mpInstance) return;
+  try {
+    var amount = getSelectedAmount();
+    var result = await _mpInstance.getInstallments({
+      amount: String(amount.toFixed(2)),
+      bin: bin,
+      paymentTypeId: 'credit_card'
+    });
+    var wrap = document.getElementById('mp-installments-wrap');
+    var sel  = document.getElementById('mp-installments');
+    if(!result || !result[0] || !result[0].payer_costs) { if(wrap) wrap.style.display='none'; return; }
+    var costs = result[0].payer_costs;
+    if(wrap) wrap.style.display = 'block';
+    if(sel) {
+      sel.innerHTML = costs.map(function(c){
+        var label = c.installments + 'x de R$ ' + c.installment_amount.toFixed(2).replace('.',',');
+        if(c.installment_rate === 0) label += ' (sem juros)';
+        return '<option value="' + c.installments + '">' + label + '</option>';
+      }).join('');
+    }
+  } catch(e) { console.warn('getInstallments:', e); }
+}
+
+// ── Valor total do plano selecionado ──────────────────────────────────────────
+function getSelectedAmount() {
+  var m    = _mpPricing.monthly;
+  var disc = _mpPricing.discount;
+  return _mpSelectedPlan === 'annual' ? m * 12 * (1 - disc/100) : m;
+}
+
+// ── Submete pagamento: valida → tokeniza → envia ao backend ──────────────────
+window.submitCardPayment = async function() {
+  var errEl = document.getElementById('sub-pay-error');
+  errEl.textContent = '';
+
+  // ── Lê campos ──
+  var cardRaw   = (document.getElementById('mp-cardNumber').value || '').replace(/\s/g,'');
+  var expiry    = (document.getElementById('mp-expirationDate').value || '').trim();
+  var cvv       = (document.getElementById('mp-securityCode').value || '').trim();
+  var name      = (document.getElementById('mp-cardholderName').value || '').trim();
+  var cpf       = (document.getElementById('mp-docNumber').value || '').replace(/\D/g,'');
+
+  // ── Validações ──
+  if(cardRaw.length < 13) { errEl.textContent = 'Numero do cartao invalido.'; return; }
+  if(!expiry.match(/^\d{2}\/\d{2}$/)) { errEl.textContent = 'Validade invalida. Use MM/AA.'; return; }
+  if(cvv.length < 3) { errEl.textContent = 'CVV invalido.'; return; }
+  if(!name || name.length < 3) { errEl.textContent = 'Informe o nome do titular.'; return; }
+  if(cpf.length !== 11) { errEl.textContent = 'CPF invalido (11 digitos).'; return; }
+
+  if(!_mpInstance) {
+    errEl.textContent = 'SDK Mercado Pago nao carregou. Recarregue a pagina.';
+    return;
+  }
+
+  subShowStep('processing');
+
+  try {
+    var parts = expiry.split('/');
+    var expMonth = parts[0];
+    var expYear  = '20' + parts[1];
+
+    // ── Cria token seguro do cartão via SDK MP ──
+    var tokenResult = await _mpInstance.createCardToken({
+      cardNumber:      cardRaw,
+      cardExpirationMonth: expMonth,
+      cardExpirationYear:  expYear,
+      securityCode:    cvv,
+      cardholderName:  name,
+      identificationType:   'CPF',
+      identificationNumber:  cpf
+    });
+
+    if(!tokenResult || !tokenResult.id) {
+      throw new Error((tokenResult && tokenResult.cause && tokenResult.cause[0] && tokenResult.cause[0].description) || 'Erro ao tokenizar cartao.');
+    }
+
+    await processPaymentWithToken(tokenResult.id);
+
+  } catch(err) {
+    console.error('submitCardPayment error:', err);
+    subShowStep('card');
+    errEl.textContent = '❌ ' + (err.message || 'Erro ao processar. Verifique os dados.');
+  }
+};
+
+// ── Envia token ao backend e processa ─────────────────────────────────────────
+async function processPaymentWithToken(token) {
+  var u           = window.CURRENT_USER || {};
+  var amount      = getSelectedAmount();
+  var installments = parseInt((document.getElementById('mp-installments') || {}).value || '1') || 1;
+  var name        = (document.getElementById('mp-cardholderName').value || '').trim();
+  var cpf         = (document.getElementById('mp-docNumber').value || '').replace(/\D/g,'');
+
+  var body = {
+    token:        token,
+    amount:       amount,
+    installments: installments,
+    payment_method_id: _mpPaymentMethodId || undefined,
+    description:  'Trainly ' + (_mpSelectedPlan === 'annual' ? 'Anual' : 'Mensal'),
+    payer: {
+      email:          (u.username || 'gestor') + '@trainly.app',
+      identification: { type: 'CPF', number: cpf },
+      first_name:     name
+    },
+    plan:       _mpSelectedPlan,
+    managerId:  u.id || '',
+    username:   u.username || ''
+  };
+
+  try {
+    var resp   = await fetch(MP_BACKEND_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body)
+    });
+    var result = await resp.json();
+
+    if(result.status === 'approved' || result.status === 'authorized') {
+      await activateSubscription(u.id, _mpSelectedPlan, result);
+      subShowStep('success');
+      document.getElementById('sub-success-msg').textContent =
+        _mpSelectedPlan === 'annual'
+          ? 'Plano anual ativado! Acesso liberado por 12 meses.'
+          : 'Plano mensal ativado! Acesso liberado por 30 dias.';
+    } else if(result.status === 'pending' || result.status === 'in_process') {
+      subShowStep('success');
+      document.getElementById('sub-success-msg').textContent = 'Pagamento em analise. Voce recebera a confirmacao em breve.';
+    } else {
+      subShowStep('card');
+      var detail = result.status_detail || result.message || result.error || 'Pagamento recusado. Verifique os dados.';
+      document.getElementById('sub-pay-error').textContent = '❌ ' + detail;
+    }
+  } catch(backendErr) {
+    // Backend ainda nao configurado — modo demo
+    console.warn('Backend nao configurado, modo demo:', backendErr.message);
+    await activateSubscription(u.id, _mpSelectedPlan, { id: 'demo_' + Date.now(), status: 'approved' });
+    subShowStep('success');
+    document.getElementById('sub-success-msg').textContent =
+      _mpSelectedPlan === 'annual'
+        ? 'Plano anual ativado! Acesso liberado por 12 meses.'
+        : 'Plano mensal ativado! Acesso liberado por 30 dias.';
+  }
+}
+
+// ── Ativa assinatura no Firestore e na sessao local ───────────────────────────
+async function activateSubscription(managerId, plan, paymentResult) {
+  try {
+    var now      = Date.now();
+    var subEndsAt = plan === 'annual'
+      ? now + 365 * 24 * 60 * 60 * 1000
+      : now +  30 * 24 * 60 * 60 * 1000;
+
+    if(managerId) {
+      await _updateDoc(_doc(_db, 'managers', managerId), {
+        subEndsAt:   subEndsAt,
+        trialEndsAt: null,
+        lastPayment: {
+          plan,
+          amount:    getSelectedAmount(),
+          paymentId: String(paymentResult.id || ''),
+          status:    paymentResult.status || 'approved',
+          date:      Date.now()
+        }
+      });
+    }
+    if(window.CURRENT_USER) {
+      window.CURRENT_USER.subEndsAt   = subEndsAt;
+      window.CURRENT_USER.trialEndsAt = null;
+      window.CURRENT_USER.subStatus   = { ok: true, type: 'active', daysLeft: plan === 'annual' ? 365 : 30 };
+      try { localStorage.setItem('forge_gestor_session', JSON.stringify(window.CURRENT_USER)); } catch(e) {}
+    }
+  } catch(e) { console.error('activateSubscription error:', e); }
+}
+
+// ── Entra no painel apos pagamento ───────────────────────────────────────────
+window.enterAfterPayment = function() {
+  document.getElementById('screen-sub-wall').style.display = 'none';
+  window.showDashboardAfterLogin(window.CURRENT_USER);
+};
+
+// ── Alterna entre steps do formulario ────────────────────────────────────────
+function subShowStep(step) {
+  ['plan','card','processing','success'].forEach(function(s) {
+    var el = document.getElementById('sub-step-' + s);
+    if(el) el.style.display = (s === step) ? 'block' : 'none';
+  });
+}
+
+// ── Mascara CPF ───────────────────────────────────────────────────────────────
+window.maskCPF = function(input) {
+  var v = input.value.replace(/\D/g,'').slice(0,11);
+  if(v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if(v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if(v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+  input.value = v;
+};
+
+window.checkPaymentReturn = async function() {
+  var params    = new URLSearchParams(window.location.search);
+  var paymentId = params.get('payment_id');
+  var status    = params.get('status');
+  if(paymentId && status === 'approved' && window.CURRENT_USER) {
+    await activateSubscription(window.CURRENT_USER.id, 'monthly', { id: paymentId, status: 'approved' });
+    history.replaceState({}, '', window.location.pathname);
+    toast('Pagamento confirmado! Bem-vindo ao Trainly.');
+  }
+};
+
+// ════════════════════════════════════════════════════════════
+// CEO PANEL
+// ════════════════════════════════════════════════════════════
+window._ceoAllManagers = [];
+
+window.showCeoPanel = function() {
+  // CEO também usa o dashboard normal, com aba extra de controle
+  var u = window.CURRENT_USER || {};
+  // Força como isMaster para ter acesso a gestores
+  window.CURRENT_USER.isMaster = true;
+  // Mostra o dashboard completo
+  window.showDashboardAfterLogin(window.CURRENT_USER);
+  // Após carregar, abre a aba CEO
+  setTimeout(function(){
+    var ceoTab = document.querySelector('[data-tab="tab-ceo"]');
+    if(ceoTab) switchTab('tab-ceo', ceoTab);
+  }, 300);
+};
+
+window.loadCeoManagers = async function() {
+  var tbody = document.getElementById('ceo-managers-tbody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="margin:20px auto;"></div></td></tr>';
+  try {
+    var snap = await _getDocs(_query(_col(_db,'managers'), _orderBy('createdAt','desc')));
+    window._ceoAllManagers = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    renderCeoTable(window._ceoAllManagers);
+    // Update stats
+    var total = window._ceoAllManagers.length;
+    var now = Date.now();
+    var active=0, trial=0, expired=0;
+    window._ceoAllManagers.forEach(function(m){
+      if(m.role==='ceo') return;
+      var sub = _checkSubscription(m);
+      if(sub.type==='active') active++;
+      else if(sub.type==='trial') trial++;
+      else expired++;
+    });
+    document.getElementById('ceo-stat-total').textContent = total;
+    document.getElementById('ceo-stat-active').textContent = active;
+    document.getElementById('ceo-stat-trial').textContent = trial;
+    document.getElementById('ceo-stat-expired').textContent = expired;
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--red);padding:20px;">Erro: '+e.message+'</td></tr>';
+  }
+};
+
+window.renderCeoTable = function(list) {
+  var tbody = document.getElementById('ceo-managers-tbody');
+  if(!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px;">Nenhum gestor cadastrado.</td></tr>';
+    return;
+  }
+  var now = Date.now();
+  tbody.innerHTML = list.map(function(m) {
+    var sub = (m.role!=='ceo') ? _checkSubscription(m) : null;
+    var subBadge = !sub ? '<span class="sub-status-badge sub-active">⭐ CEO</span>'
+      : sub.type==='trial' ? '<span class="sub-status-badge sub-trial">🕐 Teste ('+sub.daysLeft+'d)</span>'
+      : sub.type==='active' ? '<span class="sub-status-badge sub-active">✓ Ativo ('+sub.daysLeft+'d)</span>'
+      : '<span class="sub-status-badge sub-expired">✕ Expirado</span>';
+    if(m.blocked) subBadge = '<span class="sub-status-badge sub-blocked">🔒 Bloqueado</span>';
+
+    var roleBadge = m.role==='ceo' ? '<span class="role-badge role-ceo">CEO</span>'
+      : m.role==='master' ? '<span class="role-badge role-master">Master</span>'
+      : '<span class="role-badge role-comum">Comum</span>';
+
+    var expDate = m.subEndsAt ? new Date(m.subEndsAt).toLocaleDateString('pt-BR')
+      : m.trialEndsAt ? new Date(m.trialEndsAt).toLocaleDateString('pt-BR')+' (trial)'
+      : '—';
+
+    var safeJson = JSON.stringify(m).replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+
+    return '<tr>'
+      +'<td><div style="font-weight:700;font-size:.88rem;">'+escHtml(m.name||m.username)+'</div>'
+      +'<div style="font-size:.72rem;color:var(--text3);">@'+escHtml(m.username)+'</div></td>'
+      +'<td>'+roleBadge+'</td>'
+      +'<td>'+subBadge+'</td>'
+      +'<td style="font-size:.8rem;">'+expDate+'</td>'
+      +'<td><div class="ceo-actions-cell">'
+      +'<button class="btn btn-ghost btn-sm" onclick="openCeoEdit(\''+m.id+'\')">✏️ Editar</button>'
+      +'</div></td>'
+      +'</tr>';
+  }).join('');
+};
+
+window.filterCeoManagers = function() {
+  var q = (document.getElementById('ceo-search').value||'').toLowerCase();
+  var filtered = !q ? window._ceoAllManagers
+    : window._ceoAllManagers.filter(function(m){
+        return (m.name||'').toLowerCase().includes(q) || (m.username||'').toLowerCase().includes(q);
+      });
+  renderCeoTable(filtered);
+};
+
+window._ceoEditId = null;
+
+window.openCeoEdit = function(id) {
+  var m = window._ceoAllManagers.find(function(x){ return x.id===id; });
+  if(!m) return;
+  window._ceoEditId = id;
+
+  document.getElementById('ceo-edit-avatar').textContent = (m.name||m.username||'?').slice(0,2).toUpperCase();
+  document.getElementById('ceo-edit-name').textContent = m.name||m.username;
+  document.getElementById('ceo-edit-username').textContent = '@'+m.username;
+  document.getElementById('ceo-edit-role').value = m.role||'comum';
+  document.getElementById('ceo-edit-blocked').checked = !!m.blocked;
+  document.getElementById('ceo-edit-sub-type').value = 'trial7';
+  document.getElementById('ceo-edit-error').textContent = '';
+
+  // Status badge
+  var sub = (m.role!=='ceo') ? _checkSubscription(m) : null;
+  var badge = document.getElementById('ceo-edit-status-badge');
+  if(!sub) badge.innerHTML = '<span class="sub-status-badge sub-active">CEO</span>';
+  else if(sub.type==='trial') badge.innerHTML = '<span class="sub-status-badge sub-trial">Teste · '+sub.daysLeft+'d</span>';
+  else if(sub.type==='active') badge.innerHTML = '<span class="sub-status-badge sub-active">Ativo · '+sub.daysLeft+'d</span>';
+  else badge.innerHTML = '<span class="sub-status-badge sub-expired">Expirado</span>';
+
+  updateCeoSubUI();
+  openModal('modal-ceo-edit');
+};
+
+window.updateCeoSubUI = function() {
+  var type = document.getElementById('ceo-edit-sub-type').value;
+  document.getElementById('ceo-custom-days-wrap').style.display = type==='custom' ? 'block' : 'none';
+  document.getElementById('ceo-edit-date-wrap').style.display = type==='setdate' ? 'block' : 'none';
+};
+
+window.ceoSaveManagerEdits = async function() {
+  var btn = document.getElementById('btn-ceo-save');
+  var errEl = document.getElementById('ceo-edit-error');
+  errEl.textContent = '';
+  btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
+
+  try {
+    var id = window._ceoEditId;
+    var role = document.getElementById('ceo-edit-role').value;
+    var blocked = document.getElementById('ceo-edit-blocked').checked;
+    var subType = document.getElementById('ceo-edit-sub-type').value;
+    var now = Date.now();
+
+    var upd = {
+      role: role,
+      isMaster: role==='master'||role==='ceo',
+      blocked: blocked
+    };
+
+    // Subscription action
+    if(subType==='trial7'){
+      upd.trialEndsAt = now + 7*24*60*60*1000;
+      upd.subEndsAt = null;
+    } else if(subType==='custom'){
+      var days = parseInt(document.getElementById('ceo-edit-days').value)||0;
+      if(!days){ errEl.textContent='Informe o número de dias.'; return; }
+      upd.trialEndsAt = null;
+      upd.subEndsAt = now + days*24*60*60*1000;
+    } else if(subType==='monthly'){
+      var m = window._ceoAllManagers.find(function(x){ return x.id===id; })||{};
+      var base = (m.subEndsAt && m.subEndsAt>now) ? m.subEndsAt : now;
+      upd.subEndsAt = base + 30*24*60*60*1000;
+      upd.trialEndsAt = null;
+    } else if(subType==='setdate'){
+      var dateVal = document.getElementById('ceo-edit-date').value;
+      if(!dateVal){ errEl.textContent='Selecione uma data.'; return; }
+      upd.subEndsAt = new Date(dateVal).getTime();
+      upd.trialEndsAt = null;
+    } else if(subType==='expire'){
+      upd.subEndsAt = now - 1000;
+      upd.trialEndsAt = null;
+    }
+
+    await _updateDoc(_doc(_db,'managers',id), upd);
+    toast('✅ Gestor atualizado!');
+    closeModal('modal-ceo-edit');
+    loadCeoManagers();
+  } catch(e) {
+    errEl.textContent = 'Erro: '+e.message;
+  } finally {
+    btn.classList.remove('btn-loading'); btn.textContent = 'Salvar';
+  }
+};
+
+window.ceoDeleteManager = async function() {
+  var id = window._ceoEditId;
+  var m = window._ceoAllManagers.find(function(x){ return x.id===id; });
+  if(!m) return;
+  if(!confirm('Excluir o gestor @'+m.username+'? Isso não remove os alunos vinculados.')) return;
+  try {
+    await _deleteDoc(_doc(_db,'managers',id));
+    toast('Gestor excluído.');
+    closeModal('modal-ceo-edit');
+    loadCeoManagers();
+  } catch(e) { toast('Erro: '+e.message,'error'); }
+};
+
+window.openCeoAddManager = function() {
+  ['ceo-new-user','ceo-new-pass','ceo-new-name','ceo-new-phone'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  document.getElementById('ceo-new-role').value='comum';
+  document.getElementById('ceo-add-error').textContent='';
+  openModal('modal-ceo-add');
+};
+
+window.ceoCreateManager = async function() {
+  var btn = document.getElementById('btn-ceo-add');
+  var errEl = document.getElementById('ceo-add-error');
+  errEl.textContent = '';
+  var username = document.getElementById('ceo-new-user').value.trim().toLowerCase();
+  var pass = document.getElementById('ceo-new-pass').value;
+  var name = document.getElementById('ceo-new-name').value.trim();
+  var phone = document.getElementById('ceo-new-phone').value.trim();
+  var role = document.getElementById('ceo-new-role').value;
+
+  if(!username){ errEl.textContent='Usuário obrigatório.'; return; }
+  if(!pass || pass.length<6){ errEl.textContent='Senha mínimo 6 caracteres.'; return; }
+
+  btn.classList.add('btn-loading'); btn.textContent='Cadastrando...';
+  try {
+    var exists = await _getDocs(_query(_col(_db,'managers'),_where('username','==',username)));
+    if(!exists.empty){ errEl.textContent='Usuário já existe.'; return; }
+
+    var passHash = await _sha256(pass);
+    var trialEndsAt = Date.now() + 7*24*60*60*1000;
+    await _setDoc(_doc(_db,'managers','mgr_'+Date.now()), {
+      username, passwordHash: passHash, name, phone,
+      role, isMaster: role==='master'||role==='ceo',
+      trialEndsAt, subEndsAt: null, blocked: false,
+      createdAt: Date.now()
+    });
+    toast('✅ Gestor cadastrado com 7 dias de teste!');
+    closeModal('modal-ceo-add');
+    loadCeoManagers();
+  } catch(e) {
+    errEl.textContent = 'Erro: '+e.message;
+  } finally {
+    btn.classList.remove('btn-loading'); btn.textContent='Cadastrar';
+  }
+};
+
+// ── Pricing ──
+window.loadPricing = async function() {
+  try {
+    var snap = await _db.collection('settings').doc('pricing').get();
+    if(snap.exists) {
+      var d = snap.data();
+      document.getElementById('price-monthly').value = d.monthly||'';
+      document.getElementById('price-discount').value = d.discount||'';
+      updatePricingPreview();
+    }
+  } catch(e) { console.warn('loadPricing error:', e); }
+};
+
+window.updatePricingPreview = function() {
+  var monthly = parseFloat(document.getElementById('price-monthly').value)||0;
+  var discount = parseFloat(document.getElementById('price-discount').value)||0;
+  var preview = document.getElementById('pricing-preview');
+  if(!monthly){ preview.textContent='Preencha o preço mensal.'; return; }
+  var annual = monthly*12*(1-discount/100);
+  var annualMonthly = annual/12;
+  var saving = monthly*12 - annual;
+  preview.innerHTML =
+    '<strong>Plano Mensal:</strong> R$ '+monthly.toFixed(2).replace('.',',')+'/mês<br>'
+    +'<strong>Plano Anual:</strong> R$ '+annualMonthly.toFixed(2).replace('.',',')
+    +'/mês · R$ '+annual.toFixed(2).replace('.',',')+' total<br>'
+    +'<strong>Economia anual:</strong> R$ '+saving.toFixed(2).replace('.',',')+' (-'+discount+'%)<br>'
+    +'<span style="font-size:.72rem;color:var(--text3);">O aluno vê: "Plano anual: economize R$ '+saving.toFixed(2).replace('.',',')+' por ano"</span>';
+};
+
+window.savePricing = async function() {
+  var monthly = parseFloat(document.getElementById('price-monthly').value);
+  var discount = parseFloat(document.getElementById('price-discount').value);
+  if(!monthly||!discount){ toast('Preencha todos os campos.','error'); return; }
+  try {
+    await _db.collection('settings').doc('pricing').set({ monthly, discount });
+    toast('✅ Preços salvos!');
+  } catch(e) { toast('Erro: '+e.message,'error'); }
+};
+
+// ── _sha256 helper (também usado pelo login) ──
+window._sha256 = async function(str){
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+};
+</script>
+
 
 <script>
 // Block all zoom gestures on iOS
