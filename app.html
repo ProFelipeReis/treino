@@ -656,12 +656,32 @@
       .ceo-table-wrap { overflow-x:auto; }
       .pricing-inputs { grid-template-columns:1fr; }
     }
+
+    /* ══ INVITE SCREEN ══ */
+    #screen-invite { display:none; position:fixed; inset:0; z-index:6000; background:#f7f7f5; align-items:center; justify-content:center; padding:24px; overflow-y:auto; }
+    #screen-invite.visible { display:flex; }
+    .invite-card { background:#fff; border:1px solid #e4e4e0; border-radius:24px; width:100%; max-width:400px; overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,.1); }
+    .invite-head { background:#111110; padding:28px 32px 24px; text-align:center; }
+    .invite-head img { height:32px; margin-bottom:16px; }
+    .invite-head h2 { color:#fff; font-family:var(--head); font-size:1.2rem; font-weight:800; margin-bottom:6px; }
+    .invite-head p { color:rgba(255,255,255,.6); font-size:.82rem; }
+    .invite-body { padding:28px 32px; }
+    .invite-foot { padding:0 32px 24px; text-align:center; font-size:.74rem; color:var(--text3); }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png"/>
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png"/>
 </head>
 <body>
 <div id="toast-container"></div>
+
+<!-- Oculta login imediatamente se houver token de convite na URL -->
+<script>
+(function(){
+  if(new URLSearchParams(window.location.search).get('invite')){
+    document.write('<style>#screen-login{display:none!important}</style>');
+  }
+})();
+</script>
 
 <!-- LOGIN -->
 <div id="screen-login">
@@ -1062,6 +1082,37 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </div>
 
+<!-- ══ INVITE SCREEN ══ -->
+<div id="screen-invite">
+  <div class="invite-card">
+    <div class="invite-head">
+      <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly"/>
+      <h2>Criar sua conta</h2>
+      <p id="invite-subtitle">Você foi convidado para o Trainly</p>
+    </div>
+    <div class="invite-body">
+      <div id="invite-error" style="color:var(--red);font-size:.82rem;font-weight:700;min-height:18px;margin-bottom:12px;"></div>
+      <div id="invite-form">
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Usuário</label>
+          <input id="invite-username" class="form-control" type="text" placeholder="Escolha um usuário" autocomplete="username" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
+        </div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Senha</label>
+          <input id="invite-password" class="form-control" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Confirmar senha</label>
+          <input id="invite-password2" class="form-control" type="password" placeholder="Repita a senha" autocomplete="new-password"/>
+        </div>
+        <button class="btn btn-primary" id="btn-invite-register" onclick="registerFromInvite()" style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">Criar conta →</button>
+      </div>
+    </div>
+    <div class="invite-foot"><p>Trainly · Gestão de academias</p></div>
+  </div>
+</div>
+
+
 <!-- ══ TRIAL BANNER ══ -->
 <div id="trial-banner">
   <button class="tb-close" onclick="document.getElementById('trial-banner').style.display='none'">✕</button>
@@ -1224,7 +1275,21 @@ document.addEventListener('DOMContentLoaded',function(){
         <div id="student-detail-view" class="hidden"></div>
       </div>
       <div id="tab-gestores" class="tab-panel">
-        <div class="page-header"><div class="page-title">Gestores</div><button class="btn btn-primary btn-sm" onclick="openAddManagerModal()">+ Novo gestor</button></div>
+        <div class="page-header">
+          <div class="page-title">Gestores</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" id="btn-gen-invite" onclick="generateInviteLink()">🔗 Link de convite</button>
+            <button class="btn btn-primary btn-sm" onclick="openAddManagerModal()">+ Novo gestor</button>
+          </div>
+        </div>
+        <div id="invite-link-box" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;">
+          <div style="font-weight:700;font-size:.82rem;color:var(--text);margin-bottom:8px;">🔗 Link de convite gerado:</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input id="invite-link-input" class="form-control" readonly style="font-size:.75rem;flex:1;"/>
+            <button class="btn btn-primary btn-sm" onclick="copyInviteLink()">Copiar</button>
+          </div>
+          <div style="font-size:.72rem;color:var(--text3);margin-top:6px;">⏳ Válido por 48h · Uso único</div>
+        </div>
         <div id="managers-grid" class="students-grid"><div class="spinner"></div></div>
       </div>
       <div id="tab-feedbacks" class="tab-panel">
@@ -1820,7 +1885,7 @@ window.logoutGestor=function(){
   if(window._chatSnapshotUnsubs){ window._chatSnapshotUnsubs.forEach(function(fn){ try{fn();}catch(e){} }); window._chatSnapshotUnsubs=[]; }
   if(window._chatSnapshotUnsubs){ window._chatSnapshotUnsubs=[]; }
   // Oculta todas as telas
-  ['screen-dashboard','screen-sub-wall'].forEach(function(id){
+  ['screen-dashboard','screen-sub-wall','screen-invite'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
   document.getElementById('screen-login').style.display='flex';
@@ -3162,6 +3227,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
 // ── Auto login from localStorage ──
 (function init(){
+  // Não faz auto-login se houver token de convite na URL
+  if(new URLSearchParams(window.location.search).get('invite')) return;
   if(hasSession()){
     var sess=getSession();
     if(sess){
@@ -4112,6 +4179,172 @@ window._sha256 = async function(str){
   var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
 };
+</script>
+
+
+<script>
+// ════════════════════════════════════════════════════════
+// SISTEMA DE CONVITE
+// ════════════════════════════════════════════════════════
+
+// Chamado na inicialização — verifica se há ?invite= na URL
+window.checkInviteOnLoad = function() {
+  var params = new URLSearchParams(window.location.search);
+  var token  = params.get('invite');
+  if(!token) return;
+
+  // Esconde login e mostra tela de convite
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-invite').classList.add('visible');
+
+  // Valida o token no Firestore
+  _db.collection('invites').where('token','==',token).get().then(function(snap) {
+    if(snap.empty) {
+      _inviteSetError('Link inválido ou expirado.'); return;
+    }
+    var doc    = snap.docs[0];
+    var invite = doc.data();
+    if(invite.used) {
+      _inviteSetError('Este link já foi utilizado.'); return;
+    }
+    if(invite.expiresAt && Date.now() > invite.expiresAt) {
+      _inviteSetError('Este link expirou.'); return;
+    }
+    // Convite válido
+    window._inviteToken = token;
+    window._inviteDocId = doc.id;
+    window._inviteBy    = invite.createdBy || '';
+  }).catch(function(e) {
+    _inviteSetError('Erro ao validar convite: ' + e.message);
+  });
+};
+
+function _inviteSetError(msg) {
+  document.getElementById('invite-error').textContent = msg;
+  document.getElementById('invite-form').style.display = 'none';
+}
+
+window.registerFromInvite = async function() {
+  var errEl = document.getElementById('invite-error');
+  errEl.textContent = '';
+
+  var username = (document.getElementById('invite-username').value || '').trim().toLowerCase();
+  var pass     = document.getElementById('invite-password').value;
+  var pass2    = document.getElementById('invite-password2').value;
+
+  if(!username || username.length < 3) { errEl.textContent = 'Usuário deve ter ao menos 3 caracteres.'; return; }
+  if(!pass || pass.length < 6)         { errEl.textContent = 'Senha deve ter ao menos 6 caracteres.'; return; }
+  if(pass !== pass2)                   { errEl.textContent = 'As senhas não coincidem.'; return; }
+  if(!window._inviteDocId)             { errEl.textContent = 'Convite inválido. Solicite um novo link.'; return; }
+
+  var btn = document.getElementById('btn-invite-register');
+  btn.classList.add('btn-loading'); btn.textContent = 'Cadastrando...';
+
+  try {
+    // Verifica se username já existe
+    var existing = await _db.collection('managers').where('username','==',username).get();
+    if(!existing.empty) { errEl.textContent = 'Este usuário já está em uso.'; return; }
+
+    // Re-valida convite
+    var invDoc = await _db.collection('invites').doc(window._inviteDocId).get();
+    if(!invDoc.exists || invDoc.data().used) { errEl.textContent = 'Este convite já foi utilizado.'; return; }
+
+    // Cria o gestor
+    var passHash    = await _sha256(pass);
+    var trialEndsAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    var newId       = 'mgr_' + Date.now();
+
+    await _db.collection('managers').doc(newId).set({
+      username,
+      passwordHash: passHash,
+      role:         'comum',
+      isMaster:     false,
+      trialEndsAt,
+      subEndsAt:    null,
+      blocked:      false,
+      createdAt:    Date.now(),
+      invitedBy:    window._inviteBy || ''
+    });
+
+    // Marca convite como usado
+    await _db.collection('invites').doc(window._inviteDocId).update({
+      used: true, usedAt: Date.now(), usedBy: username
+    });
+
+    // Limpa URL
+    history.replaceState({}, '', window.location.pathname);
+
+    // Login automático
+    var userData = {
+      id: newId, username, role: 'comum',
+      isMaster: false, isCeo: false,
+      displayName: username, phone: '',
+      subStatus: { ok: true, type: 'trial', daysLeft: 7 },
+      trialEndsAt, subEndsAt: null
+    };
+    window.CURRENT_USER = userData;
+    try { localStorage.setItem('forge_gestor_session', JSON.stringify(userData)); } catch(e) {}
+
+    document.getElementById('screen-invite').classList.remove('visible');
+    toast('✅ Conta criada! Bem-vindo ao Trainly.');
+    window.showDashboardAfterLogin(userData);
+
+  } catch(e) {
+    errEl.textContent = 'Erro: ' + e.message;
+  } finally {
+    btn.classList.remove('btn-loading'); btn.textContent = 'Criar conta →';
+  }
+};
+
+window.generateInviteLink = async function() {
+  var u = window.CURRENT_USER || {};
+  if(!u.isMaster && u.role !== 'master' && u.role !== 'ceo') {
+    toast('Apenas o master pode gerar convites.', 'error'); return;
+  }
+  var btn = document.getElementById('btn-gen-invite');
+  btn.textContent = 'Gerando...'; btn.disabled = true;
+  try {
+    var arr   = new Uint8Array(24);
+    crypto.getRandomValues(arr);
+    var token = Array.from(arr).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+
+    await _db.collection('invites').doc('inv_' + Date.now()).set({
+      token,
+      createdBy: u.username || '',
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 48 * 60 * 60 * 1000,
+      used: false, usedBy: null, usedAt: null
+    });
+
+    var link  = window.location.origin + window.location.pathname + '?invite=' + token;
+    var box   = document.getElementById('invite-link-box');
+    var input = document.getElementById('invite-link-input');
+    box.style.display  = 'block';
+    input.value        = link;
+    toast('🔗 Link gerado! Copie e envie ao novo gestor.');
+  } catch(e) {
+    toast('Erro: ' + e.message, 'error');
+  } finally {
+    btn.textContent = '🔗 Link de convite'; btn.disabled = false;
+  }
+};
+
+window.copyInviteLink = function() {
+  var input = document.getElementById('invite-link-input');
+  if(!input) return;
+  navigator.clipboard.writeText(input.value)
+    .then(function(){ toast('✅ Link copiado!'); })
+    .catch(function(){ input.select(); document.execCommand('copy'); toast('✅ Link copiado!'); });
+};
+
+// Checa convite assim que o _db estiver pronto
+(function waitDbForInvite(){
+  if(window._db) {
+    window.checkInviteOnLoad();
+  } else {
+    setTimeout(waitDbForInvite, 80);
+  }
+})();
 </script>
 
 
