@@ -657,32 +657,54 @@
       .pricing-inputs { grid-template-columns:1fr; }
     }
 
-    /* ══ INVITE SCREEN ══ */
-    #screen-invite { display:none; position:fixed; inset:0; z-index:6000; background:#f7f7f5; align-items:center; justify-content:center; padding:24px; overflow-y:auto; }
-    #screen-invite.visible { display:flex; }
-    .invite-card { background:#fff; border:1px solid #e4e4e0; border-radius:24px; width:100%; max-width:400px; overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,.1); }
-    .invite-head { background:#111110; padding:28px 32px 24px; text-align:center; }
-    .invite-head img { height:32px; margin-bottom:16px; }
-    .invite-head h2 { color:#fff; font-family:var(--head); font-size:1.2rem; font-weight:800; margin-bottom:6px; }
-    .invite-head p { color:rgba(255,255,255,.6); font-size:.82rem; }
-    .invite-body { padding:28px 32px; }
-    .invite-foot { padding:0 32px 24px; text-align:center; font-size:.74rem; color:var(--text3); }
+    /* ══ INVITE ══ */
+    #screen-invite{display:none;position:fixed;inset:0;z-index:6000;background:#f7f7f5;align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
+    #screen-invite.on{display:flex;}
+    .inv-card{background:#fff;border:1px solid #e4e4e0;border-radius:24px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.1);position:relative;min-height:280px;}
+    .inv-head{background:#111110;padding:28px 32px 24px;text-align:center;}
+    .inv-head img{height:32px;margin-bottom:16px;}
+    .inv-head h2{color:#fff;font-family:var(--head);font-size:1.2rem;font-weight:800;margin-bottom:6px;}
+    .inv-head p{color:rgba(255,255,255,.6);font-size:.82rem;}
+    .inv-body{padding:28px 32px;}
+    .inv-foot{padding:0 32px 24px;text-align:center;font-size:.74rem;color:var(--text3);}
+    /* badges */
+    .mgr-badge{display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:99px;font-size:.7rem;font-weight:800;letter-spacing:.04em;}
+    .mgr-ceo{background:linear-gradient(135deg,#f5c800,#e0a800);color:#111110;box-shadow:0 2px 8px rgba(245,200,0,.3);}
+    .mgr-master{background:rgba(17,17,16,.08);color:#111110;border:1px solid rgba(17,17,16,.2);}
+    .mgr-comum{background:#f0f0ee;color:#888880;border:1px solid #ddddd8;}
+    /* success overlay */
+    .inv-success{position:absolute;inset:0;background:#fff;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;animation:fadeIO .3s ease;}
+    @keyframes fadeIO{from{opacity:0}to{opacity:1}}
+    .inv-check{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#2e7d52,#1a5c38);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(46,125,82,.35);animation:popIn .4s cubic-bezier(.22,1,.36,1) .1s both;}
+    @keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+    .inv-check svg{stroke-dasharray:50;stroke-dashoffset:50;animation:drawChk .4s ease .45s forwards;}
+    @keyframes drawChk{to{stroke-dashoffset:0;opacity:1}}
+    .inv-ok-title{font-family:var(--head);font-size:1.1rem;font-weight:800;color:var(--text);animation:slideUp .3s ease .5s both;}
+    .inv-ok-sub{font-size:.82rem;color:var(--text3);animation:slideUp .3s ease .6s both;}
+    @keyframes slideUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+    /* ══ TERMS MODAL ══ */
+    #modal-terms { display:none; position:fixed; inset:0; z-index:7000; background:rgba(0,0,0,.5); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px; }
+    #modal-terms.on { display:flex; }
+    .terms-card { background:#fff; border-radius:20px; width:100%; max-width:580px; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 16px 48px rgba(0,0,0,.2); }
+    .terms-header { display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .terms-header h3 { font-family:var(--head); font-size:1rem; font-weight:800; }
+    .terms-body { overflow-y:auto; padding:24px; flex:1; font-size:.85rem; color:var(--text2); line-height:1.75; }
+    .terms-body h2 { font-family:var(--head); font-size:.95rem; font-weight:800; color:var(--text); margin:20px 0 8px; }
+    .terms-body h2:first-child { margin-top:0; }
+    .terms-body p { margin-bottom:10px; }
+    .terms-body ul { padding-left:18px; margin-bottom:10px; }
+    .terms-body ul li { margin-bottom:4px; }
+    .terms-body strong { color:var(--text); font-weight:700; }
+    .terms-footer { padding:14px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; flex-shrink:0; }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png"/>
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png"/>
 </head>
 <body>
 <div id="toast-container"></div>
-
-<!-- Oculta login imediatamente se houver token de convite na URL -->
-<script>
-(function(){
-  if(new URLSearchParams(window.location.search).get('invite')){
-    document.documentElement.classList.add('has-invite');
-  }
-})();
-</script>
-<style>.has-invite #screen-login { display:none !important; }</style>
+<script>if(new URLSearchParams(window.location.search).get('invite')){document.documentElement.classList.add('has-invite');}</script>
+<style>.has-invite #screen-login{display:none!important}</style>
 
 <!-- LOGIN -->
 <div id="screen-login">
@@ -1077,7 +1099,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     </div>
     <div class="sub-wall-footer">
-      <p>Trainly · Gestão de academias</p>
+      <p>Trainly</p>
       <button class="sub-wall-logout" onclick="logoutGestor()">Sair da conta</button>
     </div>
   </div>
@@ -1085,31 +1107,77 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- ══ INVITE SCREEN ══ -->
 <div id="screen-invite">
-  <div class="invite-card">
-    <div class="invite-head">
+  <div class="inv-card">
+    <div class="inv-head">
       <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly"/>
       <h2>Criar sua conta</h2>
-      <p id="invite-subtitle">Você foi convidado para o Trainly</p>
+      <p>Você foi convidado para o Trainly</p>
     </div>
-    <div class="invite-body">
-      <div id="invite-error" style="color:var(--red);font-size:.82rem;font-weight:700;min-height:18px;margin-bottom:12px;"></div>
-      <div id="invite-form">
+    <div class="inv-body">
+      <div id="inv-error" style="color:var(--red);font-size:.82rem;font-weight:700;min-height:18px;margin-bottom:12px;"></div>
+
+      <!-- ETAPA 1: Usuário, senha e termos -->
+      <div id="inv-step1">
+        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 1 de 2 — Acesso</div>
         <div class="form-group">
           <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Usuário</label>
-          <input id="invite-username" class="form-control" type="text" placeholder="Escolha um usuário" autocomplete="username" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
+          <input id="inv-user" class="form-control" type="text" placeholder="Escolha um usuário" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
         </div>
         <div class="form-group">
           <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Senha</label>
-          <input id="invite-password" class="form-control" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+          <input id="inv-pass" class="form-control" type="password" placeholder="Mínimo 6 caracteres"/>
         </div>
         <div class="form-group">
           <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Confirmar senha</label>
-          <input id="invite-password2" class="form-control" type="password" placeholder="Repita a senha" autocomplete="new-password"/>
+          <input id="inv-pass2" class="form-control" type="password" placeholder="Repita a senha"/>
         </div>
-        <button class="btn btn-primary" id="btn-invite-register" onclick="registerFromInvite()" style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">Criar conta →</button>
+        <label style="display:flex;align-items:flex-start;gap:10px;margin-top:14px;margin-bottom:4px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="inv-terms" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;"/>
+          <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">
+            Li e concordo com os
+            <a href="#" onclick="openTermsModal('uso');return false;" style="color:#111110;font-weight:700;text-decoration:underline;">Termos de Uso</a>
+            e a
+            <a href="#" onclick="openTermsModal('privacidade');return false;" style="color:#111110;font-weight:700;text-decoration:underline;">Política de Privacidade</a>.
+          </span>
+        </label>
+        <button class="btn btn-primary" onclick="inviteStep1Next()" style="width:100%;justify-content:center;padding:13px;margin-top:12px;font-size:.95rem;">Continuar →</button>
+      </div>
+
+      <!-- ETAPA 2: CREF e declaração profissional -->
+      <div id="inv-step2" style="display:none;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 2 de 2 — Dados profissionais</div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Número de registro CREF</label>
+          <input id="inv-cref" class="form-control" type="text" placeholder="Ex: 123456-G/SP"/>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;margin-top:14px;margin-bottom:4px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="inv-cref-decl" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;"/>
+          <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">
+            Declaro que sou profissional de educação física com registro ativo no CREF, sendo responsável pelas orientações fornecidas.
+          </span>
+        </label>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn btn-ghost" onclick="inviteStep2Back()" style="flex:0 0 auto;">← Voltar</button>
+          <button class="btn btn-primary" id="inv-btn" onclick="inviteRegister()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Criar conta →</button>
+        </div>
       </div>
     </div>
-    <div class="invite-foot"><p>Trainly · Gestão de academias</p></div>
+    <div class="inv-foot"><p>Trainly</p></div>
+  </div>
+</div>
+
+
+<!-- ══ TERMS MODAL ══ -->
+<div id="modal-terms">
+  <div class="terms-card">
+    <div class="terms-header">
+      <h3 id="terms-modal-title">Termos de Uso</h3>
+      <button onclick="closeTermsModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div class="terms-body" id="terms-modal-body"></div>
+    <div class="terms-footer">
+      <button class="btn btn-primary" onclick="closeTermsModal()">Entendi</button>
+    </div>
   </div>
 </div>
 
@@ -1279,15 +1347,15 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="page-header">
           <div class="page-title">Gestores</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-ghost btn-sm" id="btn-gen-invite" onclick="generateInviteLink()">🔗 Link de convite</button>
+            <button class="btn btn-ghost btn-sm" id="btn-inv-link" onclick="inviteGenLink()">🔗 Link de convite</button>
             <button class="btn btn-primary btn-sm" onclick="openAddManagerModal()">+ Novo gestor</button>
           </div>
         </div>
-        <div id="invite-link-box" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;">
+        <div id="inv-link-box" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;">
           <div style="font-weight:700;font-size:.82rem;color:var(--text);margin-bottom:8px;">🔗 Link de convite gerado:</div>
           <div style="display:flex;align-items:center;gap:8px;">
-            <input id="invite-link-input" class="form-control" readonly style="font-size:.75rem;flex:1;"/>
-            <button class="btn btn-primary btn-sm" onclick="copyInviteLink()">Copiar</button>
+            <input id="inv-link-input" class="form-control" readonly style="font-size:.75rem;flex:1;min-width:0;"/>
+            <button class="btn btn-primary btn-sm" onclick="inviteCopyLink()">Copiar</button>
           </div>
           <div style="font-size:.72rem;color:var(--text3);margin-top:6px;">⏳ Válido por 48h · Uso único</div>
         </div>
@@ -3200,9 +3268,7 @@ window.renderManagersGrid=function(list){
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:4px;">
-        <span class="badge ${m.isMaster?'badge-active':''}">
-          ${m.isMaster?'⭐ Master':'Gestor'}
-        </span>
+        <span class="mgr-badge ${m.role==='ceo'?'mgr-ceo':m.isMaster?'mgr-master':'mgr-comum'}">${m.role==='ceo'?'⭐ CEO':m.isMaster?'⭐ Master':'Comum'}</span>
         <div style="display:flex;gap:6px;">
           <button class="btn btn-ghost btn-sm" onclick="openAddManagerModal(${JSON.stringify(m).replace(/"/g,'&quot;')})">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="deleteManager('${m.id}','${m.username}')">🗑</button>
@@ -3228,7 +3294,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 // ── Auto login from localStorage ──
 (function init(){
-  // Não faz auto-login se houver token de convite na URL
   if(new URLSearchParams(window.location.search).get('invite')) return;
   if(hasSession()){
     var sess=getSession();
@@ -4180,174 +4245,193 @@ window._sha256 = async function(str){
   var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
 };
-</script>
 
+// ══════════════════════════════════════════════════════════
+// SISTEMA DE CONVITE — tudo aqui, _db já está disponível
+// ══════════════════════════════════════════════════════════
 
-<script>
-// ════════════════════════════════════════════════════════
-// SISTEMA DE CONVITE
-// ════════════════════════════════════════════════════════
+var _TERMS_USO = `
+<h2>1. Sobre a Plataforma</h2>
+<p>A <strong>Trainly</strong> é uma plataforma digital voltada à gestão de treinos, alunos e comunicação entre profissionais e seus clientes, permitindo a criação, organização e acompanhamento de rotinas de treino.</p>
+<p>A plataforma atua exclusivamente como <strong>ferramenta tecnológica</strong>, não realizando prescrição direta de exercícios físicos.</p>
+<h2>2. Aceitação dos Termos</h2>
+<p>Ao se cadastrar e utilizar a plataforma, o usuário declara que leu, compreendeu e concorda integralmente com estes Termos de Uso.</p>
+<h2>3. Cadastro e Elegibilidade</h2>
+<p>Para utilizar a Trainly, o usuário deve ter no mínimo 18 anos, fornecer informações verdadeiras e ser responsável pela confidencialidade de sua conta e senha.</p>
+<h2>4. Uso Profissional e Registro no CREF</h2>
+<p>Ao se cadastrar como gestor, o usuário declara que é profissional de educação física devidamente qualificado, possui registro ativo no CREF e é o único responsável pelas prescrições de treino fornecidas.</p>
+<h2>5. Responsabilidade sobre Treinos</h2>
+<p>A Trainly <strong>não se responsabiliza</strong> por lesões, danos físicos ou problemas de saúde decorrentes da execução de treinos, resultados obtidos pelos alunos, ou prescrições inadequadas. Toda orientação é de <strong>responsabilidade exclusiva do gestor</strong>.</p>
+<h2>6. Uso da Plataforma</h2>
+<p>O usuário concorda em utilizar a plataforma de forma legal e ética, não compartilhar sua conta com terceiros e não utilizar o sistema para fins ilícitos.</p>
+<h2>7. Planos, Pagamentos e Assinaturas</h2>
+<p>Ao contratar um plano, o usuário concorda que os valores podem ser alterados com aviso prévio, a cobrança poderá ser recorrente e o acesso poderá ser suspenso em caso de inadimplência.</p>
+<h2>8. Período de Teste (Trial)</h2>
+<p>A Trainly poderá oferecer período de teste gratuito por tempo limitado. Após o término, será necessário contratar um plano pago para continuar utilizando os serviços.</p>
+<h2>9. Cancelamento</h2>
+<p>O usuário pode solicitar cancelamento a qualquer momento. A Trainly se reserva o direito de suspender contas que violem estes termos.</p>
+<h2>10. Dados e Privacidade (LGPD)</h2>
+<p>Ao utilizar a plataforma, o usuário autoriza a coleta e tratamento de dados conforme a Política de Privacidade. Os dados são armazenados em serviços de terceiros como Firebase.</p>
+<h2>11. Propriedade Intelectual</h2>
+<p>Todos os direitos sobre a plataforma pertencem à Trainly, sendo proibida a cópia ou reprodução sem autorização.</p>
+<h2>12. Legislação Aplicável</h2>
+<p>Estes Termos são regidos pelas leis da República Federativa do Brasil.</p>
+`;
 
-// Chamado na inicialização — verifica se há ?invite= na URL
-window.checkInviteOnLoad = function() {
-  var params = new URLSearchParams(window.location.search);
-  var token  = params.get('invite');
-  if(!token) return;
+var _TERMS_PRIVACIDADE = `
+<h2>1. Introdução</h2>
+<p>Esta Política informa como a <strong>Trainly</strong> coleta, utiliza, armazena e protege os dados pessoais dos usuários da plataforma.</p>
+<h2>2. Dados Coletados</h2>
+<p>Coletamos dados fornecidos pelo usuário (nome, telefone, e-mail, senha criptografada), dados de alunos cadastrados pelo gestor, dados de uso da plataforma e dados de pagamento. <strong>Dados sensíveis de cartão não são armazenados pela Trainly.</strong></p>
+<h2>3. Base Legal (LGPD)</h2>
+<p>O tratamento ocorre com base na execução de contrato, consentimento do usuário, cumprimento de obrigações legais e legítimo interesse para melhoria dos serviços.</p>
+<h2>4. Finalidade do Uso</h2>
+<p>Os dados são utilizados para funcionamento da plataforma, cadastro de usuários, processamento de pagamentos, comunicação e melhoria dos serviços.</p>
+<h2>5. Compartilhamento</h2>
+<p>Dados podem ser compartilhados com prestadores de serviço essenciais (Firebase, Mercado Pago) e autoridades legais quando exigido. <strong>A Trainly não comercializa dados pessoais.</strong></p>
+<h2>6. Segurança</h2>
+<p>Adotamos controle de acesso, autenticação, monitoramento e criptografia. Nenhum sistema é completamente seguro.</p>
+<h2>7. Direitos do Titular (LGPD)</h2>
+<p>O usuário pode acessar, corrigir, anonimizar, bloquear ou solicitar exclusão de seus dados, além de revogar consentimento a qualquer momento.</p>
+<h2>8. Responsabilidade dos Gestores</h2>
+<p>Os gestores são responsáveis pelos dados de seus alunos inseridos na plataforma e devem garantir o consentimento adequado.</p>
+<h2>9. Alterações</h2>
+<p>Esta política pode ser atualizada a qualquer momento. O uso contínuo implica aceitação das alterações.</p>
+<h2>10. Contato</h2>
+<p>Para dúvidas ou solicitações sobre privacidade, entre em contato pelos canais oficiais da plataforma.</p>
+`;
 
-  // Esconde login e mostra tela de convite
-  document.getElementById('screen-login').style.display = 'none';
-  var inviteScreen = document.getElementById('screen-invite');
-  inviteScreen.style.cssText = 'display:flex!important;position:fixed;inset:0;z-index:6000;background:#f7f7f5;align-items:center;justify-content:center;padding:24px;overflow-y:auto;';
-
-  // Valida o token no Firestore
-  firebase.firestore().collection('invites').where('token','==',token).get().then(function(snap) {
-    if(snap.empty) {
-      _inviteSetError('Link inválido ou expirado.'); return;
-    }
-    var doc    = snap.docs[0];
-    var invite = doc.data();
-    if(invite.used) {
-      _inviteSetError('Este link já foi utilizado.'); return;
-    }
-    if(invite.expiresAt && Date.now() > invite.expiresAt) {
-      _inviteSetError('Este link expirou.'); return;
-    }
-    // Convite válido
-    window._inviteToken = token;
-    window._inviteDocId = doc.id;
-    window._inviteBy    = invite.createdBy || '';
-  }).catch(function(e) {
-    _inviteSetError('Erro ao validar convite: ' + e.message);
-  });
+window.openTermsModal = function(tipo) {
+  var modal = document.getElementById('modal-terms');
+  var title = document.getElementById('terms-modal-title');
+  var body  = document.getElementById('terms-modal-body');
+  title.textContent = tipo === 'uso' ? 'Termos de Uso' : 'Política de Privacidade';
+  body.innerHTML    = tipo === 'uso' ? _TERMS_USO : _TERMS_PRIVACIDADE;
+  modal.classList.add('on');
+  body.scrollTop = 0;
 };
 
-function _inviteSetError(msg) {
-  document.getElementById('invite-error').textContent = msg;
-  document.getElementById('invite-form').style.display = 'none';
-}
-
-window.registerFromInvite = async function() {
-  var errEl = document.getElementById('invite-error');
-  errEl.textContent = '';
-
-  var username = (document.getElementById('invite-username').value || '').trim().toLowerCase();
-  var pass     = document.getElementById('invite-password').value;
-  var pass2    = document.getElementById('invite-password2').value;
-
-  if(!username || username.length < 3) { errEl.textContent = 'Usuário deve ter ao menos 3 caracteres.'; return; }
-  if(!pass || pass.length < 6)         { errEl.textContent = 'Senha deve ter ao menos 6 caracteres.'; return; }
-  if(pass !== pass2)                   { errEl.textContent = 'As senhas não coincidem.'; return; }
-  if(!window._inviteDocId)             { errEl.textContent = 'Convite inválido. Solicite um novo link.'; return; }
-
-  var btn = document.getElementById('btn-invite-register');
-  btn.classList.add('btn-loading'); btn.textContent = 'Cadastrando...';
-
-  try {
-    // Verifica se username já existe
-    var fdb = firebase.firestore();
-    var existing = await fdb.collection('managers').where('username','==',username).get();
-    if(!existing.empty) { errEl.textContent = 'Este usuário já está em uso.'; return; }
-
-    // Re-valida convite
-    var invDoc = await fdb.collection('invites').doc(window._inviteDocId).get();
-    if(!invDoc.exists || invDoc.data().used) { errEl.textContent = 'Este convite já foi utilizado.'; return; }
-
-    // Cria o gestor
-    var passHash    = await _sha256(pass);
-    var trialEndsAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
-    var newId       = 'mgr_' + Date.now();
-
-    await fdb.collection('managers').doc(newId).set({
-      username,
-      passwordHash: passHash,
-      role:         'comum',
-      isMaster:     false,
-      trialEndsAt,
-      subEndsAt:    null,
-      blocked:      false,
-      createdAt:    Date.now(),
-      invitedBy:    window._inviteBy || ''
-    });
-
-    // Marca convite como usado
-    await fdb.collection('invites').doc(window._inviteDocId).update({
-      used: true, usedAt: Date.now(), usedBy: username
-    });
-
-    // Limpa URL
-    history.replaceState({}, '', window.location.pathname);
-
-    // Login automático
-    var userData = {
-      id: newId, username, role: 'comum',
-      isMaster: false, isCeo: false,
-      displayName: username, phone: '',
-      subStatus: { ok: true, type: 'trial', daysLeft: 7 },
-      trialEndsAt, subEndsAt: null
-    };
-    window.CURRENT_USER = userData;
-    try { localStorage.setItem('forge_gestor_session', JSON.stringify(userData)); } catch(e) {}
-
-    document.getElementById('screen-invite').classList.remove('visible');
-    toast('✅ Conta criada! Bem-vindo ao Trainly.');
-    window.showDashboardAfterLogin(userData);
-
-  } catch(e) {
-    errEl.textContent = 'Erro: ' + e.message;
-  } finally {
-    btn.classList.remove('btn-loading'); btn.textContent = 'Criar conta →';
-  }
+window.closeTermsModal = function() {
+  document.getElementById('modal-terms').classList.remove('on');
 };
 
-window.generateInviteLink = async function() {
+// Gera link de convite (master/ceo)
+window.inviteGenLink = async function() {
   var u = window.CURRENT_USER || {};
   if(!u.isMaster && u.role !== 'master' && u.role !== 'ceo') {
     toast('Apenas o master pode gerar convites.', 'error'); return;
   }
-  var btn = document.getElementById('btn-gen-invite');
+  var btn = document.getElementById('btn-inv-link');
   btn.textContent = 'Gerando...'; btn.disabled = true;
   try {
-    var arr   = new Uint8Array(24);
-    crypto.getRandomValues(arr);
-    var token = Array.from(arr).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
-
-    await firebase.firestore().collection('invites').doc('inv_' + Date.now()).set({
-      token,
-      createdBy: u.username || '',
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 48 * 60 * 60 * 1000,
-      used: false, usedBy: null, usedAt: null
+    var arr = new Uint8Array(24); crypto.getRandomValues(arr);
+    var token = Array.from(arr).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    await _db.collection('invites').doc('inv_'+Date.now()).set({
+      token, createdBy: u.username||'', createdAt: Date.now(),
+      expiresAt: Date.now()+48*60*60*1000, used:false, usedBy:null, usedAt:null
     });
-
-    var link  = window.location.origin + window.location.pathname + '?invite=' + token;
-    var box   = document.getElementById('invite-link-box');
-    var input = document.getElementById('invite-link-input');
-    box.style.display  = 'block';
-    input.value        = link;
-    toast('🔗 Link gerado! Copie e envie ao novo gestor.');
-  } catch(e) {
-    toast('Erro: ' + e.message, 'error');
-  } finally {
-    btn.textContent = '🔗 Link de convite'; btn.disabled = false;
-  }
+    var link = window.location.origin+window.location.pathname+'?invite='+token;
+    document.getElementById('inv-link-box').style.display='block';
+    document.getElementById('inv-link-input').value=link;
+    toast('🔗 Link gerado!');
+  } catch(e){ toast('Erro: '+e.message,'error'); }
+  finally{ btn.textContent='🔗 Link de convite'; btn.disabled=false; }
 };
 
-window.copyInviteLink = function() {
-  var input = document.getElementById('invite-link-input');
-  if(!input) return;
+window.inviteCopyLink = function(){
+  var input = document.getElementById('inv-link-input');
   navigator.clipboard.writeText(input.value)
-    .then(function(){ toast('✅ Link copiado!'); })
-    .catch(function(){ input.select(); document.execCommand('copy'); toast('✅ Link copiado!'); });
+    .then(function(){toast('✅ Link copiado!');})
+    .catch(function(){input.select();document.execCommand('copy');toast('✅ Link copiado!');});
 };
 
-// Checa convite assim que o _db estiver pronto
-(function waitDbForInvite(){
-  if(window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
-    window.checkInviteOnLoad();
-  } else {
-    setTimeout(waitDbForInvite, 80);
-  }
+// Registro via convite
+// Avança da etapa 1 para a etapa 2
+window.inviteStep1Next = function(){
+  var errEl = document.getElementById('inv-error');
+  errEl.textContent = '';
+  var username = (document.getElementById('inv-user').value||'').trim().toLowerCase();
+  var pass     = document.getElementById('inv-pass').value;
+  var pass2    = document.getElementById('inv-pass2').value;
+  if(!username||username.length<3){errEl.textContent='Usuário deve ter ao menos 3 caracteres.';return;}
+  if(!pass||pass.length<6){errEl.textContent='Senha deve ter ao menos 6 caracteres.';return;}
+  if(pass!==pass2){errEl.textContent='As senhas não coincidem.';return;}
+  if(!document.getElementById('inv-terms').checked){errEl.textContent='Você precisa aceitar os Termos de Uso e a Política de Privacidade.';return;}
+  errEl.textContent='';
+  document.getElementById('inv-step1').style.display='none';
+  document.getElementById('inv-step2').style.display='block';
+  document.getElementById('inv-cref').focus();
+};
+
+// Volta da etapa 2 para a etapa 1
+window.inviteStep2Back = function(){
+  document.getElementById('inv-error').textContent='';
+  document.getElementById('inv-step2').style.display='none';
+  document.getElementById('inv-step1').style.display='block';
+};
+
+// Finaliza o cadastro (etapa 2)
+window.inviteRegister = async function(){
+  var errEl = document.getElementById('inv-error');
+  errEl.textContent='';
+  var cref  = (document.getElementById('inv-cref').value||'').trim();
+  if(!cref){errEl.textContent='Informe seu número de registro no CREF.';return;}
+  if(!document.getElementById('inv-cref-decl').checked){errEl.textContent='Você precisa marcar a declaração profissional.';return;}
+  if(!window._invDocId){errEl.textContent='Convite inválido. Solicite um novo link.';return;}
+  var username = (document.getElementById('inv-user').value||'').trim().toLowerCase();
+  var pass     = document.getElementById('inv-pass').value;
+  var btn=document.getElementById('inv-btn');
+  btn.classList.add('btn-loading');btn.textContent='Cadastrando...';
+  try{
+    var ex=await _db.collection('managers').where('username','==',username).get();
+    if(!ex.empty){errEl.textContent='Usuário já existe.';inviteStep2Back();return;}
+    var inv=await _db.collection('invites').doc(window._invDocId).get();
+    if(!inv.exists||inv.data().used){errEl.textContent='Convite já utilizado.';return;}
+    var hash=await _sha256(pass);
+    var newId='mgr_'+Date.now();
+    await _db.collection('managers').doc(newId).set({
+      username, passwordHash:hash, role:'comum', isMaster:false,
+      cref, crefDeclared:true,
+      trialEndsAt:Date.now()+7*24*60*60*1000, subEndsAt:null,
+      blocked:false, createdAt:Date.now(), invitedBy:window._invBy||''
+    });
+    await _db.collection('invites').doc(window._invDocId).update({
+      used:true, usedAt:Date.now(), usedBy:username
+    });
+    // Animação de sucesso
+    var card=document.querySelector('.inv-card');
+    var ov=document.createElement('div');
+    ov.className='inv-success';
+    ov.innerHTML='<div class="inv-check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="inv-ok-title">Conta criada com sucesso!</div><div class="inv-ok-sub">Redirecionando para o login...</div>';
+    card.appendChild(ov);
+    setTimeout(function(){
+      history.replaceState({},'',window.location.pathname);
+      document.getElementById('screen-invite').classList.remove('on');
+      document.getElementById('screen-login').style.display='flex';
+      document.documentElement.classList.remove('has-invite');
+    },2500);
+  }catch(e){errEl.textContent='Erro: '+e.message;}
+  finally{btn.classList.remove('btn-loading');btn.textContent='Criar conta →';}
+};
+
+// Valida token de convite — chamado logo abaixo
+window._invDocId=null; window._invBy='';
+(function checkInviteUrl(){
+  var token=new URLSearchParams(window.location.search).get('invite');
+  if(!token) return;
+  // Esconde login, mostra tela de convite
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('screen-invite').classList.add('on');
+  // Valida no Firestore
+  _db.collection('invites').where('token','==',token).get().then(function(snap){
+    if(snap.empty){document.getElementById('inv-error').textContent='Link inválido ou expirado.';document.getElementById('inv-form').style.display='none';return;}
+    var d=snap.docs[0]; var inv=d.data();
+    if(inv.used){document.getElementById('inv-error').textContent='Este link já foi utilizado.';document.getElementById('inv-form').style.display='none';return;}
+    if(inv.expiresAt&&Date.now()>inv.expiresAt){document.getElementById('inv-error').textContent='Este link expirou.';document.getElementById('inv-form').style.display='none';return;}
+    window._invDocId=d.id; window._invBy=inv.createdBy||'';
+  }).catch(function(e){document.getElementById('inv-error').textContent='Erro: '+e.message;});
 })();
+
 </script>
 
 
