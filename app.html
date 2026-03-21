@@ -702,7 +702,7 @@ async function doLogin(){
 
   // Master check (instant, no Firestore needed)
   if(user==='felipereis' && pass==='Epil3004@'){
-    _loginSuccess(user, true, 'felipereis', '27974008527');
+    _loginSuccess(user, true, 'Felipe R. Cruz', '27974008527');
     return;
   }
 
@@ -1356,7 +1356,7 @@ const LS_GESTOR='forge_gestor_session';
 function saveSession(data){ try{ localStorage.setItem(LS_GESTOR, typeof data==='string'?data:JSON.stringify(data)); }catch(e){} }
 function clearSession(){ try{ localStorage.removeItem(LS_GESTOR); }catch(e){} }
 function hasSession(){ try{ return !!localStorage.getItem(LS_GESTOR); }catch(e){ return false; } }
-function getSession(){ try{ var v=localStorage.getItem(LS_GESTOR); if(!v) return null; try{ var s=JSON.parse(v); if(s && typeof s==='object'){ s.phone=s.phone||''; return s; } return null; }catch(e){ return v==='logged'?{username:'felipereis',isMaster:true,displayName:'felipereis',phone:'27974008527'}:null; } }catch(e){ return null; } }
+function getSession(){ try{ var v=localStorage.getItem(LS_GESTOR); if(!v) return null; try{ var s=JSON.parse(v); if(s && typeof s==='object'){ s.phone=s.phone||''; return s; } return null; }catch(e){ return v==='logged'?{username:'felipereis',isMaster:true,displayName:'Felipe R. Cruz',phone:'27974008527'}:null; } }catch(e){ return null; } }
 
 const toast=(msg,type='success')=>{const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;document.getElementById('toast-container').appendChild(t);setTimeout(()=>t.remove(),3500)};
 window.openModal=id=>document.getElementById(id).classList.remove('hidden');
