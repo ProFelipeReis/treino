@@ -1120,6 +1120,10 @@ document.addEventListener('DOMContentLoaded',function(){
       <div id="inv-step1">
         <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 1 de 2 — Acesso</div>
         <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nome completo</label>
+          <input id="inv-name" class="form-control" type="text" placeholder="Seu nome completo" autocomplete="name"/>
+        </div>
+        <div class="form-group">
           <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Usuário</label>
           <input id="inv-user" class="form-control" type="text" placeholder="Escolha um usuário" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
         </div>
@@ -4353,6 +4357,8 @@ window.inviteStep1Next = function(){
   var username = (document.getElementById('inv-user').value||'').trim().toLowerCase();
   var pass     = document.getElementById('inv-pass').value;
   var pass2    = document.getElementById('inv-pass2').value;
+  var name = (document.getElementById('inv-name').value||'').trim();
+  if(!name||name.length<3){errEl.textContent='Informe seu nome completo.';return;}
   if(!username||username.length<3){errEl.textContent='Usuário deve ter ao menos 3 caracteres.';return;}
   if(!pass||pass.length<6){errEl.textContent='Senha deve ter ao menos 6 caracteres.';return;}
   if(pass!==pass2){errEl.textContent='As senhas não coincidem.';return;}
@@ -4389,8 +4395,9 @@ window.inviteRegister = async function(){
     if(!inv.exists||inv.data().used){errEl.textContent='Convite já utilizado.';return;}
     var hash=await _sha256(pass);
     var newId='mgr_'+Date.now();
+    var invName = (document.getElementById('inv-name').value||'').trim();
     await _db.collection('managers').doc(newId).set({
-      username, passwordHash:hash, role:'comum', isMaster:false,
+      username, passwordHash:hash, name: invName, role:'comum', isMaster:false,
       cref, crefDeclared:true,
       trialEndsAt:Date.now()+7*24*60*60*1000, subEndsAt:null,
       blocked:false, createdAt:Date.now(), invitedBy:window._invBy||''
