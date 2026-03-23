@@ -193,6 +193,46 @@
     .quick-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 24px; box-shadow: var(--shadow); }
     .quick-card h3 { font-family: var(--head); font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--text2); }
 
+    /* Referral banner — dashboard */
+    .referral-dash-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r2); padding: 16px 20px;
+      margin-bottom: 20px; box-shadow: var(--shadow);
+    }
+    .referral-dash-banner-left { display: flex; align-items: center; gap: 13px; }
+    .referral-dash-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--accent-dim); border: 1px solid var(--accent-soft); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .referral-dash-text strong { font-family: var(--head); font-size: .92rem; font-weight: 800; color: var(--text); display: block; }
+    .referral-dash-text span { font-size: .76rem; color: var(--text2); font-weight: 500; }
+    .referral-dash-text em { font-weight: 700; color: var(--green); font-style: normal; }
+
+    /* Student access info banner — topo do detalhe do aluno */
+    .student-access-banner {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--r); padding: 13px 16px;
+      margin-bottom: 22px;
+    }
+    .student-access-banner svg { flex-shrink: 0; color: var(--text3); }
+    .student-access-info { flex: 1; min-width: 0; }
+    .student-access-info .sai-label { font-size: .68rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+    .student-access-info .sai-code { font-family: var(--head); font-size: 1.15rem; font-weight: 800; color: var(--text); letter-spacing: .08em; }
+    .student-access-info .sai-link { font-size: .77rem; color: var(--text2); font-weight: 500; margin-top: 2px; }
+    .student-access-info .sai-link a { color: var(--text); font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--border2); }
+    .student-access-copy { display: flex; gap: 7px; flex-shrink: 0; flex-wrap: wrap; }
+
+    /* Modal de cadastro — código exibido após criar aluno */
+    .new-student-code-reveal {
+      display: none; margin-top: 16px;
+      background: var(--accent-dim); border: 1.5px solid var(--accent-soft);
+      border-radius: var(--r); padding: 14px 16px; text-align: center;
+    }
+    .new-student-code-reveal .nsc-label { font-size: .72rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
+    .new-student-code-reveal .nsc-code { font-family: var(--head); font-size: 2rem; font-weight: 800; color: var(--text); letter-spacing: .12em; }
+    .new-student-code-reveal .nsc-hint { font-size: .75rem; color: var(--text2); margin-top: 6px; line-height: 1.5; }
+
     .students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
     .student-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 20px; cursor: pointer; transition: all .2s; box-shadow: var(--shadow); }
     .student-card:hover { border-color: var(--accent-soft); transform: translateY(-2px); box-shadow: var(--shadow-md); }
@@ -1097,6 +1137,14 @@ async function doLogin(){
     var role = mgr.role || (mgr.isMaster ? 'master' : 'comum');
     var subStatus = (role !== 'ceo') ? _checkSubscription(mgr) : null;
 
+    // Garante que o gestor tem um referralCode permanente — gera uma única vez se não tiver
+    var referralCode = mgr.referralCode || '';
+    if(!referralCode) {
+      var arr = new Uint8Array(5); crypto.getRandomValues(arr);
+      referralCode = Array.from(arr).map(function(b){return b.toString(16).padStart(2,'0');}).join(''); // 10 chars hex
+      try { await db.collection('managers').doc(docSnap.id).update({ referralCode: referralCode }); } catch(e) {}
+    }
+
     _loginSuccess({
       id: docSnap.id,
       username: user,
@@ -1108,6 +1156,7 @@ async function doLogin(){
       subStatus: subStatus,
       trialEndsAt: mgr.trialEndsAt || null,
       subEndsAt: mgr.subEndsAt || null,
+      referralCode: referralCode,
     });
 
   } catch(e) {
@@ -1387,6 +1436,10 @@ document.addEventListener('DOMContentLoaded',function(){
       <!-- ETAPA 1: Dados pessoais -->
       <div id="reg-step1">
         <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 1 de 2 — Dados pessoais</div>
+        <!-- Banner de indicação — só aparece quando vem via ?ref= -->
+        <div id="reg-referral-banner" style="display:none;background:var(--green-dim);border:1px solid rgba(46,125,82,.2);border-radius:var(--r);padding:11px 14px;margin-bottom:16px;font-size:.8rem;color:var(--green);font-weight:600;line-height:1.5;">
+          🎁 Você foi indicado por um colega! Ao concluir seu cadastro, ele ganhará <strong>+7 dias</strong> na assinatura como recompensa pela indicação.
+        </div>
         <div class="form-group">
           <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nome completo</label>
           <input id="reg-name" class="form-control" type="text" placeholder="Seu nome completo" autocomplete="name"/>
@@ -1402,6 +1455,11 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="form-group">
           <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Confirmar senha</label>
           <input id="reg-pass2" class="form-control" type="password" placeholder="Repita a senha" autocomplete="new-password"/>
+        </div>
+        <!-- Campo de código de indicação — oculto por padrão, visível quando não vem por link direto -->
+        <div class="form-group" id="reg-ref-code-wrap" style="display:none;">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Código de indicação <span style="font-weight:500;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input id="reg-ref-code" class="form-control" type="text" placeholder="Ex: joao123" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
         </div>
         <label style="display:flex;align-items:flex-start;gap:10px;margin-top:14px;margin-bottom:4px;cursor:pointer;user-select:none;">
           <input type="checkbox" id="reg-terms" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;"/>
@@ -1737,6 +1795,18 @@ document.addEventListener('DOMContentLoaded',function(){
             <button class="btn btn-ghost" onclick="openCreateAlertModal()" style="background:rgba(245,200,0,.1);border-color:rgba(245,200,0,.4);color:#8a6c00;font-weight:800;">📢 Criar Alerta</button>
           </div>
         </div>
+
+        <!-- Banner de indicação — visível para todos os gestores -->
+        <div class="referral-dash-banner" id="referral-dash-banner">
+          <div class="referral-dash-banner-left">
+            <div class="referral-dash-icon">🎁</div>
+            <div class="referral-dash-text">
+              <strong>Indique um colega, ganhe 7 dias grátis</strong>
+              <span>Convide um profissional de educação física e, quando ele se cadastrar pelo seu link, você ganha <em>+7 dias</em> na sua mensalidade.</span>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="openReferralModal()" style="white-space:nowrap;flex-shrink:0;">Gerar meu link →</button>
+        </div>
       </div>
       <div id="tab-alunos" class="tab-panel">
         <div id="students-list-view">
@@ -1926,16 +1996,76 @@ document.addEventListener('DOMContentLoaded',function(){
 <div id="mobile-sidebar-overlay"></div>
 <div id="mobile-sidebar"></div>
 
+<!-- MODAL: INDICAÇÃO DE AMIGO -->
+<div id="modal-referral" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>🎁 Indicar um colega</h3>
+      <button class="close-btn" onclick="closeModal('modal-referral')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--accent-dim);border:1px solid var(--accent-soft);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;">
+        <div style="font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:4px;">Como funciona</div>
+        <div style="font-size:.8rem;color:var(--text2);line-height:1.6;">
+          Compartilhe o link ou o código com um profissional de educação física. Quando ele se cadastrar usando seu código, você ganha automaticamente <strong>+7 dias</strong> adicionados à sua assinatura.
+        </div>
+      </div>
+
+      <!-- Código de convite em destaque -->
+      <div class="form-group" style="margin-bottom:14px;">
+        <label>Seu código de convite</label>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 16px;">
+          <span id="referral-code-display" style="font-family:var(--head);font-size:1.5rem;font-weight:800;letter-spacing:.1em;color:var(--text);flex:1;">—</span>
+          <button class="btn btn-ghost btn-sm" onclick="copyReferralCode()" style="flex-shrink:0;">📋 Copiar</button>
+        </div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:5px;">Use este código para convidar em massa ou compartilhar verbalmente</div>
+      </div>
+
+      <!-- Link de indicação -->
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>Ou compartilhe o link direto</label>
+        <div style="display:flex;gap:8px;">
+          <input id="referral-link-input" class="form-control" readonly style="font-size:.75rem;flex:1;min-width:0;"/>
+          <button class="btn btn-primary btn-sm" onclick="copyReferralLink()">Copiar</button>
+        </div>
+      </div>
+      <div style="font-size:.72rem;color:var(--text3);margin-bottom:16px;">O link não expira · Cada cadastro vale +7 dias para você</div>
+
+      <!-- Estatísticas -->
+      <div id="referral-stats-wrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Seus convites</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;">
+          <div><div style="font-family:var(--head);font-size:1.4rem;font-weight:800;" id="ref-stat-sent">—</div><div style="font-size:.72rem;color:var(--text3);font-weight:600;">Cadastros</div></div>
+          <div><div style="font-family:var(--head);font-size:1.4rem;font-weight:800;color:var(--green);" id="ref-stat-days">— dias</div><div style="font-size:.72rem;color:var(--text3);font-weight:600;">Dias ganhos</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-referral')">Fechar</button>
+      <button class="btn btn-whatsapp btn-sm" onclick="shareReferralWhatsApp()">📱 Compartilhar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: NOVO ALUNO -->
 <div id="modal-add-student" class="modal-overlay hidden">
   <div class="modal modal-sm">
     <div class="modal-header"><h3>Cadastrar aluno</h3><button class="close-btn" onclick="closeModal('modal-add-student')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group"><label>Nome completo *</label><input id="new-student-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
-      <div class="form-group"><label>Telefone / WhatsApp</label><input id="new-student-phone" class="form-control" type="tel" placeholder="Ex: (27) 99999-9999"/></div>
-      <div class="form-group"><label>Observações (opcional)</label><input id="new-student-obs" class="form-control" type="text" placeholder="Ex: treina manhã, restrição no joelho..."/></div>
+      <div id="add-student-form">
+        <div class="form-group"><label>Nome completo *</label><input id="new-student-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
+        <div class="form-group"><label>Telefone / WhatsApp</label><input id="new-student-phone" class="form-control" type="tel" placeholder="Ex: (27) 99999-9999"/></div>
+        <div class="form-group"><label>Observações (opcional)</label><input id="new-student-obs" class="form-control" type="text" placeholder="Ex: treina manhã, restrição no joelho..."/></div>
+      </div>
+      <!-- Revelação do código após cadastro -->
+      <div class="new-student-code-reveal" id="new-student-code-reveal">
+        <div class="nsc-label">Código de acesso do aluno</div>
+        <div class="nsc-code" id="new-student-code-display">—</div>
+        <div class="nsc-hint">Anote ou compartilhe este código com o aluno.<br/>Ele usará para entrar em <strong>trainly.online</strong></div>
+        <button class="btn btn-ghost btn-sm" onclick="copyNewStudentCode()" style="margin-top:12px;">📋 Copiar código</button>
+      </div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer" id="add-student-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-add-student')">Cancelar</button>
       <button id="btn-add-student" class="btn btn-primary" onclick="addStudent()">Cadastrar</button>
     </div>
@@ -2384,6 +2514,8 @@ window.showDashboardAfterLogin = window.showDashboard = function(userData){
   loadStudents();
   startNotifPolling();
   (function waitChat(){ if(window.startChatBadgePolling){ startChatBadgePolling(); } else { setTimeout(waitChat,200); } })();
+  // Verifica notificação pendente de revogação de bônus de indicação
+  setTimeout(function(){ if(window._checkPendingReferralRevokeNotice) _checkPendingReferralRevokeNotice(); }, 1500);
   // Atualiza dados do Firestore
   _getDocs(_query(_col(_db,'managers'),_where('username','==',u.username))).then(function(snap){
     if(!snap.empty){
@@ -2547,6 +2679,12 @@ window.openAddStudentModal=()=>{
   document.getElementById('new-student-name').value='';
   document.getElementById('new-student-phone').value='';
   document.getElementById('new-student-obs').value='';
+  // Reset code reveal state
+  document.getElementById('add-student-form').style.display='';
+  document.getElementById('new-student-code-reveal').style.display='none';
+  document.getElementById('add-student-footer').innerHTML=
+    '<button class="btn btn-ghost" onclick="closeModal(\'modal-add-student\')">Cancelar</button>'
+    +'<button id="btn-add-student" class="btn btn-primary" onclick="addStudent()">Cadastrar</button>';
   openModal('modal-add-student');
   setTimeout(()=>document.getElementById('new-student-name').focus(),100);
 };
@@ -2568,11 +2706,22 @@ window.addStudent=async()=>{
       managerPhone: u.phone||'',
       createdAt:Date.now()
     });
-    closeModal('modal-add-student');
-    toast(`✅ Aluno cadastrado · Código: ${code}`);
+    // Esconde o formulário e mostra o código gerado
+    document.getElementById('add-student-form').style.display='none';
+    document.getElementById('new-student-code-display').textContent=code;
+    document.getElementById('new-student-code-reveal').style.display='block';
+    document.getElementById('add-student-footer').innerHTML=
+      '<button class="btn btn-primary" onclick="closeModal(\'modal-add-student\')">Concluir</button>';
     await loadStudents();
   }catch(e){toast('Erro: '+e.message,'error');}
-  finally{btn.classList.remove('btn-loading');btn.textContent='Cadastrar';}
+  finally{
+    const b=document.getElementById('btn-add-student');
+    if(b){b.classList.remove('btn-loading');b.textContent='Cadastrar';}
+  }
+};
+window.copyNewStudentCode=function(){
+  var code=document.getElementById('new-student-code-display').textContent;
+  navigator.clipboard.writeText(code).then(function(){toast('✅ Código copiado!');}).catch(function(){toast('Código: '+code);});
 };
 window.openEditStudentModal=sid=>{
   const s=ST.students.find(x=>x.id===sid);
@@ -2629,6 +2778,18 @@ window.openStudentDetail=async sid=>{
   const dv=document.getElementById('student-detail-view');dv.classList.remove('hidden');
   dv.innerHTML=`
     <button class="back-btn" onclick="showStudentsList()">← Voltar</button>
+    <div class="student-access-banner">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div class="student-access-info">
+        <div class="sai-label">Código de acesso do aluno</div>
+        <div class="sai-code">${s.code}</div>
+        <div class="sai-link">Acesse em <a href="https://trainly.online" target="_blank">trainly.online</a> e insira este código</div>
+      </div>
+      <div class="student-access-copy">
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${s.code}').then(()=>toast('✅ Código copiado!'))">📋 Copiar código</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('trainly.online').then(()=>toast('✅ Link copiado!'))">🔗 Copiar link</button>
+      </div>
+    </div>
     <div class="detail-header">
       <div class="detail-avatar">${initials(s.name)}</div>
       <div class="detail-info">
@@ -4126,10 +4287,11 @@ window.crefReject = async function(btn) {
       blockReasons: ['Documento CREF falso ou inválido']
     });
 
-    // Notifica todos os alunos desse gestor
+    // Notifica todos os alunos desse gestor e revoga bônus de indicação
     if(mgrUsername) {
       await window._notifyStudentsOfSuspension(mgrUsername);
     }
+    await _revokeReferralBonus(id);
 
     toast('Conta bloqueada por CREF inválido.', 'error');
     loadCrefPending();
@@ -4739,12 +4901,13 @@ window.ceoSaveManagerEdits = async function() {
 
     await _updateDoc(_doc(_db,'managers',id), upd);
 
-    // Se acabou de ser bloqueado, notifica os alunos
+    // Se acabou de ser bloqueado, notifica os alunos e revoga bônus de indicação
     if(!wasBlocked && isNowBlocked) {
       var mgrUsername = mgrBefore.username || '';
       if(mgrUsername) {
         await window._notifyStudentsOfSuspension(mgrUsername);
       }
+      await _revokeReferralBonus(id);
     }
 
     toast('✅ Gestor atualizado!');
@@ -4924,11 +5087,63 @@ window.closeTermsModal = function() {
   document.getElementById('modal-terms').classList.remove('on');
 };
 
-// Gera link de convite (master/ceo)
+// ════════════════════════════════════════════════════════
+// SISTEMA DE INDICAÇÃO (REFERRAL) — todos os gestores
+// ════════════════════════════════════════════════════════
+
+// Abre modal de indicação
+window.openReferralModal = async function() {
+  var u = window.CURRENT_USER || {};
+  var refCode = u.referralCode || '';
+
+  if(!refCode) {
+    toast('Erro ao carregar seu código. Tente fazer login novamente.', 'error');
+    return;
+  }
+
+  var link = window.location.origin + window.location.pathname + '?ref=' + refCode;
+  var codeEl = document.getElementById('referral-code-display');
+  if(codeEl) codeEl.textContent = refCode;
+  document.getElementById('referral-link-input').value = link;
+
+  // Carrega estatísticas de indicações
+  try {
+    var snap = await _db.collection('managers').where('referredBy','==',refCode).get();
+    var count = snap.size;
+    document.getElementById('ref-stat-sent').textContent = count;
+    document.getElementById('ref-stat-days').textContent = (count * 7) + ' dias';
+  } catch(e) {
+    document.getElementById('ref-stat-sent').textContent = '—';
+    document.getElementById('ref-stat-days').textContent = '—';
+  }
+  openModal('modal-referral');
+};
+
+window.copyReferralCode = function() {
+  var code = (document.getElementById('referral-code-display') || {}).textContent || '';
+  navigator.clipboard.writeText(code)
+    .then(function(){ toast('✅ Código copiado!'); })
+    .catch(function(){ toast('Código: ' + code); });
+};
+
+window.copyReferralLink = function() {
+  var input = document.getElementById('referral-link-input');
+  navigator.clipboard.writeText(input.value)
+    .then(function(){ toast('✅ Link de indicação copiado!'); })
+    .catch(function(){ input.select(); document.execCommand('copy'); toast('✅ Link copiado!'); });
+};
+
+window.shareReferralWhatsApp = function() {
+  var link = document.getElementById('referral-link-input').value;
+  var text = 'Oi! Estou usando o Trainly para gerenciar meus alunos e recomendo muito. Se você é personal trainer ou professor de educação física, se cadastra pelo meu link: ' + link;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+};
+
+// Gera link de convite — mantido para compatibilidade com aba Gestores (master/ceo)
 window.inviteGenLink = async function() {
   var u = window.CURRENT_USER || {};
   if(!u.isMaster && u.role !== 'master' && u.role !== 'ceo') {
-    toast('Apenas o master pode gerar convites.', 'error'); return;
+    toast('Apenas o master pode gerar convites de gestor.', 'error'); return;
   }
   var btn = document.getElementById('btn-inv-link');
   btn.textContent = 'Gerando...'; btn.disabled = true;
@@ -4954,8 +5169,138 @@ window.inviteCopyLink = function(){
     .catch(function(){input.select();document.execCommand('copy');toast('✅ Link copiado!');});
 };
 
-// Registro via convite
-// Avança da etapa 1 para a etapa 2
+// ── Recompensa de +7 dias para quem indicou ──────────────────────────────────
+async function _applyReferralBonus(referredByCode) {
+  if(!referredByCode) return;
+  try {
+    // Busca pelo referralCode aleatório (não pelo username)
+    var snap = await _db.collection('managers').where('referralCode','==',referredByCode).get();
+    if(snap.empty) return;
+    var doc = snap.docs[0];
+    var m = doc.data();
+    var now = Date.now();
+    var bonusDays = 7 * 24 * 60 * 60 * 1000;
+    var base = (m.subEndsAt && m.subEndsAt > now) ? m.subEndsAt
+             : (m.trialEndsAt && m.trialEndsAt > now) ? m.trialEndsAt
+             : now;
+    var field = (m.subEndsAt && m.subEndsAt > now) ? 'subEndsAt' : 'trialEndsAt';
+    var upd = {}; upd[field] = base + bonusDays;
+    await _db.collection('managers').doc(doc.id).update(upd);
+  } catch(e) { console.warn('Referral bonus error:', e); }
+}
+
+// ── Revoga bônus de +7 dias de quem indicou um gestor bloqueado ──────────────
+async function _revokeReferralBonus(blockedManagerId) {
+  if(!blockedManagerId) return;
+  try {
+    // Busca o gestor bloqueado para pegar o referredBy
+    var blockedDoc = await _db.collection('managers').doc(blockedManagerId).get();
+    if(!blockedDoc.exists) return;
+    var blockedData = blockedDoc.data();
+
+    // Evita revogar duas vezes
+    if(blockedData.referralBonusRevoked) return;
+
+    var refCode = blockedData.referredBy || '';
+    if(!refCode) return; // não foi indicado por ninguém
+
+    // Tenta encontrar o referrer pelo referralCode (fluxo ?ref=) OU pelo username (fluxo ?invite=)
+    var referrerDoc = null;
+    var snap = await _db.collection('managers').where('referralCode','==',refCode).get();
+    if(!snap.empty) {
+      referrerDoc = snap.docs[0];
+    } else {
+      // Fallback: refCode pode ser o username de quem criou o convite
+      var snap2 = await _db.collection('managers').where('username','==',refCode).get();
+      if(!snap2.empty) referrerDoc = snap2.docs[0];
+    }
+    if(!referrerDoc) return; // referrer não encontrado de jeito nenhum
+
+    var referrer = referrerDoc.data();
+    var now = Date.now();
+    var bonusDays = 7 * 24 * 60 * 60 * 1000;
+
+    // Remove os 7 dias que foram adicionados
+    var upd = {};
+    if(referrer.subEndsAt && referrer.subEndsAt > now) {
+      upd.subEndsAt = Math.max(now, referrer.subEndsAt - bonusDays);
+    } else if(referrer.trialEndsAt && referrer.trialEndsAt > now) {
+      upd.trialEndsAt = Math.max(now, referrer.trialEndsAt - bonusDays);
+    } else {
+      // Assinatura já vencida — não há dias a remover, mas ainda notifica
+    }
+
+    if(Object.keys(upd).length) {
+      await _db.collection('managers').doc(referrerDoc.id).update(upd);
+    }
+
+    // Marca no gestor bloqueado que o bônus foi revogado (evita dupla revogação)
+    await _db.collection('managers').doc(blockedManagerId).update({ referralBonusRevoked: true });
+
+    var blockedName = blockedData.name || blockedData.username || 'O gestor indicado';
+
+    // Se o referrer estiver logado agora, mostra o popup imediatamente
+    var cu = window.CURRENT_USER || {};
+    if(cu.id === referrerDoc.id) {
+      _showReferralRevokedAlert(blockedName);
+    } else {
+      // Grava notificação pendente — referrer verá no próximo login
+      await _db.collection('managers').doc(referrerDoc.id).update({
+        pendingReferralRevokeNotice: {
+          revokedAt: Date.now(),
+          blockedName: blockedName
+        }
+      });
+    }
+  } catch(e) { console.warn('Revoke referral bonus error:', e); }
+}
+
+function _showReferralRevokedAlert(blockedName) {
+  // Remove overlay anterior se existir
+  var existing = document.getElementById('referral-revoke-overlay');
+  if(existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'referral-revoke-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
+  overlay.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:400px;box-shadow:var(--shadow-md);overflow:hidden;">
+      <div style="background:var(--red-dim);border-bottom:1px solid rgba(224,62,62,.2);padding:20px 24px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(224,62,62,.15);border:1px solid rgba(224,62,62,.25);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">⚠️</div>
+        <div>
+          <div style="font-family:var(--head);font-size:1rem;font-weight:800;color:var(--red);">Bônus de indicação revogado</div>
+          <div style="font-size:.76rem;color:var(--text2);margin-top:2px;">Uma indicação sua foi bloqueada</div>
+        </div>
+      </div>
+      <div style="padding:20px 24px;">
+        <p style="font-size:.88rem;color:var(--text2);line-height:1.65;">
+          A conta de <strong style="color:var(--text);">${blockedName}</strong>, que você indicou, foi bloqueada pela administração.<br><br>
+          Os <strong>7 dias de bônus</strong> concedidos pela indicação foram removidos da sua assinatura.
+        </p>
+      </div>
+      <div style="padding:0 24px 20px;display:flex;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="document.getElementById('referral-revoke-overlay').remove()">Entendi</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+// Verifica ao carregar o dashboard se há notificação de revogação pendente
+window._checkPendingReferralRevokeNotice = async function() {
+  var cu = window.CURRENT_USER || {};
+  if(!cu.id) return;
+  try {
+    var doc = await _db.collection('managers').doc(cu.id).get();
+    if(!doc.exists) return;
+    var data = doc.data();
+    if(data.pendingReferralRevokeNotice) {
+      var notice = data.pendingReferralRevokeNotice;
+      // Exibe o popup e limpa a notificação pendente
+      _showReferralRevokedAlert(notice.blockedName || 'um gestor indicado');
+      await _db.collection('managers').doc(cu.id).update({ pendingReferralRevokeNotice: null });
+    }
+  } catch(e) {}
+};
 window.inviteStep1Next = function(){
   var errEl = document.getElementById('inv-error');
   errEl.textContent = '';
@@ -4974,14 +5319,12 @@ window.inviteStep1Next = function(){
   document.getElementById('inv-cref').focus();
 };
 
-// Volta da etapa 2 para a etapa 1
 window.inviteStep2Back = function(){
   document.getElementById('inv-error').textContent='';
   document.getElementById('inv-step2').style.display='none';
   document.getElementById('inv-step1').style.display='block';
 };
 
-// Finaliza o cadastro (etapa 2)
 window.inviteRegister = async function(){
   var errEl = document.getElementById('inv-error');
   errEl.textContent='';
@@ -5001,16 +5344,24 @@ window.inviteRegister = async function(){
     var hash=await _sha256(pass);
     var newId='mgr_'+Date.now();
     var invName = (document.getElementById('inv-name').value||'').trim();
+    var invBy = window._invBy||'';
+    // Busca o referralCode real de quem criou o convite (para consistência com o sistema de revogação)
+    var invByRefCode = invBy;
+    try {
+      var invBySnap = await _db.collection('managers').where('username','==',invBy).get();
+      if(!invBySnap.empty) invByRefCode = invBySnap.docs[0].data().referralCode || invBy;
+    } catch(e) {}
     await _db.collection('managers').doc(newId).set({
       username, passwordHash:hash, name: invName, role:'comum', isMaster:false,
       cref, crefDeclared:true,
       trialEndsAt:Date.now()+7*24*60*60*1000, subEndsAt:null,
-      blocked:false, createdAt:Date.now(), invitedBy:window._invBy||''
+      blocked:false, createdAt:Date.now(), invitedBy:invBy, referredBy:invByRefCode
     });
     await _db.collection('invites').doc(window._invDocId).update({
       used:true, usedAt:Date.now(), usedBy:username
     });
-    // Animação de sucesso
+    // Bônus para quem indicou
+    await _applyReferralBonus(invBy);
     var card=document.querySelector('.inv-card');
     var ov=document.createElement('div');
     ov.className='inv-success';
@@ -5031,10 +5382,8 @@ window._invDocId=null; window._invBy='';
 (function checkInviteUrl(){
   var token=new URLSearchParams(window.location.search).get('invite');
   if(!token) return;
-  // Esconde login, mostra tela de convite
   document.getElementById('screen-login').style.display='none';
   document.getElementById('screen-invite').classList.add('on');
-  // Valida no Firestore
   _db.collection('invites').where('token','==',token).get().then(function(snap){
     if(snap.empty){document.getElementById('inv-error').textContent='Link inválido ou expirado.';document.getElementById('inv-form').style.display='none';return;}
     var d=snap.docs[0]; var inv=d.data();
@@ -5042,6 +5391,31 @@ window._invDocId=null; window._invBy='';
     if(inv.expiresAt&&Date.now()>inv.expiresAt){document.getElementById('inv-error').textContent='Este link expirou.';document.getElementById('inv-form').style.display='none';return;}
     window._invDocId=d.id; window._invBy=inv.createdBy||'';
   }).catch(function(e){document.getElementById('inv-error').textContent='Erro: '+e.message;});
+})();
+
+// Detecta ?ref= e valida o código no Firestore antes de abrir o cadastro
+window._pendingRefCode = '';
+(function checkRefUrl(){
+  var ref = new URLSearchParams(window.location.search).get('ref');
+  if(!ref) return;
+  // Valida no Firestore — o código deve existir em algum manager
+  function tryOpen() {
+    if(!window._db) { setTimeout(tryOpen, 150); return; }
+    _db.collection('managers').where('referralCode','==',ref).get()
+      .then(function(snap){
+        if(snap.empty) {
+          // Código inválido — abre cadastro normal sem referral
+          console.warn('Referral code not found:', ref);
+          if(typeof openRegisterScreen === 'function') openRegisterScreen();
+          return;
+        }
+        // Código válido — guarda e abre cadastro com banner de indicação
+        window._pendingRefCode = ref;
+        if(typeof openRegisterScreen === 'function') openRegisterScreen();
+      })
+      .catch(function(){ if(typeof openRegisterScreen === 'function') openRegisterScreen(); });
+  }
+  window.addEventListener('load', function(){ setTimeout(tryOpen, 300); });
 })();
 
 </script>
@@ -5087,6 +5461,23 @@ window.openRegisterScreen = async function() {
   document.getElementById('reg-installments-wrap').style.display = 'none';
   _regSelectedPlan = 'monthly';
   _regMpMethodId   = '';
+
+  // Trata código de indicação — da URL (?ref=) já validado ou digitado manualmente
+  var refCode = window._pendingRefCode || new URLSearchParams(window.location.search).get('ref') || '';
+  var refBanner = document.getElementById('reg-referral-banner');
+  var refCodeWrap = document.getElementById('reg-ref-code-wrap');
+  var refCodeInput = document.getElementById('reg-ref-code');
+  if(refCode) {
+    // Veio via link válido: mostra banner, armazena código no campo oculto
+    if(refBanner) refBanner.style.display = 'block';
+    if(refCodeWrap) refCodeWrap.style.display = 'none';
+    if(refCodeInput) refCodeInput.value = refCode;
+  } else {
+    // Abriu cadastro direto: mostra campo opcional de código
+    if(refBanner) refBanner.style.display = 'none';
+    if(refCodeWrap) refCodeWrap.style.display = 'block';
+    if(refCodeInput) refCodeInput.value = '';
+  }
 
   regShowStep(1);
   document.getElementById('screen-login').style.display = 'none';
@@ -5142,7 +5533,7 @@ window.regSelectPlan = function(plan) {
   document.getElementById('reg-plan-annual').classList.toggle('selected', plan==='annual');
 };
 
-window.regStep1Next = function() {
+window.regStep1Next = async function() {
   var errEl = document.getElementById('reg-error');
   errEl.textContent = '';
   var name  = (document.getElementById('reg-name').value||'').trim();
@@ -5154,6 +5545,30 @@ window.regStep1Next = function() {
   if(!pass||pass.length<6)  { errEl.textContent='Senha deve ter ao menos 6 caracteres.'; return; }
   if(pass!==pass2)          { errEl.textContent='As senhas não coincidem.'; return; }
   if(!document.getElementById('reg-terms').checked) { errEl.textContent='Você precisa aceitar os Termos de Uso e a Política de Privacidade.'; return; }
+
+  // Valida código de indicação manual (se preenchido e não veio via ?ref=)
+  var refInput = document.getElementById('reg-ref-code');
+  var refCodeWrap = document.getElementById('reg-ref-code-wrap');
+  var refManual = refInput ? refInput.value.trim() : '';
+  if(refManual && !window._pendingRefCode && refCodeWrap && refCodeWrap.style.display !== 'none') {
+    var btn1 = document.querySelector('#reg-step1 .btn-primary');
+    if(btn1) { btn1.classList.add('btn-loading'); btn1.textContent = 'Verificando...'; }
+    try {
+      // Busca pelo campo referralCode (código aleatório), não pelo username
+      var snap = await _db.collection('managers').where('referralCode','==',refManual).get();
+      if(snap.empty) {
+        errEl.textContent = 'Código de indicação inválido. Verifique com quem te indicou.';
+        if(btn1) { btn1.classList.remove('btn-loading'); btn1.textContent = 'Continuar →'; }
+        return;
+      }
+      // Código válido — armazena para usar no cadastro
+      window._pendingRefCode = refManual;
+    } catch(e) {
+      // Erro de rede — deixa passar sem bloquear o cadastro
+    }
+    if(btn1) { btn1.classList.remove('btn-loading'); btn1.textContent = 'Continuar →'; }
+  }
+
   regShowStep(2);
 };
 
@@ -5183,12 +5598,19 @@ window.regStep2Next = async function() {
 
     var hash = await _sha256(document.getElementById('reg-pass').value);
     _regNewId = 'mgr_'+Date.now();
+    // Captura código de indicação — prioritário: pendingRefCode > campo manual
+    var refCode = window._pendingRefCode
+               || (document.getElementById('reg-ref-code') ? document.getElementById('reg-ref-code').value.trim() : '')
+               || '';
     await _db.collection('managers').doc(_regNewId).set({
       username:user, passwordHash:hash, name, cref, crefDeclared:true,
       role:'comum', isMaster:false,
       trialEndsAt:Date.now()+7*24*60*60*1000, subEndsAt:null,
-      blocked:false, createdAt:Date.now()
+      blocked:false, createdAt:Date.now(),
+      referredBy: refCode
     });
+    // Aplica bônus de +7 dias para quem indicou (só ele, não o novo cadastro)
+    if(refCode) await _applyReferralBonus(refCode);
 
     document.getElementById('reg-processing').style.display = 'none';
     // Esconde indicador de etapas e rodapé
@@ -5196,8 +5618,9 @@ window.regStep2Next = async function() {
     var foot = document.getElementById('reg-foot'); if(foot) foot.style.display='none';
     document.getElementById('reg-success').style.display = 'block';
     document.getElementById('reg-success-msg').textContent = 'Redirecionando para o login...';
-    // Redirect automático após animação
+    // Redirect automático após animação — limpa ?ref= da URL antes de mostrar login
     setTimeout(function(){
+      history.replaceState({}, '', window.location.pathname); // remove ?ref= da URL
       document.getElementById('screen-register').classList.remove('on');
       document.getElementById('screen-register').style.display = '';
       document.getElementById('screen-login').style.display = 'flex';
