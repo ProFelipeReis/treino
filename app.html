@@ -697,6 +697,123 @@
     .terms-body ul li { margin-bottom:4px; }
     .terms-body strong { color:var(--text); font-weight:700; }
     .terms-footer { padding:14px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; flex-shrink:0; }
+
+    /* ══ REGISTER SCREEN ══ */
+    #screen-register { display:none; position:fixed; inset:0; z-index:6000; background:#f7f7f5; align-items:center; justify-content:center; padding:24px; overflow-y:auto; }
+    #screen-register.on { display:flex; }
+    .reg-card { background:#fff; border:1px solid #e4e4e0; border-radius:24px; width:100%; max-width:420px; overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,.1); position:relative; }
+    .reg-head { background:#111110; padding:24px 32px 20px; text-align:center; }
+    .reg-head img { height:28px; margin-bottom:12px; }
+    .reg-head h2 { color:#fff; font-family:var(--head); font-size:1.1rem; font-weight:800; margin-bottom:4px; }
+    .reg-head p { color:rgba(255,255,255,.55); font-size:.8rem; }
+    .reg-body { padding:24px 32px; }
+    .reg-foot { padding:0 32px 20px; text-align:center; }
+    .reg-step-indicator { display:flex; align-items:center; gap:6px; margin-bottom:18px; }
+    .reg-step-dot { width:8px; height:8px; border-radius:50%; background:var(--border2); transition:all .2s; }
+    .reg-step-dot.active { background:var(--accent); transform:scale(1.3); }
+    .reg-step-dot.done { background:var(--green); }
+
+    /* ══ CREF REVIEW ══ */
+    .cref-review-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; box-shadow:var(--shadow); margin-bottom:28px; }
+    .cref-review-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px; }
+    .cref-badge-pending { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:.7rem; font-weight:800; background:rgba(245,200,0,.15); color:#8a6c00; border:1px solid rgba(245,200,0,.3); }
+    .cref-item { display:flex; align-items:center; gap:14px; padding:14px 20px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .cref-item:last-child { border-bottom:none; }
+    .cref-item-info { flex:1; min-width:0; }
+    .cref-item-name { font-weight:700; font-size:.92rem; color:var(--text); }
+    .cref-item-user { font-size:.76rem; color:var(--text3); font-weight:600; margin-top:1px; }
+    .cref-item-number { display:inline-flex; align-items:center; gap:5px; margin-top:6px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:4px 10px; font-size:.8rem; font-weight:700; color:var(--text); }
+    .cref-item-actions { display:flex; gap:8px; flex-shrink:0; }
+    .btn-approve { background:var(--green-dim); color:var(--green); border:1px solid rgba(46,125,82,.25); border-radius:var(--r); padding:7px 16px; font-size:.82rem; font-weight:700; cursor:pointer; font-family:var(--body); transition:all .15s; }
+    .btn-approve:hover { background:var(--green-soft); }
+    .btn-reject { background:var(--red-dim); color:var(--red); border:1px solid rgba(224,62,62,.25); border-radius:var(--r); padding:7px 16px; font-size:.82rem; font-weight:700; cursor:pointer; font-family:var(--body); transition:all .15s; }
+    .btn-reject:hover { background:rgba(224,62,62,.15); }
+    .cref-empty { padding:32px 20px; text-align:center; color:var(--text3); font-size:.85rem; }
+    .cref-stat-badge { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--red); color:#fff; font-size:.65rem; font-weight:900; margin-left:8px; }
+
+    /* ══ BLOCKED SCREEN ══ */
+    #screen-blocked { display:none; position:fixed; inset:0; z-index:5500; background:#f7f7f5; align-items:center; justify-content:center; padding:24px; overflow-y:auto; }
+    #screen-blocked.on { display:flex; }
+    .blocked-card { background:#fff; border:1px solid #e4e4e0; border-radius:24px; width:100%; max-width:440px; overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,.1); }
+    .blocked-head { background:#111110; padding:28px 32px 24px; text-align:center; }
+    .blocked-head img { height:32px; margin-bottom:16px; }
+    .blocked-head h2 { color:#fff; font-family:var(--head); font-size:1.15rem; font-weight:800; margin-bottom:6px; }
+    .blocked-head p { color:rgba(255,255,255,.55); font-size:.82rem; }
+    .blocked-body { padding:24px 32px; }
+    .blocked-icon { font-size:2.5rem; text-align:center; margin-bottom:12px; }
+    .blocked-title { font-family:var(--head); font-size:1rem; font-weight:800; color:var(--text); text-align:center; margin-bottom:6px; }
+    .blocked-sub { font-size:.83rem; color:var(--text2); text-align:center; margin-bottom:18px; line-height:1.6; }
+    .blocked-reasons { background:var(--red-dim); border:1px solid rgba(224,62,62,.2); border-radius:var(--r); padding:14px 16px; margin-bottom:18px; }
+    .blocked-reasons-title { font-size:.72rem; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+    .blocked-reason-item { font-size:.82rem; color:var(--text); padding:4px 0; display:flex; align-items:center; gap:8px; }
+    .blocked-reason-item::before { content:"•"; color:var(--red); font-weight:900; flex-shrink:0; }
+    .blocked-foot { padding:0 32px 24px; text-align:center; }
+
+    /* ══ TRIAL WELCOME MODAL ══ */
+    #trial-welcome-overlay {
+      display:none; position:fixed; inset:0; z-index:2000;
+      background:rgba(0,0,0,.45); backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      align-items:center; justify-content:center; padding:20px;
+      animation:fadeIO .3s ease;
+    }
+    #trial-welcome-overlay.on { display:flex; }
+    .trial-welcome-card {
+      background:#fff; border-radius:24px; width:100%; max-width:420px;
+      box-shadow:0 16px 48px rgba(0,0,0,.25);
+      animation:popIn .4s cubic-bezier(.22,1,.36,1);
+      overflow:hidden;
+    }
+    .trial-welcome-head {
+      background:linear-gradient(135deg,#111110 0%,#2a2620 100%);
+      padding:28px 28px 24px; text-align:center;
+      border-bottom:2px solid var(--accent);
+    }
+    .trial-welcome-head img { height:30px; margin-bottom:12px; }
+    .trial-welcome-head h2 { color:#fff; font-family:var(--head); font-size:1.15rem; font-weight:800; margin-bottom:4px; }
+    .trial-welcome-head p { color:rgba(255,255,255,.6); font-size:.82rem; }
+    .trial-welcome-body { padding:24px 28px; }
+    .trial-days-badge {
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      background:var(--accent-dim); border:1px solid var(--accent-soft);
+      border-radius:12px; padding:12px 16px; margin-bottom:20px;
+    }
+    .trial-days-num { font-family:var(--head); font-size:2rem; font-weight:800; color:#111110; line-height:1; }
+    .trial-days-lbl { font-size:.82rem; color:var(--text2); font-weight:600; line-height:1.4; }
+    .trial-welcome-foot { padding:0 28px 24px; display:flex; flex-direction:column; gap:10px; }
+
+    /* ══ TRIAL DASHBOARD CARD ══ */
+    .trial-dash-card {
+      display:none;
+      background:linear-gradient(135deg,#111110 0%,#2a2620 100%);
+      border:1px solid rgba(245,200,0,.3);
+      border-radius:var(--r2); padding:20px 24px;
+      margin-bottom:20px;
+      box-shadow:0 4px 20px rgba(0,0,0,.15);
+      align-items:center; justify-content:space-between;
+      gap:16px; flex-wrap:wrap;
+    }
+    .trial-dash-card.visible { display:flex; }
+    .trial-dash-left { display:flex; align-items:center; gap:16px; }
+    .trial-days-circle {
+      width:58px; height:58px; border-radius:50%;
+      background:rgba(245,200,0,.15); border:2px solid rgba(245,200,0,.4);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .trial-days-circle .num { font-family:var(--head); font-size:1.3rem; font-weight:800; color:var(--accent); line-height:1; }
+    .trial-days-circle .lbl { font-size:.5rem; font-weight:700; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.06em; }
+    .trial-dash-info h4 { color:#fff; font-family:var(--head); font-size:.95rem; font-weight:800; margin-bottom:3px; }
+    .trial-dash-info p { color:rgba(255,255,255,.55); font-size:.78rem; line-height:1.4; }
+    .trial-dash-btn {
+      background:linear-gradient(135deg,#f5c800,#e0a800);
+      color:#111110; border:none; border-radius:var(--r);
+      padding:10px 20px; font-size:.85rem; font-weight:800;
+      font-family:var(--body); cursor:pointer; white-space:nowrap;
+      transition:all .15s; flex-shrink:0;
+    }
+    .trial-dash-btn:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(245,200,0,.4); }
+    @media(max-width:768px){ .trial-dash-card { flex-direction:column; align-items:flex-start; } .trial-dash-btn { width:100%; justify-content:center; text-align:center; } }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png"/>
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png"/>
@@ -874,6 +991,11 @@
         <button type="button" onclick="doLogin()" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">Acessar painel →</button>
       </form>
     </div>
+    <div style="margin-top:18px;text-align:center;">
+      <button onclick="openRegisterScreen()" style="background:none;border:none;cursor:pointer;font-family:var(--body);font-size:.84rem;color:#333330;transition:color .15s;">
+        Novo aqui? <span style="color:#111110;font-weight:700;text-decoration:underline;">Criar conta</span>
+      </button>
+    </div>
   </div>
 </div>
 <script>
@@ -881,6 +1003,38 @@
 // LOGIN — 100% Firestore, sem credenciais no código
 // Roles: ceo > master > comum
 // ══════════════════════════════════════════════════════
+function logoutFromBlocked() {
+  var s = document.getElementById('screen-blocked');
+  if(s){ s.classList.remove('on'); s.style.display='none'; }
+  try{ localStorage.removeItem('forge_gestor_session'); }catch(e){}
+  window.CURRENT_USER = null;
+  document.getElementById('screen-login').style.display='flex';
+}
+
+function showBlockedScreen(reasons) {
+  document.getElementById('screen-login').style.display = 'none';
+  var screen = document.getElementById('screen-blocked');
+  if(!screen) return;
+  screen.style.display = '';
+  screen.classList.add('on');
+  var list = document.getElementById('blocked-reasons-list');
+  if(!list) return;
+  var isCrefFake = reasons.some(function(r){ return r && r.indexOf('CREF') !== -1; });
+  if(reasons && reasons.length) {
+    list.innerHTML = '<div class="blocked-reasons-title">Motivos registrados</div>'
+      + reasons.map(function(r){ return '<div class="blocked-reason-item">'+r+'</div>'; }).join('')
+      + (isCrefFake
+          ? '<div style="margin-top:12px;padding:12px 14px;background:#fff8e1;border-radius:8px;border:1px solid #ffc107;">'
+            + '<div style="font-size:.68rem;font-weight:800;color:#7d5a00;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">⚠️ Aviso Legal</div>'
+            + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;margin-bottom:6px;"><strong>Exercício Ilegal da Profissão:</strong> O exercício de atividade profissional sem preencher as condições legais é contravenção penal prevista no <strong>Art. 47 da Lei das Contravenções Penais</strong>.</p>'
+            + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;"><strong>Uso de Documento Falso:</strong> A utilização de carteira do CREF, diploma ou qualquer identificação profissional falsa configura crime de uso de documento falso, conforme o <strong>Art. 304 do Código Penal</strong>.</p>'
+            + '</div>'
+          : '');
+  } else {
+    list.innerHTML = '<div class="blocked-reasons-title">Motivo</div><div class="blocked-reason-item">Violação dos Termos de Uso</div>';
+  }
+}
+
 async function doLogin(){
   var user = document.getElementById('login-user').value.trim().toLowerCase();
   var pass = document.getElementById('login-pass').value;
@@ -911,7 +1065,8 @@ async function doLogin(){
 
     // Conta bloqueada pelo CEO?
     if(mgr.blocked){
-      showLoginError('Conta bloqueada. Entre em contato com o suporte.');
+      var reasons = mgr.blockReasons && mgr.blockReasons.length ? mgr.blockReasons : [];
+      showBlockedScreen(reasons);
       return;
     }
 
@@ -967,8 +1122,9 @@ function showLoginError(msg){
 
 function _loginSuccess(userData){
   try{ localStorage.setItem('forge_gestor_session', JSON.stringify(userData)); }catch(e){}
-  document.getElementById('screen-login').style.display='none';
   window.CURRENT_USER = userData;
+  location.reload();
+  return;
 
   if(userData.role === 'ceo'){
     (function waitCeo(){ if(window.showCeoPanel){ showCeoPanel(); } else { setTimeout(waitCeo,100); } })();
@@ -1186,6 +1342,219 @@ document.addEventListener('DOMContentLoaded',function(){
 </div>
 
 
+<!-- ══ REGISTER SCREEN ══ -->
+<div id="screen-register">
+  <div class="reg-card">
+    <div class="reg-head">
+      <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly"/>
+      <h2>Criar conta</h2>
+      <p>Preencha os dados para se cadastrar</p>
+    </div>
+    <div class="reg-body">
+      <!-- Indicador de etapa -->
+      <div class="reg-step-indicator">
+        <div class="reg-step-dot active" id="reg-dot-1"></div>
+        <div style="flex:1;height:2px;background:var(--border);border-radius:2px;"></div>
+        <div class="reg-step-dot" id="reg-dot-2"></div>
+      </div>
+
+      <div id="reg-error" style="color:var(--red);font-size:.82rem;font-weight:700;min-height:18px;margin-bottom:10px;"></div>
+
+      <!-- ETAPA 1: Dados pessoais -->
+      <div id="reg-step1">
+        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 1 de 2 — Dados pessoais</div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nome completo</label>
+          <input id="reg-name" class="form-control" type="text" placeholder="Seu nome completo" autocomplete="name"/>
+        </div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Usuário</label>
+          <input id="reg-user" class="form-control" type="text" placeholder="Escolha um usuário" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
+        </div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Senha</label>
+          <input id="reg-pass" class="form-control" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Confirmar senha</label>
+          <input id="reg-pass2" class="form-control" type="password" placeholder="Repita a senha" autocomplete="new-password"/>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;margin-top:14px;margin-bottom:4px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="reg-terms" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;"/>
+          <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">
+            Li e concordo com os
+            <a href="#" onclick="openTermsModal('uso');return false;" style="color:#111110;font-weight:700;text-decoration:underline;">Termos de Uso</a>
+            e a
+            <a href="#" onclick="openTermsModal('privacidade');return false;" style="color:#111110;font-weight:700;text-decoration:underline;">Política de Privacidade</a>.
+          </span>
+        </label>
+        <button class="btn btn-primary" onclick="regStep1Next()" style="width:100%;justify-content:center;padding:13px;margin-top:14px;font-size:.95rem;">Continuar →</button>
+        <div style="text-align:center;margin-top:14px;">
+          <button onclick="closeRegisterScreen()" style="background:none;border:none;cursor:pointer;font-family:var(--body);font-size:.82rem;color:var(--text3);">← Voltar ao login</button>
+        </div>
+      </div>
+
+      <!-- ETAPA 2: Dados profissionais -->
+      <div id="reg-step2" style="display:none;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 2 de 2 — Dados profissionais</div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Número de registro CREF</label>
+          <input id="reg-cref" class="form-control" type="text" placeholder="Ex: 123456-G/SP"/>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;margin-top:14px;margin-bottom:4px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="reg-cref-decl" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;"/>
+          <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">Declaro que sou profissional de educação física com registro ativo no CREF, sendo responsável pelas orientações fornecidas.</span>
+        </label>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn btn-ghost" onclick="regStepBack(1)" style="flex:0 0 auto;">← Voltar</button>
+          <button class="btn btn-primary" onclick="regStep2Next()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Criar conta →</button>
+        </div>
+      </div>
+
+      <!-- ETAPA 3: Pagamento -->
+      <div id="reg-step3" style="display:none;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 3 de 3 — Assine o Trainly</div>
+        <div class="sub-plans" id="reg-plans-grid" style="margin-bottom:16px;">
+          <div class="sub-plan selected" id="reg-plan-monthly" onclick="regSelectPlan('monthly')">
+            <div class="sub-plan-label">Mensal</div>
+            <div class="sub-plan-price" id="reg-price-monthly">R$ —</div>
+            <div class="sub-plan-period">/mês</div>
+          </div>
+          <div class="sub-plan" id="reg-plan-annual" onclick="regSelectPlan('annual')">
+            <div class="sub-plan-badge" id="reg-annual-badge">Economize</div>
+            <div class="sub-plan-label">Anual</div>
+            <div class="sub-plan-price" id="reg-price-annual">R$ —</div>
+            <div class="sub-plan-period">/mês · anual</div>
+            <div class="sub-plan-saving" id="reg-annual-saving"></div>
+          </div>
+        </div>
+        <!-- Campos cartão -->
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Número do cartão</label>
+          <div style="position:relative;">
+            <input id="reg-cardNumber" class="form-control" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number" oninput="regCardNumberInput(this)"/>
+            <span id="reg-card-brand" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.8rem;font-weight:700;color:var(--text3);pointer-events:none;"></span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Validade</label>
+            <input id="reg-expiry" class="form-control" type="text" inputmode="numeric" placeholder="MM/AA" maxlength="5" oninput="onExpiryInput(this)"/>
+          </div>
+          <div class="form-group">
+            <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">CVV</label>
+            <input id="reg-cvv" class="form-control" type="text" inputmode="numeric" placeholder="123" maxlength="4"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nome no cartão</label>
+          <input id="reg-card-name" class="form-control" type="text" placeholder="Como está no cartão" oninput="this.value=this.value.toUpperCase()"/>
+        </div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">CPF do titular</label>
+          <input id="reg-cpf" class="form-control" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)"/>
+        </div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">E-mail para recibo</label>
+          <input id="reg-email" class="form-control" type="email" placeholder="seu@email.com"/>
+        </div>
+        <div class="form-group" id="reg-installments-wrap" style="display:none;">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Parcelas</label>
+          <select id="reg-installments" class="form-control"><option value="1">1x (sem juros)</option></select>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px;">
+          <button class="btn btn-ghost" onclick="regStepBack(2)" style="flex:0 0 auto;">← Voltar</button>
+          <button class="btn btn-primary" id="reg-pay-btn" onclick="regSubmitPayment()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">🔒 Pagar e criar conta</button>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-size:.72rem;color:var(--text3);">Pagamento seguro via Mercado Pago</div>
+      </div>
+
+      <!-- Processando -->
+      <div id="reg-processing" style="display:none;text-align:center;padding:20px 0;">
+        <div class="spinner" style="margin:0 auto 16px;"></div>
+        <p style="font-weight:700;font-size:.95rem;color:var(--text);">Processando pagamento...</p>
+        <p style="font-size:.82rem;color:var(--text3);margin-top:6px;">Aguarde, isso leva alguns segundos.</p>
+      </div>
+
+      <!-- Sucesso -->
+      <div id="reg-success" style="display:none;text-align:center;padding:20px 0;">
+        <div class="inv-check" style="margin:0 auto 16px;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:50;stroke-dashoffset:50;animation:drawChk .4s ease .45s forwards;"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <p style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:6px;animation:slideUp .3s ease .5s both;">Conta criada com sucesso!</p>
+        <p style="font-size:.84rem;color:var(--text3);animation:slideUp .3s ease .6s both;" id="reg-success-msg">Redirecionando para o login...</p>
+      </div>
+
+    </div>
+    <div class="reg-foot" id="reg-foot"></div>
+  </div>
+</div>
+
+
+<!-- ══ BLOCKED SCREEN ══ -->
+<div id="screen-blocked">
+  <div class="blocked-card">
+    <div class="blocked-head">
+      <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly"/>
+      <h2>Acesso bloqueado</h2>
+      <p>Sua conta foi suspensa pelo administrador</p>
+    </div>
+    <div class="blocked-body">
+      <div class="blocked-icon">🚫</div>
+      <div class="blocked-title">Sua conta está bloqueada</div>
+      <div class="blocked-sub">O acesso ao painel foi suspenso devido às seguintes condutas identificadas:</div>
+      <div class="blocked-reasons" id="blocked-reasons-list"></div>
+      <div class="blocked-sub" style="margin-bottom:0;">Se acredita que há um engano, entre em contato com o suporte.</div>
+
+    </div>
+    <div class="blocked-foot">
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="logoutGestor()">Sair da conta</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ TRIAL WELCOME MODAL ══ -->
+<div id="trial-welcome-overlay">
+  <div class="trial-welcome-card">
+    <div class="trial-welcome-head">
+      <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly"/>
+      <h2>Bem-vindo ao Trainly! 🎉</h2>
+      <p>Seu período de teste foi ativado</p>
+    </div>
+    <div class="trial-welcome-body">
+      <div class="trial-days-badge">
+        <div class="trial-days-num" id="trial-welcome-days">7</div>
+        <div class="trial-days-lbl">dias grátis<br/>para explorar tudo</div>
+      </div>
+      <div style="font-size:.84rem;color:var(--text2);line-height:1.7;margin-bottom:16px;">
+        Escolha um plano antes que seu teste expire e continue sem interrupções:
+      </div>
+      <div class="sub-plans" style="margin-bottom:0;">
+        <div class="sub-plan selected" id="tw-plan-monthly" onclick="twSelectPlan('monthly')" style="cursor:pointer;">
+          <div class="sub-plan-label">Mensal</div>
+          <div class="sub-plan-price" id="tw-price-monthly">R$ —</div>
+          <div class="sub-plan-period">/mês</div>
+        </div>
+        <div class="sub-plan" id="tw-plan-annual" onclick="twSelectPlan('annual')" style="cursor:pointer;">
+          <div class="sub-plan-badge" id="tw-annual-badge">Economize</div>
+          <div class="sub-plan-label">Anual</div>
+          <div class="sub-plan-price" id="tw-price-annual">R$ —</div>
+          <div class="sub-plan-period">/mês · anual</div>
+          <div class="sub-plan-saving" id="tw-annual-saving"></div>
+        </div>
+      </div>
+    </div>
+    <div class="trial-welcome-foot">
+      <button class="btn-subscribe" onclick="twGoToPayment()">Assinar agora →</button>
+      <button onclick="twContinueTrial()" style="background:none;border:none;cursor:pointer;font-family:var(--body);font-size:.83rem;color:var(--text3);padding:4px;text-align:center;">
+        Continuar no teste gratuito por enquanto
+      </button>
+    </div>
+  </div>
+</div>
+
+
 <!-- ══ TRIAL BANNER ══ -->
 <div id="trial-banner">
   <button class="tb-close" onclick="document.getElementById('trial-banner').style.display='none'">✕</button>
@@ -1317,6 +1686,20 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="main-content">
       <div id="tab-dashboard" class="tab-panel active">
         <div class="page-header"><div class="page-title">Dashboard</div></div>
+        <!-- Trial card — visível só durante o período de teste -->
+        <div class="trial-dash-card" id="trial-dash-card">
+          <div class="trial-dash-left">
+            <div class="trial-days-circle">
+              <span class="num" id="trial-dash-days">7</span>
+              <span class="lbl">dias</span>
+            </div>
+            <div class="trial-dash-info">
+              <h4>Período de teste ativo</h4>
+              <p id="trial-dash-desc">Você tem 7 dias restantes.<br/>Assine para não perder o acesso.</p>
+            </div>
+          </div>
+          <button class="trial-dash-btn" onclick="showSubscriptionWall()">⚡ Assinar agora</button>
+        </div>
         <div class="stats-grid">
           <div class="stat-card"><div class="stat-num" id="stat-alunos">—</div><div class="stat-lbl">Alunos cadastrados</div></div>
           <div class="stat-card"><div class="stat-num green" id="stat-planos">—</div><div class="stat-lbl">Planos ativos</div></div>
@@ -1409,7 +1792,21 @@ document.addEventListener('DOMContentLoaded',function(){
           <div class="ceo-stat"><div class="ceo-stat-num yellow" id="ceo-stat-trial">—</div><div class="ceo-stat-lbl">Em teste</div></div>
           <div class="ceo-stat"><div class="ceo-stat-num red" id="ceo-stat-expired">—</div><div class="ceo-stat-lbl">Expirados</div></div>
         </div>
-        <!-- Pricing -->
+        <!-- CREF Review -->
+        <div class="cref-review-card" id="cref-review-section">
+          <div class="cref-review-head">
+            <div class="ceo-section-title" style="margin:0;">
+              📋 Análise de documentos CREF
+              <span class="cref-stat-badge" id="cref-pending-count" style="display:none;">0</span>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="loadCrefPending()">↺ Atualizar</button>
+          </div>
+          <div id="cref-pending-list">
+            <div class="cref-empty">Carregando...</div>
+          </div>
+        </div>
+
+                <!-- Pricing -->
         <div class="pricing-card">
           <div class="ceo-section-title">💰 Preços das assinaturas</div>
           <div class="pricing-inputs">
@@ -1943,7 +2340,20 @@ window.showDashboardAfterLogin = window.showDashboard = function(userData){
         var sub = _checkSubscription(mgr);
         window.CURRENT_USER.subStatus = sub;
         if(!sub.ok){ showSubscriptionWall(); return; }
-        if(sub.type==='trial'){ showTrialBanner(sub.daysLeft); }
+        if(sub.type==='trial'){
+          showTrialBanner(sub.daysLeft);
+          // Mostra modal de assinatura 3s após entrar (só uma vez — flag no Firestore)
+          if(!mgr.trialModalShown) {
+            setTimeout(function(){
+              if(window.showTrialWelcomeModal) showTrialWelcomeModal(sub.daysLeft);
+              // Marca no Firestore que já foi mostrado
+              try {
+                var docId = snap.docs[0].id;
+                _updateDoc(_doc(_db,'managers',docId), { trialModalShown: true });
+              } catch(e) {}
+            }, 3000);
+          }
+        }
       }
       try{ localStorage.setItem(LS_GESTOR, JSON.stringify(window.CURRENT_USER)); }catch(e){}
       _applyUserUI();
@@ -1958,11 +2368,12 @@ window.logoutGestor=function(){
   if(window._chatSnapshotUnsubs){ window._chatSnapshotUnsubs.forEach(function(fn){ try{fn();}catch(e){} }); window._chatSnapshotUnsubs=[]; }
   if(window._chatSnapshotUnsubs){ window._chatSnapshotUnsubs=[]; }
   // Oculta todas as telas
-  ['screen-dashboard','screen-sub-wall','screen-invite'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.style.display='none';
+  ['screen-dashboard','screen-sub-wall','screen-invite','screen-blocked','screen-register'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){ el.style.display='none'; el.classList.remove('on','visible'); }
   });
-  document.getElementById('screen-login').style.display='flex';
   toast('Sessão encerrada.');
+  setTimeout(function(){ location.reload(); }, 800);
 };
 window.switchTab=(tabId,el)=>{
   document.querySelectorAll('.tab-panel').forEach(t=>t.classList.remove('active'));
@@ -1973,7 +2384,7 @@ window.switchTab=(tabId,el)=>{
   if(tabId==='tab-gestores') loadManagers();
   if(tabId==='tab-feedbacks') loadFeedbacks();
   if(tabId==='tab-chat'){ loadChatList(); closeChatDetail(); }
-  if(tabId==='tab-ceo'){ loadCeoManagers(); loadPricing(); }
+  if(tabId==='tab-ceo'){ loadCeoManagers(); loadPricing(); loadCrefPending(); }
 };
 window.goToAlunos=()=>switchTab('tab-alunos',document.querySelector('[data-tab="tab-alunos"]'));
 
@@ -3268,6 +3679,7 @@ window.renderManagersGrid=function(list){
         <div>
           <div class="student-name">${m.name||m.username}</div>
           <div class="student-code">@${m.username}</div>
+          ${m.cref?`<div style="font-size:.74rem;color:var(--text2);margin-top:3px;font-weight:600;display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;">🪪 ${m.cref}</div>`:''}
           ${m.phone?`<div style="font-size:.74rem;color:var(--text3);margin-top:2px;font-weight:500;">📱 ${m.phone}</div>`:''}
         </div>
       </div>
@@ -3593,6 +4005,116 @@ window.sendAlert = async function() {
     btn.textContent = '📢 Enviar alerta';
   }
 };
+
+window.loadCrefPending = async function() {
+  var list  = document.getElementById('cref-pending-list');
+  var badge = document.getElementById('cref-pending-count');
+  if(!list) return;
+  list.innerHTML = '<div class="cref-empty"><div class="spinner" style="margin:0 auto;"></div></div>';
+  try {
+    var snap = await _db.collection('managers').get();
+    var pending = snap.docs
+      .map(function(d){ return Object.assign({id:d.id}, d.data()); })
+      .filter(function(m){ return m.role !== 'ceo' && m.cref && (!m.crefStatus || m.crefStatus === 'pending'); });
+
+    if(badge) {
+      badge.style.display = pending.length > 0 ? 'inline-flex' : 'none';
+      badge.textContent   = pending.length > 9 ? '9+' : pending.length;
+    }
+    if(!pending.length) {
+      list.innerHTML = '<div class="cref-empty">✅ Nenhum documento pendente de análise.</div>';
+      return;
+    }
+    list.innerHTML = pending.map(function(m) {
+      return '<div class="cref-item" id="cref-item-'+m.id+'">'
+        + '<div class="avatar" style="flex-shrink:0;width:42px;height:42px;font-size:.95rem;">'+(m.name||m.username||'?').slice(0,2).toUpperCase()+'</div>'
+        + '<div class="cref-item-info">'
+          + '<div class="cref-item-name">'+escHtml(m.name||m.username)+'</div>'
+          + '<div class="cref-item-user">@'+escHtml(m.username)+'</div>'
+          + '<div class="cref-item-number">🪪 CREF: '+escHtml(m.cref||'Não informado')+'</div>'
+        + '</div>'
+        + '<div class="cref-item-actions">'
+          + '<button class="btn-approve" onclick="crefApprove(this)" data-id="'+m.id+'">✓ Aprovar</button>'
+          + '<button class="btn-reject"  onclick="crefReject(this)"  data-id="'+m.id+'">✕ Rejeitar</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="cref-empty" style="color:var(--red);">Erro: '+e.message+'</div>';
+  }
+};
+
+window.crefApprove = async function(btn) {
+  var id   = btn.dataset.id;
+  var item = document.getElementById('cref-item-'+id);
+  if(item) item.style.opacity = '.4';
+  try {
+    await _updateDoc(_doc(_db,'managers',id), { crefStatus: 'approved' });
+    toast('✅ CREF aprovado!');
+    loadCrefPending();
+  } catch(e) {
+    toast('Erro: '+e.message,'error');
+    if(item) item.style.opacity = '1';
+  }
+};
+
+window.crefReject = async function(btn) {
+  var id = btn.dataset.id;
+  try {
+    // Busca o username do gestor para notificar alunos
+    var mgrDoc = await _db.collection('managers').doc(id).get();
+    var mgrUsername = mgrDoc.exists ? (mgrDoc.data().username || '') : '';
+
+    await _updateDoc(_doc(_db,'managers',id), {
+      crefStatus:   'rejected',
+      blocked:      true,
+      blockReasons: ['Documento CREF falso ou inválido']
+    });
+
+    // Notifica todos os alunos desse gestor
+    if(mgrUsername) {
+      await window._notifyStudentsOfSuspension(mgrUsername);
+    }
+
+    toast('Conta bloqueada por CREF inválido.', 'error');
+    loadCrefPending();
+    loadCeoManagers();
+  } catch(e) {
+    toast('Erro: '+e.message,'error');
+  }
+}
+
+// ── _sha256 helper (também usado pelo login) ──
+window._sha256 = async function(str){
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+};
+
+// ── Notifica alunos quando um gestor é bloqueado/suspenso ──
+// Grava um documento em alerts/{studentId} com type='trainer_suspended'
+// O app do aluno lê isso e exibe o pop-up de suspensão.
+window._notifyStudentsOfSuspension = async function(managerUsername) {
+  if(!managerUsername) return;
+  try {
+    var snap = await _db.collection('students').where('managerId','==',managerUsername).get();
+    var batch = [];
+    snap.docs.forEach(function(d) {
+      batch.push(
+        _db.collection('alerts').doc(d.id).set({
+          type:    'trainer_suspended',
+          message: 'Seu treinador foi suspenso da plataforma. Após o vencimento do seu plano de treino, o acesso será removido automaticamente.',
+          ts:      Date.now()
+        }, { merge: true })
+      );
+    });
+    await Promise.all(batch);
+    console.log('[Trainly] Suspension alerts sent to', snap.size, 'student(s) of', managerUsername);
+  } catch(e) {
+    console.warn('[Trainly] Failed to notify students of suspension:', e.message);
+  }
+};
+
+
 </script>
 
 <script>
@@ -3602,12 +4124,28 @@ window.sendAlert = async function() {
 window.showTrialBanner = function(daysLeft) {
   var banner = document.getElementById('trial-banner');
   var text = document.getElementById('trial-banner-text');
-  if(!banner) return;
-  text.textContent = daysLeft <= 1
-    ? 'Seu período de teste expira hoje! Assine para não perder o acesso.'
-    : 'Você tem ' + daysLeft + ' dias restantes de avaliação gratuita.';
-  banner.style.display = 'block';
-  setTimeout(function(){ banner.style.display='none'; }, 8000);
+  if(banner && text) {
+    text.textContent = daysLeft <= 1
+      ? 'Seu período de teste expira hoje! Assine para não perder o acesso.'
+      : 'Você tem ' + daysLeft + ' dias restantes de avaliação gratuita.';
+    banner.style.display = 'block';
+    setTimeout(function(){ banner.style.display='none'; }, 8000);
+  }
+  // Exibe card no dashboard
+  var card = document.getElementById('trial-dash-card');
+  var daysEl = document.getElementById('trial-dash-days');
+  var descEl = document.getElementById('trial-dash-desc');
+  if(card) {
+    card.classList.add('visible');
+    if(daysEl) daysEl.textContent = daysLeft;
+    if(descEl) {
+      if(daysLeft <= 1) {
+        descEl.innerHTML = 'Seu teste <strong style="color:#f5c800;">expira hoje!</strong><br/>Assine agora para continuar.';
+      } else {
+        descEl.innerHTML = 'Você tem <strong style="color:#f5c800;">' + daysLeft + ' dias</strong> restantes.<br/>Assine para não perder o acesso.';
+      }
+    }
+  }
 };
 
 // ════════════════════════════════════════════════════════════
@@ -3983,6 +4521,7 @@ window.showCeoPanel = function() {
   setTimeout(function(){
     var ceoTab = document.querySelector('[data-tab="tab-ceo"]');
     if(ceoTab) switchTab('tab-ceo', ceoTab);
+    loadCrefPending();
   }, 300);
 };
 
@@ -4136,7 +4675,21 @@ window.ceoSaveManagerEdits = async function() {
       upd.trialEndsAt = null;
     }
 
+    // Verifica se o gestor está sendo bloqueado agora
+    var mgrBefore = (window._ceoAllManagers||[]).find(function(x){ return x.id===id; })||{};
+    var wasBlocked = !!mgrBefore.blocked;
+    var isNowBlocked = !!blocked;
+
     await _updateDoc(_doc(_db,'managers',id), upd);
+
+    // Se acabou de ser bloqueado, notifica os alunos
+    if(!wasBlocked && isNowBlocked) {
+      var mgrUsername = mgrBefore.username || '';
+      if(mgrUsername) {
+        await window._notifyStudentsOfSuspension(mgrUsername);
+      }
+    }
+
     toast('✅ Gestor atualizado!');
     closeModal('modal-ceo-edit');
     loadCeoManagers();
@@ -4244,11 +4797,6 @@ window.savePricing = async function() {
   } catch(e) { toast('Erro: '+e.message,'error'); }
 };
 
-// ── _sha256 helper (também usado pelo login) ──
-window._sha256 = async function(str){
-  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
-};
 
 // ══════════════════════════════════════════════════════════
 // SISTEMA DE CONVITE — tudo aqui, _db já está disponível
@@ -4441,6 +4989,378 @@ window._invDocId=null; window._invBy='';
 
 </script>
 
+
+<script>
+
+// ════════════════════════════════════════════════════════
+// CADASTRO PÚBLICO
+// ════════════════════════════════════════════════════════
+
+var _regSelectedPlan = 'monthly';
+var _regPricing      = { monthly: 0, discount: 0 };
+var _regMpMethodId   = '';
+var _regNewId        = null;
+
+window.openRegisterScreen = async function() {
+  // Carrega preços
+  try {
+    var snap = await _db.collection('settings').doc('pricing').get();
+    if(snap.exists) {
+      var d = snap.data();
+      _regPricing.monthly  = parseFloat(d.monthly)  || 0;
+      _regPricing.discount = parseFloat(d.discount) || 0;
+    }
+  } catch(e) {}
+  regRenderPrices();
+
+  // Inicializa MP SDK
+  if(!_mpInstance && window.MercadoPago) {
+    _mpInstance = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+  }
+
+  // Limpa campos
+  ['reg-name','reg-user','reg-pass','reg-pass2','reg-cref','reg-card-name','reg-cpf','reg-email','reg-cardNumber','reg-expiry','reg-cvv'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  ['reg-terms','reg-cref-decl'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.checked = false;
+  });
+  document.getElementById('reg-error').textContent = '';
+  document.getElementById('reg-card-brand').textContent = '';
+  document.getElementById('reg-installments-wrap').style.display = 'none';
+  _regSelectedPlan = 'monthly';
+  _regMpMethodId   = '';
+
+  regShowStep(1);
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-register').classList.add('on');
+};
+
+window.closeRegisterScreen = function() {
+  document.getElementById('screen-register').classList.remove('on');
+  document.getElementById('screen-register').style.display = '';
+  document.getElementById('screen-login').style.display = 'flex';
+  if(_regNewId) {
+    // Já criou conta — faz login automático
+    _regNewId = null;
+  }
+};
+
+function regShowStep(n) {
+  [1,2].forEach(function(i){
+    var s = document.getElementById('reg-step'+i);
+    if(s) s.style.display = i===n ? 'block' : 'none';
+    var dot = document.getElementById('reg-dot-'+i);
+    if(dot) {
+      dot.classList.remove('active','done');
+      if(i < n)  dot.classList.add('done');
+      if(i === n) dot.classList.add('active');
+    }
+  });
+  document.getElementById('reg-processing').style.display = 'none';
+  document.getElementById('reg-success').style.display    = 'none';
+  document.getElementById('reg-error').textContent = '';
+}
+
+function regRenderPrices() {
+  var m    = _regPricing.monthly;
+  var disc = _regPricing.discount;
+  var annTotal   = m * 12 * (1 - disc/100);
+  var annMonthly = annTotal / 12;
+  var saving     = m * 12 - annTotal;
+  var fmt = function(v){ return 'R$ ' + v.toFixed(2).replace('.',','); };
+  var elM = document.getElementById('reg-price-monthly');
+  var elA = document.getElementById('reg-price-annual');
+  var elB = document.getElementById('reg-annual-badge');
+  var elS = document.getElementById('reg-annual-saving');
+  if(elM) elM.textContent = m > 0 ? fmt(m) : 'R$ —';
+  if(elA) elA.textContent = annMonthly > 0 ? fmt(annMonthly) : 'R$ —';
+  if(elB) elB.textContent = disc > 0 ? 'Economize '+disc+'%' : '';
+  if(elS && saving > 0) elS.textContent = 'Economia de '+fmt(saving)+'/ano';
+}
+
+window.regSelectPlan = function(plan) {
+  _regSelectedPlan = plan;
+  document.getElementById('reg-plan-monthly').classList.toggle('selected', plan==='monthly');
+  document.getElementById('reg-plan-annual').classList.toggle('selected', plan==='annual');
+};
+
+window.regStep1Next = function() {
+  var errEl = document.getElementById('reg-error');
+  errEl.textContent = '';
+  var name  = (document.getElementById('reg-name').value||'').trim();
+  var user  = (document.getElementById('reg-user').value||'').trim().toLowerCase();
+  var pass  = document.getElementById('reg-pass').value;
+  var pass2 = document.getElementById('reg-pass2').value;
+  if(!name||name.length<3)  { errEl.textContent='Informe seu nome completo.'; return; }
+  if(!user||user.length<3)  { errEl.textContent='Usuário deve ter ao menos 3 caracteres.'; return; }
+  if(!pass||pass.length<6)  { errEl.textContent='Senha deve ter ao menos 6 caracteres.'; return; }
+  if(pass!==pass2)          { errEl.textContent='As senhas não coincidem.'; return; }
+  if(!document.getElementById('reg-terms').checked) { errEl.textContent='Você precisa aceitar os Termos de Uso e a Política de Privacidade.'; return; }
+  regShowStep(2);
+};
+
+window.regStep2Next = async function() {
+  var errEl = document.getElementById('reg-error');
+  errEl.textContent = '';
+  var cref = (document.getElementById('reg-cref').value||'').trim();
+  if(!cref) { errEl.textContent='Informe seu número de registro no CREF.'; return; }
+  if(!document.getElementById('reg-cref-decl').checked) { errEl.textContent='Você precisa marcar a declaração profissional.'; return; }
+
+  // Mostra processando
+  [1,2,3].forEach(function(i){ var el=document.getElementById('reg-step'+i); if(el) el.style.display='none'; });
+  document.getElementById('reg-processing').style.display = 'block';
+
+  try {
+    var user = (document.getElementById('reg-user').value||'').trim().toLowerCase();
+    var name = (document.getElementById('reg-name').value||'').trim();
+
+    // Verifica se username já existe
+    var existing = await _db.collection('managers').where('username','==',user).get();
+    if(!existing.empty) {
+      document.getElementById('reg-processing').style.display = 'none';
+      errEl.textContent = 'Este usuário já está em uso. Escolha outro.';
+      regShowStep(1);
+      return;
+    }
+
+    var hash = await _sha256(document.getElementById('reg-pass').value);
+    _regNewId = 'mgr_'+Date.now();
+    await _db.collection('managers').doc(_regNewId).set({
+      username:user, passwordHash:hash, name, cref, crefDeclared:true,
+      role:'comum', isMaster:false,
+      trialEndsAt:Date.now()+7*24*60*60*1000, subEndsAt:null,
+      blocked:false, createdAt:Date.now()
+    });
+
+    document.getElementById('reg-processing').style.display = 'none';
+    // Esconde indicador de etapas e rodapé
+    document.querySelector('.reg-step-indicator').style.display = 'none';
+    var foot = document.getElementById('reg-foot'); if(foot) foot.style.display='none';
+    document.getElementById('reg-success').style.display = 'block';
+    document.getElementById('reg-success-msg').textContent = 'Redirecionando para o login...';
+    // Redirect automático após animação
+    setTimeout(function(){
+      document.getElementById('screen-register').classList.remove('on');
+      document.getElementById('screen-register').style.display = '';
+      document.getElementById('screen-login').style.display = 'flex';
+    }, 2800);
+
+  } catch(e) {
+    document.getElementById('reg-processing').style.display = 'none';
+    errEl.textContent = 'Erro: ' + e.message;
+    regShowStep(2);
+  }
+};
+
+window.regStepBack = function(to) {
+  regShowStep(to);
+};
+
+window.regCardNumberInput = function(input) {
+  var raw = input.value.replace(/\D/g,'').slice(0,16);
+  input.value = (raw.match(/.{1,4}/g)||[]).join(' ');
+  var brand = '';
+  if(/^4/.test(raw))           { brand='💳 Visa';       _regMpMethodId='visa'; }
+  else if(/^5[1-5]/.test(raw)) { brand='💳 Mastercard'; _regMpMethodId='master'; }
+  else if(/^3[47]/.test(raw))  { brand='💳 Amex';       _regMpMethodId='amex'; }
+  else                          { _regMpMethodId=''; }
+  document.getElementById('reg-card-brand').textContent = brand;
+  if(raw.length>=6 && _mpInstance && _regMpMethodId) {
+    loadInstallmentsReg(raw.slice(0,6));
+  }
+};
+
+async function loadInstallmentsReg(bin) {
+  try {
+    var amount = regGetAmount();
+    var result = await _mpInstance.getInstallments({ amount:String(amount.toFixed(2)), bin, paymentTypeId:'credit_card' });
+    var wrap = document.getElementById('reg-installments-wrap');
+    var sel  = document.getElementById('reg-installments');
+    if(!result||!result[0]||!result[0].payer_costs){ if(wrap) wrap.style.display='none'; return; }
+    if(wrap) wrap.style.display='block';
+    if(sel) sel.innerHTML = result[0].payer_costs.map(function(c){
+      var label = c.installments+'x de R$ '+c.installment_amount.toFixed(2).replace('.',',');
+      if(c.installment_rate===0) label+=' (sem juros)';
+      return '<option value="'+c.installments+'">'+label+'</option>';
+    }).join('');
+  } catch(e) {}
+}
+
+function regGetAmount() {
+  var m = _regPricing.monthly, disc = _regPricing.discount;
+  return _regSelectedPlan==='annual' ? m*12*(1-disc/100) : m;
+}
+
+window.regSubmitPayment = async function() {
+  var errEl = document.getElementById('reg-error');
+  errEl.textContent = '';
+  var cardRaw = (document.getElementById('reg-cardNumber').value||'').replace(/\s/g,'');
+  var expiry  = (document.getElementById('reg-expiry').value||'').trim();
+  var cvv     = (document.getElementById('reg-cvv').value||'').trim();
+  var cname   = (document.getElementById('reg-card-name').value||'').trim();
+  var cpf     = (document.getElementById('reg-cpf').value||'').replace(/\D/g,'');
+  var email   = (document.getElementById('reg-email').value||'').trim();
+  if(cardRaw.length<13)            { errEl.textContent='Número do cartão inválido.'; return; }
+  if(!expiry.match(/^\d{2}\/\d{2}$/)) { errEl.textContent='Validade inválida. Use MM/AA.'; return; }
+  if(cvv.length<3)                 { errEl.textContent='CVV inválido.'; return; }
+  if(!cname||cname.length<3)       { errEl.textContent='Informe o nome do titular.'; return; }
+  if(cpf.length!==11)              { errEl.textContent='CPF inválido.'; return; }
+  if(!email||!email.includes('@')) { errEl.textContent='Informe um e-mail válido.'; return; }
+  if(!_mpInstance)                 { errEl.textContent='SDK Mercado Pago não carregou. Recarregue a página.'; return; }
+
+  // Verifica se username já existe
+  var user = (document.getElementById('reg-user').value||'').trim().toLowerCase();
+  var existing = await _db.collection('managers').where('username','==',user).get();
+  if(!existing.empty) { errEl.textContent='Este usuário já está em uso. Escolha outro.'; regShowStep(1); return; }
+
+  regShowStep('processing');
+  document.getElementById('reg-processing').style.display = 'block';
+  document.getElementById('reg-step1').style.display = 'none';
+  document.getElementById('reg-step2').style.display = 'none';
+  document.getElementById('reg-step3').style.display = 'none';
+
+  try {
+    var parts = expiry.split('/');
+    var tokenResult = await _mpInstance.createCardToken({
+      cardNumber: cardRaw, cardExpirationMonth: parts[0], cardExpirationYear: '20'+parts[1],
+      securityCode: cvv, cardholderName: cname, identificationType:'CPF', identificationNumber:cpf
+    });
+    if(!tokenResult||!tokenResult.id) throw new Error('Erro ao tokenizar cartão.');
+
+    var installments = parseInt((document.getElementById('reg-installments')||{}).value||'1')||1;
+    var amount       = regGetAmount();
+    var name         = (document.getElementById('reg-name').value||'').trim();
+    var cref         = (document.getElementById('reg-cref').value||'').trim();
+
+    // Cria conta no Firestore (trial de 7 dias durante processamento)
+    var hash  = await _sha256(document.getElementById('reg-pass').value);
+    _regNewId = 'mgr_'+Date.now();
+    await _db.collection('managers').doc(_regNewId).set({
+      username:user, passwordHash:hash, name, cref, crefDeclared:true,
+      role:'comum', isMaster:false,
+      trialEndsAt:Date.now()+7*24*60*60*1000, subEndsAt:null,
+      blocked:false, createdAt:Date.now()
+    });
+
+    // Processa pagamento
+    var resp = await fetch(MP_BACKEND_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        token:tokenResult.id, amount, installments,
+        payment_method_id: _regMpMethodId||'',
+        description:'Trainly '+(_regSelectedPlan==='annual'?'Anual':'Mensal'),
+        payer:{ email, identification:{type:'CPF',number:cpf}, first_name:cname },
+        plan:_regSelectedPlan, managerId:_regNewId, username:user
+      })
+    });
+    var result = await resp.json();
+
+    document.getElementById('reg-processing').style.display = 'none';
+
+    if(result.status==='approved'||result.status==='authorized') {
+      document.getElementById('reg-success').style.display = 'block';
+      document.getElementById('reg-success-msg').textContent =
+        _regSelectedPlan==='annual'
+          ? 'Plano anual ativado! Acesso liberado por 12 meses.'
+          : 'Plano mensal ativado! Acesso liberado por 30 dias.';
+    } else if(result.status==='pending'||result.status==='in_process') {
+      document.getElementById('reg-success').style.display = 'block';
+      document.getElementById('reg-success-msg').textContent = 'Pagamento em análise. Você receberá a confirmação em breve.';
+    } else {
+      // Pagamento falhou — remove a conta criada
+      await _db.collection('managers').doc(_regNewId).delete();
+      _regNewId = null;
+      errEl.textContent = '❌ '+(result.status_detail||result.message||'Pagamento recusado. Verifique os dados.');
+      regShowStep(3);
+    }
+  } catch(e) {
+    document.getElementById('reg-processing').style.display = 'none';
+    if(_regNewId) { try { await _db.collection('managers').doc(_regNewId).delete(); } catch(x){} _regNewId=null; }
+    errEl.textContent = '❌ '+(e.message||'Erro ao processar. Tente novamente.');
+    regShowStep(3);
+  }
+};
+
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════
+// ANÁLISE DE CREF — CEO
+// ════════════════════════════════════════════════════════
+
+</script>
+
+<script>
+
+// ════════════════════════════════════════════════════════
+// TRIAL WELCOME MODAL
+// ════════════════════════════════════════════════════════
+var _twPlan = 'monthly';
+var _twPricing = { monthly: 0, discount: 0 };
+
+window.showTrialWelcomeModal = async function(daysLeft) {
+  // Carrega preços
+  try {
+    var snap = await _db.collection('settings').doc('pricing').get();
+    if(snap.exists) {
+      var d = snap.data();
+      _twPricing.monthly  = parseFloat(d.monthly)  || 0;
+      _twPricing.discount = parseFloat(d.discount) || 0;
+    }
+  } catch(e) {}
+
+  // Atualiza dias
+  var daysEl = document.getElementById('trial-welcome-days');
+  if(daysEl) daysEl.textContent = daysLeft || 7;
+
+  // Renderiza preços
+  twRenderPrices();
+
+  // Inicializa MP
+  if(!_mpInstance && window.MercadoPago) {
+    _mpInstance = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+  }
+
+  // Exibe overlay
+  document.getElementById('trial-welcome-overlay').classList.add('on');
+};
+
+function twRenderPrices() {
+  var m = _twPricing.monthly, disc = _twPricing.discount;
+  var annTotal   = m * 12 * (1 - disc/100);
+  var annMonthly = annTotal / 12;
+  var saving     = m * 12 - annTotal;
+  var fmt = function(v){ return 'R$ ' + v.toFixed(2).replace('.',','); };
+  var elM = document.getElementById('tw-price-monthly');
+  var elA = document.getElementById('tw-price-annual');
+  var elB = document.getElementById('tw-annual-badge');
+  var elS = document.getElementById('tw-annual-saving');
+  if(elM) elM.textContent = m > 0 ? fmt(m) : 'R$ —';
+  if(elA) elA.textContent = annMonthly > 0 ? fmt(annMonthly) : 'R$ —';
+  if(elB) elB.textContent = disc > 0 ? 'Economize '+disc+'%' : '';
+  if(elS && saving > 0) elS.textContent = 'Economia de '+fmt(saving)+'/ano';
+}
+
+window.twSelectPlan = function(plan) {
+  _twPlan = plan;
+  document.getElementById('tw-plan-monthly').classList.toggle('selected', plan === 'monthly');
+  document.getElementById('tw-plan-annual').classList.toggle('selected', plan === 'annual');
+};
+
+window.twGoToPayment = function() {
+  // Fecha modal e abre a subscription wall no step de plano
+  document.getElementById('trial-welcome-overlay').classList.remove('on');
+  // Pre-seleciona o plano escolhido
+  _mpSelectedPlan = _twPlan;
+  showSubscriptionWall();
+};
+
+window.twContinueTrial = function() {
+  document.getElementById('trial-welcome-overlay').classList.remove('on');
+};
+
+</script>
 
 <script>
 // Block all zoom gestures on iOS
