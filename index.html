@@ -494,6 +494,56 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.2);
     }
     .alert-popup-ok:hover { background: #2a2a28; transform: translateY(-1px); }
+
+    /* SUSPENDED TRAINER POPUP */
+    #suspended-popup-overlay {
+      position: fixed; inset: 0; z-index: 3500;
+      background: rgba(0,0,0,.65); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    #suspended-popup-box {
+      background: var(--surface); border-radius: 22px;
+      width: 100%; max-width: 360px;
+      box-shadow: 0 16px 48px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.15);
+      border: 1px solid var(--border); overflow: hidden;
+      animation: modalIn .25s cubic-bezier(.22,1,.36,1);
+    }
+    .suspended-header {
+      background: linear-gradient(135deg, #c0392b 0%, #96231a 100%);
+      padding: 22px 22px 18px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .suspended-header-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .suspended-header-title {
+      font-family: var(--head); font-size: 1rem; font-weight: 800;
+      color: #ffffff; line-height: 1.3;
+    }
+    .suspended-header-sub {
+      font-size: .72rem; color: rgba(255,255,255,.65); margin-top: 2px; font-weight: 600;
+    }
+    .suspended-body { padding: 18px 20px 6px; }
+    .suspended-msg {
+      font-size: .88rem; color: var(--text2); line-height: 1.65;
+    }
+    .suspended-expiry-box {
+      margin-top: 14px; padding: 12px 14px;
+      background: var(--red-dim); border: 1px solid rgba(224,62,62,.2);
+      border-radius: var(--r); font-size: .82rem; color: var(--red);
+      font-weight: 600; display: flex; align-items: flex-start; gap: 8px;
+    }
+    .suspended-expiry-box span { line-height: 1.5; }
+    .suspended-footer {
+      border-top: 1px solid var(--border); padding: 14px 20px;
+      display: flex; justify-content: flex-end;
+    }
+    .suspended-ok-btn {
+      padding: 10px 28px; border-radius: 10px;
+      background: #111110; color: #fff;
+      font-size: .88rem; font-weight: 800; border: none; cursor: pointer;
+      transition: all .15s; font-family: var(--body);
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+    .suspended-ok-btn:hover { background: #2a2a28; transform: translateY(-1px); }
   </style>
 </head>
 <body>
@@ -512,6 +562,33 @@
     </div>
     <div class="alert-popup-footer">
       <button class="alert-popup-ok" onclick="dismissAlert()">Ok</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUSPENDED TRAINER POPUP -->
+<div id="suspended-popup-overlay" class="hidden">
+  <div id="suspended-popup-box">
+    <div class="suspended-header">
+      <span class="suspended-header-icon">🚫</span>
+      <div>
+        <div class="suspended-header-title">Treinador Suspenso</div>
+        <div class="suspended-header-sub">Aviso importante sobre sua conta</div>
+      </div>
+    </div>
+    <div class="suspended-body">
+      <p class="suspended-msg">
+        O treinador responsável pela sua ficha foi <strong>suspenso da plataforma</strong>.
+      </p>
+      <div class="suspended-expiry-box">
+        <span>⚠️</span>
+        <span id="suspended-expiry-text">
+          Após o vencimento do seu plano de treino atual, seu acesso será removido automaticamente e o código não funcionará mais.
+        </span>
+      </div>
+    </div>
+    <div class="suspended-footer">
+      <button class="suspended-ok-btn" onclick="dismissSuspendedPopup()">Entendi</button>
     </div>
   </div>
 </div>
@@ -805,9 +882,16 @@
     </div>
   </div>
 
-  <div id="trainer-bar" class="hidden" style="background:#1a1a18;border-bottom:1px solid #2e2e2a;padding:7px 20px;display:flex;align-items:center;gap:8px;">
-    <span style="font-size:.72rem;color:#999990;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">Treinador</span>
-    <span id="trainer-name" style="font-size:.82rem;font-weight:800;color:var(--accent);letter-spacing:.01em;">—</span>
+  <div id="trainer-bar" class="hidden" style="background:#1a1a18;border-bottom:1px solid #2e2e2a;padding:8px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:.72rem;color:#999990;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">Treinador</span>
+      <span id="trainer-name" style="font-size:.82rem;font-weight:800;color:var(--accent);letter-spacing:.01em;">—</span>
+    </div>
+    <div id="trainer-cref-wrap" style="display:none;align-items:center;gap:6px;">
+      <span style="font-size:.72rem;color:#555550;font-weight:600;">|</span>
+      <span style="font-size:.7rem;color:#999990;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">CREF</span>
+      <span id="trainer-cref" style="font-size:.78rem;font-weight:700;color:rgba(255,255,255,.7);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:2px 8px;">—</span>
+    </div>
   </div>
 
   <div class="greeting-wrap"><div class="greeting" id="greeting-text">Olá! 👋</div></div>
@@ -1179,6 +1263,25 @@ function showApp(student){
     trainerBar.classList.remove('hidden');
     trainerBar.style.display='flex';
   }
+  // Busca dados do gestor no Firestore (CREF + status de bloqueio)
+  if(student.managerId){
+    getDocs(query(collection(db,'managers'),where('username','==',student.managerId))).then(function(snap){
+      if(!snap.empty){
+        var mgr = snap.docs[0].data();
+        if(mgr.cref){
+          var crefEl = document.getElementById('trainer-cref');
+          var crefWrap = document.getElementById('trainer-cref-wrap');
+          if(crefEl) crefEl.textContent = mgr.cref;
+          if(crefWrap) crefWrap.style.display = 'flex';
+        }
+        // Verifica se o gestor está bloqueado
+        if(mgr.blocked){
+          window._trainerBlocked = true;
+          window.checkAndShowSuspendedPopup(student);
+        }
+      }
+    }).catch(function(){});
+  }
   // Restore active timer if any
   restoreActiveTimer(student);
   loadPlans(student);
@@ -1216,12 +1319,16 @@ function restoreActiveTimer(student){
   }
 }
 
-window.doLogout=()=>{
+window.doLogout=(skipMessage)=>{
   clearSession();
   _currentStudent=null;
+  window._trainerBlocked=false;
   if(_timerInterval){ clearInterval(_timerInterval); _timerInterval=null; }
   _activeWorkout=null;
   hideTimerBar();
+  // Esconde popup de suspensão se estiver aberto
+  const sp=document.getElementById('suspended-popup-overlay');
+  if(sp) sp.classList.add('hidden');
   document.getElementById('screen-app').style.display='none';
   document.getElementById('screen-login').style.display='flex';
   document.getElementById('login-code').value='';
@@ -1231,6 +1338,15 @@ window.doLogout=()=>{
   document.getElementById('greeting-text').innerHTML='Olá! 👋';
   const tb=document.getElementById('trainer-bar');
   if(tb){ tb.classList.add('hidden'); tb.style.display='none'; }
+  // Mensagem especial quando conta foi deletada automaticamente
+  if(window._suspendedAutoDeleted){
+    window._suspendedAutoDeleted=false;
+    const errEl=document.getElementById('login-error');
+    if(errEl){
+      errEl.textContent='Seu acesso foi encerrado pois o plano de treino venceu e o treinador responsável foi suspenso.';
+      errEl.style.color='#ffaaaa';
+    }
+  }
 };
 
 async function loadPlans(student){
@@ -1242,6 +1358,45 @@ async function loadPlans(student){
     const activePlans=plans.filter(p=>!isExpired(p));
     const latestActive=activePlans[0]||null;
     const expiredPlans=plans.filter(p=>isExpired(p));
+
+    // ── Verificação de deleção automática ──
+    // Caso 1: alerta cref_suspended (legado) + sem planos ativos
+    // Caso 2: gestor bloqueado + sem planos ativos → apaga tudo
+    try {
+      let shouldDelete = false;
+
+      // Verifica alerta cref_suspended (legado)
+      try {
+        const alertSnap = await window._fsGetDoc(window._fsDoc(db,'alerts',student.id));
+        if(alertSnap.exists()) {
+          const alertData = alertSnap.data();
+          if(alertData.type === 'cref_suspended' && activePlans.length === 0) {
+            shouldDelete = true;
+          }
+        }
+      } catch(ea) {}
+
+      // Verifica se o gestor do aluno está bloqueado e não há planos ativos
+      if(!shouldDelete && window._trainerBlocked && activePlans.length === 0) {
+        shouldDelete = true;
+      }
+
+      if(shouldDelete) {
+        // Apaga todos os planos
+        for(const p of plans) {
+          try { await window._fsDeleteDoc(window._fsDoc(db,'plans',p.id)); } catch(e){}
+        }
+        // Apaga alerta se existir
+        try { await window._fsDeleteDoc(window._fsDoc(db,'alerts',student.id)); } catch(e){}
+        // Apaga o aluno — da próxima vez que tentar entrar com o código, não encontrará mais
+        await window._fsDeleteDoc(window._fsDoc(db,'students',student.id));
+        clearSession();
+        // Sinaliza que foi deletado por suspensão do treinador e volta para o login
+        window._suspendedAutoDeleted = true;
+        doLogout();
+        return;
+      }
+    } catch(e) { console.warn('autoDelete check:', e); }
 
     // Status bar
     const statusWrap=document.getElementById('plan-status-wrap');
@@ -1658,7 +1813,17 @@ window.checkAndShowAlert = async function(studentId, db, trainerName) {
     var snap = await window._fsGetDoc(alertRef);
     if(snap.exists()) {
       var data = snap.data();
-      if(data && data.message) {
+      if(!data) return;
+
+      // Alerta de suspensão do treinador — mostra popup específico
+      if(data.type === 'trainer_suspended' || data.type === 'cref_suspended') {
+        window._trainerBlocked = true;
+        window.checkAndShowSuspendedPopup({ id: studentId });
+        return;
+      }
+
+      // Alerta genérico enviado pelo treinador
+      if(data.message) {
         var nm = trainerName || 'Treinador';
         document.getElementById('alert-popup-title').textContent = nm + ':';
         document.getElementById('alert-popup-msg').textContent = data.message;
@@ -1680,6 +1845,38 @@ window.dismissAlert = async function() {
   }
   window._pendingAlertDocId = null;
   window._pendingAlertDb = null;
+};
+
+// ── SUSPENDED TRAINER POPUP ──
+window._trainerBlocked = false;
+
+window.checkAndShowSuspendedPopup = function(student) {
+  // Monta texto de validade do plano atual
+  var expiryText = '';
+  try {
+    // Pega sessão salva para verificar se há plano ativo
+    var sess = JSON.parse(localStorage.getItem('forge_student_session') || 'null');
+  } catch(e) {}
+
+  var popup = document.getElementById('suspended-popup-overlay');
+  var expiryEl = document.getElementById('suspended-expiry-text');
+
+  if(expiryEl) {
+    expiryEl.textContent =
+      'Após o vencimento do seu plano de treino atual, seu acesso será removido ' +
+      'automaticamente e o código de acesso não funcionará mais. ' +
+      'Procure outro profissional de educação física para continuar treinando.';
+  }
+
+  if(popup) popup.classList.remove('hidden');
+
+  // Salva flag para não mostrar novamente nesta sessão (já foi visto)
+  try { sessionStorage.setItem('suspendedSeen_'+(student.id||''), '1'); } catch(e) {}
+};
+
+window.dismissSuspendedPopup = function() {
+  var popup = document.getElementById('suspended-popup-overlay');
+  if(popup) popup.classList.add('hidden');
 };
 </script>
 </body>
