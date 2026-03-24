@@ -46,12 +46,15 @@
     html { scroll-behavior: smooth; }
     /* Prevent zoom and horizontal scroll */
     html { touch-action: pan-x pan-y; overflow-x: hidden; }
-    * { touch-action: manipulation; }
+    /* touch-action: manipulation apenas onde não há scroll — NÃO em * globalmente */
+    body { touch-action: pan-x pan-y; }
     body { overflow-x: hidden; }
 
     body { font-family: var(--body); background: var(--bg); color: var(--text); min-height: 100vh; }
-    button { cursor: pointer; border: none; font-family: inherit; }
-    input, select, textarea { font-family: inherit; }
+    /* touch-action: manipulation em elementos interativos — não em containers scrolláveis */
+    button, a, label, [onclick] { touch-action: manipulation; cursor: pointer; }
+    button { border: none; font-family: inherit; }
+    input, select, textarea { font-family: inherit; touch-action: manipulation; }
     .hidden { display: none !important; }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
@@ -63,15 +66,16 @@
     .toast.error::before { content: ''; position: absolute; left: 0; top: 0; width: 3px; height: 100%; background: var(--red); border-radius: 3px 0 0 3px; }
     @keyframes toastIn { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-    .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.35); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 16px; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 760px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-md); }
+    .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.35); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 16px; touch-action: none; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 760px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-md); touch-action: pan-y; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
     .modal-sm { max-width: 460px; }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; border-radius: 20px 20px 0 0; }
-    .modal-header h3 { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: var(--text); }
-    .modal-body { padding: 24px; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #111110; z-index: 1; border-radius: 20px 20px 0 0; }
+    .modal-header h3 { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: #ffffff; }
+    .modal-header p, .modal-header span { color: rgba(255,255,255,0.6) !important; }
+    .modal-body { padding: 24px; touch-action: pan-y; }
     .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
-    .close-btn { background: var(--surface2); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: .95rem; transition: all .15s; }
-    .close-btn:hover { background: var(--surface3); color: var(--text); }
+    .close-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: .95rem; transition: all .15s; }
+    .close-btn:hover { background: rgba(255,255,255,0.22); color: #ffffff; }
 
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: .75rem; font-weight: 700; color: var(--text2); margin-bottom: 7px; text-transform: uppercase; letter-spacing: .06em; }
@@ -282,34 +286,80 @@
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); grid-column: 1/-1; }
     .empty-state .ei { font-size: 2.5rem; margin-bottom: 10px; }
 
-    .workouts-editor { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
-    .workout-block { background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--r2); overflow: hidden; }
-    .workout-block-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
-    .wb-letter { width: 28px; height: 28px; border-radius: 7px; background: var(--accent-dim); border: 1px solid var(--accent-soft); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 800; font-size: .85rem; color: #111110; flex-shrink: 0; }
-    .wb-title-input { flex: 1; padding: 7px 11px; border: 1.5px solid var(--border); border-radius: 8px; font-size: .88rem; background: var(--bg); color: var(--text); font-weight: 700; }
-    .wb-title-input:focus { outline: none; border-color: var(--accent); }
-    .remove-block-btn { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); border-radius: 7px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .85rem; flex-shrink: 0; }
-    .workout-block-body { padding: 14px 16px; }
-    .days-selector { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-    .day-toggle { padding: 7px 13px; border-radius: var(--r); border: 1.5px solid var(--border); background: var(--surface); font-size: .78rem; font-weight: 700; cursor: pointer; transition: all .15s; color: var(--text2); }
-    .day-toggle.selected { background: var(--accent); border-color: var(--accent2); color: #111110; box-shadow: 0 2px 8px rgba(245,200,0,.35); }
-    .exercises-list { display: flex; flex-direction: column; gap: 8px; }
-    .exercise-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 14px; transition: box-shadow .15s, opacity .15s; position: relative; }
-    .exercise-item.drag-over { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
-    .exercise-item.dragging { opacity: .4; }
-    .exercise-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .drag-handle { cursor: grab; color: var(--text3); padding: 2px 4px; border-radius: 4px; display: flex; align-items: center; flex-shrink: 0; transition: color .15s; user-select: none; }
-    .drag-handle:hover { color: var(--text2); background: var(--surface2); }
+    .workouts-editor { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+    .workout-block { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r2); overflow: hidden; box-shadow: var(--shadow); }
+    .workout-block-header { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .wb-letter { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 800; font-size: .8rem; color: #111110; flex-shrink: 0; }
+    .wb-title-input { flex: 1; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: .88rem; background: var(--bg); color: var(--text); font-weight: 700; font-family: var(--head); }
+    .wb-title-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+    .remove-block-btn { background: none; color: var(--text3); border: none; border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; flex-shrink: 0; transition: all .15s; }
+    .remove-block-btn:hover { background: var(--red-dim); color: var(--red); }
+    .workout-block-body { padding: 12px 14px; background: var(--bg); }
+
+    /* Dias da semana inline compactos */
+    .wb-days-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .wb-days-label { font-size: .62rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
+    .days-selector { display: flex; gap: 4px; flex-wrap: wrap; }
+    .day-toggle { padding: 4px 10px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface); font-size: .72rem; font-weight: 700; cursor: pointer; transition: all .15s; color: var(--text2); line-height: 1.6; }
+    .day-toggle.selected { background: var(--accent); border-color: var(--accent2); color: #111110; }
+
+    /* Exercise items */
+    .exercises-list { display: flex; flex-direction: column; gap: 6px; }
+    .exercise-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: opacity .15s; }
+    .exercise-item.drag-over { border-color: var(--accent); outline: 2px solid var(--accent-dim); }
+    .exercise-item.dragging { opacity: .35; }
+
+    /* Linha 1: handle + número + select + remover */
+    .ex-row-top { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .drag-handle { cursor: grab; color: var(--border2); display: flex; align-items: center; flex-shrink: 0; user-select: none; transition: color .15s; padding: 2px; }
+    .drag-handle:hover { color: var(--text3); }
     .drag-handle:active { cursor: grabbing; }
-    .ex-num { width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0; background: var(--surface2); color: var(--text3); display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; border: 1px solid var(--border); }
-    .exercise-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-    .ctrl-label { font-size: .7rem; font-weight: 700; color: var(--text3); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .07em; }
-    .remove-ex-btn { margin-left: auto; background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; flex-shrink: 0; }
-    .add-ex-btn { width: 100%; padding: 9px; border: 2px dashed var(--border2); background: transparent; color: var(--text3); border-radius: var(--r); font-weight: 700; font-size: .82rem; cursor: pointer; margin-top: 8px; transition: all .15s; }
+    .ex-num { font-size: .66rem; font-weight: 800; color: var(--text3); min-width: 14px; text-align: center; flex-shrink: 0; }
+    .ex-select { flex: 1; padding: 5px 8px; font-size: .82rem; border: none; background: transparent; color: var(--text); font-family: var(--body); font-weight: 600; cursor: pointer; min-width: 0; }
+    .ex-select:focus { outline: none; }
+    .remove-ex-btn { margin-left: 2px; background: none; color: var(--border2); border: none; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; flex-shrink: 0; transition: all .15s; }
+    .remove-ex-btn:hover { background: var(--red-dim); color: var(--red); }
+
+    /* Linha 2: séries + reps + biset numa grade densa */
+    .ex-row-fields { display: grid; grid-template-columns: 64px 1fr 1fr; gap: 6px; padding: 8px 10px; align-items: end; border-bottom: 1px solid var(--border); }
+    .ex-field { display: flex; flex-direction: column; gap: 3px; }
+    .ex-field-label { font-size: .6rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .07em; }
+    .ex-field input, .ex-field select { padding: 5px 8px; border: 1.5px solid var(--border); border-radius: 7px; font-size: .82rem; background: var(--bg); color: var(--text); font-family: var(--body); width: 100%; }
+    .ex-field input:focus, .ex-field select:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+    .ex-field select { font-size: .78rem; }
+
+    /* Reps: chips inline sem label separado */
+    .ex-reps-chips { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+    .ex-rep-chip { display: flex; align-items: center; gap: 3px; }
+    .ex-rep-chip-lbl { font-size: .6rem; font-weight: 700; color: var(--text3); }
+    .ex-rep-chip input { width: 54px; padding: 5px 6px; border: 1.5px solid var(--border); border-radius: 6px; font-size: .78rem; font-weight: 600; background: var(--bg); color: var(--text); text-align: center; font-family: var(--body); }
+    .ex-rep-chip input:focus { outline: none; border-color: var(--accent); }
+
+    /* Linha 3: técnicas + obs juntas */
+    .ex-row-bottom { padding: 8px 10px; display: flex; flex-direction: column; gap: 7px; }
+    .ex-techniques { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+    .ex-tech-label { font-size: .6rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .07em; margin-right: 2px; }
+    .tech-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface2); font-size: .72rem; font-weight: 700; color: var(--text2); cursor: pointer; user-select: none; transition: all .12s; }
+    .tech-pill input[type=checkbox] { display: none; }
+    .tech-pill:has(input:checked) { background: var(--accent-dim); border-color: var(--accent-soft); color: #111110; }
+
+    /* Isometria inline com técnicas */
+    .ex-isometria-inline { display: flex; align-items: center; gap: 5px; margin-left: 4px; }
+    .ex-isometria-inline input { width: 52px; padding: 3px 7px; font-size: .78rem; border: 1.5px solid var(--accent-soft); border-radius: 6px; background: var(--accent-dim); color: var(--text); font-family: var(--body); text-align: center; }
+    .ex-isometria-inline input:focus { outline: none; border-color: var(--accent); }
+    .ex-isometria-inline span { font-size: .68rem; color: var(--text3); font-weight: 600; }
+
+    /* Obs compacta */
+    .ex-obs-wrap textarea { width: 100%; padding: 6px 9px; border: 1.5px solid var(--border); border-radius: 7px; font-size: .8rem; font-family: var(--body); color: var(--text); background: var(--bg); resize: none; min-height: 42px; line-height: 1.45; }
+    .ex-obs-wrap textarea:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+    .ex-obs-wrap textarea::placeholder { color: var(--text3); }
+
+    .ctrl-label { font-size: .65rem; font-weight: 700; color: var(--text3); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .08em; }
+    .add-ex-btn { width: 100%; padding: 8px; border: 1.5px dashed var(--border2); background: transparent; color: var(--text3); border-radius: 8px; font-weight: 700; font-size: .8rem; cursor: pointer; margin-top: 8px; transition: all .15s; font-family: var(--body); }
     .add-ex-btn:hover { border-color: var(--accent); color: #111110; background: var(--accent-dim); }
-    .add-workout-block-btn { border: 2px dashed var(--border2); background: transparent; color: var(--text2); border-radius: var(--r); padding: 14px; width: 100%; font-size: .86rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all .15s; font-family: var(--body); }
+    .add-workout-block-btn { border: 1.5px dashed var(--border2); background: transparent; color: var(--text2); border-radius: var(--r); padding: 12px; width: 100%; font-size: .84rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all .15s; font-family: var(--body); }
     .add-workout-block-btn:hover { border-color: var(--accent); color: #111110; background: var(--accent-dim); }
-    .checkbox-label { display: flex; align-items: center; gap: 7px; font-size: .82rem; color: var(--text2); cursor: pointer; user-select: none; margin-top: 8px; font-weight: 600; }
+    .checkbox-label { display: flex; align-items: center; gap: 7px; font-size: .82rem; color: var(--text2); cursor: pointer; user-select: none; font-weight: 600; }
     .checkbox-label input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
 
     .pv-workout { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 12px; }
@@ -322,6 +372,134 @@
     .yt-embed iframe { width: 100%; aspect-ratio: 16/9; display: block; border: none; }
     .yt-fallback { display: none; margin-top: 8px; }
     .yt-fallback-btn { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #ff0000; color: white; border-radius: var(--r); text-decoration: none; font-weight: 700; font-size: .82rem; }
+
+    /* ══════════════════════════════════════════
+       MODAL PLANO — alinhado ao padrão do site
+    ══════════════════════════════════════════ */
+
+    /* Usa exatamente a classe .modal padrão — scroll nativo já funciona */
+    .modal-plan-premium {
+      max-width: 840px;
+    }
+
+    /* Reutiliza .modal-header/.modal-body/.modal-footer padrão,
+       só adiciona micro-detalhes internos dos workout blocks */
+
+    /* Workout blocks: header com acento escuro igual ao topbar */
+    .modal-plan-premium .workout-block {
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: box-shadow .2s, border-color .2s;
+    }
+    .modal-plan-premium .workout-block:focus-within {
+      border-color: var(--accent-soft);
+      box-shadow: var(--shadow-md);
+    }
+    .modal-plan-premium .workout-block-header {
+      background: #111110;
+      border-bottom: 1px solid rgba(245,200,0,.15);
+    }
+    .modal-plan-premium .wb-letter {
+      background: var(--accent);
+      color: #111110;
+      border-radius: 8px;
+    }
+    .modal-plan-premium .wb-title-input {
+      background: rgba(255,255,255,.07) !important;
+      border-color: rgba(255,255,255,.14) !important;
+      color: #f0ece0 !important;
+      font-family: var(--head) !important;
+      font-weight: 700 !important;
+    }
+    .modal-plan-premium .wb-title-input:focus {
+      background: rgba(255,255,255,.13) !important;
+      border-color: rgba(245,200,0,.5) !important;
+      outline: none !important;
+    }
+    .modal-plan-premium .wb-title-input::placeholder { color: rgba(255,255,255,.28) !important; }
+    .modal-plan-premium .remove-block-btn { color: rgba(255,255,255,.28) !important; }
+    .modal-plan-premium .remove-block-btn:hover {
+      background: rgba(224,62,62,.2) !important;
+      color: #ff7070 !important;
+    }
+    .modal-plan-premium .workout-block-body { background: var(--bg); }
+
+    /* Days: selecionado usa accent do sistema */
+    .modal-plan-premium .day-toggle.selected {
+      background: var(--accent);
+      border-color: var(--accent2);
+      color: #111110;
+      font-weight: 800;
+    }
+
+    /* Botão + Adicionar exercício */
+    .modal-plan-premium .add-ex-btn {
+      border: 1.5px solid #111110 !important;
+      background: #111110 !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border-radius: var(--r) !important;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      transition: all .15s !important;
+    }
+    .modal-plan-premium .add-ex-btn svg { color: #ffffff; flex-shrink: 0; }
+    .modal-plan-premium .add-ex-btn:hover {
+      border-color: #333330 !important;
+      background: #333330 !important;
+      color: #ffffff !important;
+      transform: translateY(-1px) !important;
+      box-shadow: var(--shadow) !important;
+    }
+
+    /* Botão + Adicionar treino ao plano — igual ao padrão .add-plan-btn */
+    .plan-add-workout-btn {
+      border: 2px dashed var(--border2) !important;
+      background: transparent !important;
+      color: var(--text3) !important;
+      border-radius: var(--r2) !important;
+      padding: 18px !important;
+      font-size: .88rem !important;
+      font-weight: 700 !important;
+      transition: all .2s !important;
+      gap: 8px !important;
+    }
+    .plan-add-workout-btn:hover {
+      border-color: var(--accent) !important;
+      color: #111110 !important;
+      background: var(--accent-dim) !important;
+    }
+    .plan-add-workout-btn svg { flex-shrink: 0; }
+
+    /* Erro */
+    .plan-error-msg {
+      color: var(--red); font-size: .8rem; font-weight: 600;
+      min-height: 18px; margin-top: 8px;
+    }
+
+    /* Remover classes desnecessárias (só alias) */
+    .plan-modal-header  { display: none; } /* não usado — usa .modal-header padrão */
+    .plan-modal-body    { } /* alias de .modal-body */
+    .plan-modal-footer  { } /* alias de .modal-footer */
+    .plan-modal-subtitle { font-size: .76rem; color: rgba(255,255,255,0.6); font-weight: 500; margin-top: 2px; }
+    .plan-close-btn     { } /* alias de .close-btn */
+    .plan-btn-cancel    { } /* alias de .btn-ghost */
+    .plan-btn-save      { } /* alias de .btn-primary */
+    .plan-footer-hint   { font-size: .73rem; color: var(--text3); display: flex; align-items: center; gap: 5px; }
+    .plan-footer-actions { display: flex; gap: 10px; }
+    .plan-section       { margin-bottom: 20px; }
+    .plan-section-workouts { margin-bottom: 4px; }
+    .plan-section-label {
+      font-size: .7rem; font-weight: 700; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .1em;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .plan-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .plan-section-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+    .plan-section-dot-accent { background: var(--accent); }
+    .plan-label { display: flex; align-items: center; gap: 5px; font-size: .75rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 7px; }
+    .plan-input { } /* alias de .form-control */
+    .plan-form-group { margin-bottom: 0; }
 
     /* Three-dots context menu */
     .ctx-menu-wrap { position: relative; }
@@ -2227,33 +2405,49 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- MODAL: PLANO DE TREINO -->
 <div id="modal-plan" class="modal-overlay hidden">
-  <div class="modal">
+  <div class="modal modal-plan-premium">
     <div class="modal-header">
-      <h3 id="plan-modal-title">Criar plano de treino</h3>
+      <div>
+        <h3 id="plan-modal-title">Criar plano de treino</h3>
+        <p class="plan-modal-subtitle">Configure os treinos e exercícios do plano</p>
+      </div>
       <button class="close-btn" onclick="confirmClosePlan()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label>Nome do plano *</label><input id="plan-title" class="form-control" type="text" placeholder="Ex: Plano Junho 2025"/></div>
-        <div class="form-group"><label>Validade (opcional)</label><input id="plan-expiry" class="form-control" type="date"/></div>
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group" style="margin-bottom:0;"><label>Nome do plano *</label><input id="plan-title" class="form-control" type="text" placeholder="Ex: Plano Junho 2025"/></div>
+        <div class="form-group" style="margin-bottom:0;"><label>Validade (opcional)</label><input id="plan-expiry" class="form-control" type="date"/></div>
       </div>
-      <div class="form-group" style="margin-top:4px;">
-        <label>Treinos do plano</label>
-        <div id="workouts-editor" class="workouts-editor"></div>
-        <button type="button" class="add-workout-block-btn" style="margin-top:10px;" onclick="addWorkoutBlock()">+ Adicionar treino ao plano</button>
+      <div class="plan-section-label" style="margin-bottom:14px;">
+        <span class="plan-section-dot plan-section-dot-accent"></span>
+        Treinos do plano
       </div>
-      <div id="plan-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:18px;margin-top:8px;"></div>
+      <div id="workouts-editor" class="workouts-editor"></div>
+      <button type="button" class="add-workout-block-btn plan-add-workout-btn" style="margin-top:12px;" onclick="addWorkoutBlock()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Adicionar treino ao plano
+      </button>
+      <div id="plan-error" class="plan-error-msg"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="confirmClosePlan()">Cancelar</button>
-      <button id="btn-save-plan" class="btn btn-primary" onclick="savePlan()">Salvar plano</button>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <span class="plan-footer-hint">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Salve para não perder as alterações
+      </span>
+      <div class="plan-footer-actions">
+        <button class="btn btn-ghost" onclick="confirmClosePlan()">Cancelar</button>
+        <button id="btn-save-plan" class="btn btn-primary" onclick="savePlan()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Salvar plano
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- MODAL: VER PLANO -->
 <div id="modal-plan-view" class="modal-overlay hidden">
-  <div class="modal">
+  <div class="modal modal-plan-premium">
     <div class="modal-header">
       <h3 id="pv-title">Plano</h3>
       <button class="close-btn" onclick="closeModal('modal-plan-view')">✕</button>
@@ -3122,6 +3316,7 @@ window.openPlanModal=async(sid,editId=null)=>{
   ST.planStudentId=sid;ST.editPlanId=editId;ST.workoutBlocks=[];
   document.getElementById('plan-title').value='';document.getElementById('plan-expiry').value='';document.getElementById('plan-error').textContent='';
   document.getElementById('plan-modal-title').textContent=editId?'Editar plano':'Criar plano de treino';
+  var subtitleEl=document.querySelector('#modal-plan .plan-modal-subtitle');if(subtitleEl)subtitleEl.textContent=editId?'Atualize os treinos e exercícios do plano':'Configure os treinos e exercícios do plano';
   if(editId){const snap=await _getDoc(_doc(_db,'plans',editId));if(snap.exists){const p=snap.data();document.getElementById('plan-title').value=p.title||'';document.getElementById('plan-expiry').value=p.expiry||'';ST.workoutBlocks=(p.workouts||[]).map(w=>({...w,exercises:(w.exercises||[]).map(e=>({...e}))}));}}
   else{ST.workoutBlocks=[{title:'Treino A',days:[],exercises:[{}]}];}
   ST._planSnapshot=JSON.stringify(ST.workoutBlocks);ST._planTitleSnapshot=document.getElementById('plan-title').value;ST._planExpirySnapshot=document.getElementById('plan-expiry').value;
@@ -3175,55 +3370,61 @@ window.renderWorkoutsEditor=()=>{
           <input type="text" class="form-control" style="flex:1;" value="${r}" placeholder="12" oninput="updateRepsSerie(${bi},${ei},${si},this.value)"/>
         </div>`).join('');
       const isCustom=ex.name==='__custom__';
+      const repsChips=repsArr.map((r,si)=>`<div class="ex-rep-chip"><span class="ex-rep-chip-lbl">S${si+1}</span><input type="text" value="${r}" placeholder="12" oninput="updateRepsSerie(${bi},${ei},${si},this.value)"/></div>`).join('');
+      const isoInline=ex.isometria?`<div class="ex-isometria-inline"><input type="number" min="1" placeholder="0" value="${ex.isometriaSegs||''}" oninput="updateExInBlock(${bi},${ei},'isometriaSegs',this.value)"/><span>seg</span></div>`:'';
       return `<div class="exercise-item" data-bi="${bi}" data-ei="${ei}">
-        <div class="exercise-item-header">
-          <div class="drag-handle" title="Arraste para reordenar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
-          </div>
-          <div class="ex-num">${ei+1}</div>
-          <select class="form-control" style="flex:1;" onchange="onExNameSelect(${bi},${ei},this.value)">
-            <option value="">— exercício —</option>
+        <div class="ex-row-top">
+          <div class="drag-handle" title="Reordenar"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><circle cx="2.5" cy="1.5" r="1.5"/><circle cx="7.5" cy="1.5" r="1.5"/><circle cx="2.5" cy="6" r="1.5"/><circle cx="7.5" cy="6" r="1.5"/><circle cx="2.5" cy="10.5" r="1.5"/><circle cx="7.5" cy="10.5" r="1.5"/></svg></div>
+          <span class="ex-num">${ei+1}</span>
+          <select class="ex-select" onchange="onExNameSelect(${bi},${ei},this.value)">
+            <option value="">— selecione o exercício —</option>
             <option value="__custom__" ${isCustom?'selected':''}>✏️ Personalizado</option>
             ${opts}
           </select>
-          <button type="button" class="remove-ex-btn" onclick="removeExFromBlock(${bi},${ei})">✕</button>
+          <button type="button" class="remove-ex-btn" title="Remover" onclick="removeExFromBlock(${bi},${ei})"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
-        ${isCustom?`<div style="margin-bottom:8px;"><input type="text" class="form-control" placeholder="Nome do exercício personalizado..." value="${(ex.customName||'').replace(/"/g,'&quot;')}" oninput="updateExInBlock(${bi},${ei},'customName',this.value)"/></div>`:''}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <div>
-            <span class="ctrl-label">Número de séries</span>
-            <input type="number" class="form-control" min="1" max="20" value="${seriesCount}" oninput="updateSeriesCount(${bi},${ei},this.value)"/>
+        ${isCustom?`<div style="padding:6px 10px;border-bottom:1px solid var(--border);"><input type="text" style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:.82rem;font-family:var(--body);background:var(--bg);color:var(--text);" placeholder="Nome personalizado..." value="${(ex.customName||'').replace(/"/g,'&quot;')}" oninput="updateExInBlock(${bi},${ei},'customName',this.value)"/></div>`:''}
+        <div class="ex-row-fields">
+          <div class="ex-field">
+            <span class="ex-field-label">Séries</span>
+            <input type="number" min="1" max="20" value="${seriesCount}" oninput="updateSeriesCount(${bi},${ei},this.value)"/>
           </div>
-          <div>
-            <span class="ctrl-label">Bi-set com</span>
-            <select class="form-control" onchange="updateExInBlock(${bi},${ei},'biset',this.value)">
-              <option value="">Nenhum</option>${bisets}
-            </select>
+          <div class="ex-field">
+            <span class="ex-field-label">Reps por série</span>
+            <div class="ex-reps-chips">${repsChips}</div>
+          </div>
+          <div class="ex-field">
+            <span class="ex-field-label">Bi-set com</span>
+            <select onchange="updateExInBlock(${bi},${ei},'biset',this.value)"><option value="">Nenhum</option>${bisets}</select>
           </div>
         </div>
-        <div style="margin-bottom:8px;">
-          <span class="ctrl-label">Repetições por série</span>
-          ${repsFields}
+        <div class="ex-row-bottom">
+          <div class="ex-techniques">
+            <span class="ex-tech-label">Técnicas</span>
+            <label class="tech-pill"><input type="checkbox" ${ex.unilateral?'checked':''} onchange="updateExInBlock(${bi},${ei},'unilateral',this.checked)"/>Unilateral</label>
+            <label class="tech-pill"><input type="checkbox" ${ex.isometria?'checked':''} onchange="updateIsometria(${bi},${ei},this.checked)"/>Isometria</label>
+            <label class="tech-pill"><input type="checkbox" ${ex.restPause?'checked':''} onchange="updateExInBlock(${bi},${ei},'restPause',this.checked)"/>Rest-pause</label>
+            ${isoInline}
+          </div>
+          <div class="ex-obs-wrap">
+            <textarea placeholder="Observações: cadência, descanso, drop-set..." oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs||''}</textarea>
+          </div>
         </div>
-        <div style="margin-bottom:8px;"></div>
-        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;margin-top:4px;">
-          <label class="checkbox-label"><input type="checkbox" ${ex.unilateral?'checked':''} onchange="updateExInBlock(${bi},${ei},'unilateral',this.checked)"/> Unilateral</label>
-          <label class="checkbox-label"><input type="checkbox" ${ex.isometria?'checked':''} onchange="updateIsometria(${bi},${ei},this.checked)"/> Isometria</label>
-          <label class="checkbox-label"><input type="checkbox" ${ex.restPause?'checked':''} onchange="updateExInBlock(${bi},${ei},'restPause',this.checked)"/> Rest-pause</label>
-        </div>
-        ${ex.isometria?`<div style="margin-top:8px;display:flex;align-items:center;gap:8px;"><span class="ctrl-label" style="margin-bottom:0;white-space:nowrap;">Tempo isometria (seg)</span><input type="number" class="form-control" style="max-width:110px;" min="1" placeholder="Ex: 30" value="${ex.isometriaSegs||''}" oninput="updateExInBlock(${bi},${ei},'isometriaSegs',this.value)"/></div>`:''}
-        <div style="margin-top:8px;"><span class="ctrl-label">Observações / Técnicas</span><textarea class="form-control" rows="2" placeholder="Ex: Cadência 2-0-2, descanso 60s, drop-set na última série..." style="resize:vertical;min-height:56px;" oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs||''}</textarea></div>
       </div>`;
     }).join('');
     return `<div class="workout-block">
       <div class="workout-block-header">
         <div class="wb-letter">${String.fromCharCode(65+bi)}</div>
         <input class="wb-title-input" type="text" value="${wb.title||''}" placeholder="Nome do treino..." onchange="updateBlockTitle(${bi},this.value)"/>
-        ${ST.workoutBlocks.length>1?`<button type="button" class="remove-block-btn" onclick="removeWorkoutBlock(${bi})">✕</button>`:''}
+        ${ST.workoutBlocks.length>1?`<button type="button" class="remove-block-btn" title="Remover treino" onclick="removeWorkoutBlock(${bi})"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:''}
       </div>
       <div class="workout-block-body">
-        <div style="margin-bottom:8px;"><span class="ctrl-label">Dias da semana</span><div class="days-selector">${daysHTML}</div></div>
-        <div><span class="ctrl-label">Exercícios</span><div class="exercises-list">${exHTML}</div><button type="button" class="add-ex-btn" onclick="addExToBlock(${bi})">+ exercício</button></div>
+        <div class="wb-days-row">
+          <span class="wb-days-label">Dias</span>
+          <div class="days-selector">${daysHTML}</div>
+        </div>
+        <div class="exercises-list">${exHTML}</div>
+        <button type="button" class="add-ex-btn" onclick="addExToBlock(${bi})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Adicionar exercício</button>
       </div>
     </div>`;
   }).join('');
@@ -5986,14 +6187,27 @@ window.twContinueTrial = function() {
 document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, {passive:false});
 document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, {passive:false});
 document.addEventListener('gestureend', function(e){ e.preventDefault(); }, {passive:false});
-// Block double-tap zoom
+
+// Block double-tap zoom — APENAS fora de modais e inputs
 var lastTap=0;
 document.addEventListener('touchend', function(e){
+  // Não interfere com modais, inputs, selects, textareas, botões dentro de modais
+  var t = e.target;
+  if(t && (
+    t.closest('.modal') ||
+    t.closest('.modal-overlay') ||
+    t.tagName === 'INPUT' ||
+    t.tagName === 'SELECT' ||
+    t.tagName === 'TEXTAREA' ||
+    t.tagName === 'BUTTON' ||
+    t.tagName === 'A'
+  )) return;
   var now=Date.now();
   if(now-lastTap<300){ e.preventDefault(); }
   lastTap=now;
 }, {passive:false});
-// Block pinch zoom
+
+// Block pinch zoom (multi-touch) — sempre válido
 document.addEventListener('touchmove', function(e){
   if(e.touches.length>1){ e.preventDefault(); }
 }, {passive:false});
