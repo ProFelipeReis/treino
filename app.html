@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
@@ -3387,7 +3387,7 @@ window.renderWorkoutsEditor=()=>{
         <div class="ex-row-fields">
           <div class="ex-field">
             <span class="ex-field-label">Séries</span>
-            <input type="number" min="1" max="20" value="${seriesCount}" oninput="updateSeriesCount(${bi},${ei},this.value)"/>
+            <input type="number" min="1" max="20" value="${seriesCount}" oninput="updateSeriesCount(${bi},${ei},this.value,true)" onblur="updateSeriesCount(${bi},${ei},this.value,false)"/>
           </div>
           <div class="ex-field">
             <span class="ex-field-label">Reps por série</span>
@@ -3498,7 +3498,13 @@ window.initDragDrop=function(){
 };
 
 // Update series count → rebuild repsArr and re-render
-window.updateSeriesCount=(bi,ei,val)=>{
+window.updateSeriesCount=(bi,ei,val,typing)=>{
+  // Se o campo estiver vazio E ainda estiver digitando, permite ficar em branco
+  if((val===''||val===null||val===undefined) && typing) {
+    ST.workoutBlocks[bi].exercises[ei].series='';
+    return;
+  }
+  // Se estiver em branco ao desfocar (blur), volta para 1
   const n=Math.max(1,Math.min(20,parseInt(val)||1));
   const ex=ST.workoutBlocks[bi].exercises[ei];
   ex.series=n;
