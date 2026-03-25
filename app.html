@@ -16,7 +16,7 @@
   <!-- Firebase SDK loaded early so login can query Firestore immediately -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-functions-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-functions-compat.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -961,6 +961,22 @@
     .reg-step-dot.active { background:var(--accent); transform:scale(1.3); }
     .reg-step-dot.done { background:var(--green); }
 
+    /* ══ MODAL MIGRAÇÃO AUTH ══ */
+    #migration-overlay { display:none; position:fixed; inset:0; z-index:9500; background:rgba(0,0,0,.5); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px; }
+    #migration-overlay.on { display:flex; }
+    .migration-card { background:#fff; border-radius:24px; width:100%; max-width:400px; overflow:hidden; box-shadow:0 16px 60px rgba(0,0,0,.25); animation:popIn .35s cubic-bezier(.22,1,.36,1); }
+    .migration-head { background:#111110; padding:28px 32px 22px; text-align:center; }
+    .migration-head .mig-icon { font-size:2rem; margin-bottom:10px; }
+    .migration-head h3 { color:#fff; font-family:var(--head); font-size:1.1rem; font-weight:800; margin-bottom:5px; }
+    .migration-head p { color:rgba(255,255,255,.55); font-size:.8rem; line-height:1.5; }
+    .migration-body { padding:24px 28px; }
+    .migration-body .mig-info { background:var(--accent-dim); border:1px solid var(--accent-soft); border-radius:var(--r); padding:12px 14px; margin-bottom:18px; font-size:.8rem; color:#7a5c00; line-height:1.6; }
+    .migration-body .mig-info strong { color:#5a3e00; }
+    .migration-footer { padding:0 28px 24px; display:flex; flex-direction:column; gap:8px; }
+    .migration-footer .mig-skip { background:none; border:none; font-size:.78rem; color:var(--text3); cursor:pointer; padding:6px; font-family:var(--body); font-weight:600; transition:color .15s; }
+    .migration-footer .mig-skip:hover { color:var(--text2); }
+    #mig-error { color:var(--red); font-size:.8rem; font-weight:600; min-height:16px; margin-bottom:4px; }
+
     /* ══ CREF REVIEW ══ */
     .cref-review-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; box-shadow:var(--shadow); margin-bottom:28px; }
     .cref-review-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px; }
@@ -1283,7 +1299,9 @@ function showBlockedScreen(reasons) {
   }
 }
 
-async function doLogin(){
+// _doLoginLegacy — substituída pelo sistema de Auth abaixo (firebase-auth)
+// Mantida aqui apenas como referência histórica. Não é chamada.
+async function _doLoginLegacy(){
   var user = document.getElementById('login-user').value.trim().toLowerCase();
   var pass = document.getElementById('login-pass').value;
   if(!user || !pass){ showLoginError('Preencha usuário e senha.'); return; }
@@ -1639,6 +1657,11 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="form-group">
           <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Confirmar senha</label>
           <input id="reg-pass2" class="form-control" type="password" placeholder="Repita a senha" autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">E-mail</label>
+          <input id="reg-email-step1" class="form-control" type="email" placeholder="seu@email.com" autocomplete="email"/>
+          <div style="font-size:.72rem;color:var(--text3);margin-top:5px;">Usado para recuperação de conta e segurança.</div>
         </div>
         <!-- Campo de código de indicação — oculto por padrão, visível quando não vem por link direto -->
         <div class="form-group" id="reg-ref-code-wrap" style="display:none;">
@@ -2749,6 +2772,8 @@ window.showDashboardAfterLogin = window.showDashboard = function(userData){
 };
 
 window.logoutGestor=function(){
+  // Faz signOut do Firebase Auth antes de limpar tudo
+  try { if(window._auth && window._auth.currentUser){ window._auth.signOut().catch(function(){}); } } catch(e){}
   clearSession();
   window.CURRENT_USER=null;
   if(window._notifInterval){ clearInterval(window._notifInterval); window._notifInterval=null; }
@@ -6217,6 +6242,493 @@ document.addEventListener('touchend', function(e){
 document.addEventListener('touchmove', function(e){
   if(e.touches.length>1){ e.preventDefault(); }
 }, {passive:false});
+</script>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL DE MIGRAÇÃO PARA FIREBASE AUTH
+     Aparece na primeira vez que o gestor existente faz login
+     após a ativação do Auth. Solicita e-mail para criar conta.
+     ══════════════════════════════════════════════════════ -->
+<div id="migration-overlay">
+  <div class="migration-card">
+    <div class="migration-head">
+      <div class="mig-icon">🔐</div>
+      <h3>Ative a segurança da sua conta</h3>
+      <p>O Trainly agora usa autenticação segura.<br/>Informe seu e-mail para proteger seu acesso.</p>
+    </div>
+    <div class="migration-body">
+      <div class="mig-info">
+        <strong>Por que isso é necessário?</strong><br/>
+        Migramos para o Firebase Auth para proteger seus dados e os de seus alunos. Isso acontece <strong>uma única vez</strong> e leva segundos.
+      </div>
+      <div id="mig-error"></div>
+      <div class="form-group">
+        <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">E-mail</label>
+        <input id="mig-email" class="form-control" type="email" placeholder="seu@email.com" autocomplete="email"/>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:5px;">Usado para recuperação de senha. Não compartilhamos com ninguém.</div>
+      </div>
+    </div>
+    <div class="migration-footer">
+      <div id="mig-error-bottom"></div>
+      <button class="btn btn-primary" onclick="migrationConfirm()" style="width:100%;justify-content:center;padding:13px;font-size:.95rem;" id="mig-btn">Ativar segurança →</button>
+      <button class="mig-skip" onclick="migrationSkip()">Agora não (será pedido novamente no próximo login)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// FIREBASE AUTH — SISTEMA DE AUTENTICAÇÃO SEGURA
+// Migração lazy: gestores existentes são migrados na
+// primeira vez que fazem login após esta atualização.
+// ════════════════════════════════════════════════════════
+
+// Instância do Auth (inicializada após firebase.initializeApp)
+var _auth = null;
+
+// Dados temporários durante o fluxo de migração/login
+var _pendingAuthMigration = null; // { userData, docId, username, password }
+
+// Inicializa o Auth assim que o Firebase estiver pronto
+(function initAuth() {
+  function tryInit() {
+    if (window.firebase && window.firebase.auth) {
+      _auth = firebase.auth();
+      _auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    } else {
+      setTimeout(tryInit, 100);
+    }
+  }
+  tryInit();
+})();
+
+// ── Helpers de e-mail sintético ──────────────────────────
+// Para gestores sem e-mail real, usamos um endereço interno
+// invisível ao usuário. Nunca é exibido na UI.
+function _syntheticEmail(username) {
+  return username.toLowerCase().replace(/[^a-z0-9]/g, '') + '@trainly-app.internal';
+}
+
+// ── Criar ou buscar conta no Firebase Auth ───────────────
+// Retorna o UID. Se a conta já existir, faz signIn para obter o UID.
+async function _ensureAuthAccount(email, password, username) {
+  try {
+    var cred = await _auth.createUserWithEmailAndPassword(email, password);
+    return cred.user.uid;
+  } catch (e) {
+    if (e.code === 'auth/email-already-in-use') {
+      // Conta já existe — faz signIn para obter o UID
+      var cred2 = await _auth.signInWithEmailAndPassword(email, password);
+      return cred2.user.uid;
+    }
+    throw e;
+  }
+}
+
+// ── LOGIN PRINCIPAL (substitui doLogin original) ─────────
+// Fluxo:
+//   1. Verifica credenciais no Firestore (compatibilidade total)
+//   2. Se já tem authUid → signIn no Auth direto
+//   3. Se não tem authUid:
+//      a. Se tem email real → cria conta Auth silenciosamente (email sintético como fallback)
+//      b. Se não tem email → abre modal de migração para pedir e-mail
+async function doLogin() {
+  var user = document.getElementById('login-user').value.trim().toLowerCase();
+  var pass = document.getElementById('login-pass').value;
+  if (!user || !pass) { showLoginError('Preencha usuário e senha.'); return; }
+
+  var btn = document.querySelector('#login-form button[type=button]');
+  if (btn) { btn.textContent = 'Verificando...'; btn.disabled = true; }
+
+  try {
+    // Aguarda Firebase estar pronto
+    var attempts = 0;
+    while ((!window.firebase || !window.firebase.firestore || !_auth) && attempts < 40) {
+      await new Promise(r => setTimeout(r, 100)); attempts++;
+    }
+    if (!window.firebase || !window.firebase.firestore) {
+      showLoginError('Erro de conexão. Tente novamente.'); return;
+    }
+
+    var db = firebase.firestore();
+    var snap = await db.collection('managers').where('username', '==', user).get();
+    if (snap.empty) { showLoginError('Credenciais inválidas.'); return; }
+
+    var docSnap = snap.docs[0];
+    var mgr = docSnap.data();
+
+    // Verifica senha (suporte a SHA-256 hash e plain legado)
+    var passOk = await _checkPassword(pass, mgr.password, mgr.passwordHash);
+    if (!passOk) { showLoginError('Credenciais inválidas.'); return; }
+
+    // Conta bloqueada?
+    if (mgr.blocked) {
+      var reasons = mgr.blockReasons && mgr.blockReasons.length ? mgr.blockReasons : [];
+      showBlockedScreen(reasons);
+      return;
+    }
+
+    var role = mgr.role || (mgr.isMaster ? 'master' : 'comum');
+    var subStatus = (role !== 'ceo') ? _checkSubscription(mgr) : null;
+
+    // Garante referralCode
+    var referralCode = mgr.referralCode || '';
+    if (!referralCode) {
+      var arr = new Uint8Array(5); crypto.getRandomValues(arr);
+      referralCode = Array.from(arr).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+      try { await db.collection('managers').doc(docSnap.id).update({ referralCode: referralCode }); } catch(e) {}
+    }
+
+    var userData = {
+      id: docSnap.id,
+      username: user,
+      role: role,
+      isMaster: role === 'master' || role === 'ceo',
+      isCeo: role === 'ceo',
+      displayName: mgr.name || user,
+      phone: mgr.phone || '',
+      subStatus: subStatus,
+      trialEndsAt: mgr.trialEndsAt || null,
+      subEndsAt: mgr.subEndsAt || null,
+      referralCode: referralCode,
+    };
+
+    // ── Rota de Auth ─────────────────────────────────────
+    if (mgr.authUid) {
+      // Já migrado: signIn direto no Auth
+      var authEmail = mgr.email || _syntheticEmail(user);
+      try {
+        await _auth.signInWithEmailAndPassword(authEmail, pass);
+      } catch (authErr) {
+        // Se a senha mudou via Firestore mas não no Auth, sincroniza
+        if (authErr.code === 'auth/wrong-password' || authErr.code === 'auth/invalid-credential') {
+          try {
+            var u = await _auth.signInWithEmailAndPassword(authEmail, pass);
+          } catch(e2) {
+            // Auth falhou mas credenciais Firestore ok — continua sem Auth por ora
+            console.warn('Auth signIn failed, continuing without Auth:', e2.message);
+          }
+        }
+      }
+      _loginSuccess(userData);
+
+    } else {
+      // Ainda não migrado para o Auth
+      _pendingAuthMigration = { userData, docId: docSnap.id, username: user, password: pass };
+
+      if (mgr.email && mgr.email.includes('@') && !mgr.email.includes('@trainly-app.internal')) {
+        // Tem e-mail real → migra silenciosamente
+        await _performAuthMigration(mgr.email, pass, docSnap.id, user);
+        _loginSuccess(userData);
+      } else {
+        // Sem e-mail real → abre modal de migração
+        if (btn) { btn.textContent = 'Acessar painel →'; btn.disabled = false; }
+        _openMigrationModal(userData, docSnap.id, user, pass);
+        return;
+      }
+    }
+
+  } catch (e) {
+    showLoginError('Erro: ' + e.message);
+  } finally {
+    if (btn) { btn.textContent = 'Acessar painel →'; btn.disabled = false; }
+  }
+}
+
+// ── Executa a migração no Auth e salva authUid + email ───
+async function _performAuthMigration(email, password, docId, username) {
+  try {
+    var uid = await _ensureAuthAccount(email, password, username);
+    await firebase.firestore().collection('managers').doc(docId).update({
+      authUid: uid,
+      email: email
+    });
+    return uid;
+  } catch (e) {
+    // Se Auth falhar, não bloqueia o login — apenas loga
+    console.warn('Auth migration failed (non-blocking):', e.message);
+    return null;
+  }
+}
+
+// ── Abre o modal de migração ─────────────────────────────
+function _openMigrationModal(userData, docId, username, password) {
+  _pendingAuthMigration = { userData, docId, username, password };
+  document.getElementById('mig-email').value = '';
+  document.getElementById('mig-error').textContent = '';
+  document.getElementById('migration-overlay').classList.add('on');
+}
+
+// ── Confirmar migração via modal ─────────────────────────
+window.migrationConfirm = async function() {
+  var email = (document.getElementById('mig-email').value || '').trim().toLowerCase();
+  var errEl = document.getElementById('mig-error');
+  errEl.textContent = '';
+
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    errEl.textContent = 'Informe um e-mail válido.';
+    return;
+  }
+
+  var btn = document.getElementById('mig-btn');
+  btn.classList.add('btn-loading');
+  btn.textContent = 'Ativando...';
+
+  try {
+    var m = _pendingAuthMigration;
+    if (!m) throw new Error('Sessão expirada. Faça login novamente.');
+
+    // Verifica se e-mail já está em uso por outro gestor no Firestore
+    var emailCheck = await firebase.firestore()
+      .collection('managers').where('email', '==', email).get();
+    if (!emailCheck.empty && emailCheck.docs[0].id !== m.docId) {
+      errEl.textContent = 'Este e-mail já está cadastrado em outra conta.';
+      btn.classList.remove('btn-loading');
+      btn.textContent = 'Ativar segurança →';
+      return;
+    }
+
+    await _performAuthMigration(email, m.password, m.docId, m.username);
+
+    document.getElementById('migration-overlay').classList.remove('on');
+    _pendingAuthMigration = null;
+    _loginSuccess(m.userData);
+
+  } catch (e) {
+    errEl.textContent = 'Erro: ' + e.message;
+  } finally {
+    btn.classList.remove('btn-loading');
+    btn.textContent = 'Ativar segurança →';
+  }
+};
+
+// ── Pular migração (será pedido no próximo login) ────────
+window.migrationSkip = function() {
+  var m = _pendingAuthMigration;
+  document.getElementById('migration-overlay').classList.remove('on');
+  _pendingAuthMigration = null;
+  if (m) _loginSuccess(m.userData);
+};
+
+// ════════════════════════════════════════════════════════
+// CADASTRO PÚBLICO — regStep2Next (com Auth)
+// Cria conta no Firestore + Firebase Auth simultaneamente
+// ════════════════════════════════════════════════════════
+var _origRegStep2Next = window.regStep2Next;
+
+window.regStep2Next = async function() {
+  var errEl = document.getElementById('reg-error');
+  errEl.textContent = '';
+  var cref = (document.getElementById('reg-cref').value || '').trim();
+  if (!cref) { errEl.textContent = 'Informe seu número de registro no CREF.'; return; }
+  if (!document.getElementById('reg-cref-decl').checked) {
+    errEl.textContent = 'Você precisa marcar a declaração profissional.'; return;
+  }
+
+  [1,2,3].forEach(function(i) {
+    var el = document.getElementById('reg-step' + i); if (el) el.style.display = 'none';
+  });
+  document.getElementById('reg-processing').style.display = 'block';
+
+  try {
+    var user  = (document.getElementById('reg-user').value || '').trim().toLowerCase();
+    var name  = (document.getElementById('reg-name').value || '').trim();
+    var email = (document.getElementById('reg-email-step1').value || '').trim().toLowerCase();
+
+    // Verifica username duplicado
+    var existing = await _db.collection('managers').where('username', '==', user).get();
+    if (!existing.empty) {
+      document.getElementById('reg-processing').style.display = 'none';
+      errEl.textContent = 'Este usuário já está em uso. Escolha outro.';
+      regShowStep(1); return;
+    }
+
+    // Verifica e-mail duplicado no Auth (se fornecido)
+    var authEmail = (email && email.includes('@')) ? email : _syntheticEmail(user);
+
+    var hash = await _sha256(document.getElementById('reg-pass').value);
+    var password = document.getElementById('reg-pass').value;
+    _regNewId = 'mgr_' + Date.now();
+
+    var refCode = window._pendingRefCode
+               || (document.getElementById('reg-ref-code') ? document.getElementById('reg-ref-code').value.trim() : '')
+               || '';
+
+    // Cria no Firestore primeiro
+    await _db.collection('managers').doc(_regNewId).set({
+      username: user, passwordHash: hash, name, cref, crefDeclared: true,
+      email: authEmail,
+      role: 'comum', isMaster: false,
+      trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
+      blocked: false, createdAt: Date.now(),
+      referredBy: refCode
+    });
+
+    // Cria no Firebase Auth (não bloqueia o cadastro se falhar)
+    try {
+      var uid = await _ensureAuthAccount(authEmail, password, user);
+      await _db.collection('managers').doc(_regNewId).update({ authUid: uid });
+    } catch (authErr) {
+      console.warn('Auth creation failed (non-blocking):', authErr.message);
+    }
+
+    if (refCode) await _applyReferralBonus(refCode);
+
+    document.getElementById('reg-processing').style.display = 'none';
+    document.querySelector('.reg-step-indicator').style.display = 'none';
+    var foot = document.getElementById('reg-foot'); if (foot) foot.style.display = 'none';
+    document.getElementById('reg-success').style.display = 'block';
+    document.getElementById('reg-success-msg').textContent = 'Redirecionando para o login...';
+
+    setTimeout(function() {
+      history.replaceState({}, '', window.location.pathname);
+      document.getElementById('screen-register').classList.remove('on');
+      document.getElementById('screen-register').style.display = '';
+      document.getElementById('screen-login').style.display = 'flex';
+    }, 2800);
+
+  } catch (e) {
+    document.getElementById('reg-processing').style.display = 'none';
+    errEl.textContent = 'Erro: ' + e.message;
+    regShowStep(2);
+  }
+};
+
+// ════════════════════════════════════════════════════════
+// CADASTRO VIA CONVITE — inviteRegister (com Auth)
+// ════════════════════════════════════════════════════════
+var _origInviteRegister = window.inviteRegister;
+
+window.inviteRegister = async function() {
+  var errEl = document.getElementById('inv-error');
+  errEl.textContent = '';
+  var cref = (document.getElementById('inv-cref').value || '').trim();
+  if (!cref) { errEl.textContent = 'Informe seu número de registro no CREF.'; return; }
+  if (!document.getElementById('inv-cref-decl').checked) {
+    errEl.textContent = 'Você precisa marcar a declaração profissional.'; return;
+  }
+  if (!window._invDocId) { errEl.textContent = 'Convite inválido. Solicite um novo link.'; return; }
+
+  var username = (document.getElementById('inv-user').value || '').trim().toLowerCase();
+  var pass     = document.getElementById('inv-pass').value;
+  var btn      = document.getElementById('inv-btn');
+  btn.classList.add('btn-loading'); btn.textContent = 'Cadastrando...';
+
+  try {
+    var ex = await _db.collection('managers').where('username', '==', username).get();
+    if (!ex.empty) { errEl.textContent = 'Usuário já existe.'; inviteStep2Back(); return; }
+
+    var inv = await _db.collection('invites').doc(window._invDocId).get();
+    if (!inv.exists || inv.data().used) { errEl.textContent = 'Convite já utilizado.'; return; }
+
+    var hash     = await _sha256(pass);
+    var newId    = 'mgr_' + Date.now();
+    var invName  = (document.getElementById('inv-name').value || '').trim();
+    var invBy    = window._invBy || '';
+    var authEmail = _syntheticEmail(username); // convite não tem campo de email — usa sintético
+
+    // Busca referralCode de quem criou o convite
+    var invByRefCode = invBy;
+    try {
+      var invBySnap = await _db.collection('managers').where('username', '==', invBy).get();
+      if (!invBySnap.empty) invByRefCode = invBySnap.docs[0].data().referralCode || invBy;
+    } catch(e) {}
+
+    // Cria no Firestore
+    await _db.collection('managers').doc(newId).set({
+      username, passwordHash: hash, name: invName, role: 'comum', isMaster: false,
+      cref, crefDeclared: true,
+      email: authEmail,
+      trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
+      blocked: false, createdAt: Date.now(), invitedBy: invBy, referredBy: invByRefCode
+    });
+
+    // Cria no Firebase Auth (não bloqueia se falhar)
+    try {
+      var uid = await _ensureAuthAccount(authEmail, pass, username);
+      await _db.collection('managers').doc(newId).update({ authUid: uid });
+    } catch (authErr) {
+      console.warn('Auth creation failed (invite, non-blocking):', authErr.message);
+    }
+
+    await _db.collection('invites').doc(window._invDocId).update({
+      used: true, usedAt: Date.now(), usedBy: username
+    });
+    await _applyReferralBonus(invBy);
+
+    var card = document.querySelector('.inv-card');
+    var ov   = document.createElement('div');
+    ov.className = 'inv-success';
+    ov.innerHTML = '<div class="inv-check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="inv-ok-title">Conta criada com sucesso!</div><div class="inv-ok-sub">Redirecionando para o login...</div>';
+    card.appendChild(ov);
+    setTimeout(function() {
+      history.replaceState({}, '', window.location.pathname);
+      document.getElementById('screen-invite').classList.remove('on');
+      document.getElementById('screen-login').style.display = 'flex';
+      document.documentElement.classList.remove('has-invite');
+    }, 2500);
+
+  } catch (e) {
+    errEl.textContent = 'Erro: ' + e.message;
+  } finally {
+    btn.classList.remove('btn-loading'); btn.textContent = 'Criar conta →';
+  }
+};
+
+// ════════════════════════════════════════════════════════
+// LOGOUT — usa auth.signOut() além de limpar localStorage
+// ════════════════════════════════════════════════════════
+var _origLogout = window.doLogout;
+window.doLogout = async function() {
+  try {
+    if (_auth && _auth.currentUser) await _auth.signOut();
+  } catch(e) {}
+  try { localStorage.removeItem('forge_gestor_session'); } catch(e) {}
+  location.reload();
+};
+
+// Garante que botões de logout chamem a versão com Auth
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[onclick*="doLogout"], .logout-btn').forEach(function(el) {
+    if (el.getAttribute('onclick') && el.getAttribute('onclick').includes('doLogout')) return;
+    el.onclick = function() { window.doLogout(); };
+  });
+});
+
+// ════════════════════════════════════════════════════════
+// VALIDAÇÃO STEP 1 — adiciona verificação do e-mail
+// (sobrescreve regStep1Next para validar o novo campo)
+// ════════════════════════════════════════════════════════
+var _origRegStep1Next = window.regStep1Next;
+window.regStep1Next = async function() {
+  // Valida o campo de e-mail antes de chamar a validação original
+  var email = (document.getElementById('reg-email-step1').value || '').trim();
+  var errEl = document.getElementById('reg-error');
+
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    errEl.textContent = 'Informe um e-mail válido.';
+    return;
+  }
+
+  // Verifica duplicidade de e-mail no Firestore
+  try {
+    var emailCheck = await _db.collection('managers').where('email', '==', email.toLowerCase()).get();
+    // Ignora e-mails sintéticos internos na checagem
+    var realConflict = emailCheck.docs.filter(function(d) {
+      return !d.data().email.includes('@trainly-app.internal');
+    });
+    if (realConflict.length > 0) {
+      errEl.textContent = 'Este e-mail já está cadastrado. Tente fazer login.';
+      return;
+    }
+  } catch(e) { /* não bloqueia por erro de rede */ }
+
+  // Chama o step1Next original
+  if (_origRegStep1Next) {
+    _origRegStep1Next();
+  }
+};
+
 </script>
 </body>
 </html>
