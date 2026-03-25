@@ -724,7 +724,7 @@
 <div id="alert-popup-overlay" class="hidden">
   <div id="alert-popup-box">
     <div class="alert-popup-header">
-      <span class="alert-popup-header-icon">📣</span>
+      <span class="alert-popup-header-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#fff"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
       <span class="alert-popup-header-title">Mensagem do seu treinador</span>
     </div>
     <div class="alert-popup-body">
@@ -741,7 +741,7 @@
 <div id="suspended-popup-overlay" class="hidden">
   <div id="suspended-popup-box">
     <div class="suspended-header">
-      <span class="suspended-header-icon">🚫</span>
+      <span class="suspended-header-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#fff"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></span>
       <div>
         <div class="suspended-header-title">Treinador Suspenso</div>
         <div class="suspended-header-sub">Aviso importante sobre sua conta</div>
@@ -752,7 +752,7 @@
         O treinador responsável pela sua ficha foi <strong>suspenso da plataforma</strong>.
       </p>
       <div class="suspended-expiry-box">
-        <span>⚠️</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--red)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
         <span id="suspended-expiry-text">
           Após o vencimento do seu plano de treino atual, seu acesso será removido automaticamente e o código não funcionará mais.
         </span>
@@ -783,7 +783,7 @@
     <button class="chat-close-btn" onclick="toggleChatDrawer()">✕</button>
   </div>
   <div class="chat-messages" id="chat-messages-aluno">
-    <div class="chat-empty">Nenhuma mensagem ainda.<br>Mande um ola! 👋</div>
+    <div class="chat-empty">Nenhuma mensagem ainda.<br>Mande um olá!</div>
   </div>
   <div class="chat-input-wrap">
     <textarea id="chat-input-aluno" placeholder="Mensagem..." rows="1" onkeydown="chatAlunoKeydown(event)" oninput="autoResizeChatInput(this)"></textarea>
@@ -1423,7 +1423,7 @@ window.sendFeedback=async function(){
       read: false
     });
     closeCompletionModal();
-    toast('Feedback enviado! Obrigado 💪');
+    toast('Feedback enviado! Obrigado');
   }catch(e){
     toast('Erro ao enviar: '+e.message,'error');
   }finally{
@@ -1632,11 +1632,11 @@ async function loadPlans(student){
     const statusWrap=document.getElementById('plan-status-wrap');
     if(latestActive){
       const d=latestActive.expiry?new Date(latestActive.expiry+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'sem data de vencimento';
-      statusWrap.innerHTML=`<div class="plan-status-bar active"><div class="psb-dot"></div><div class="psb-text">✅ Plano ativo<span class="psb-name">${latestActive.title}</span>${latestActive.expiry?` · válido até ${d}`:' · sem validade'}</div></div>`;
+      statusWrap.innerHTML=`<div class="plan-status-bar active"><div class="psb-dot"></div><div class="psb-text"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg> Plano ativo<span class="psb-name">${latestActive.title}</span>${latestActive.expiry?` · válido até ${d}`:' · sem validade'}</div></div>`;
     }else if(upcomingPlans.length){
       const p=upcomingPlans[0];
       const d=new Date(p.startDate+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-      statusWrap.innerHTML=`<div class="plan-status-bar" style="background:rgba(245,200,0,.07);border-color:rgba(245,200,0,.3);color:#8a6200;"><div class="psb-dot"></div><div class="psb-text">🗓 Próximo plano começa em ${d}</div></div>`;
+      statusWrap.innerHTML=`<div class="plan-status-bar" style="background:rgba(245,200,0,.07);border-color:rgba(245,200,0,.3);color:#8a6200;"><div class="psb-dot"></div><div class="psb-text"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Próximo plano começa em ${d}</div></div>`;
     }else if(expiredPlans.length){
       const d=new Date(expiredPlans[0].expiry+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
       statusWrap.innerHTML=`<div class="plan-status-bar expired"><div class="psb-dot"></div><div class="psb-text">Plano vencido em ${d} — solicite uma atualização ao seu treinador</div></div>`;
@@ -1649,11 +1649,11 @@ async function loadPlans(student){
     const todayWorkouts=[];
     for(const p of activePlans){ for(const w of (p.workouts||[])){ if((w.days||[]).includes(TODAY)) todayWorkouts.push(w.title); } }
     if(todayWorkouts.length){
-      todayWrap.innerHTML=`<div class="today-card"><div class="today-card-left"><div class="today-card-label">💪 Treino de hoje</div><div class="today-card-workout">${todayWorkouts.join(' · ')}</div><div class="today-card-day">${DAYS_FULL[TODAY]}</div></div><div class="today-card-icon">🏋️</div></div>`;
+      todayWrap.innerHTML=`<div class="today-card"><div class="today-card-left"><div class="today-card-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Treino de hoje</div><div class="today-card-workout">${todayWorkouts.join(' · ')}</div><div class="today-card-day">${DAYS_FULL[TODAY]}</div></div><div class="today-card-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#111110"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg></div></div>`;
     }
 
     if(!plans.length){
-      content.innerHTML=`<div class="empty-state"><span class="ei">🏋️</span><p>Nenhum plano de treino cadastrado ainda.</p></div>`;
+      content.innerHTML=`<div class="empty-state"><span class="ei"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg></span><p>Nenhum plano de treino cadastrado ainda.</p></div>`;
       return;
     }
 
@@ -1668,13 +1668,13 @@ async function loadPlans(student){
     if(activePlans.length===0 && upcomingPlans.length===0 && expiredPlans.length>0){
       const msg=document.createElement('div');
       msg.className='no-active-plan-msg';
-      msg.innerHTML=`<div class="napm-icon">📅</div><div class="napm-title">Nenhum treino ativo no momento</div><div class="napm-sub">Seu plano anterior venceu.<br>Aguarde seu treinador cadastrar um novo plano.</div>`;
+      msg.innerHTML=`<div class="napm-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="napm-title">Nenhum treino ativo no momento</div><div class="napm-sub">Seu plano anterior venceu.<br>Aguarde seu treinador cadastrar um novo plano.</div>`;
       content.appendChild(msg);
     } else if(activePlans.length===0 && upcomingPlans.length>0){
       const nextDate=new Date(upcomingPlans[0].startDate+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
       const msg=document.createElement('div');
       msg.className='no-active-plan-msg';
-      msg.innerHTML=`<div class="napm-icon">🗓</div><div class="napm-title">Nenhum treino ativo hoje</div><div class="napm-sub">Seu próximo plano começa em <strong>${nextDate}</strong>.<br>Você já pode visualizar os treinos abaixo.</div>`;
+      msg.innerHTML=`<div class="napm-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="napm-title">Nenhum treino ativo hoje</div><div class="napm-sub">Seu próximo plano começa em <strong>${nextDate}</strong>.<br>Você já pode visualizar os treinos abaixo.</div>`;
       content.appendChild(msg);
     }
 
@@ -1698,7 +1698,7 @@ async function loadPlans(student){
           histContent.appendChild(renderPlan(p,'expired'));
         }
       } else {
-        histContent.innerHTML = `<div class="empty-state"><span class="ei">📋</span><p>Nenhum treino finalizado ainda.</p></div>`;
+        histContent.innerHTML = `<div class="empty-state"><span class="ei"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span><p>Nenhum treino finalizado ainda.</p></div>`;
       }
     }
 
@@ -1788,7 +1788,7 @@ function renderPlan(p, status){
   const badgeHtml = expired
     ? `<span class="plan-expired-badge">Finalizado</span>`
     : upcoming
-    ? `<span class="plan-upcoming-badge">🗓 Em breve</span>`
+    ? `<span class="plan-upcoming-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Em breve</span>`
     : '';
 
   const planToggleId = `plan-toggle-${p.id}`;
@@ -1848,17 +1848,18 @@ function renderPlan(p, status){
         if(alreadyStarted && !upcoming){
           videoHtml=`<div class="ex-video-wrap"><a href="${ytUrl}" target="_blank" class="yt-link-btn"><img src="${thumbUrl}" class="yt-thumb" alt="Ver exercício"/><div class="yt-play-overlay"><svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg><span>Ver no YouTube</span></div></a></div>`;
         }else{
-          videoHtml=`<div class="ex-video-wrap"><div class="yt-lock-overlay" data-yturl="${vid}" onclick="toast('Você deve iniciar o treino para continuar.','error')">🔒 <span>Inicie o treino para ver o vídeo</span></div></div>`;
+          videoHtml=`<div class="ex-video-wrap"><div class="yt-lock-overlay" data-yturl="${vid}" onclick="toast('Você deve iniciar o treino para continuar.','error')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span>Inicie o treino para ver o vídeo</span></div></div>`;
         }
       }
 
       // Right side: check or lock — lock always stores all data for later unlock
       const checkDataAttrs=`data-plan="${p.id}" data-wi="${wi}" data-ei="${ei}" data-total="${total}" data-prog="${progressId}" data-ptitle="${(p.title||'').replace(/"/g,'&quot;')}" data-wtitle="${(w.title||'Treino '+(wi+1)).replace(/"/g,'&quot;')}" data-sname="${((_currentStudent&&_currentStudent.name)||'Aluno').replace(/"/g,'&quot;')}"`;
+      const lockSvg=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
       const rightHtml=(expired||upcoming)
-        ? `<div class="lock-icon" style="opacity:.4;cursor:default;" title="${expired?'Treino encerrado':'Ainda não disponível'}">🔒</div>`
+        ? `<div class="lock-icon" style="opacity:.4;cursor:default;" title="${expired?'Treino encerrado':'Ainda não disponível'}">${lockSvg}</div>`
         : alreadyStarted
         ? `<button class="check-btn" id="chkbtn_${p.id}_${wi}_${ei}" ${checkDataAttrs} onclick="handleCheckBtn(this)">✓</button>`
-        : `<div class="lock-icon" id="chkbtn_${p.id}_${wi}_${ei}" ${checkDataAttrs} title="Inicie o treino primeiro" onclick="toast('Você deve iniciar o treino para continuar.','error')">🔒</div>`;
+        : `<div class="lock-icon" id="chkbtn_${p.id}_${wi}_${ei}" ${checkDataAttrs} title="Inicie o treino primeiro" onclick="toast('Você deve iniciar o treino para continuar.','error')">${lockSvg}</div>`;
 
       return `
       <div class="exercise-row" id="exrow_${p.id}_${wi}_${ei}">
@@ -2082,7 +2083,7 @@ window.pollChatAluno = async function() {
 window.renderChatMessagesAluno = function(msgs) {
   var el = document.getElementById('chat-messages-aluno');
   if(!msgs.length) {
-    el.innerHTML = '<div class="chat-empty">Nenhuma mensagem ainda.<br>Mande um ola! 👋</div>';
+    el.innerHTML = '<div class="chat-empty">Nenhuma mensagem ainda.<br>Mande um olá!</div>';
     return;
   }
   el.innerHTML = msgs.map(function(m) {
