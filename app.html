@@ -164,7 +164,7 @@
     .topbar-brand .dot { width: 8px; height: 8px; border-radius: 50%; background: #ffffff; }
     .topbar-right { display: flex; align-items: center; gap: 12px; }
     .user-pill { background: rgba(245,200,0,.12); border: 1px solid rgba(245,200,0,.3); border-radius: 8px; padding: 5px 14px; font-size: .78rem; font-weight: 700; color: var(--accent); }
-    .logout-btn { background: none; color: #555550; font-size: .78rem; padding: 6px 12px; border-radius: 8px; font-weight: 600; transition: all .15s; }
+    .logout-btn { background: none; color: #555550; font-size: .78rem; padding: 6px 10px; border-radius: 8px; font-weight: 600; transition: all .15s; white-space: nowrap; flex-shrink: 0; }
     .logout-btn:hover { color: var(--red); background: var(--red-dim); }
     .gear-btn { background: none; color: #888880; padding: 6px 8px; border-radius: 8px; font-size: 1.1rem; transition: all .2s; line-height: 1; border: none; cursor: pointer; }
     .gear-btn:hover { color: var(--accent); background: rgba(245,200,0,.1); transform: rotate(45deg); }
@@ -1418,9 +1418,17 @@ function _loginSuccess(userData){
 
 function _applyUserUI(){
   var u = window.CURRENT_USER||{};
-  // topbar pill
+  // topbar pill (oculto, mantido para compatibilidade)
   var pill = document.getElementById('topbar-user-pill');
   if(pill) pill.textContent = u.displayName||u.username||'gestor';
+  // saudação no dashboard
+  var greetingEl = document.getElementById('dashboard-greeting');
+  if(greetingEl){
+    var _h = new Date().getHours();
+    var _p = _h < 12 ? 'Bom dia' : _h < 18 ? 'Boa tarde' : 'Boa noite';
+    var _fn = ((u.displayName||u.username||'').split(' ')[0]) || 'você';
+    greetingEl.textContent = _p + ', ' + _fn + ' 👋';
+  }
   // show/hide Gestores tab
   var show = !!u.isMaster;
   document.querySelectorAll('.sidebar-item-gestores, .mobile-nav-item-gestores').forEach(function(el){
@@ -1938,16 +1946,16 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="topbar">
     <div class="topbar-brand"><img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly" style="height:32px;width:auto;object-fit:contain;"/></div>
     <div class="topbar-right">
+      <div id="topbar-user-pill" style="display:none;">gestor</div>
       <div class="notif-wrap-rel">
-        <button class="notif-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notificações"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge hidden" id="notif-badge">0</span></button>
+        <button class="gear-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notificações" style="color:#888880;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge hidden" id="notif-badge">0</span></button>
         <div class="notif-panel hidden" id="notif-panel">
           <div class="notif-panel-header"><span>Notificações</span><button class="btn btn-ghost btn-sm" onclick="clearAllNotifs()">Limpar</button></div>
           <div id="notif-list"><div class="notif-panel-empty">Nenhuma notificação</div></div>
         </div>
       </div>
-      <div class="user-pill" id="topbar-user-pill">gestor</div>
       <button class="gear-btn" onclick="openProfileModal()" title="Configurações do perfil"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>️</button>
-      <button class="logout-btn" onclick="logoutGestor()">Sair</button>
+      <button class="logout-btn" onclick="logoutGestor()" style="flex-shrink:0;white-space:nowrap;">Sair</button>
     </div>
   </div>
   <div class="app-layout">
@@ -1981,7 +1989,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div class="main-content">
       <div id="tab-dashboard" class="tab-panel active">
-        <div class="page-header"><div class="page-title">Dashboard</div></div>
+        <div class="page-header"><div class="page-title" id="dashboard-greeting">Dashboard</div></div>
         <!-- Trial card — visível só durante o período de teste -->
         <div class="trial-dash-card" id="trial-dash-card">
           <div class="trial-dash-left">
@@ -2786,6 +2794,12 @@ window.showDashboardAfterLogin = window.showDashboard = function(userData){
   }).catch(function(){});
 };
 
+window.copyStudentCode = function(code) {
+  navigator.clipboard.writeText(code).then(function(){ toast('Código copiado!'); }).catch(function(){ toast('Código: '+code); });
+};
+window.copyStudentLink = function() {
+  navigator.clipboard.writeText('trainly.online').then(function(){ toast('Link copiado!'); }).catch(function(){ toast('trainly.online'); });
+};
 window.logoutGestor=function(){
   // Faz signOut do Firebase Auth antes de limpar tudo
   try { if(window._auth && window._auth.currentUser){ window._auth.signOut().catch(function(){}); } } catch(e){}
@@ -3028,8 +3042,8 @@ window.openStudentDetail=async sid=>{
         <div class="sai-link">Acesse em <a href="https://trainly.online" target="_blank">trainly.online</a> e insira este código</div>
       </div>
       <div class="student-access-copy">
-        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${s.code}').then(()=>toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Código copiado!'))"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Copiar código</button>
-        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('trainly.online').then(()=>toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Link copiado!'))"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Copiar link</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyStudentCode('${s.code}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Copiar código</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyStudentLink()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Copiar link</button>
       </div>
     </div>
     <div class="detail-header">
