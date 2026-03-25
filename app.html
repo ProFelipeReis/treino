@@ -101,6 +101,10 @@
     .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: .72rem; font-weight: 700; }
     .badge-active { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,125,82,.2); }
     .badge-expired { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); }
+    .badge-upcoming { background: rgba(245,200,0,.12); color: #8a6200; border: 1px solid rgba(245,200,0,.35); }
+    .plan-card.upcoming { opacity: .85; border-color: rgba(245,200,0,.3); }
+    .section-label.upcoming-label { color: #8a6200; }
+    .section-label.expired-label { color: var(--text3); }
 
         #screen-login {
       display: flex; align-items: center; justify-content: center;
@@ -1289,7 +1293,7 @@ function showBlockedScreen(reasons) {
       + reasons.map(function(r){ return '<div class="blocked-reason-item">'+r+'</div>'; }).join('')
       + (isCrefFake
           ? '<div style="margin-top:12px;padding:12px 14px;background:#fff8e1;border-radius:8px;border:1px solid #ffc107;">'
-            + '<div style="font-size:.68rem;font-weight:800;color:#7d5a00;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">⚠️ Aviso Legal</div>'
+            + '<div style="font-size:.68rem;font-weight:800;color:#7d5a00;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>️ Aviso Legal</div>'
             + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;margin-bottom:6px;"><strong>Exercício Ilegal da Profissão:</strong> O exercício de atividade profissional sem preencher as condições legais é contravenção penal prevista no <strong>Art. 47 da Lei das Contravenções Penais</strong>.</p>'
             + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;"><strong>Uso de Documento Falso:</strong> A utilização de carteira do CREF, diploma ou qualquer identificação profissional falsa configura crime de uso de documento falso, conforme o <strong>Art. 304 do Código Penal</strong>.</p>'
             + '</div>'
@@ -1391,7 +1395,7 @@ function _checkSubscription(mgr){
 }
 
 function showLoginError(msg){
-  var t=document.createElement('div');t.className='toast error';t.textContent='❌ '+msg;
+  var t=document.createElement('div');t.className='toast error';t.textContent='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> '+msg;
   document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
 }
 
@@ -1522,7 +1526,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
       <!-- STEP 4: Sucesso -->
       <div id="sub-step-success" style="display:none;text-align:center;padding:10px 0;">
-        <div style="font-size:3rem;margin-bottom:12px;">✅</div>
+        <div style="font-size:3rem;margin-bottom:12px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg></div>
         <p style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:8px;">Pagamento aprovado!</p>
         <p style="font-size:.85rem;color:var(--text2);margin-bottom:20px;line-height:1.6;" id="sub-success-msg">Seu acesso foi liberado.</p>
         <button class="btn-subscribe" onclick="enterAfterPayment()">Acessar painel →</button>
@@ -1643,7 +1647,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 1 de 2 — Dados pessoais</div>
         <!-- Banner de indicação — só aparece quando vem via ?ref= -->
         <div id="reg-referral-banner" style="display:none;background:var(--green-dim);border:1px solid rgba(46,125,82,.2);border-radius:var(--r);padding:11px 14px;margin-bottom:16px;font-size:.8rem;color:var(--green);font-weight:600;line-height:1.5;">
-          🎁 Você foi indicado por um colega! Ao concluir seu cadastro, ele ganhará <strong>+7 dias</strong> na assinatura como recompensa pela indicação.
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Você foi indicado por um colega! Ao concluir seu cadastro, ele ganhará <strong>+7 dias</strong> na assinatura como recompensa pela indicação.
         </div>
         <div class="form-group">
           <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nome completo</label>
@@ -1756,7 +1760,7 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
         <div style="display:flex;gap:10px;margin-top:4px;">
           <button class="btn btn-ghost" onclick="regStepBack(2)" style="flex:0 0 auto;">← Voltar</button>
-          <button class="btn btn-primary" id="reg-pay-btn" onclick="regSubmitPayment()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">🔒 Pagar e criar conta</button>
+          <button class="btn btn-primary" id="reg-pay-btn" onclick="regSubmitPayment()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Pagar e criar conta</button>
         </div>
         <div style="text-align:center;margin-top:8px;font-size:.72rem;color:var(--text3);">Pagamento seguro via Mercado Pago</div>
       </div>
@@ -1792,7 +1796,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <p>Sua conta foi suspensa pelo administrador</p>
     </div>
     <div class="blocked-body">
-      <div class="blocked-icon">🚫</div>
+      <div class="blocked-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
       <div class="blocked-title">Sua conta está bloqueada</div>
       <div class="blocked-sub">O acesso ao painel foi suspenso devido às seguintes condutas identificadas:</div>
       <div class="blocked-reasons" id="blocked-reasons-list"></div>
@@ -1811,7 +1815,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="trial-welcome-card">
     <div class="trial-welcome-head">
       <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly"/>
-      <h2>Bem-vindo ao Trainly! 🎉</h2>
+      <h2>Bem-vindo ao Trainly! <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></h2>
       <p>Seu período de teste foi ativado</p>
     </div>
     <div class="trial-welcome-body">
@@ -1850,7 +1854,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- ══ TRIAL BANNER ══ -->
 <div id="trial-banner">
   <button class="tb-close" onclick="document.getElementById('trial-banner').style.display='none'">✕</button>
-  <div class="tb-title">🎉 Período de teste ativo</div>
+  <div class="tb-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Período de teste ativo</div>
   <div class="tb-sub" id="trial-banner-text">Você tem X dias restantes de avaliação gratuita.</div>
 </div>
 
@@ -1901,7 +1905,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-ceo-edit')">Cancelar</button>
-      <button class="btn btn-danger btn-sm" onclick="ceoDeleteManager()">🗑 Excluir</button>
+      <button class="btn btn-danger btn-sm" onclick="ceoDeleteManager()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Excluir</button>
       <button id="btn-ceo-save" class="btn btn-primary" onclick="ceoSaveManagerEdits()">Salvar</button>
     </div>
   </div>
@@ -1935,14 +1939,14 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="topbar-brand"><img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly" style="height:32px;width:auto;object-fit:contain;"/></div>
     <div class="topbar-right">
       <div class="notif-wrap-rel">
-        <button class="notif-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notificações">🔔<span class="notif-badge hidden" id="notif-badge">0</span></button>
+        <button class="notif-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notificações"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge hidden" id="notif-badge">0</span></button>
         <div class="notif-panel hidden" id="notif-panel">
           <div class="notif-panel-header"><span>Notificações</span><button class="btn btn-ghost btn-sm" onclick="clearAllNotifs()">Limpar</button></div>
           <div id="notif-list"><div class="notif-panel-empty">Nenhuma notificação</div></div>
         </div>
       </div>
       <div class="user-pill" id="topbar-user-pill">gestor</div>
-      <button class="gear-btn" onclick="openProfileModal()" title="Configurações do perfil">⚙️</button>
+      <button class="gear-btn" onclick="openProfileModal()" title="Configurações do perfil"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>️</button>
       <button class="logout-btn" onclick="logoutGestor()">Sair</button>
     </div>
   </div>
@@ -1990,7 +1994,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <p id="trial-dash-desc">Você tem 7 dias restantes.<br/>Assine para não perder o acesso.</p>
             </div>
           </div>
-          <button class="trial-dash-btn" onclick="showSubscriptionWall()">⚡ Assinar agora</button>
+          <button class="trial-dash-btn" onclick="showSubscriptionWall()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Assinar agora</button>
         </div>
         <div class="stats-grid">
           <div class="stat-card"><div class="stat-num" id="stat-alunos">—</div><div class="stat-lbl">Alunos cadastrados</div></div>
@@ -2000,16 +2004,16 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="quick-card">
           <h3>Ações rápidas</h3>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-ghost" onclick="goToAlunos()">👥 Ver alunos</button>
+            <button class="btn btn-ghost" onclick="goToAlunos()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Ver alunos</button>
             <button class="btn btn-primary" onclick="openAddStudentModal()">+ Novo aluno</button>
-            <button class="btn btn-ghost" onclick="openCreateAlertModal()" style="background:rgba(245,200,0,.1);border-color:rgba(245,200,0,.4);color:#8a6c00;font-weight:800;">📢 Criar Alerta</button>
+            <button class="btn btn-ghost" onclick="openCreateAlertModal()" style="background:rgba(245,200,0,.1);border-color:rgba(245,200,0,.4);color:#8a6c00;font-weight:800;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Criar Alerta</button>
           </div>
         </div>
 
         <!-- Banner de indicação — visível para todos os gestores -->
         <div class="referral-dash-banner" id="referral-dash-banner">
           <div class="referral-dash-banner-left">
-            <div class="referral-dash-icon">🎁</div>
+            <div class="referral-dash-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
             <div class="referral-dash-text">
               <strong>Indique um colega, ganhe 7 dias grátis</strong>
               <span>Convide um profissional de educação física e, quando ele se cadastrar pelo seu link, você ganha <em>+7 dias</em> na sua mensalidade.</span>
@@ -2038,11 +2042,11 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="page-header">
           <div class="page-title">Gestores</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-ghost btn-sm" id="btn-inv-link" onclick="inviteGenLink()">🔗 Link de convite</button>
+            <button class="btn btn-ghost btn-sm" id="btn-inv-link" onclick="inviteGenLink()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link de convite</button>
           </div>
         </div>
         <div id="inv-link-box" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;">
-          <div style="font-weight:700;font-size:.82rem;color:var(--text);margin-bottom:8px;">🔗 Link de convite gerado:</div>
+          <div style="font-weight:700;font-size:.82rem;color:var(--text);margin-bottom:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link de convite gerado:</div>
           <div style="display:flex;align-items:center;gap:8px;">
             <input id="inv-link-input" class="form-control" readonly style="font-size:.75rem;flex:1;min-width:0;"/>
             <button class="btn btn-primary btn-sm" onclick="inviteCopyLink()">Copiar</button>
@@ -2099,7 +2103,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="cref-review-card" id="cref-review-section">
           <div class="cref-review-head">
             <div class="ceo-section-title" style="margin:0;">
-              📋 Análise de documentos CREF
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Análise de documentos CREF
               <span class="cref-stat-badge" id="cref-pending-count" style="display:none;">0</span>
             </div>
             <button class="btn btn-ghost btn-sm" onclick="loadCrefPending()">↺ Atualizar</button>
@@ -2112,12 +2116,12 @@ document.addEventListener('DOMContentLoaded',function(){
                 <!-- Histórico de Pagamentos -->
         <div class="ceo-payment-section" id="ceo-payment-section">
           <div class="ceo-payment-section-head">
-            <div class="ceo-section-title" style="margin:0;">💳 Histórico de pagamentos</div>
+            <div class="ceo-section-title" style="margin:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Histórico de pagamentos</div>
             <div class="ceo-payment-filters">
               <button class="ceo-payment-filter-btn active" id="pay-filter-all" onclick="setCeoPayFilter('all')">Todos</button>
               <button class="ceo-payment-filter-btn" id="pay-filter-approved" onclick="setCeoPayFilter('approved')">✓ Aprovados</button>
               <button class="ceo-payment-filter-btn" id="pay-filter-pending" onclick="setCeoPayFilter('pending')">⏳ Pendentes</button>
-              <button class="ceo-payment-filter-btn" id="pay-filter-manual" onclick="setCeoPayFilter('manual')">⚙️ Manual</button>
+              <button class="ceo-payment-filter-btn" id="pay-filter-manual" onclick="setCeoPayFilter('manual')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>️ Manual</button>
               <button class="btn btn-ghost btn-sm" onclick="loadCeoPaymentHistory()">↺</button>
             </div>
           </div>
@@ -2142,20 +2146,20 @@ document.addEventListener('DOMContentLoaded',function(){
 
         <!-- Pricing -->
         <div class="pricing-card">
-          <div class="ceo-section-title">💰 Preços das assinaturas</div>
+          <div class="ceo-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Preços das assinaturas</div>
           <div class="pricing-inputs">
             <div class="form-group" style="margin:0;"><label>Preço mensal (R$)</label><input id="price-monthly" class="form-control" type="number" min="1" step="0.01" placeholder="Ex: 29.90" oninput="updatePricingPreview()"/></div>
             <div class="form-group" style="margin:0;"><label>Desconto anual (%)</label><input id="price-discount" class="form-control" type="number" min="1" max="50" placeholder="Ex: 15" oninput="updatePricingPreview()"/></div>
           </div>
           <div class="pricing-preview" id="pricing-preview">Preencha os campos para ver a prévia.</div>
           <div style="margin-top:14px;display:flex;gap:10px;">
-            <button class="btn btn-primary" onclick="savePricing()">💾 Salvar preços</button>
+            <button class="btn btn-primary" onclick="savePricing()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar preços</button>
             <button class="btn btn-ghost" onclick="loadPricing()">↺ Recarregar</button>
           </div>
         </div>
         <!-- Managers table -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-          <div class="ceo-section-title" style="margin:0;">👥 Gestores cadastrados</div>
+          <div class="ceo-section-title" style="margin:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Gestores cadastrados</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <input id="ceo-search" class="form-control" type="text" placeholder="Buscar gestor..." style="max-width:220px;padding:8px 12px;" oninput="filterCeoManagers()"/>
           </div>
@@ -2208,7 +2212,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div id="modal-referral" class="modal-overlay hidden">
   <div class="modal modal-sm">
     <div class="modal-header">
-      <h3>🎁 Indicar um colega</h3>
+      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Indicar um colega</h3>
       <button class="close-btn" onclick="closeModal('modal-referral')">✕</button>
     </div>
     <div class="modal-body">
@@ -2224,7 +2228,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <label>Seu código de convite</label>
         <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 16px;">
           <span id="referral-code-display" style="font-family:var(--head);font-size:1.5rem;font-weight:800;letter-spacing:.1em;color:var(--text);flex:1;">—</span>
-          <button class="btn btn-ghost btn-sm" onclick="copyReferralCode()" style="flex-shrink:0;">📋 Copiar</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyReferralCode()" style="flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Copiar</button>
         </div>
         <div style="font-size:.72rem;color:var(--text3);margin-top:5px;">Use este código para convidar em massa ou compartilhar verbalmente</div>
       </div>
@@ -2250,7 +2254,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-referral')">Fechar</button>
-      <button class="btn btn-whatsapp btn-sm" onclick="shareReferralWhatsApp()">📱 Compartilhar</button>
+      <button class="btn btn-whatsapp btn-sm" onclick="shareReferralWhatsApp()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Compartilhar</button>
     </div>
   </div>
 </div>
@@ -2270,7 +2274,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="nsc-label">Código de acesso do aluno</div>
         <div class="nsc-code" id="new-student-code-display">—</div>
         <div class="nsc-hint">Anote ou compartilhe este código com o aluno.<br/>Ele usará para entrar em <strong>trainly.online</strong></div>
-        <button class="btn btn-ghost btn-sm" onclick="copyNewStudentCode()" style="margin-top:12px;">📋 Copiar código</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyNewStudentCode()" style="margin-top:12px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Copiar código</button>
       </div>
     </div>
     <div class="modal-footer" id="add-student-footer">
@@ -2335,7 +2339,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div id="modal-transfer" class="modal-overlay hidden">
   <div class="modal modal-sm">
     <div class="modal-header">
-      <h3>🔁 Transferir aluno</h3>
+      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Transferir aluno</h3>
       <button class="close-btn" onclick="closeModal('modal-transfer')">✕</button>
     </div>
     <div class="modal-body">
@@ -2378,7 +2382,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div id="modal-profile" class="modal-overlay hidden">
   <div class="modal modal-sm">
     <div class="modal-header">
-      <h3>⚙️ Configurações do perfil</h3>
+      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>️ Configurações do perfil</h3>
       <button class="close-btn" onclick="closeModal('modal-profile')">✕</button>
     </div>
     <div class="modal-body">
@@ -2438,9 +2442,13 @@ document.addEventListener('DOMContentLoaded',function(){
       <button class="close-btn" onclick="confirmClosePlan()">✕</button>
     </div>
     <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px;"><label>Nome do plano *</label><input id="plan-title" class="form-control" type="text" placeholder="Ex: Plano Junho 2025"/></div>
       <div class="form-row" style="margin-bottom:16px;">
-        <div class="form-group" style="margin-bottom:0;"><label>Nome do plano *</label><input id="plan-title" class="form-control" type="text" placeholder="Ex: Plano Junho 2025"/></div>
-        <div class="form-group" style="margin-bottom:0;"><label>Validade (opcional)</label><input id="plan-expiry" class="form-control" type="date"/></div>
+        <div class="form-group" style="margin-bottom:0;"><label>Data de início (opcional)</label><input id="plan-startdate" class="form-control" type="date"/></div>
+        <div class="form-group" style="margin-bottom:0;"><label>Data de vencimento (opcional)</label><input id="plan-expiry" class="form-control" type="date"/></div>
+      </div>
+      <div style="margin-bottom:16px;padding:10px 13px;background:rgba(245,200,0,.07);border:1px solid rgba(245,200,0,.25);border-radius:var(--r);font-size:.76rem;color:#7a6000;line-height:1.5;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> <strong>Período do plano:</strong> o aluno só poderá iniciar os treinos a partir da data de início. Planos vencidos ficam isolados em uma aba separada.
       </div>
       <div class="plan-section-label" style="margin-bottom:14px;">
         <span class="plan-section-dot plan-section-dot-accent"></span>
@@ -2485,7 +2493,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div id="modal-create-alert" class="modal-overlay hidden">
   <div class="modal modal-sm">
     <div class="modal-header">
-      <h3>📢 Criar Alerta para Aluno</h3>
+      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Criar Alerta para Aluno</h3>
       <button class="close-btn" onclick="closeModal('modal-create-alert')">✕</button>
     </div>
     <div class="modal-body">
@@ -2504,7 +2512,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-create-alert')">Cancelar</button>
-      <button id="btn-send-alert" class="btn btn-primary" onclick="sendAlert()" style="background:linear-gradient(135deg,#8a6c00,#5a4600);border-color:rgba(245,200,0,.4);">📢 Enviar alerta</button>
+      <button id="btn-send-alert" class="btn btn-primary" onclick="sendAlert()" style="background:linear-gradient(135deg,#8a6c00,#5a4600);border-color:rgba(245,200,0,.4);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Enviar alerta</button>
     </div>
   </div>
 </div>
@@ -2724,6 +2732,12 @@ const genCode=()=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from(
 const initials=n=>{const p=n.trim().split(' ');return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():n.slice(0,2).toUpperCase()};
 
 window.isExpired=p=>{if(!p.expiry)return false;return new Date(p.expiry)<new Date(new Date().toDateString())};
+window.isNotStarted=p=>{if(!p.startDate)return false;return new Date(p.startDate+'T00:00')>new Date(new Date().toDateString())};
+window.getPlanStatus=p=>{
+  if(window.isExpired(p)) return 'expired';
+  if(window.isNotStarted(p)) return 'upcoming';
+  return 'active';
+};
 const ytId=url=>{if(!url)return '';const m=url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:''};
 const ytEmbed=url=>{const id=ytId(url);return id?`https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1`:''};
 
@@ -2826,7 +2840,7 @@ window.loadStudents=async()=>{
 window.renderStudentsGrid=list=>{
   const g=document.getElementById('students-grid');
   if(!list.length){
-    g.innerHTML=`<div class="empty-state"><div class="ei">👤</div><p>Nenhum aluno cadastrado.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAddStudentModal()">+ Primeiro aluno</button></div>`;
+    g.innerHTML=`<div class="empty-state"><div class="ei"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><p>Nenhum aluno cadastrado.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAddStudentModal()">+ Primeiro aluno</button></div>`;
     return;
   }
 
@@ -2844,17 +2858,17 @@ window.renderStudentsGrid=list=>{
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:4px;">
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          ${s.phone?`<span style="font-size:.75rem;color:var(--text3);font-weight:500;">📱 ${s.phone}</span>`:''}
+          ${s.phone?`<span style="font-size:.75rem;color:var(--text3);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> ${s.phone}</span>`:''}
           ${s.obs?`<span style="font-size:.75rem;color:var(--text2);">${s.obs}</span>`:''}
           <span class="badge badge-active">ativo</span>
-          ${isMaster&&s.managerId&&s.managerId!==(window.CURRENT_USER||{}).username&&s.managerName?`<span style="font-size:.72rem;color:var(--text3);font-weight:600;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;">👤 ${s.managerName}</span>`:''}
+          ${isMaster&&s.managerId&&s.managerId!==(window.CURRENT_USER||{}).username&&s.managerName?`<span style="font-size:.72rem;color:var(--text3);font-weight:600;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${s.managerName}</span>`:''}
         </div>
         <div style="display:flex;gap:6px;align-items:center;" onclick="event.stopPropagation()">
           <button class="btn btn-ghost btn-sm" onclick="openEditStudentModal('${s.id}')">✏️ Editar</button>
           <div class="ctx-menu-wrap">
             <button class="ctx-menu-btn" onclick="toggleCtxMenu('sctx_${s.id}')" title="Mais opções">•••</button>
             <div class="ctx-menu hidden" id="sctx_${s.id}">
-              <div class="ctx-menu-item" onclick="closeAllCtxMenus();openTransferModal('${s.id}')">🔁 Transferir aluno</div>
+              <div class="ctx-menu-item" onclick="closeAllCtxMenus();openTransferModal('${s.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Transferir aluno</div>
             </div>
           </div>
         </div>
@@ -2877,7 +2891,7 @@ window.renderStudentsGrid=list=>{
   if(mine.length){
     html+=mine.map(cardHTML).join('');
   } else {
-    html+=`<div class="empty-state" style="grid-column:1/-1;padding:40px 20px;"><div class="ei">👤</div><p>Você ainda não cadastrou alunos.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAddStudentModal()">+ Primeiro aluno</button></div>`;
+    html+=`<div class="empty-state" style="grid-column:1/-1;padding:40px 20px;"><div class="ei"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><p>Você ainda não cadastrou alunos.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAddStudentModal()">+ Primeiro aluno</button></div>`;
   }
 
   if(others.length){
@@ -2947,7 +2961,7 @@ window.addStudent=async()=>{
 };
 window.copyNewStudentCode=function(){
   var code=document.getElementById('new-student-code-display').textContent;
-  navigator.clipboard.writeText(code).then(function(){toast('✅ Código copiado!');}).catch(function(){toast('Código: '+code);});
+  navigator.clipboard.writeText(code).then(function(){toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Código copiado!');}).catch(function(){toast('Código: '+code);});
 };
 window.openEditStudentModal=sid=>{
   const s=ST.students.find(x=>x.id===sid);
@@ -2971,7 +2985,7 @@ window.saveEditStudent=async()=>{
     const obs=document.getElementById('edit-student-obs').value.trim();
     await _updateDoc(_doc(_db,'students',sid),{name,phone,obs});
     closeModal('modal-edit-student');
-    toast('✅ Aluno atualizado!');
+    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Aluno atualizado!');
     await loadStudents();
   }catch(e){toast('Erro: '+e.message,'error');}
   finally{btn.classList.remove('btn-loading');btn.textContent='Salvar';}
@@ -2987,8 +3001,8 @@ window.updateStats=async()=>{
   }
   const snap=await _getDocs(_col(_db,'plans'));
   const ps=snap.docs.map(d=>d.data()).filter(p=>studentIds.includes(p.studentId));
-  document.getElementById('stat-planos').textContent=ps.filter(p=>!isExpired(p)).length;
-  document.getElementById('stat-expired').textContent=ps.filter(p=>isExpired(p)).length;
+  document.getElementById('stat-planos').textContent=ps.filter(p=>getPlanStatus(p)==='active').length;
+  document.getElementById('stat-expired').textContent=ps.filter(p=>getPlanStatus(p)==='expired').length;
 };
 window.showStudentsList=()=>{
   document.getElementById('students-list-view').classList.remove('hidden');
@@ -2999,21 +3013,23 @@ window.openStudentDetail=async sid=>{
   const s=ST.students.find(x=>x.id===sid);if(!s)return;ST.currentStudentId=sid;
   const snap=await _getDocs(_query(_col(_db,'plans'),_where('studentId','==',sid)));
   const plans=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.createdAt-a.createdAt);
-  const active=plans.filter(p=>!isExpired(p)),expired=plans.filter(p=>isExpired(p));
+  const active=plans.filter(p=>getPlanStatus(p)==='active');
+  const upcoming=plans.filter(p=>getPlanStatus(p)==='upcoming');
+  const expired=plans.filter(p=>getPlanStatus(p)==='expired');
   document.getElementById('students-list-view').classList.add('hidden');
   const dv=document.getElementById('student-detail-view');dv.classList.remove('hidden');
   dv.innerHTML=`
     <button class="back-btn" onclick="showStudentsList()">← Voltar</button>
     <div class="student-access-banner">
-      <div class="student-access-banner-icon">🔑</div>
+      <div class="student-access-banner-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
       <div class="student-access-info">
         <div class="sai-label">Código de acesso do aluno</div>
         <div class="sai-code">${s.code}</div>
         <div class="sai-link">Acesse em <a href="https://trainly.online" target="_blank">trainly.online</a> e insira este código</div>
       </div>
       <div class="student-access-copy">
-        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${s.code}').then(()=>toast('✅ Código copiado!'))">📋 Copiar código</button>
-        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('trainly.online').then(()=>toast('✅ Link copiado!'))">🔗 Copiar link</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${s.code}').then(()=>toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Código copiado!'))"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Copiar código</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('trainly.online').then(()=>toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Link copiado!'))"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Copiar link</button>
       </div>
     </div>
     <div class="detail-header">
@@ -3021,17 +3037,19 @@ window.openStudentDetail=async sid=>{
       <div class="detail-info">
         <h2>${s.name}</h2>
         <div class="code">Código: ${s.code}</div>
-        ${s.phone?`<div style="font-size:.82rem;color:var(--text2);margin-top:6px;font-weight:500;">📱 ${s.phone}</div>`:''}
+        ${s.phone?`<div style="font-size:.82rem;color:var(--text2);margin-top:6px;font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> ${s.phone}</div>`:''}
         ${s.obs?`<div style="font-size:.82rem;color:var(--text2);margin-top:4px;">${s.obs}</div>`:''}
       </div>
       <div class="detail-actions" style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
-        ${s.phone?`<button class="btn btn-whatsapp btn-sm" onclick="contactWhatsApp('${s.phone}','${s.name}')">📱 WhatsApp</button>`:''}
+        ${s.phone?`<button class="btn btn-whatsapp btn-sm" onclick="contactWhatsApp('${s.phone}','${s.name}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> WhatsApp</button>`:''}
         <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">Excluir aluno</button>
       </div>
     </div>
-    ${plans.length===0?`<div class="empty-center"><div class="empty-icon">🏋️</div><p>Nenhum plano cadastrado.</p><button class="btn btn-primary" style="margin-top:4px;" onclick="openPlanModal('${sid}')">+ Criar plano</button></div>`:`
-      ${active.length?`<div class="section-label">Planos ativos</div><div class="plans-list">${active.map((p,i)=>planCardHTML(p,sid,i)).join('')}</div>`:''}
-      ${expired.length?`<div class="section-label">Planos vencidos</div><div class="plans-list">${expired.map((p,i)=>planCardHTML(p,sid,i,true)).join('')}</div>`:''}
+    ${plans.length===0?`<div class="empty-center"><div class="empty-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>️</div><p>Nenhum plano cadastrado.</p><button class="btn btn-primary" style="margin-top:4px;" onclick="openPlanModal('${sid}')">+ Criar plano</button></div>`:`
+      ${active.length?`<div class="section-label">Planos ativos</div><div class="plans-list">${active.map((p,i)=>planCardHTML(p,sid,i,'active')).join('')}</div>`:''}
+      ${upcoming.length?`<div class="section-label upcoming-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Em breve</div><div class="plans-list">${upcoming.map((p,i)=>planCardHTML(p,sid,i,'upcoming')).join('')}</div>`:''}
+      ${!active.length&&!upcoming.length?`<div class="empty-center" style="padding:20px 0;"><div class="empty-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p style="color:var(--text2);font-size:.87rem;">Nenhum treino ativo no momento.<br><span style="color:var(--text3);font-size:.8rem;">${upcoming.length?'Próximos planos listados abaixo.':''}</span></p></div>`:''}
+      ${expired.length?`<div class="section-label expired-label" style="margin-top:8px;">Vencidos / Finalizados</div><div class="plans-list">${expired.map((p,i)=>planCardHTML(p,sid,i,'expired')).join('')}</div>`:''}
       <button class="add-plan-btn" onclick="openPlanModal('${sid}')">+ Adicionar plano de treino</button>
     `}`;
 };
@@ -3041,7 +3059,7 @@ window.contactWhatsApp=function(phone, name){
   const cleaned=phone.replace(/\D/g,'');
   let num=cleaned;
   if(!num.startsWith('55')) num='55'+num;
-  const msg=encodeURIComponent(`Olá ${name}! Aqui é seu treinador. 💪`);
+  const msg=encodeURIComponent(`Olá ${name}! Aqui é seu treinador. <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>`);
   window.open(`https://wa.me/${num}?text=${msg}`,'_blank');
 };
 
@@ -3051,8 +3069,11 @@ window.exportPlanPDF=function(planId, studentName){
   if(!p){toast('Plano não encontrado.','error');return;}
   const DAYS2=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
   const DAYS_FULL=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
-  const expired=isExpired(p);
-  const expiryStr=p.expiry?new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'Sem data de validade';
+  const status=getPlanStatus(p);
+  const expired=status==='expired';
+  const startStr=p.startDate?new Date(p.startDate+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'';
+  const expiryStr=p.expiry?new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'Sem data de vencimento';
+  const periodStr=startStr&&p.expiry?startStr+' → '+expiryStr:startStr?'Início: '+startStr:p.expiry?'Vence em: '+expiryStr:'Sem data definida';
   const today=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
 
   let exercisesHTML='';
@@ -3187,7 +3208,7 @@ window.exportPlanPDF=function(planId, studentName){
     </div>
     <div class="header-right">
       <div class="validity-label">Validade</div>
-      <div class="validity">${expiryStr}${expired?' · Vencido':''}</div>
+      <div class="validity">${periodStr}${expired?' · Vencido':''}</div>
       <div class="generated">Gerado em ${today}</div>
     </div>
   </div>
@@ -3211,7 +3232,7 @@ window.exportPlanPDF=function(planId, studentName){
 </html>`;
 
   const win=window.open('','_blank');
-  if(win){ win.document.write(html); win.document.close(); toast('📄 PDF pronto para imprimir!'); }
+  if(win){ win.document.write(html); win.document.close(); toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF pronto para imprimir!'); }
   else { toast('Permita pop-ups para exportar PDF.','error'); }
 };
 
@@ -3220,12 +3241,12 @@ window.sharePlanWhatsApp=function(planId, studentName, studentPhone){
   const p=window.__gestorPlans&&window.__gestorPlans[planId];
   if(!p){toast('Plano não encontrado.','error');return;}
   const DAYS2=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-  let msg=`🏋️ *Trainly — Ficha de Treino*\n👤 *${studentName}*\n📋 *${p.title}*\n`;
-  if(p.expiry) msg+=`📅 Válido até ${new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR')}\n`;
+  let msg=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>️ *Trainly — Ficha de Treino*\n<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> *${studentName}*\n<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> *${p.title}*\n`;
+  if(p.expiry) msg+=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Válido até ${new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR')}\n`;
   msg+=`\n`;
   (p.workouts||[]).forEach((w,wi)=>{
     msg+=`*${String.fromCharCode(65+wi)}. ${w.title||'Treino '+(wi+1)}*\n`;
-    if(w.days&&w.days.length) msg+=`📆 ${w.days.map(d=>DAYS2[d]).join(', ')}\n`;
+    if(w.days&&w.days.length) msg+=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${w.days.map(d=>DAYS2[d]).join(', ')}\n`;
     (w.exercises||[]).forEach((ex,ei)=>{
       msg+=`  ${ei+1}. ${ex.name} — ${ex.series}x${ex.reps}`;
       if(ex.unilateral) msg+=` (Unilateral)`;
@@ -3235,7 +3256,7 @@ window.sharePlanWhatsApp=function(planId, studentName, studentPhone){
     });
     msg+=`\n`;
   });
-  msg+=`_Enviado via Trainly_ ⚡`;
+  msg+=`_Enviado via Trainly_ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
   const encoded=encodeURIComponent(msg);
   let url='https://wa.me/';
   if(studentPhone){
@@ -3249,32 +3270,43 @@ window.sharePlanWhatsApp=function(planId, studentName, studentPhone){
   toast('Abrindo WhatsApp...');
 };
 
-const planCardHTML=(p,sid,idx,exp=false)=>{
+const planCardHTML=(p,sid,idx,status='active')=>{
   window.__gestorPlans=window.__gestorPlans||{};
   window.__gestorPlans[p.id]=p;
   const student=ST.students.find(s=>s.id===sid)||{};
+  const exp=status==='expired';
+  const upcoming=status==='upcoming';
+  const startStr=p.startDate?new Date(p.startDate+'T12:00').toLocaleDateString('pt-BR'):'';
+  const expiryStr=p.expiry?new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR'):'';
+  let metaParts=[];
+  if(startStr) metaParts.push('Início · '+startStr);
+  if(expiryStr) metaParts.push('Vence · '+expiryStr);
+  if(!startStr&&!expiryStr) metaParts.push('Sem validade');
+  metaParts.push((p.workouts||[]).length+' treino(s)');
+  const badgeClass=exp?'badge-expired':upcoming?'badge-upcoming':'badge-active';
+  const badgeLabel=exp?'Vencido':upcoming?'Em breve':'Ativo';
   return `
-  <div class="plan-card ${exp?'expired':''}">
+  <div class="plan-card ${exp?'expired':upcoming?'upcoming':''}">
     <div class="plan-card-header">
       <div class="plan-card-header-top">
         <div class="plan-letter">${String.fromCharCode(65+idx)}</div>
         <div class="plan-info">
           <div class="plan-title">${p.title}</div>
-          <div class="plan-meta">${p.expiry?`Validade · ${new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR')}`:'Sem validade'} · ${(p.workouts||[]).length} treino(s)</div>
+          <div class="plan-meta">${metaParts.join(' · ')}</div>
         </div>
-        <span class="badge ${exp?'badge-expired':'badge-active'}" style="flex-shrink:0;">${exp?'Vencido':'Ativo'}</span>
+        <span class="badge ${badgeClass}" style="flex-shrink:0;">${badgeLabel}</span>
         <div class="ctx-menu-wrap">
           <button class="ctx-menu-btn" onclick="event.stopPropagation();toggleCtxMenu('ctx_${p.id}')" title="Mais opções">•••</button>
           <div class="ctx-menu hidden" id="ctx_${p.id}">
-            <div class="ctx-menu-item" onclick="event.stopPropagation();closeAllCtxMenus();openCloneModal('${p.id}','${sid}')">📋 Clonar treino</div>
+            <div class="ctx-menu-item" onclick="event.stopPropagation();closeAllCtxMenus();openCloneModal('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Clonar treino</div>
           </div>
         </div>
       </div>
       <div class="plan-actions">
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewPlan('${p.id}','${sid}')">👁 Ver</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewPlan('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Ver</button>
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPlanModal('${sid}','${p.id}')">✏️ Editar</button>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();exportPlanPDF('${p.id}','${student.name||''}')">📄 Exportar PDF</button>
-        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePlan('${p.id}','${sid}')">🗑 Excluir</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();exportPlanPDF('${p.id}','${student.name||''}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Exportar PDF</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePlan('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Excluir</button>
       </div>
     </div>
     <div class="plan-workouts">
@@ -3331,8 +3363,8 @@ window.viewPlan=async(pid,sid)=>{
           </div>`).join('')}
       </div>`).join('')}`;
   document.getElementById('pv-footer').innerHTML=`
-    <button class="btn btn-whatsapp" onclick="sendWhatsAppPlan('${sid}','${p.id}')">📱 WhatsApp</button>
-    <button class="btn btn-ghost" onclick="closeModal('modal-plan-view');exportPlanPDF('${p.id}','${student.name||''}')">📄 PDF</button>
+    <button class="btn btn-whatsapp" onclick="sendWhatsAppPlan('${sid}','${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> WhatsApp</button>
+    <button class="btn btn-ghost" onclick="closeModal('modal-plan-view');exportPlanPDF('${p.id}','${student.name||''}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
     <button class="btn btn-primary" onclick="closeModal('modal-plan-view');openPlanModal('${sid}','${p.id}')">✏️ Editar</button>
     <button class="btn btn-danger" onclick="deletePlan('${p.id}','${sid}')">Excluir</button>`;
   openModal('modal-plan-view');
@@ -3340,12 +3372,12 @@ window.viewPlan=async(pid,sid)=>{
 
 window.openPlanModal=async(sid,editId=null)=>{
   ST.planStudentId=sid;ST.editPlanId=editId;ST.workoutBlocks=[];
-  document.getElementById('plan-title').value='';document.getElementById('plan-expiry').value='';document.getElementById('plan-error').textContent='';
+  document.getElementById('plan-title').value='';document.getElementById('plan-startdate').value='';document.getElementById('plan-expiry').value='';document.getElementById('plan-error').textContent='';
   document.getElementById('plan-modal-title').textContent=editId?'Editar plano':'Criar plano de treino';
   var subtitleEl=document.querySelector('#modal-plan .plan-modal-subtitle');if(subtitleEl)subtitleEl.textContent=editId?'Atualize os treinos e exercícios do plano':'Configure os treinos e exercícios do plano';
-  if(editId){const snap=await _getDoc(_doc(_db,'plans',editId));if(snap.exists){const p=snap.data();document.getElementById('plan-title').value=p.title||'';document.getElementById('plan-expiry').value=p.expiry||'';ST.workoutBlocks=(p.workouts||[]).map(w=>({...w,exercises:(w.exercises||[]).map(e=>({...e}))}));}}
+  if(editId){const snap=await _getDoc(_doc(_db,'plans',editId));if(snap.exists){const p=snap.data();document.getElementById('plan-title').value=p.title||'';document.getElementById('plan-startdate').value=p.startDate||'';document.getElementById('plan-expiry').value=p.expiry||'';ST.workoutBlocks=(p.workouts||[]).map(w=>({...w,exercises:(w.exercises||[]).map(e=>({...e}))}));}}
   else{ST.workoutBlocks=[{title:'Treino A',days:[],exercises:[{}]}];}
-  ST._planSnapshot=JSON.stringify(ST.workoutBlocks);ST._planTitleSnapshot=document.getElementById('plan-title').value;ST._planExpirySnapshot=document.getElementById('plan-expiry').value;
+  ST._planSnapshot=JSON.stringify(ST.workoutBlocks);ST._planTitleSnapshot=document.getElementById('plan-title').value;ST._planStartDateSnapshot=document.getElementById('plan-startdate').value;ST._planExpirySnapshot=document.getElementById('plan-expiry').value;
   renderWorkoutsEditor();openModal('modal-plan');
 };
 
@@ -3571,7 +3603,7 @@ window.sendWhatsAppPlan=function(sid, planId){
   const name=student.name||'';
   const code=student.code||'';
   const phone=student.phone||'';
-  const msg=`Olá *${name}*, seu treino está pronto. 🏋️\n\n*https://trainly.online*\n\n*Código de acesso:* \`${code}\``;
+  const msg=`Olá *${name}*, seu treino está pronto. <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>️\n\n*https://trainly.online*\n\n*Código de acesso:* \`${code}\``;
   const encoded=encodeURIComponent(msg);
   let url='https://wa.me/';
   if(phone){
@@ -3638,7 +3670,7 @@ window.doClonePlan=async function(){
     };
     delete newData.id;
     await _setDoc(_doc(_db,'plans','plan_'+Date.now()), newData);
-    toast(`✅ Plano clonado para ${targetStudent.name||'aluno'}!`);
+    toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Plano clonado para ${targetStudent.name||'aluno'}!`);
     closeModal('modal-clone');
     await loadStudents();
   }catch(e){
@@ -3741,7 +3773,7 @@ window.doTransfer=async function(){
 
     closeModal('modal-transfer-confirm');
     closeModal('modal-transfer');
-    toast(`✅ Aluno transferido para ${mgrName}!`);
+    toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Aluno transferido para ${mgrName}!`);
     await loadStudents();
   }catch(e){
     toast('Erro: '+e.message,'error');
@@ -3755,6 +3787,7 @@ window.confirmClosePlan=function(){
   var changed=
     JSON.stringify(ST.workoutBlocks)!==(ST._planSnapshot||'[]') ||
     document.getElementById('plan-title').value!==(ST._planTitleSnapshot||'') ||
+    document.getElementById('plan-startdate').value!==(ST._planStartDateSnapshot||'') ||
     document.getElementById('plan-expiry').value!==(ST._planExpirySnapshot||'');
   if(changed){
     openModal('modal-confirm-close');
@@ -3795,7 +3828,7 @@ window.renderNotifPanel=function(){
     list.innerHTML='<div class="notif-panel-empty">Nenhuma notificação ainda</div>';
     return;
   }
-  const typeIcon={'workout_done':'🏆','workout_started':'▶️','workout_finished':'✅','feedback_sent':'💬'};
+  const typeIcon={'workout_done':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2"/><rect x="6" y="18" width="12" height="4"/></svg>','workout_started':'▶️','workout_finished':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg>','feedback_sent':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'};
   const typeLabel={'workout_done':'Treino concluído','workout_started':'Treino iniciado','workout_finished':'Treino finalizado','feedback_sent':'Feedback recebido'};
   list.innerHTML=window._notifData.slice(0,30).map(n=>{
     let subtitle='';
@@ -3805,7 +3838,7 @@ window.renderNotifPanel=function(){
     else subtitle=`${n.workoutTitle||n.planTitle||''} · ${n.date||''}`;
     return `
     <div class="notif-item ${n.read?'':'unread'}">
-      <div class="notif-icon">${typeIcon[n.type]||'🔔'}</div>
+      <div class="notif-icon">${typeIcon[n.type]||'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'}</div>
       <div class="notif-text">
         <div class="notif-title"><strong>${n.studentName}</strong> — ${typeLabel[n.type]||'Notificação'}</div>
         <div class="notif-sub">${subtitle}</div>
@@ -3881,7 +3914,7 @@ window.loadFeedbacks=async function(){
     }
     const feedbacks=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
     if(!feedbacks.length){
-      container.innerHTML=`<div class="empty-state" style="padding:60px 20px;"><div class="ei">💬</div><p>Nenhum feedback recebido ainda.</p></div>`;
+      container.innerHTML=`<div class="empty-state" style="padding:60px 20px;"><div class="ei"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><p>Nenhum feedback recebido ainda.</p></div>`;
       return;
     }
     container.innerHTML=feedbacks.map(f=>`
@@ -3920,10 +3953,10 @@ window.savePlan=async()=>{
   for(const wb of ST.workoutBlocks){if(!wb.exercises.filter(e=>e.name).length){document.getElementById('plan-error').textContent=`"${wb.title}" precisa de ao menos um exercício.`;return;}}
   const btn=document.getElementById('btn-save-plan');btn.classList.add('btn-loading');btn.textContent='Salvando...';
   const workouts=ST.workoutBlocks.map(wb=>({title:wb.title,days:wb.days||[],exercises:wb.exercises.filter(e=>e.name).map(e=>({name:e.name==='__custom__'?(e.customName||'Personalizado'):e.name,series:Number(e.series)||1,reps:e.reps||'12',repsArr:e.repsArr||[e.reps||'12'],videoUrl:e.videoUrl||'',unilateral:!!e.unilateral,biset:e.biset||'',bisetName:e.biset||'',isometria:!!e.isometria,isometriaSegs:e.isometriaSegs||'',restPause:!!e.restPause,obs:e.obs||''}))}));
-  const data={title,expiry:document.getElementById('plan-expiry').value||'',workouts,studentId:ST.planStudentId,createdAt:Date.now()};
+  const data={title,startDate:document.getElementById('plan-startdate').value||'',expiry:document.getElementById('plan-expiry').value||'',workouts,studentId:ST.planStudentId,createdAt:Date.now()};
   try{
-    if(ST.editPlanId){await _updateDoc(_doc(_db,'plans',ST.editPlanId),data);toast('✅ Plano atualizado.');}
-    else{await _setDoc(_doc(_db,'plans','plan_'+Date.now()),data);toast('✅ Plano criado!');}
+    if(ST.editPlanId){await _updateDoc(_doc(_db,'plans',ST.editPlanId),data);toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Plano atualizado.');}
+    else{await _setDoc(_doc(_db,'plans','plan_'+Date.now()),data);toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Plano criado!');}
     closeModal('modal-plan');await openStudentDetail(ST.planStudentId);
   }catch(e){document.getElementById('plan-error').textContent='Erro: '+e.message;toast('Erro ao salvar.','error');}
   finally{btn.classList.remove('btn-loading');btn.textContent='Salvar plano';}
@@ -3996,7 +4029,7 @@ window.saveProfile=async function(){
 
     _applyUserUI();
     closeModal('modal-profile');
-    toast('✅ Perfil atualizado!');
+    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Perfil atualizado!');
   }catch(e){
     errEl.textContent='Erro: '+e.message;
   }finally{
@@ -4082,7 +4115,7 @@ window.saveManager=async function(){
       for(var sd of studSnap.docs){
         await _updateDoc(_doc(_db,'students',sd.id),{managerPhone:phone,managerName:name||username});
       }
-      toast('✅ Gestor atualizado!');
+      toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Gestor atualizado!');
     } else {
       // Check if username exists
       var exists=await _getDocs(_query(_col(_db,'managers'),_where('username','==',username)));
@@ -4100,7 +4133,7 @@ window.saveManager=async function(){
         trialEndsAt, subEndsAt: null,
         blocked: false, createdAt: Date.now()
       });
-      toast('✅ Gestor cadastrado com 7 dias de teste!');
+      toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Gestor cadastrado com 7 dias de teste!');
     }
     closeModal('modal-add-manager');
     await loadManagers();
@@ -4124,7 +4157,7 @@ window.loadManagers=async function(){
 window.renderManagersGrid=function(list){
   var g=document.getElementById('managers-grid');
   if(!list.length){
-    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><div class="ei">🛡️</div><p>Nenhum gestor cadastrado além do master.</p></div>`;
+    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><div class="ei"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>️</div><p>Nenhum gestor cadastrado além do master.</p></div>`;
     return;
   }
   g.innerHTML=list.map(m=>`
@@ -4134,15 +4167,15 @@ window.renderManagersGrid=function(list){
         <div>
           <div class="student-name">${m.name||m.username}</div>
           <div class="student-code">@${m.username}</div>
-          ${m.cref?`<div style="font-size:.74rem;color:var(--text2);margin-top:3px;font-weight:600;display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;">🪪 ${m.cref}</div>`:''}
-          ${m.phone?`<div style="font-size:.74rem;color:var(--text3);margin-top:2px;font-weight:500;">📱 ${m.phone}</div>`:''}
+          ${m.cref?`<div style="font-size:.74rem;color:var(--text2);margin-top:3px;font-weight:600;display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="7" y1="15" x2="10" y2="15"/><line x1="13" y1="15" x2="17" y2="15"/></svg> ${m.cref}</div>`:''}
+          ${m.phone?`<div style="font-size:.74rem;color:var(--text3);margin-top:2px;font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> ${m.phone}</div>`:''}
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:4px;">
         <span class="mgr-badge ${m.role==='ceo'?'mgr-ceo':m.isMaster?'mgr-master':'mgr-comum'}">${m.role==='ceo'?'⭐ CEO':m.isMaster?'⭐ Master':'Comum'}</span>
         <div style="display:flex;gap:6px;">
           <button class="btn btn-ghost btn-sm" onclick="openAddManagerModal(${JSON.stringify(m).replace(/"/g,'&quot;')})">✏️</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteManager('${m.id}','${m.username}')">🗑</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteManager('${m.id}','${m.username}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
         </div>
       </div>
     </div>`).join('');
@@ -4225,7 +4258,7 @@ window.loadChatList = async function() {
     chatItems.sort(function(a,b){ return (b.lastMsg.ts||0)-(a.lastMsg.ts||0); });
 
     if(!chatItems.length) {
-      el.innerHTML = '<div class="empty-state"><div class="ei">💬</div><p>Nenhuma conversa ainda.<br>Os alunos podem iniciar o chat pelo app.</p></div>';
+      el.innerHTML = '<div class="empty-state"><div class="ei"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><p>Nenhuma conversa ainda.<br>Os alunos podem iniciar o chat pelo app.</p></div>';
       return;
     }
 
@@ -4247,7 +4280,7 @@ window.loadChatList = async function() {
         + '</div>'
         + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">'
         + '<div class="chat-list-time">'+timeStr+'</div>'
-        + '<button class="chat-delete-btn" title="Limpar conversa" onclick="event.stopPropagation();deleteChatGestor(\''+s.id+'\',\''+escHtml(s.name||s.code||'Aluno')+'\')">🗑</button>'
+        + '<button class="chat-delete-btn" title="Limpar conversa" onclick="event.stopPropagation();deleteChatGestor(\''+s.id+'\',\''+escHtml(s.name||s.code||'Aluno')+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>'
         + '</div>'
         + '</div>'
         + '</div>';
@@ -4355,7 +4388,7 @@ window.deleteChatGestor = async function(sid, name) {
     for(var d of snap.docs) {
       await _db.collection('chats').doc(sid).collection('messages').doc(d.id).delete();
     }
-    toast('✅ Conversa limpa!');
+    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Conversa limpa!');
     if(window._chatActiveSid === sid) window.closeChatDetail();
     window.loadChatList();
   } catch(e) { toast('Erro: '+e.message,'error'); }
@@ -4451,13 +4484,13 @@ window.sendAlert = async function() {
   btn.classList.add('btn-loading'); btn.textContent = 'Enviando...';
   try {
     await _setDoc(_doc(_db,'alerts',sid), { message: msg, ts: Date.now() });
-    toast('✅ Alerta enviado! O aluno verá ao abrir o app.');
+    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Alerta enviado! O aluno verá ao abrir o app.');
     closeModal('modal-create-alert');
   } catch(e) {
     errEl.textContent = 'Erro: '+e.message;
   } finally {
     btn.classList.remove('btn-loading');
-    btn.textContent = '📢 Enviar alerta';
+    btn.textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Enviar alerta';
   }
 };
 
@@ -4477,7 +4510,7 @@ window.loadCrefPending = async function() {
       badge.textContent   = pending.length > 9 ? '9+' : pending.length;
     }
     if(!pending.length) {
-      list.innerHTML = '<div class="cref-empty">✅ Nenhum documento pendente de análise.</div>';
+      list.innerHTML = '<div class="cref-empty"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Nenhum documento pendente de análise.</div>';
       return;
     }
     list.innerHTML = pending.map(function(m) {
@@ -4486,7 +4519,7 @@ window.loadCrefPending = async function() {
         + '<div class="cref-item-info">'
           + '<div class="cref-item-name">'+escHtml(m.name||m.username)+'</div>'
           + '<div class="cref-item-user">@'+escHtml(m.username)+'</div>'
-          + '<div class="cref-item-number">🪪 CREF: '+escHtml(m.cref||'Não informado')+'</div>'
+          + '<div class="cref-item-number"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="7" y1="15" x2="10" y2="15"/><line x1="13" y1="15" x2="17" y2="15"/></svg> CREF: '+escHtml(m.cref||'Não informado')+'</div>'
         + '</div>'
         + '<div class="cref-item-actions">'
           + '<button class="btn-approve" onclick="crefApprove(this)" data-id="'+m.id+'">✓ Aprovar</button>'
@@ -4505,7 +4538,7 @@ window.crefApprove = async function(btn) {
   if(item) item.style.opacity = '.4';
   try {
     await _updateDoc(_doc(_db,'managers',id), { crefStatus: 'approved' });
-    toast('✅ CREF aprovado!');
+    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> CREF aprovado!');
     loadCrefPending();
   } catch(e) {
     toast('Erro: '+e.message,'error');
@@ -4711,12 +4744,12 @@ window.onCardNumberInput = function(input) {
   // Detecta bandeira pelo prefixo
   var brand = '';
   var brandEl = document.getElementById('mp-card-brand');
-  if(/^4/.test(raw))                brand = '💳 Visa';
-  else if(/^5[1-5]/.test(raw))      brand = '💳 Mastercard';
-  else if(/^3[47]/.test(raw))       brand = '💳 Amex';
-  else if(/^6(?:011|5)/.test(raw))  brand = '💳 Discover';
-  else if(/^(?:606282|3841)/.test(raw)) brand = '💳 Hipercard';
-  else if(/^(?:4011|4312|4389|4514|4576|5041|5067|5090|6277|6362|6516|6550)/.test(raw)) brand = '💳 Elo';
+  if(/^4/.test(raw))                brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Visa';
+  else if(/^5[1-5]/.test(raw))      brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Mastercard';
+  else if(/^3[47]/.test(raw))       brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Amex';
+  else if(/^6(?:011|5)/.test(raw))  brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Discover';
+  else if(/^(?:606282|3841)/.test(raw)) brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Hipercard';
+  else if(/^(?:4011|4312|4389|4514|4576|5041|5067|5090|6277|6362|6516|6550)/.test(raw)) brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Elo';
   if(brandEl) brandEl.textContent = brand;
 
   // Detecta payment_method_id para MP
@@ -4824,7 +4857,7 @@ window.submitCardPayment = async function() {
   } catch(err) {
     console.error('submitCardPayment error:', err);
     subShowStep('card');
-    errEl.textContent = '❌ ' + (err.message || 'Erro ao processar. Verifique os dados.');
+    errEl.textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ' + (err.message || 'Erro ao processar. Verifique os dados.');
   }
 };
 
@@ -4888,12 +4921,12 @@ async function processPaymentWithToken(token) {
     } else {
       subShowStep('card');
       var detail = result.status_detail || result.message || result.error || 'Pagamento recusado. Verifique os dados.';
-      document.getElementById('sub-pay-error').textContent = '❌ ' + detail;
+      document.getElementById('sub-pay-error').textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ' + detail;
     }
   } catch(backendErr) {
     console.warn('Backend erro:', backendErr.message);
     subShowStep('card');
-    document.getElementById('sub-pay-error').textContent = '❌ Erro de conexao com o servidor. Tente novamente.';
+    document.getElementById('sub-pay-error').textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Erro de conexao com o servidor. Tente novamente.';
   }
 }
 
@@ -5020,10 +5053,10 @@ window.renderCeoTable = function(list) {
   tbody.innerHTML = list.map(function(m) {
     var sub = (m.role!=='ceo') ? _checkSubscription(m) : null;
     var subBadge = !sub ? '<span class="sub-status-badge sub-active">⭐ CEO</span>'
-      : sub.type==='trial' ? '<span class="sub-status-badge sub-trial">🕐 Teste ('+sub.daysLeft+'d)</span>'
+      : sub.type==='trial' ? '<span class="sub-status-badge sub-trial"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Teste ('+sub.daysLeft+'d)</span>'
       : sub.type==='active' ? '<span class="sub-status-badge sub-active">✓ Ativo ('+sub.daysLeft+'d)</span>'
       : '<span class="sub-status-badge sub-expired">✕ Expirado</span>';
-    if(m.blocked) subBadge = '<span class="sub-status-badge sub-blocked">🔒 Bloqueado</span>';
+    if(m.blocked) subBadge = '<span class="sub-status-badge sub-blocked"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bloqueado</span>';
 
     var roleBadge = m.role==='ceo' ? '<span class="role-badge role-ceo">CEO</span>'
       : m.role==='master' ? '<span class="role-badge role-master">Master</span>'
@@ -5149,7 +5182,7 @@ window.ceoSaveManagerEdits = async function() {
       await _revokeReferralBonus(id);
     }
 
-    toast('✅ Gestor atualizado!');
+    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Gestor atualizado!');
     closeModal('modal-ceo-edit');
     loadCeoManagers();
   } catch(e) {
@@ -5207,7 +5240,7 @@ window.ceoCreateManager = async function() {
       trialEndsAt, subEndsAt: null, blocked: false,
       createdAt: Date.now()
     });
-    toast('✅ Gestor cadastrado com 7 dias de teste!');
+    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Gestor cadastrado com 7 dias de teste!');
     closeModal('modal-ceo-add');
     loadCeoManagers();
   } catch(e) {
@@ -5252,7 +5285,7 @@ window.savePricing = async function() {
   if(!monthly||!discount){ toast('Preencha todos os campos.','error'); return; }
   try {
     await _db.collection('settings').doc('pricing').set({ monthly, discount });
-    toast('✅ Preços salvos!');
+    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Preços salvos!');
   } catch(e) { toast('Erro: '+e.message,'error'); }
 };
 
@@ -5361,15 +5394,15 @@ window.openReferralModal = async function() {
 window.copyReferralCode = function() {
   var code = (document.getElementById('referral-code-display') || {}).textContent || '';
   navigator.clipboard.writeText(code)
-    .then(function(){ toast('✅ Código copiado!'); })
+    .then(function(){ toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Código copiado!'); })
     .catch(function(){ toast('Código: ' + code); });
 };
 
 window.copyReferralLink = function() {
   var input = document.getElementById('referral-link-input');
   navigator.clipboard.writeText(input.value)
-    .then(function(){ toast('✅ Link de indicação copiado!'); })
-    .catch(function(){ input.select(); document.execCommand('copy'); toast('✅ Link copiado!'); });
+    .then(function(){ toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Link de indicação copiado!'); })
+    .catch(function(){ input.select(); document.execCommand('copy'); toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Link copiado!'); });
 };
 
 window.shareReferralWhatsApp = function() {
@@ -5396,16 +5429,16 @@ window.inviteGenLink = async function() {
     var link = window.location.origin+window.location.pathname+'?invite='+token;
     document.getElementById('inv-link-box').style.display='block';
     document.getElementById('inv-link-input').value=link;
-    toast('🔗 Link gerado!');
+    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link gerado!');
   } catch(e){ toast('Erro: '+e.message,'error'); }
-  finally{ btn.textContent='🔗 Link de convite'; btn.disabled=false; }
+  finally{ btn.textContent='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link de convite'; btn.disabled=false; }
 };
 
 window.inviteCopyLink = function(){
   var input = document.getElementById('inv-link-input');
   navigator.clipboard.writeText(input.value)
-    .then(function(){toast('✅ Link copiado!');})
-    .catch(function(){input.select();document.execCommand('copy');toast('✅ Link copiado!');});
+    .then(function(){toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Link copiado!');})
+    .catch(function(){input.select();document.execCommand('copy');toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Link copiado!');});
 };
 
 // ── Recompensa de +7 dias para quem indicou ──────────────────────────────────
@@ -5505,7 +5538,7 @@ function _showReferralRevokedAlert(blockedName) {
   overlay.innerHTML = `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:400px;box-shadow:var(--shadow-md);overflow:hidden;">
       <div style="background:var(--red-dim);border-bottom:1px solid rgba(224,62,62,.2);padding:20px 24px;display:flex;align-items:center;gap:12px;">
-        <div style="width:40px;height:40px;border-radius:10px;background:rgba(224,62,62,.15);border:1px solid rgba(224,62,62,.25);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">⚠️</div>
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(224,62,62,.15);border:1px solid rgba(224,62,62,.25);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>️</div>
         <div>
           <div style="font-family:var(--head);font-size:1rem;font-weight:800;color:var(--red);">Bônus de indicação revogado</div>
           <div style="font-size:.76rem;color:var(--text2);margin-top:2px;">Uma indicação sua foi bloqueada</div>
@@ -5877,9 +5910,9 @@ window.regCardNumberInput = function(input) {
   var raw = input.value.replace(/\D/g,'').slice(0,16);
   input.value = (raw.match(/.{1,4}/g)||[]).join(' ');
   var brand = '';
-  if(/^4/.test(raw))           { brand='💳 Visa';       _regMpMethodId='visa'; }
-  else if(/^5[1-5]/.test(raw)) { brand='💳 Mastercard'; _regMpMethodId='master'; }
-  else if(/^3[47]/.test(raw))  { brand='💳 Amex';       _regMpMethodId='amex'; }
+  if(/^4/.test(raw))           { brand='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Visa';       _regMpMethodId='visa'; }
+  else if(/^5[1-5]/.test(raw)) { brand='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Mastercard'; _regMpMethodId='master'; }
+  else if(/^3[47]/.test(raw))  { brand='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Amex';       _regMpMethodId='amex'; }
   else                          { _regMpMethodId=''; }
   document.getElementById('reg-card-brand').textContent = brand;
   if(raw.length>=6 && _mpInstance && _regMpMethodId) {
@@ -5987,13 +6020,13 @@ window.regSubmitPayment = async function() {
       // Pagamento falhou — remove a conta criada
       await _db.collection('managers').doc(_regNewId).delete();
       _regNewId = null;
-      errEl.textContent = '❌ '+(result.status_detail||result.message||'Pagamento recusado. Verifique os dados.');
+      errEl.textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> '+(result.status_detail||result.message||'Pagamento recusado. Verifique os dados.');
       regShowStep(3);
     }
   } catch(e) {
     document.getElementById('reg-processing').style.display = 'none';
     if(_regNewId) { try { await _db.collection('managers').doc(_regNewId).delete(); } catch(x){} _regNewId=null; }
-    errEl.textContent = '❌ '+(e.message||'Erro ao processar. Tente novamente.');
+    errEl.textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> '+(e.message||'Erro ao processar. Tente novamente.');
     regShowStep(3);
   }
 };
@@ -6103,7 +6136,7 @@ function _renderCeoPayments(list) {
   var statusBadge = function(s) {
     if(s==='approved'||s==='authorized') return '<span class="pay-status-badge pay-approved">✓ Aprovado</span>';
     if(s==='pending'||s==='in_process') return '<span class="pay-status-badge pay-pending">⏳ Pendente</span>';
-    if(s==='manual') return '<span class="pay-status-badge pay-manual">⚙️ Manual</span>';
+    if(s==='manual') return '<span class="pay-status-badge pay-manual"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>️ Manual</span>';
     return '<span class="pay-status-badge pay-rejected">✕ '+(s||'Recusado')+'</span>';
   };
   tbody.innerHTML = list.map(function(p) {
