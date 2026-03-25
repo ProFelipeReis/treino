@@ -6244,52 +6244,17 @@ document.addEventListener('touchmove', function(e){
 }, {passive:false});
 </script>
 
-<!-- ══════════════════════════════════════════════════════
-     MODAL DE MIGRAÇÃO PARA FIREBASE AUTH
-     Aparece na primeira vez que o gestor existente faz login
-     após a ativação do Auth. Solicita e-mail para criar conta.
-     ══════════════════════════════════════════════════════ -->
-<div id="migration-overlay">
-  <div class="migration-card">
-    <div class="migration-head">
-      <div class="mig-icon">🔐</div>
-      <h3>Ative a segurança da sua conta</h3>
-      <p>O Trainly agora usa autenticação segura.<br/>Informe seu e-mail para proteger seu acesso.</p>
-    </div>
-    <div class="migration-body">
-      <div class="mig-info">
-        <strong>Por que isso é necessário?</strong><br/>
-        Migramos para o Firebase Auth para proteger seus dados e os de seus alunos. Isso acontece <strong>uma única vez</strong> e leva segundos.
-      </div>
-      <div id="mig-error"></div>
-      <div class="form-group">
-        <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">E-mail</label>
-        <input id="mig-email" class="form-control" type="email" placeholder="seu@email.com" autocomplete="email"/>
-        <div style="font-size:.72rem;color:var(--text3);margin-top:5px;">Usado para recuperação de senha. Não compartilhamos com ninguém.</div>
-      </div>
-    </div>
-    <div class="migration-footer">
-      <div id="mig-error-bottom"></div>
-      <button class="btn btn-primary" onclick="migrationConfirm()" style="width:100%;justify-content:center;padding:13px;font-size:.95rem;" id="mig-btn">Ativar segurança →</button>
-      <button class="mig-skip" onclick="migrationSkip()">Agora não (será pedido novamente no próximo login)</button>
-    </div>
-  </div>
-</div>
-
 <script>
 // ════════════════════════════════════════════════════════
-// FIREBASE AUTH — SISTEMA DE AUTENTICAÇÃO SEGURA
-// Migração lazy: gestores existentes são migrados na
-// primeira vez que fazem login após esta atualização.
+// FIREBASE AUTH — FLUXO SEGURO (username → e-mail interno)
+//
+// O login deriva o e-mail diretamente do username, sem
+// nenhuma consulta ao Firestore antes de autenticar.
+// Isso permite fechar as Security Rules completamente.
 // ════════════════════════════════════════════════════════
 
-// Instância do Auth (inicializada após firebase.initializeApp)
 var _auth = null;
 
-// Dados temporários durante o fluxo de migração/login
-var _pendingAuthMigration = null; // { userData, docId, username, password }
-
-// Inicializa o Auth assim que o Firebase estiver pronto
 (function initAuth() {
   function tryInit() {
     if (window.firebase && window.firebase.auth) {
@@ -6302,22 +6267,21 @@ var _pendingAuthMigration = null; // { userData, docId, username, password }
   tryInit();
 })();
 
-// ── Helpers de e-mail sintético ──────────────────────────
-// Para gestores sem e-mail real, usamos um endereço interno
-// invisível ao usuário. Nunca é exibido na UI.
-function _syntheticEmail(username) {
+// Deriva o e-mail de autenticação a partir do username.
+// O e-mail real do gestor fica salvo no Firestore apenas
+// para fins de suporte — nunca é usado no Auth.
+function _authEmail(username) {
   return username.toLowerCase().replace(/[^a-z0-9]/g, '') + '@trainly-app.internal';
 }
+var _syntheticEmail = _authEmail; // alias para compatibilidade
 
 // ── Criar ou buscar conta no Firebase Auth ───────────────
-// Retorna o UID. Se a conta já existir, faz signIn para obter o UID.
-async function _ensureAuthAccount(email, password, username) {
+async function _ensureAuthAccount(email, password) {
   try {
     var cred = await _auth.createUserWithEmailAndPassword(email, password);
     return cred.user.uid;
   } catch (e) {
     if (e.code === 'auth/email-already-in-use') {
-      // Conta já existe — faz signIn para obter o UID
       var cred2 = await _auth.signInWithEmailAndPassword(email, password);
       return cred2.user.uid;
     }
@@ -6325,13 +6289,13 @@ async function _ensureAuthAccount(email, password, username) {
   }
 }
 
-// ── LOGIN PRINCIPAL (substitui doLogin original) ─────────
+// ── LOGIN PRINCIPAL ───────────────────────────────────────
 // Fluxo:
-//   1. Verifica credenciais no Firestore (compatibilidade total)
-//   2. Se já tem authUid → signIn no Auth direto
-//   3. Se não tem authUid:
-//      a. Se tem email real → cria conta Auth silenciosamente (email sintético como fallback)
-//      b. Se não tem email → abre modal de migração para pedir e-mail
+//   1. Deriva e-mail interno do username (sem consultar Firestore)
+//   2. signInWithEmailAndPassword no Auth
+//   3. Autenticado → lê documento do manager no Firestore
+//   4. Verifica bloqueio, subscription, etc.
+//   5. _loginSuccess
 async function doLogin() {
   var user = document.getElementById('login-user').value.trim().toLowerCase();
   var pass = document.getElementById('login-pass').value;
@@ -6346,23 +6310,42 @@ async function doLogin() {
     while ((!window.firebase || !window.firebase.firestore || !_auth) && attempts < 40) {
       await new Promise(r => setTimeout(r, 100)); attempts++;
     }
-    if (!window.firebase || !window.firebase.firestore) {
+    if (!window.firebase || !window.firebase.firestore || !_auth) {
       showLoginError('Erro de conexão. Tente novamente.'); return;
     }
 
+    // ── Passo 1: autentica no Auth via e-mail interno ─────
+    var authEmail = _authEmail(user);
+    try {
+      await _auth.signInWithEmailAndPassword(authEmail, pass);
+    } catch (authErr) {
+      if (
+        authErr.code === 'auth/wrong-password'    ||
+        authErr.code === 'auth/invalid-credential' ||
+        authErr.code === 'auth/user-not-found'
+      ) {
+        showLoginError('Usuário ou senha incorretos.');
+      } else {
+        showLoginError('Erro ao autenticar: ' + authErr.message);
+      }
+      return;
+    }
+
+    // ── Passo 2: autenticado → lê o documento no Firestore ──
     var db = firebase.firestore();
     var snap = await db.collection('managers').where('username', '==', user).get();
-    if (snap.empty) { showLoginError('Credenciais inválidas.'); return; }
+    if (snap.empty) {
+      await _auth.signOut();
+      showLoginError('Usuário ou senha incorretos.');
+      return;
+    }
 
     var docSnap = snap.docs[0];
     var mgr = docSnap.data();
 
-    // Verifica senha (suporte a SHA-256 hash e plain legado)
-    var passOk = await _checkPassword(pass, mgr.password, mgr.passwordHash);
-    if (!passOk) { showLoginError('Credenciais inválidas.'); return; }
-
     // Conta bloqueada?
     if (mgr.blocked) {
+      await _auth.signOut();
       var reasons = mgr.blockReasons && mgr.blockReasons.length ? mgr.blockReasons : [];
       showBlockedScreen(reasons);
       return;
@@ -6393,40 +6376,7 @@ async function doLogin() {
       referralCode: referralCode,
     };
 
-    // ── Rota de Auth ─────────────────────────────────────
-    if (mgr.authUid) {
-      // Já migrado: signIn direto no Auth
-      var authEmail = mgr.email || _syntheticEmail(user);
-      try {
-        await _auth.signInWithEmailAndPassword(authEmail, pass);
-      } catch (authErr) {
-        // Se a senha mudou via Firestore mas não no Auth, sincroniza
-        if (authErr.code === 'auth/wrong-password' || authErr.code === 'auth/invalid-credential') {
-          try {
-            var u = await _auth.signInWithEmailAndPassword(authEmail, pass);
-          } catch(e2) {
-            // Auth falhou mas credenciais Firestore ok — continua sem Auth por ora
-            console.warn('Auth signIn failed, continuing without Auth:', e2.message);
-          }
-        }
-      }
-      _loginSuccess(userData);
-
-    } else {
-      // Ainda não migrado para o Auth
-      _pendingAuthMigration = { userData, docId: docSnap.id, username: user, password: pass };
-
-      if (mgr.email && mgr.email.includes('@') && !mgr.email.includes('@trainly-app.internal')) {
-        // Tem e-mail real → migra silenciosamente
-        await _performAuthMigration(mgr.email, pass, docSnap.id, user);
-        _loginSuccess(userData);
-      } else {
-        // Sem e-mail real → abre modal de migração
-        if (btn) { btn.textContent = 'Acessar painel →'; btn.disabled = false; }
-        _openMigrationModal(userData, docSnap.id, user, pass);
-        return;
-      }
-    }
+    _loginSuccess(userData);
 
   } catch (e) {
     showLoginError('Erro: ' + e.message);
@@ -6434,81 +6384,6 @@ async function doLogin() {
     if (btn) { btn.textContent = 'Acessar painel →'; btn.disabled = false; }
   }
 }
-
-// ── Executa a migração no Auth e salva authUid + email ───
-async function _performAuthMigration(email, password, docId, username) {
-  try {
-    var uid = await _ensureAuthAccount(email, password, username);
-    await firebase.firestore().collection('managers').doc(docId).update({
-      authUid: uid,
-      email: email
-    });
-    return uid;
-  } catch (e) {
-    // Se Auth falhar, não bloqueia o login — apenas loga
-    console.warn('Auth migration failed (non-blocking):', e.message);
-    return null;
-  }
-}
-
-// ── Abre o modal de migração ─────────────────────────────
-function _openMigrationModal(userData, docId, username, password) {
-  _pendingAuthMigration = { userData, docId, username, password };
-  document.getElementById('mig-email').value = '';
-  document.getElementById('mig-error').textContent = '';
-  document.getElementById('migration-overlay').classList.add('on');
-}
-
-// ── Confirmar migração via modal ─────────────────────────
-window.migrationConfirm = async function() {
-  var email = (document.getElementById('mig-email').value || '').trim().toLowerCase();
-  var errEl = document.getElementById('mig-error');
-  errEl.textContent = '';
-
-  if (!email || !email.includes('@') || !email.includes('.')) {
-    errEl.textContent = 'Informe um e-mail válido.';
-    return;
-  }
-
-  var btn = document.getElementById('mig-btn');
-  btn.classList.add('btn-loading');
-  btn.textContent = 'Ativando...';
-
-  try {
-    var m = _pendingAuthMigration;
-    if (!m) throw new Error('Sessão expirada. Faça login novamente.');
-
-    // Verifica se e-mail já está em uso por outro gestor no Firestore
-    var emailCheck = await firebase.firestore()
-      .collection('managers').where('email', '==', email).get();
-    if (!emailCheck.empty && emailCheck.docs[0].id !== m.docId) {
-      errEl.textContent = 'Este e-mail já está cadastrado em outra conta.';
-      btn.classList.remove('btn-loading');
-      btn.textContent = 'Ativar segurança →';
-      return;
-    }
-
-    await _performAuthMigration(email, m.password, m.docId, m.username);
-
-    document.getElementById('migration-overlay').classList.remove('on');
-    _pendingAuthMigration = null;
-    _loginSuccess(m.userData);
-
-  } catch (e) {
-    errEl.textContent = 'Erro: ' + e.message;
-  } finally {
-    btn.classList.remove('btn-loading');
-    btn.textContent = 'Ativar segurança →';
-  }
-};
-
-// ── Pular migração (será pedido no próximo login) ────────
-window.migrationSkip = function() {
-  var m = _pendingAuthMigration;
-  document.getElementById('migration-overlay').classList.remove('on');
-  _pendingAuthMigration = null;
-  if (m) _loginSuccess(m.userData);
-};
 
 // ════════════════════════════════════════════════════════
 // CADASTRO PÚBLICO — regStep2Next (com Auth)
@@ -6531,9 +6406,10 @@ window.regStep2Next = async function() {
   document.getElementById('reg-processing').style.display = 'block';
 
   try {
-    var user  = (document.getElementById('reg-user').value || '').trim().toLowerCase();
-    var name  = (document.getElementById('reg-name').value || '').trim();
-    var email = (document.getElementById('reg-email-step1').value || '').trim().toLowerCase();
+    var user     = (document.getElementById('reg-user').value || '').trim().toLowerCase();
+    var name     = (document.getElementById('reg-name').value || '').trim();
+    var email    = (document.getElementById('reg-email-step1').value || '').trim().toLowerCase();
+    var password = document.getElementById('reg-pass').value;
 
     // Verifica username duplicado
     var existing = await _db.collection('managers').where('username', '==', user).get();
@@ -6543,34 +6419,36 @@ window.regStep2Next = async function() {
       regShowStep(1); return;
     }
 
-    // Verifica e-mail duplicado no Auth (se fornecido)
-    var authEmail = (email && email.includes('@')) ? email : _syntheticEmail(user);
+    // E-mail interno derivado do username — usado no Auth
+    var authEmail = _authEmail(user);
 
-    var hash = await _sha256(document.getElementById('reg-pass').value);
-    var password = document.getElementById('reg-pass').value;
+    var hash = await _sha256(password);
     _regNewId = 'mgr_' + Date.now();
 
     var refCode = window._pendingRefCode
                || (document.getElementById('reg-ref-code') ? document.getElementById('reg-ref-code').value.trim() : '')
                || '';
 
-    // Cria no Firestore primeiro
+    // Cria no Firebase Auth primeiro
+    var uid = null;
+    try {
+      uid = await _ensureAuthAccount(authEmail, password);
+    } catch (authErr) {
+      document.getElementById('reg-processing').style.display = 'none';
+      errEl.textContent = 'Erro ao criar conta: ' + authErr.message;
+      regShowStep(1); return;
+    }
+
+    // Cria no Firestore — salva o e-mail real do gestor para suporte/recuperação
     await _db.collection('managers').doc(_regNewId).set({
       username: user, passwordHash: hash, name, cref, crefDeclared: true,
-      email: authEmail,
+      email: email || authEmail, // e-mail real se informado, interno como fallback
+      authUid: uid,
       role: 'comum', isMaster: false,
       trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
       blocked: false, createdAt: Date.now(),
       referredBy: refCode
     });
-
-    // Cria no Firebase Auth (não bloqueia o cadastro se falhar)
-    try {
-      var uid = await _ensureAuthAccount(authEmail, password, user);
-      await _db.collection('managers').doc(_regNewId).update({ authUid: uid });
-    } catch (authErr) {
-      console.warn('Auth creation failed (non-blocking):', authErr.message);
-    }
 
     if (refCode) await _applyReferralBonus(refCode);
 
@@ -6597,8 +6475,6 @@ window.regStep2Next = async function() {
 // ════════════════════════════════════════════════════════
 // CADASTRO VIA CONVITE — inviteRegister (com Auth)
 // ════════════════════════════════════════════════════════
-var _origInviteRegister = window.inviteRegister;
-
 window.inviteRegister = async function() {
   var errEl = document.getElementById('inv-error');
   errEl.textContent = '';
@@ -6621,11 +6497,21 @@ window.inviteRegister = async function() {
     var inv = await _db.collection('invites').doc(window._invDocId).get();
     if (!inv.exists || inv.data().used) { errEl.textContent = 'Convite já utilizado.'; return; }
 
-    var hash     = await _sha256(pass);
-    var newId    = 'mgr_' + Date.now();
-    var invName  = (document.getElementById('inv-name').value || '').trim();
-    var invBy    = window._invBy || '';
-    var authEmail = _syntheticEmail(username); // convite não tem campo de email — usa sintético
+    var hash      = await _sha256(pass);
+    var newId     = 'mgr_' + Date.now();
+    var invName   = (document.getElementById('inv-name').value || '').trim();
+    var invBy     = window._invBy || '';
+    var authEmail = _authEmail(username); // sempre deriva do username
+
+    // Cria no Firebase Auth primeiro
+    var uid = null;
+    try {
+      uid = await _ensureAuthAccount(authEmail, pass);
+    } catch (authErr) {
+      errEl.textContent = 'Erro ao criar conta: ' + authErr.message;
+      btn.classList.remove('btn-loading'); btn.textContent = 'Criar conta →';
+      return;
+    }
 
     // Busca referralCode de quem criou o convite
     var invByRefCode = invBy;
@@ -6639,17 +6525,10 @@ window.inviteRegister = async function() {
       username, passwordHash: hash, name: invName, role: 'comum', isMaster: false,
       cref, crefDeclared: true,
       email: authEmail,
+      authUid: uid,
       trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
       blocked: false, createdAt: Date.now(), invitedBy: invBy, referredBy: invByRefCode
     });
-
-    // Cria no Firebase Auth (não bloqueia se falhar)
-    try {
-      var uid = await _ensureAuthAccount(authEmail, pass, username);
-      await _db.collection('managers').doc(newId).update({ authUid: uid });
-    } catch (authErr) {
-      console.warn('Auth creation failed (invite, non-blocking):', authErr.message);
-    }
 
     await _db.collection('invites').doc(window._invDocId).update({
       used: true, usedAt: Date.now(), usedBy: username
@@ -6676,9 +6555,8 @@ window.inviteRegister = async function() {
 };
 
 // ════════════════════════════════════════════════════════
-// LOGOUT — usa auth.signOut() além de limpar localStorage
+// LOGOUT
 // ════════════════════════════════════════════════════════
-var _origLogout = window.doLogout;
 window.doLogout = async function() {
   try {
     if (_auth && _auth.currentUser) await _auth.signOut();
@@ -6687,47 +6565,12 @@ window.doLogout = async function() {
   location.reload();
 };
 
-// Garante que botões de logout chamem a versão com Auth
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[onclick*="doLogout"], .logout-btn').forEach(function(el) {
     if (el.getAttribute('onclick') && el.getAttribute('onclick').includes('doLogout')) return;
     el.onclick = function() { window.doLogout(); };
   });
 });
-
-// ════════════════════════════════════════════════════════
-// VALIDAÇÃO STEP 1 — adiciona verificação do e-mail
-// (sobrescreve regStep1Next para validar o novo campo)
-// ════════════════════════════════════════════════════════
-var _origRegStep1Next = window.regStep1Next;
-window.regStep1Next = async function() {
-  // Valida o campo de e-mail antes de chamar a validação original
-  var email = (document.getElementById('reg-email-step1').value || '').trim();
-  var errEl = document.getElementById('reg-error');
-
-  if (!email || !email.includes('@') || !email.includes('.')) {
-    errEl.textContent = 'Informe um e-mail válido.';
-    return;
-  }
-
-  // Verifica duplicidade de e-mail no Firestore
-  try {
-    var emailCheck = await _db.collection('managers').where('email', '==', email.toLowerCase()).get();
-    // Ignora e-mails sintéticos internos na checagem
-    var realConflict = emailCheck.docs.filter(function(d) {
-      return !d.data().email.includes('@trainly-app.internal');
-    });
-    if (realConflict.length > 0) {
-      errEl.textContent = 'Este e-mail já está cadastrado. Tente fazer login.';
-      return;
-    }
-  } catch(e) { /* não bloqueia por erro de rede */ }
-
-  // Chama o step1Next original
-  if (_origRegStep1Next) {
-    _origRegStep1Next();
-  }
-};
 
 </script>
 </body>
