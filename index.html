@@ -138,14 +138,89 @@
     .btn-primary:disabled { opacity: .4; pointer-events: none; }
     #login-error { color: #ffaaaa !important; }
 
-    /* APP */
+    /* ── NAV MENU ── */
     #screen-app { display: none; flex-direction: column; min-height: 100vh; }
-    .topbar { background: #111110; border-bottom: 1px solid #2e2e2a; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.3); display: flex; flex-direction: column; }
+
+    /* Topbar — largura total no topo */
+    .topbar { background: #111110; border-bottom: 1px solid #2e2e2a; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.3); display: flex; flex-direction: column; width: 100%; }
     .topbar-main { padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
     .topbar-brand { font-family: var(--head); font-size: 1.1rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 10px; letter-spacing: -.01em; }
     .student-pill { background: rgba(245,200,0,.12); border: 1px solid rgba(245,200,0,.3); border-radius: 8px; padding: 5px 12px; font-size: .78rem; font-weight: 700; color: var(--accent); }
     .logout-btn { background: none; color: #555550; font-size: .78rem; padding: 6px 12px; border-radius: 8px; transition: all .15s; font-weight: 600; }
     .logout-btn:hover { color: var(--red); background: var(--red-dim); }
+
+    /* app-body: sidebar + conteúdo */
+    #app-body { display: flex; flex: 1; min-height: 0; }
+
+    /* Sidebar desktop — idêntico ao gestor */
+    #nav-sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--surface); border-right: 1px solid var(--border);
+      padding: 20px 10px;
+      display: flex; flex-direction: column; gap: 2px;
+      position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto;
+    }
+    .nav-sidebar-section {
+      font-size: .68rem; font-weight: 700; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .12em; padding: 14px 12px 8px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: var(--r);
+      font-size: .88rem; font-weight: 600; color: var(--text2);
+      cursor: pointer; border: none; background: none;
+      font-family: var(--body); transition: all .15s;
+      text-align: left; width: 100%; position: relative;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--accent-dim); color: #111110; font-weight: 700; }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%); width: 3px; height: 60%;
+      background: var(--accent); border-radius: 0 3px 3px 0;
+    }
+    .nav-item svg { flex-shrink: 0; color: var(--text3); }
+    .nav-item.active svg { color: #111110; }
+    .nav-sidebar-bottom {
+      margin-top: auto; border-top: 1px solid var(--border);
+      padding-top: 12px; display: flex; flex-direction: column; gap: 2px;
+    }
+
+    /* Main content */
+    #app-main { flex: 1; min-width: 0; overflow-y: auto; }
+
+    /* Bottom nav mobile — idêntico ao gestor */
+    #nav-bottom {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 6px 0 env(safe-area-inset-bottom);
+      box-shadow: 0 -2px 16px rgba(0,0,0,.07);
+    }
+    .nav-bottom-items { display: flex; justify-content: space-around; align-items: stretch; }
+    .nav-bottom-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      font-size: .6rem; font-weight: 700; color: var(--text3);
+      cursor: pointer; border: none; background: none;
+      font-family: var(--body); padding: 6px 4px;
+      border-radius: 8px; transition: color .15s; min-width: 0;
+    }
+    .nav-bottom-item.active { color: #111110; }
+    .nav-bottom-item svg { flex-shrink: 0; }
+
+    /* Pages */
+    .nav-page { display: none; }
+    .nav-page.active { display: block; }
+
+    @media (max-width: 768px) {
+      #nav-sidebar { display: none; }
+      #nav-bottom { display: block; }
+      #app-main { padding-bottom: 72px; }
+    }
+    @media (min-width: 769px) {
+      #nav-bottom { display: none !important; }
+    }
 
     .greeting-wrap { padding: 20px 20px 4px; }
     .greeting { font-family: var(--head); font-size: 1.5rem; font-weight: 800; color: var(--text); }
@@ -169,12 +244,102 @@
     .empty-state { text-align: center; padding: 80px 20px; color: var(--text3); }
     .empty-state .ei { font-size: 3rem; margin-bottom: 14px; display: block; }
 
-    /* PLAN */
-    .plan-wrap { margin-bottom: 28px; }
-    .plan-header-strip { display: flex; align-items: center; gap: 10px; padding: 0 4px; margin-bottom: 12px; }
-    .plan-header-name { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: var(--text); }
-    .plan-header-expiry { font-size: .75rem; color: var(--text3); margin-left: auto; font-weight: 500; }
-    .plan-expired-badge { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); border-radius: 99px; padding: 3px 10px; font-size: .72rem; font-weight: 700; }
+    /* PLAN — single unified card */
+    .plan-wrap { margin-bottom: 14px; background: #fff; border: 1.5px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.06); transition: box-shadow .18s; }
+    .plan-wrap:hover { box-shadow: 0 6px 22px rgba(0,0,0,.09); }
+    .plan-wrap.active-plan-wrap { border-color: rgba(46,160,67,.25); box-shadow: 0 4px 20px rgba(46,160,67,.1); }
+    .plan-wrap.upcoming-plan-wrap { border-color: var(--border); opacity: .72; transform: scale(.985); transform-origin: top center; }
+    .plan-wrap.expired-plan-wrap { opacity: .75; }
+
+    /* Plan header — clickable row inside the card */
+    .plan-card-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; border-bottom: 1.5px solid transparent; transition: background .15s, border-color .15s; }
+    .plan-card-header:hover { background: rgba(0,0,0,.018); }
+    .plan-wrap.active-plan-wrap .plan-card-header { border-bottom-color: rgba(46,160,67,.12); }
+    .plan-wrap.upcoming-plan-wrap .plan-card-header { border-bottom-color: var(--border); }
+    .plan-wrap.expired-plan-wrap .plan-card-header { border-bottom-color: var(--border); }
+    .plan-card-header.open { border-bottom-color: var(--border) !important; }
+
+    /* Icon container — simple circle, no yellow square */
+    .plan-card-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative;
+    }
+    /* Active: clean white circle with subtle green ring */
+    .plan-wrap.active-plan-wrap .plan-card-num {
+      background: #fff;
+      border-color: rgba(46,160,67,.3);
+      box-shadow: 0 0 0 3px rgba(46,160,67,.08);
+    }
+    /* Upcoming: muted */
+    .plan-wrap.upcoming-plan-wrap .plan-card-num {
+      background: var(--surface2);
+      border-color: var(--border);
+    }
+
+    /* Status dot — sits outside the circle, bottom-right corner */
+    .plan-card-num-inner { font-family: var(--head); font-weight: 800; font-size: .78rem; color: var(--text2); }
+    .plan-wrap.active-plan-wrap .plan-card-num-inner { color: var(--green); }
+    .plan-status-dot {
+      position: absolute; bottom: -1px; right: -1px;
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 2px solid #fff;
+      display: block; flex-shrink: 0;
+    }
+    .plan-status-dot.active-dot {
+      background: #2ab757;
+      box-shadow: 0 0 6px rgba(42,183,87,.5);
+    }
+    .plan-status-dot.upcoming-dot {
+      background: #bbb;
+      box-shadow: none;
+    }
+    .plan-status-dot.expired-dot { background: #ccc; box-shadow: none; }
+
+    /* Upcoming plan — dimmed */
+    .plan-wrap.upcoming-plan-wrap .workout-accordion { color: var(--text2); }
+
+    .plan-card-info { flex: 1; min-width: 0; }
+    .plan-card-title { font-family: var(--head); font-size: .95rem; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .plan-wrap.active-plan-wrap .plan-card-title { font-size: 1.02rem; font-weight: 900; color: #111; }
+    .plan-wrap.upcoming-plan-wrap .plan-card-title { font-size: .88rem; font-weight: 700; color: var(--text2); }
+    .plan-card-meta { font-size: .72rem; color: var(--text3); font-weight: 500; margin-top: 2px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .plan-card-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: .4; flex-shrink: 0; }
+
+    .plan-card-badge { border-radius: 99px; padding: 3px 10px; font-size: .7rem; font-weight: 700; flex-shrink: 0; }
+    .plan-card-badge.badge-active { background: rgba(46,160,67,.1); color: #1a7a35; border: 1px solid rgba(46,160,67,.25); }
+    .plan-card-badge.badge-upcoming { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+    .plan-card-badge.badge-expired { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+
+    .plan-card-arrow { width: 26px; height: 26px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: .6rem; transition: transform .22s; flex-shrink: 0; }
+    .plan-card-header.open .plan-card-arrow { transform: rotate(90deg); }
+
+    /* Workouts inside the card — no individual card styling */
+    .plan-workouts-wrap { display: none; }
+    .plan-workouts-wrap.open { display: block; }
+
+    /* legacy badges — kept for compat */
+    .plan-expired-badge { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; font-size: .72rem; font-weight: 700; }
+    .plan-upcoming-badge { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; font-size: .72rem; font-weight: 700; }
+
+    .plan-wrap.upcoming-plan-wrap .plan-card-meta { font-size: .68rem; }
+    .no-active-plan-msg { margin: 8px 0 24px; background: var(--surface); border: 1px dashed var(--border2); border-radius: var(--r2); padding: 28px 20px; text-align: center; color: var(--text3); }
+    .no-active-plan-msg .napm-icon { font-size: 2rem; margin-bottom: 10px; }
+    .no-active-plan-msg .napm-title { font-family: var(--head); font-size: .95rem; font-weight: 800; color: var(--text2); margin-bottom: 6px; }
+    .no-active-plan-msg .napm-sub { font-size: .8rem; line-height: 1.6; }
+
+    /* HISTORY SECTION */
+    .history-section-header { display: flex; align-items: center; gap: 10px; margin: 32px 0 14px; padding: 0 2px; }
+    .history-section-title { font-family: var(--head); font-size: .82rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; }
+    .history-section-line { flex: 1; height: 1px; background: var(--border); }
+    .history-toggle-btn { font-size: .74rem; font-weight: 700; color: var(--text3); background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; cursor: pointer; transition: all .15s; flex-shrink: 0; }
+    .history-toggle-btn:hover { color: var(--text); background: var(--surface); }
+    #history-plans-wrap { display: none; }
+    #history-plans-wrap.open { display: block; }
+    .plan-wrap.expired-plan .workout-accordion { opacity: .6; }
+    .plan-wrap.expired-plan .workout-accordion-header { background: #fafaf9; }
+
 
     /* PROGRESS */
     .progress-wrap { margin-bottom: 14px; }
@@ -182,21 +347,27 @@
     .progress-bar-bg { height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
     .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s cubic-bezier(.22,1,.36,1); box-shadow: 0 0 8px rgba(245,200,0,.4); }
 
-    /* WORKOUT ACCORDION */
-    .workout-accordion { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 14px; transition: all .25s; box-shadow: 0 2px 10px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04); }
-    .workout-accordion:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.1); }
-    .workout-accordion.is-today { border-color: var(--border); box-shadow: 0 4px 20px rgba(0,0,0,.1); }
-    .workout-accordion-header { display: flex; align-items: center; gap: 14px; padding: 18px 20px; cursor: pointer; user-select: none; position: relative; overflow: hidden; background: #ffffff; }
-    .workout-accordion-header::before { content: ''; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%; background: rgba(0,0,0,.025); pointer-events: none; }
-    .wa-letter { width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0; background: var(--surface2); border: 1.5px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 800; font-size: 1.1rem; color: var(--text2); transition: all .2s; }
-    .workout-accordion.is-today .wa-letter { background: var(--accent); border-color: var(--accent2); color: #111110; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
-    .wa-info { flex: 1; position: relative; z-index: 1; }
-    .wa-title { font-weight: 800; font-size: 1rem; color: var(--text); letter-spacing: -.01em; }
-    .wa-meta { font-size: .74rem; color: var(--text3); margin-top: 3px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
-    .wa-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: .5; }
-    .wa-today-badge { background: var(--accent); color: #111110; border: none; border-radius: 99px; padding: 4px 12px; font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; position: relative; z-index: 1; box-shadow: 0 2px 10px rgba(245,200,0,.4); }
-    .wa-arrow { width: 28px; height: 28px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: .7rem; transition: all .25s; flex-shrink: 0; position: relative; z-index: 1; }
+    /* WORKOUT ACCORDION — flat rows inside the plan card */
+    .workout-accordion { border-top: 1px solid var(--border); transition: background .15s; }
+    .workout-accordion:first-child { border-top: none; }
+    .workout-accordion:hover { background: rgba(0,0,0,.012); }
+    .workout-accordion.is-today { background: rgba(245,200,0,.06); border-left: 3px solid var(--accent); }
+    .workout-accordion.is-today .workout-accordion-header { padding: 11px 16px 11px 13px; }
+    .workout-accordion.is-today .wa-title { font-size: .93rem; font-weight: 800; color: #111; }
+    .workout-accordion.is-today .wa-ex-count { color: var(--text2); font-weight: 700; }
+    .workout-accordion.is-today .wa-arrow { background: var(--accent); border-color: var(--accent2); color: #111; }
+    .workout-accordion-header { display: flex; align-items: center; gap: 10px; padding: 9px 16px; cursor: pointer; user-select: none; }
+    .wa-letter { display: none; }
+    .wa-info { flex: 1; min-width: 0; }
+    .wa-title-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .wa-title { font-weight: 600; font-size: .88rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .wa-meta { display: none; }
+    .wa-ex-count { font-size: .7rem; color: var(--text3); font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+    .wa-today-badge { background: var(--accent); color: #111110; border: none; border-radius: 99px; padding: 2px 8px; font-size: .62rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; box-shadow: 0 2px 8px rgba(245,200,0,.35); flex-shrink: 0; }
+    .wa-arrow { width: 20px; height: 20px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: .55rem; transition: transform .22s; flex-shrink: 0; }
     .workout-accordion.open .wa-arrow { transform: rotate(90deg); }
+    .exercises-body { padding: 0 18px 16px; }
+    .workout-days-row { padding: 0 18px 10px; }
 
     .workout-days-row { padding: 10px 20px 12px; display: flex; gap: 6px; flex-wrap: wrap; background: var(--surface2); border-top: 1px solid var(--border); }
     .day-chip { background: var(--surface); color: var(--text2); border: 1px solid var(--border2); border-radius: 99px; padding: 4px 12px; font-size: .71rem; font-weight: 700; }
@@ -863,17 +1034,18 @@
 
 <!-- APP -->
 <div id="screen-app">
+
+  <!-- TOPBAR — largura total, igual gestor -->
   <div class="topbar">
     <div class="topbar-main">
       <div class="topbar-brand">
-        <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly" style="height:30px;width:auto;object-fit:contain;"/>
+        <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly" style="height:28px;width:auto;object-fit:contain;"/>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <div class="student-pill" id="student-pill">—</div>
         <button class="logout-btn" onclick="doLogout()">Sair</button>
       </div>
     </div>
-    <!-- TIMER BAR (hidden until workout started) -->
     <div id="workout-timer-bar" style="display:none;">
       <div class="timer-dot"></div>
       <span class="timer-label">Em treino</span>
@@ -882,22 +1054,71 @@
     </div>
   </div>
 
-  <div id="trainer-bar" class="hidden" style="background:#1a1a18;border-bottom:1px solid #2e2e2a;padding:8px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span style="font-size:.72rem;color:#999990;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">Treinador</span>
-      <span id="trainer-name" style="font-size:.82rem;font-weight:800;color:var(--accent);letter-spacing:.01em;">—</span>
-    </div>
-    <div id="trainer-cref-wrap" style="display:none;align-items:center;gap:6px;">
-      <span style="font-size:.72rem;color:#555550;font-weight:600;">|</span>
-      <span style="font-size:.7rem;color:#999990;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">CREF</span>
-      <span id="trainer-cref" style="font-size:.78rem;font-weight:700;color:rgba(255,255,255,.7);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:2px 8px;">—</span>
+  <!-- BODY: sidebar + conteúdo lado a lado -->
+  <div id="app-body">
+
+    <!-- SIDEBAR (desktop) -->
+    <nav id="nav-sidebar">
+      <div class="nav-sidebar-section">Principal</div>
+      <button class="nav-item active" onclick="switchTab('treinos')" id="nav-treinos">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>
+        Treinos
+      </button>
+      <button class="nav-item" onclick="switchTab('historico')" id="nav-historico">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Histórico
+      </button>
+      <div class="nav-sidebar-bottom">
+        <div style="padding:4px 14px 8px;font-size:.78rem;color:var(--text2);font-weight:700;" id="student-pill-sidebar">—</div>
+        <button class="nav-item" onclick="doLogout()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sair
+        </button>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div id="app-main">
+      <div id="trainer-bar" class="hidden" style="background:#1a1a18;border-bottom:1px solid #2e2e2a;padding:8px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:.72rem;color:#999990;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">Treinador</span>
+          <span id="trainer-name" style="font-size:.82rem;font-weight:800;color:var(--accent);letter-spacing:.01em;">—</span>
+        </div>
+        <div id="trainer-cref-wrap" style="display:none;align-items:center;gap:6px;">
+          <span style="font-size:.72rem;color:#555550;font-weight:600;">|</span>
+          <span style="font-size:.7rem;color:#999990;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">CREF</span>
+          <span id="trainer-cref" style="font-size:.78rem;font-weight:700;color:rgba(255,255,255,.7);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:2px 8px;">—</span>
+        </div>
+      </div>
+
+      <!-- PAGE: TREINOS -->
+      <div id="page-treinos" class="nav-page active">
+        <div class="greeting-wrap"><div class="greeting" id="greeting-text">Olá! 👋</div></div>
+        <div id="plan-status-wrap"></div>
+        <div id="today-wrap"></div>
+        <div id="content" class="content"><div class="spinner"></div></div>
+      </div>
+
+      <!-- PAGE: HISTÓRICO -->
+      <div id="page-historico" class="nav-page">
+        <div class="content" id="content-historico"><div class="spinner"></div></div>
+      </div>
     </div>
   </div>
 
-  <div class="greeting-wrap"><div class="greeting" id="greeting-text">Olá! 👋</div></div>
-  <div id="plan-status-wrap"></div>
-  <div id="today-wrap"></div>
-  <div id="content" class="content"><div class="spinner"></div></div>
+  <!-- BOTTOM NAV (mobile) -->
+  <nav id="nav-bottom">
+    <div class="nav-bottom-items">
+      <button class="nav-bottom-item active" onclick="switchTab('treinos')" id="nav-bottom-treinos">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>
+        <span>Treinos</span>
+      </button>
+      <button class="nav-bottom-item" onclick="switchTab('historico')" id="nav-bottom-historico">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Histórico</span>
+      </button>
+    </div>
+  </nav>
 </div>
 
 <script type="module">
@@ -952,7 +1173,9 @@ const toast=(msg,type='success')=>{
   document.getElementById('toast-container').appendChild(t);
   setTimeout(()=>t.remove(),3500);
 };
-const isExpired=p=>{if(!p.expiry)return false;return new Date(p.expiry)<new Date(new Date().toDateString())};
+const isExpired=p=>{if(!p.expiry)return false;return new Date(p.expiry+'T23:59')<=new Date();};
+const isNotStarted=p=>{if(!p.startDate)return false;return new Date(p.startDate+'T00:00')>new Date();};
+const getPlanStatus=p=>{if(isExpired(p))return 'expired';if(isNotStarted(p))return 'upcoming';return 'active';};
 
 // ── Session ──
 const LS_KEY='forge_student_session';
@@ -1267,6 +1490,8 @@ function showApp(student){
   document.getElementById('screen-login').style.display='none';
   document.getElementById('screen-app').style.cssText='display:flex;flex-direction:column;';
   document.getElementById('student-pill').textContent=student.name;
+  const sidebarPill=document.getElementById('student-pill-sidebar');
+  if(sidebarPill) sidebarPill.textContent=student.name;
   const first=student.name.trim().split(' ')[0];
   document.getElementById('greeting-text').innerHTML=`Olá, <span>${first}</span>! 👋`;
   // Trainer bar
@@ -1368,63 +1593,58 @@ async function loadPlans(student){
   content.innerHTML='<div class="spinner"></div>';
   try{
     const snap=await getDocs(query(collection(db,'plans'),where('studentId','==',student.id)));
-    const plans=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.createdAt-a.createdAt);
-    const activePlans=plans.filter(p=>!isExpired(p));
-    const latestActive=activePlans[0]||null;
-    const expiredPlans=plans.filter(p=>isExpired(p));
+    const plans=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.startDate||'').localeCompare(b.startDate||'') || a.createdAt-b.createdAt);
+
+    const activePlans  = plans.filter(p=>getPlanStatus(p)==='active');
+    const upcomingPlans= plans.filter(p=>getPlanStatus(p)==='upcoming');
+    const expiredPlans = plans.filter(p=>getPlanStatus(p)==='expired');
+    const latestActive = activePlans[0]||null;
 
     // ── Verificação de deleção automática ──
-    // Caso 1: alerta cref_suspended (legado) + sem planos ativos
-    // Caso 2: gestor bloqueado + sem planos ativos → apaga tudo
     try {
       let shouldDelete = false;
-
-      // Verifica alerta cref_suspended (legado)
       try {
         const alertSnap = await window._fsGetDoc(window._fsDoc(db,'alerts',student.id));
         if(alertSnap.exists()) {
           const alertData = alertSnap.data();
-          if(alertData.type === 'cref_suspended' && activePlans.length === 0) {
+          if(alertData.type === 'cref_suspended' && activePlans.length === 0 && upcomingPlans.length === 0) {
             shouldDelete = true;
           }
         }
       } catch(ea) {}
-
-      // Verifica se o gestor do aluno está bloqueado e não há planos ativos
-      if(!shouldDelete && window._trainerBlocked && activePlans.length === 0) {
+      if(!shouldDelete && window._trainerBlocked && activePlans.length === 0 && upcomingPlans.length === 0) {
         shouldDelete = true;
       }
-
       if(shouldDelete) {
-        // Apaga todos os planos
         for(const p of plans) {
           try { await window._fsDeleteDoc(window._fsDoc(db,'plans',p.id)); } catch(e){}
         }
-        // Apaga alerta se existir
         try { await window._fsDeleteDoc(window._fsDoc(db,'alerts',student.id)); } catch(e){}
-        // Apaga o aluno — da próxima vez que tentar entrar com o código, não encontrará mais
         await window._fsDeleteDoc(window._fsDoc(db,'students',student.id));
         clearSession();
-        // Sinaliza que foi deletado por suspensão do treinador e volta para o login
         window._suspendedAutoDeleted = true;
         doLogout();
         return;
       }
     } catch(e) { console.warn('autoDelete check:', e); }
 
-    // Status bar
+    // ── Status bar ──
     const statusWrap=document.getElementById('plan-status-wrap');
     if(latestActive){
-      const d=latestActive.expiry?new Date(latestActive.expiry+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'sem data de validade';
+      const d=latestActive.expiry?new Date(latestActive.expiry+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'sem data de vencimento';
       statusWrap.innerHTML=`<div class="plan-status-bar active"><div class="psb-dot"></div><div class="psb-text">✅ Plano ativo<span class="psb-name">${latestActive.title}</span>${latestActive.expiry?` · válido até ${d}`:' · sem validade'}</div></div>`;
+    }else if(upcomingPlans.length){
+      const p=upcomingPlans[0];
+      const d=new Date(p.startDate+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+      statusWrap.innerHTML=`<div class="plan-status-bar" style="background:rgba(245,200,0,.07);border-color:rgba(245,200,0,.3);color:#8a6200;"><div class="psb-dot"></div><div class="psb-text">🗓 Próximo plano começa em ${d}</div></div>`;
     }else if(expiredPlans.length){
       const d=new Date(expiredPlans[0].expiry+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
       statusWrap.innerHTML=`<div class="plan-status-bar expired"><div class="psb-dot"></div><div class="psb-text">Plano vencido em ${d} — solicite uma atualização ao seu treinador</div></div>`;
-    }else if(!plans.length){
+    }else{
       statusWrap.innerHTML=`<div class="plan-status-bar none"><div class="psb-dot"></div><div class="psb-text">Nenhum plano de treino cadastrado</div></div>`;
     }
 
-    // Today card
+    // ── Today card — apenas planos ativos ──
     const todayWrap=document.getElementById('today-wrap');
     const todayWorkouts=[];
     for(const p of activePlans){ for(const w of (p.workouts||[])){ if((w.days||[]).includes(TODAY)) todayWorkouts.push(w.title); } }
@@ -1438,14 +1658,53 @@ async function loadPlans(student){
     }
 
     content.innerHTML='';
-    for(const p of [...activePlans,...expiredPlans]){
-      content.appendChild(renderPlan(p));
+
+    // ── Planos ativos ──
+    for(const p of activePlans){
+      content.appendChild(renderPlan(p,'active'));
+    }
+
+    // ── Mensagem se não há ativo nem futuro ──
+    if(activePlans.length===0 && upcomingPlans.length===0 && expiredPlans.length>0){
+      const msg=document.createElement('div');
+      msg.className='no-active-plan-msg';
+      msg.innerHTML=`<div class="napm-icon">📅</div><div class="napm-title">Nenhum treino ativo no momento</div><div class="napm-sub">Seu plano anterior venceu.<br>Aguarde seu treinador cadastrar um novo plano.</div>`;
+      content.appendChild(msg);
+    } else if(activePlans.length===0 && upcomingPlans.length>0){
+      const nextDate=new Date(upcomingPlans[0].startDate+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+      const msg=document.createElement('div');
+      msg.className='no-active-plan-msg';
+      msg.innerHTML=`<div class="napm-icon">🗓</div><div class="napm-title">Nenhum treino ativo hoje</div><div class="napm-sub">Seu próximo plano começa em <strong>${nextDate}</strong>.<br>Você já pode visualizar os treinos abaixo.</div>`;
+      content.appendChild(msg);
+    }
+
+    // ── Planos futuros (upcoming) ──
+    if(upcomingPlans.length){
+      const upcomingHeader=document.createElement('div');
+      upcomingHeader.className='history-section-header';
+      upcomingHeader.innerHTML=`<div class="history-section-line"></div><div class="history-section-title">Em breve</div><div class="history-section-line"></div>`;
+      content.appendChild(upcomingHeader);
+      for(const p of upcomingPlans){
+        content.appendChild(renderPlan(p,'upcoming'));
+      }
+    }
+
+    // ── Histórico (expirados) — renderiza na aba Histórico ──
+    const histContent = document.getElementById('content-historico');
+    if(histContent){
+      histContent.innerHTML = '';
+      if(expiredPlans.length){
+        for(const p of expiredPlans){
+          histContent.appendChild(renderPlan(p,'expired'));
+        }
+      } else {
+        histContent.innerHTML = `<div class="empty-state"><span class="ei">📋</span><p>Nenhum treino finalizado ainda.</p></div>`;
+      }
     }
 
     // After render: restore lock state for active timers
     if(_activeWorkout){
       refreshWorkoutLockState(_activeWorkout.planId, _activeWorkout.wi, true);
-      // Restore UI indicators
       const startBtn=document.getElementById(`start-btn-${_activeWorkout.planId}-${_activeWorkout.wi}`);
       const startedInd=document.getElementById(`started-ind-${_activeWorkout.planId}-${_activeWorkout.wi}`);
       const finishBtn=document.getElementById(`finish-btn-${_activeWorkout.planId}-${_activeWorkout.wi}`);
@@ -1457,6 +1716,35 @@ async function loadPlans(student){
     content.innerHTML=`<div class="empty-state"><p>Erro ao carregar: ${err.message}</p></div>`;
   }
 }
+
+window.toggleHistory=function(btn){
+  const wrap=document.getElementById('history-plans-wrap');
+  if(!wrap) return;
+  const open=wrap.classList.toggle('open');
+  btn.textContent=open?'Ocultar histórico':'Ver histórico';
+};
+
+window.switchTab=function(tab){
+  // Pages
+  document.querySelectorAll('.nav-page').forEach(p=>p.classList.remove('active'));
+  const page=document.getElementById('page-'+tab);
+  if(page) page.classList.add('active');
+
+  // Sidebar items
+  document.querySelectorAll('#nav-sidebar .nav-item').forEach(i=>i.classList.remove('active'));
+  const sideItem=document.getElementById('nav-'+tab);
+  if(sideItem) sideItem.classList.add('active');
+
+  // Bottom nav items
+  document.querySelectorAll('.nav-bottom-item').forEach(i=>i.classList.remove('active'));
+  const botItem=document.getElementById('nav-bottom-'+tab);
+  if(botItem) botItem.classList.add('active');
+
+  // Topbar title
+  const titles={treinos:'Treinos',historico:'Histórico'};
+  const titleEl=document.getElementById('topbar-page-title');
+  if(titleEl) titleEl.textContent=titles[tab]||'';
+};
 
 // ── Check ──
 window.toggleCheck=async function(planId,wi,ei,total,progressId,planTitle,workoutTitle,studentName){
@@ -1481,21 +1769,58 @@ window.handleCheckBtn=function(btn){
   toggleCheck(d.plan,+d.wi,+d.ei,+d.total,d.prog,d.ptitle,d.wtitle,d.sname);
 };
 
-function renderPlan(p){
-  const expired=isExpired(p);
+function renderPlan(p, status){
+  status = status || getPlanStatus(p);
+  const expired  = status==='expired';
+  const upcoming = status==='upcoming';
   const wrap=document.createElement('div');
-  wrap.className='plan-wrap';
-  const expiryText=p.expiry?`Válido até ${new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR')}`:'Sem validade';
+  wrap.className='plan-wrap' + (expired?' expired-plan-wrap':upcoming?' upcoming-plan-wrap':' active-plan-wrap');
 
+  // Period label
+  const startStr = p.startDate ? new Date(p.startDate+'T12:00').toLocaleDateString('pt-BR') : '';
+  const expiryStr= p.expiry    ? new Date(p.expiry+'T12:00').toLocaleDateString('pt-BR')    : '';
+  let periodText = '';
+  if(startStr && expiryStr) periodText = `${startStr} → ${expiryStr}`;
+  else if(startStr)          periodText = `Início: ${startStr}`;
+  else if(expiryStr)         periodText = expired ? `Venceu em: ${expiryStr}` : `Válido até: ${expiryStr}`;
+  else                       periodText = 'Sem data definida';
+
+  const badgeHtml = expired
+    ? `<span class="plan-expired-badge">Finalizado</span>`
+    : upcoming
+    ? `<span class="plan-upcoming-badge">🗓 Em breve</span>`
+    : '';
+
+  const planToggleId = `plan-toggle-${p.id}`;
+  const startsOpen = (status === 'active');
+  const totalWorkouts = (p.workouts||[]).length;
+  const headerClass = ''; /* styling via plan-wrap class now */
+  const badgeClass  = status==='active'?'badge-active':status==='upcoming'?'badge-upcoming':'badge-expired';
+  const badgeLabel  = status==='active'?'Ativo':status==='upcoming'?'Em breve':'Finalizado';
+  // Letter index among all plans of same status — use wi placeholder, fix after append
   wrap.innerHTML=`
-    <div class="plan-header-strip">
-      <div class="plan-header-name">${p.title}</div>
-      ${expired?`<span class="plan-expired-badge">Vencido</span>`:''}
-      <div class="plan-header-expiry">${expiryText}</div>
+    <div class="plan-card-header ${headerClass} ${startsOpen?'open':''}" onclick="togglePlanWorkouts('${p.id}',this)" id="${planToggleId}">
+      <div class="plan-card-num">${status==="active"?'<span class="plan-card-num-inner">▶</span><span class="plan-status-dot active-dot"></span>':status==="upcoming"?'<span class="plan-card-num-inner">◷</span><span class="plan-status-dot upcoming-dot"></span>':'<span class="plan-card-num-inner" style="color:#bbb">✓</span>'}</div>
+      <div class="plan-card-info">
+        <div class="plan-card-title">${p.title}</div>
+        <div class="plan-card-meta">
+          ${periodText ? `<span>${periodText}</span>` : ''}
+          ${periodText ? `<span class="plan-card-meta-dot"></span>` : ''}
+          <span>${totalWorkouts} treino${totalWorkouts!==1?'s':''}</span>
+        </div>
+      </div>
+      <div class="plan-card-right">
+        <span class="plan-card-badge ${badgeClass}">${badgeLabel}</span>
+      </div>
+      <div class="plan-card-arrow">▶</div>
     </div>`;
 
+  const workoutsWrap = document.createElement('div');
+  workoutsWrap.className = 'plan-workouts-wrap' + (startsOpen ? ' open' : '');
+  workoutsWrap.id = `plan-workouts-${p.id}`;
+
   (p.workouts||[]).forEach((w,wi)=>{
-    const isToday=!expired&&(w.days||[]).includes(TODAY);
+    const isToday=!expired&&!upcoming&&(w.days||[]).includes(TODAY);
     const exs=w.exercises||[];
     const total=exs.length;
     const progressId=`prog_${p.id}_${wi}`;
@@ -1520,7 +1845,7 @@ function renderPlan(p){
         const vidId=ytId(vid);
         const thumbUrl=`https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
         const ytUrl=`https://www.youtube.com/watch?v=${vidId}`;
-        if(alreadyStarted){
+        if(alreadyStarted && !upcoming){
           videoHtml=`<div class="ex-video-wrap"><a href="${ytUrl}" target="_blank" class="yt-link-btn"><img src="${thumbUrl}" class="yt-thumb" alt="Ver exercício"/><div class="yt-play-overlay"><svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg><span>Ver no YouTube</span></div></a></div>`;
         }else{
           videoHtml=`<div class="ex-video-wrap"><div class="yt-lock-overlay" data-yturl="${vid}" onclick="toast('Você deve iniciar o treino para continuar.','error')">🔒 <span>Inicie o treino para ver o vídeo</span></div></div>`;
@@ -1529,9 +1854,11 @@ function renderPlan(p){
 
       // Right side: check or lock — lock always stores all data for later unlock
       const checkDataAttrs=`data-plan="${p.id}" data-wi="${wi}" data-ei="${ei}" data-total="${total}" data-prog="${progressId}" data-ptitle="${(p.title||'').replace(/"/g,'&quot;')}" data-wtitle="${(w.title||'Treino '+(wi+1)).replace(/"/g,'&quot;')}" data-sname="${((_currentStudent&&_currentStudent.name)||'Aluno').replace(/"/g,'&quot;')}"`;
-      const rightHtml=alreadyStarted
-        ?`<button class="check-btn" id="chkbtn_${p.id}_${wi}_${ei}" ${checkDataAttrs} onclick="handleCheckBtn(this)">✓</button>`
-        :`<div class="lock-icon" id="chkbtn_${p.id}_${wi}_${ei}" ${checkDataAttrs} title="Inicie o treino primeiro" onclick="toast('Você deve iniciar o treino para continuar.','error')">🔒</div>`;
+      const rightHtml=(expired||upcoming)
+        ? `<div class="lock-icon" style="opacity:.4;cursor:default;" title="${expired?'Treino encerrado':'Ainda não disponível'}">🔒</div>`
+        : alreadyStarted
+        ? `<button class="check-btn" id="chkbtn_${p.id}_${wi}_${ei}" ${checkDataAttrs} onclick="handleCheckBtn(this)">✓</button>`
+        : `<div class="lock-icon" id="chkbtn_${p.id}_${wi}_${ei}" ${checkDataAttrs} title="Inicie o treino primeiro" onclick="toast('Você deve iniciar o treino para continuar.','error')">🔒</div>`;
 
       return `
       <div class="exercise-row" id="exrow_${p.id}_${wi}_${ei}">
@@ -1558,7 +1885,9 @@ function renderPlan(p){
     }).join('');
 
     // Start/Finish button area
-    const startAreaHtml=expired?'':`
+    // upcoming: aluno pode visualizar mas não iniciar — sem botão algum
+    // expired: sem botão
+    const startAreaHtml=(expired||upcoming)?'' : `
       <button class="workout-action-btn start-workout-btn ${alreadyStarted?'hidden':''}" id="start-btn-${p.id}-${wi}"
         onclick="openStartModal('${p.id}',${wi},'${(p.title||'').replace(/'/g,"\\'")}','${(w.title||'Treino '+(wi+1)).replace(/'/g,"\\'")}')">
         <span class="wa-btn-icon">
@@ -1579,12 +1908,13 @@ function renderPlan(p){
 
     acc.innerHTML=`
       <div class="workout-accordion-header" onclick="toggleAccordion(this)">
-        <div class="wa-letter">${String.fromCharCode(65+wi)}</div>
         <div class="wa-info">
-          <div class="wa-title">${w.title||'Treino '+(wi+1)}</div>
-          <div class="wa-meta">${total} exercício${total!==1?'s':''}<span class="wa-meta-dot"></span>${(w.days||[]).map(d=>DAYS_ABBR[d]).join(', ')||'sem dias'}</div>
+          <div class="wa-title-row">
+            <div class="wa-title">${w.title||'Treino '+(wi+1)}</div>
+            ${isToday?'<span class="wa-today-badge">HOJE</span>':''}
+          </div>
         </div>
-        ${isToday?'<span class="wa-today-badge">HOJE</span>':''}
+        <span class="wa-ex-count">${total} ex.</span>
         <div class="wa-arrow">▶</div>
       </div>
       <div class="workout-days-row" style="display:none;">
@@ -1592,13 +1922,13 @@ function renderPlan(p){
       </div>
       <div class="exercises-body" id="exercises-body-${p.id}-${wi}" style="display:none;">
         ${startAreaHtml}
-        <div class="progress-wrap" id="${progressId}">
+        ${!expired&&!upcoming?`<div class="progress-wrap" id="${progressId}">
           <div class="progress-header">
             <span>Progresso</span>
             <span class="progress-label">0/${total} exercícios</span>
           </div>
           <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0%"></div></div>
-        </div>
+        </div>`:''}
         ${exsHTML}
       </div>`;
 
@@ -1609,8 +1939,9 @@ function renderPlan(p){
       acc.querySelector('.exercises-body').style.display='flex';
     }
 
-    wrap.appendChild(acc);
+    workoutsWrap.appendChild(acc);
   });
+  wrap.appendChild(workoutsWrap);
 
   return wrap;
 }
@@ -1622,6 +1953,13 @@ window.toggleAccordion=header=>{
   const body=acc.querySelector('.exercises-body');
   if(open){acc.classList.remove('open');daysRow.style.display='none';body.style.display='none';}
   else{acc.classList.add('open');daysRow.style.display='flex';body.style.display='flex';}
+};
+
+window.togglePlanWorkouts=function(planId, headerEl){
+  const workoutsWrap = document.getElementById('plan-workouts-'+planId);
+  if(!workoutsWrap) return;
+  const isOpen = workoutsWrap.classList.toggle('open');
+  headerEl.classList.toggle('open', isOpen);
 };
 
 (async function init(){
