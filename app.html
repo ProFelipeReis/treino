@@ -59,6 +59,112 @@
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
+    /* ── EVOLUÇÃO / ASSESSMENT ── */
+    .assessment-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+    .assessment-tab { padding: 10px 18px; font-size: .83rem; font-weight: 700; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--body); }
+    .assessment-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+    .assessment-tab-panel { display: none; }
+    .assessment-tab-panel.active { display: block; }
+
+    .evol-section { margin-bottom: 22px; }
+    .evol-section-title { font-size: .72rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .evol-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .evol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .evol-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media(max-width:520px) { .evol-grid { grid-template-columns: 1fr; } .evol-grid-3 { grid-template-columns: 1fr 1fr; } }
+
+    .health-check-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .health-check-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--r); cursor: pointer; transition: all .15s; }
+    .health-check-item:hover { border-color: var(--border2); }
+    .health-check-item.checked { background: var(--accent-dim); border-color: var(--accent-soft); }
+    .health-check-item input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); flex-shrink: 0; }
+    .health-check-item label { font-size: .86rem; font-weight: 600; color: var(--text); cursor: pointer; flex: 1; }
+    .health-detail-field { margin-top: 8px; display: none; }
+    .health-detail-field.visible { display: block; }
+
+
+    /* ── Frequência de Treinos — linha do tempo ───────── */
+    .freq-inline-section { margin: 0 0 18px 0; border-radius: var(--r); transition: background .15s; }
+    .freq-inline-section:hover { background: var(--surface2); }
+    .freq-inline-hint { font-size: .65rem; font-weight: 600; color: var(--text3); letter-spacing: .02em; margin-top: -10px; margin-bottom: 14px; opacity: .7; }
+    .freq-inline-title { display: flex; align-items: center; gap: 7px; font-size: .72rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }
+    .freq-inline-title svg { opacity: .6; }
+
+    .freq-tl-row { display: flex; align-items: center; width: 100%; }
+    .freq-tl-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+    .freq-tl-line { flex: 1; height: 2px; background: var(--border); margin: 0; position: relative; top: -9px; }
+    .freq-tl-line.trained { background: var(--green); opacity: .5; }
+    .freq-tl-line.missed  { background: var(--red); opacity: .25; }
+    .freq-tl-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border2); background: transparent; transition: all .2s; flex-shrink: 0; }
+    .freq-tl-dot.trained { border-color: rgba(46,125,82,.6); background: var(--green-dim); }
+    .freq-tl-dot.today   { border-color: var(--accent); border-width: 2.5px; }
+    .freq-tl-dot.missed  { border-color: rgba(224,62,62,.4); background: var(--red-dim); }
+    .freq-tl-dot.future  { opacity: .45; }
+    .freq-tl-lbl { font-size: .58rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; }
+    .freq-tl-lbl.today { color: #8a6200; font-weight: 800; }
+    @media(max-width:480px){ .freq-tl-dot{ width:26px;height:26px; } }
+
+    /* Calendário modal */
+    .freq-cal-overlay { position: fixed; inset: 0; z-index: 1100; background: rgba(0,0,0,.4); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .freq-cal-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 420px; box-shadow: var(--shadow-md); overflow: hidden; }
+    .freq-cal-header { background: #111110; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .freq-cal-title { font-family: var(--head); font-size: 1rem; font-weight: 800; color: #fff; }
+    .freq-cal-nav { display: flex; align-items: center; gap: 8px; }
+    .freq-cal-nav button { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); color: #fff; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; font-size: .8rem; }
+    .freq-cal-nav button:hover { background: rgba(255,255,255,.2); }
+    .freq-cal-body { padding: 16px; }
+    .freq-cal-weekdays { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 6px; }
+    .freq-cal-wday { text-align: center; font-size: .62rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; padding: 4px 0; }
+    .freq-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+    .freq-cal-day { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 600; color: var(--text2); position: relative; }
+    .freq-cal-day.empty { pointer-events: none; }
+    .freq-cal-day.trained { background: var(--green-dim); color: var(--green); font-weight: 800; border: 1.5px solid rgba(46,125,82,.35); }
+    .freq-cal-day.trained::after { content: '✓'; position: absolute; bottom: 2px; right: 3px; font-size: .5rem; color: var(--green); font-weight: 900; }
+    .freq-cal-day.today-cal { border: 2px solid var(--accent); font-weight: 800; color: #8a6200; }
+    .freq-cal-day.trained.today-cal { color: var(--green); }
+    .freq-cal-footer { padding: 14px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .freq-cal-month-stat { font-size: .8rem; font-weight: 700; color: var(--text2); }
+    .freq-cal-month-stat strong { color: var(--text); }
+    @media(max-width:480px){ .freq-day-dot{ width:30px;height:30px; } .freq-metric-val{ font-size:1.3rem; } }
+
+    /* Comparativo de evolução */
+    .evo-compare-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r2); overflow: hidden; margin-bottom: 16px; }
+    .evo-compare-header { padding: 12px 16px; background: #111110; display: flex; align-items: center; justify-content: space-between; }
+    .evo-compare-title { font-family: var(--head); font-size: .9rem; font-weight: 800; color: #fff; }
+    .evo-compare-date { font-size: .72rem; color: rgba(255,255,255,.5); font-weight: 600; }
+    .evo-compare-body { padding: 14px 16px; }
+    .evo-metric-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); }
+    .evo-metric-row:last-child { border-bottom: none; }
+    .evo-metric-label { font-size: .8rem; color: var(--text2); font-weight: 600; }
+    .evo-metric-values { display: flex; align-items: center; gap: 10px; }
+    .evo-metric-prev { font-size: .78rem; color: var(--text3); font-weight: 600; }
+    .evo-metric-curr { font-size: .88rem; font-weight: 800; color: var(--text); }
+    .evo-metric-diff { font-size: .78rem; font-weight: 800; padding: 2px 7px; border-radius: 99px; }
+    .evo-diff-neg { background: var(--green-dim); color: var(--green); }
+    .evo-diff-pos { background: var(--red-dim); color: var(--red); }
+    .evo-diff-zero { background: var(--surface2); color: var(--text3); }
+
+    .evo-history-list { display: flex; flex-direction: column; gap: 10px; }
+    .evo-history-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 12px 16px; cursor: pointer; transition: all .15s; }
+    .evo-history-item:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+    .evo-history-date { font-size: .78rem; font-weight: 700; color: var(--text3); margin-bottom: 4px; }
+    .evo-history-summary { font-size: .86rem; font-weight: 600; color: var(--text); }
+
+    /* Aba evolução no detalhe do aluno */
+    .student-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; overflow-x: auto; }
+    .student-tab { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: .83rem; font-weight: 700; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--body); white-space: nowrap; }
+    .student-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+    .student-tab-panel { display: none; }
+    .student-tab-panel.active { display: block; }
+
+    .imc-display { background: var(--accent-dim); border: 1.5px solid var(--accent-soft); border-radius: var(--r); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .imc-display-label { font-size: .72rem; font-weight: 800; color: #8a6200; text-transform: uppercase; letter-spacing: .08em; }
+    .imc-display-value { font-family: var(--head); font-size: 1.3rem; font-weight: 800; color: var(--text); }
+    .imc-display-cat { font-size: .72rem; color: var(--text2); font-weight: 600; margin-top: 2px; }
+
+    .new-assessment-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg,#3d3830,#1a1610); color: #fff; border-radius: var(--r); font-size: .85rem; font-weight: 800; border: 1px solid rgba(245,200,0,.18); cursor: pointer; font-family: var(--body); transition: all .15s; }
+    .new-assessment-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.22); }
+
 
     #toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
     .toast { background: var(--surface); color: var(--text); padding: 13px 18px; border-radius: var(--r); font-size: .82rem; font-weight: 600; border: 1px solid var(--border); min-width: 240px; position: relative; animation: toastIn .25s cubic-bezier(.22,1,.36,1); box-shadow: var(--shadow-md); }
@@ -66,14 +172,14 @@
     .toast.error::before { content: ''; position: absolute; left: 0; top: 0; width: 3px; height: 100%; background: var(--red); border-radius: 3px 0 0 3px; }
     @keyframes toastIn { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-    .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.35); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 16px; touch-action: none; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 760px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-md); touch-action: pan-y; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+    .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.35); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding: 16px; overflow-y: auto; touch-action: pan-y; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 760px; max-height: calc(100dvh - 32px); display: flex; flex-direction: column; box-shadow: var(--shadow-md); overscroll-behavior: contain; margin: auto 0; }
     .modal-sm { max-width: 460px; }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #111110; z-index: 1; border-radius: 20px 20px 0 0; }
+    .modal-header { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); background: #111110; z-index: 1; border-radius: 20px 20px 0 0; }
     .modal-header h3 { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: #ffffff; }
     .modal-header p, .modal-header span { color: rgba(255,255,255,0.6) !important; }
-    .modal-body { padding: 24px; touch-action: pan-y; }
-    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-body { flex: 1; overflow-y: auto; padding: 24px; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+    .modal-footer { flex-shrink: 0; padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
     .close-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: .95rem; transition: all .15s; }
     .close-btn:hover { background: rgba(255,255,255,0.22); color: #ffffff; }
 
@@ -275,7 +381,11 @@
     .plan-title { font-weight: 700; font-size: .93rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .plan-meta { font-size: .73rem; color: var(--text3); margin-top: 2px; font-weight: 500; }
     .plan-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-    .plan-workouts { border-top: 1px solid var(--border); padding: 12px 18px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
+    .plan-workouts { border-top: 1px solid var(--border); padding: 12px 18px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); overflow: hidden; transition: max-height .3s ease, padding .3s ease, opacity .3s ease; max-height: 2000px; opacity: 1; }
+    .plan-workouts.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; border-top: none; }
+    .plan-collapse-btn { background: none; border: none; padding: 2px 4px; cursor: pointer; color: var(--text3); display: flex; align-items: center; transition: transform .25s; flex-shrink: 0; }
+    .plan-collapse-btn svg { transition: transform .25s; }
+    .plan-collapse-btn.collapsed svg { transform: rotate(-90deg); }
     .workout-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; }
     .workout-row-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
     .workout-row-tag { background: var(--accent-dim); color: #111110; border: 1px solid var(--accent-soft); border-radius: 6px; padding: 2px 9px; font-size: .72rem; font-weight: 700; flex-shrink: 0; }
@@ -285,6 +395,9 @@
     .workout-excount { font-size: .74rem; color: var(--text3); margin-top: 6px; font-weight: 500; }
     .add-plan-btn { border: 2px dashed var(--border2); background: transparent; color: var(--text3); border-radius: var(--r2); padding: 20px; width: 100%; font-size: .88rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all .2s; font-family: var(--body); }
     .add-plan-btn:hover { border-color: var(--accent); color: #111110; background: var(--accent-dim); }
+    .add-plan-btn--dark { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg,#3d3830,#1a1610); color: #fff; border-radius: var(--r); font-size: .85rem; font-weight: 800; border: 1px solid rgba(255,255,255,.08); cursor: pointer; font-family: var(--body); transition: all .15s; width: auto; margin-bottom: 14px; }
+    .add-plan-btn--dark:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.22); color: #fff; background: linear-gradient(135deg,#3d3830,#1a1610); }
+    .add-plan-btn-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
     .empty-center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; gap: 16px; }
     .empty-icon { width: 68px; height: 68px; border-radius: 18px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; }
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); grid-column: 1/-1; }
@@ -1395,7 +1508,7 @@ function _checkSubscription(mgr){
 }
 
 function showLoginError(msg){
-  var t=document.createElement('div');t.className='toast error';t.textContent='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> '+msg;
+  var t=document.createElement('div');t.className='toast error';t.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> '+msg;
   document.getElementById('toast-container').appendChild(t);setTimeout(function(){t.remove();},3500);
 }
 
@@ -2269,16 +2382,111 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- MODAL: NOVO ALUNO -->
 <div id="modal-add-student" class="modal-overlay hidden">
-  <div class="modal modal-sm">
-    <div class="modal-header"><h3>Cadastrar aluno</h3><button class="close-btn" onclick="closeModal('modal-add-student')">✕</button></div>
-    <div class="modal-body">
-      <div id="add-student-form">
-        <div class="form-group"><label>Nome completo *</label><input id="new-student-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
-        <div class="form-group"><label>Telefone / WhatsApp</label><input id="new-student-phone" class="form-control" type="tel" placeholder="Ex: (27) 99999-9999"/></div>
-        <div class="form-group"><label>Observações (opcional)</label><input id="new-student-obs" class="form-control" type="text" placeholder="Ex: treina manhã, restrição no joelho..."/></div>
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <div>
+        <h3>Cadastrar aluno</h3>
+        <span id="add-student-step-label" style="font-size:.75rem;opacity:.6;">Etapa 1 de 3 — Dados pessoais</span>
       </div>
+      <button class="close-btn" onclick="closeModal('modal-add-student')">✕</button>
+    </div>
+    <div class="modal-body" style="padding-top:16px;">
+
+      <!-- Step indicator -->
+      <div id="add-student-steps" style="display:flex;gap:6px;margin-bottom:20px;">
+        <div class="add-step-dot active" id="add-step-dot-1" style="flex:1;height:4px;border-radius:99px;background:var(--accent);transition:all .3s;"></div>
+        <div class="add-step-dot" id="add-step-dot-2" style="flex:1;height:4px;border-radius:99px;background:var(--border);transition:all .3s;"></div>
+        <div class="add-step-dot" id="add-step-dot-3" style="flex:1;height:4px;border-radius:99px;background:var(--border);transition:all .3s;"></div>
+      </div>
+
+      <!-- STEP 1: Dados pessoais -->
+      <div id="add-student-step-1">
+        <div class="evol-section-title">Dados essenciais</div>
+        <div class="form-group"><label>Nome completo *</label><input id="new-student-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
+        <div class="form-row">
+          <div class="form-group"><label>Telefone / WhatsApp</label><input id="new-student-phone" class="form-control" type="tel" placeholder="(27) 99999-9999"/></div>
+          <div class="form-group"><label>E-mail</label><input id="new-student-email" class="form-control" type="email" placeholder="email@exemplo.com"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Data de nascimento</label><input id="new-student-dob" class="form-control" type="date" onchange="calcAgePreview('new-student-dob','new-student-age-preview')"/></div>
+          <div class="form-group"><label>Sexo</label>
+            <select id="new-student-sex" class="form-control">
+              <option value="">Não informado</option>
+              <option value="M">Masculino</option>
+              <option value="F">Feminino</option>
+              <option value="O">Outro</option>
+            </select>
+          </div>
+        </div>
+        <div id="new-student-age-preview" style="font-size:.78rem;color:var(--text3);font-weight:600;margin-top:-10px;margin-bottom:12px;display:none;"></div>
+      </div>
+
+      <!-- STEP 2: Dados físicos -->
+      <div id="add-student-step-2" style="display:none;">
+        <div class="evol-section-title">Dados físicos (opcional)</div>
+        <div class="form-row">
+          <div class="form-group"><label>Peso (kg)</label><input id="new-student-weight" class="form-control" type="number" step="0.1" placeholder="Ex: 75.5" oninput="calcImcPreview('new-student-weight','new-student-height','new-student-imc-box')"/></div>
+          <div class="form-group"><label>Altura (cm)</label><input id="new-student-height" class="form-control" type="number" step="1" placeholder="Ex: 175" oninput="calcImcPreview('new-student-weight','new-student-height','new-student-imc-box')"/></div>
+        </div>
+        <div id="new-student-imc-box" style="display:none;" class="imc-display">
+          <div><div class="imc-display-label">IMC calculado</div><div class="imc-display-cat" id="new-student-imc-cat"></div></div>
+          <div class="imc-display-value" id="new-student-imc-val"></div>
+        </div>
+        <div class="form-row" style="margin-top:12px;">
+          <div class="form-group"><label>% Gordura</label><input id="new-student-fat" class="form-control" type="number" step="0.1" placeholder="Ex: 18.5"/></div>
+          <div class="form-group" style="display:flex;align-items:flex-end;"><span style="font-size:.78rem;color:var(--text3);padding-bottom:11px;">Medidas em cm →</span></div>
+        </div>
+        <div class="evol-section-title" style="margin-top:4px;">Medidas corporais</div>
+        <div class="evol-grid-3">
+          <div class="form-group"><label>Peito</label><input id="new-m-chest" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Cintura</label><input id="new-m-waist" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Quadril</label><input id="new-m-hip" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Braço D</label><input id="new-m-arm-r" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Braço E</label><input id="new-m-arm-l" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Ombro</label><input id="new-m-shoulder" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Coxa D</label><input id="new-m-thigh-r" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Coxa E</label><input id="new-m-thigh-l" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Panturrilha D</label><input id="new-m-calf-r" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Panturrilha E</label><input id="new-m-calf-l" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Coxa Proximal</label><input id="new-m-thigh-prox" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Coxa Distal</label><input id="new-m-thigh-dist" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Saúde -->
+      <div id="add-student-step-3" style="display:none;">
+        <div class="evol-section-title">Saúde</div>
+        <div class="health-check-group">
+          <div class="health-check-item" onclick="toggleHealthCheck(this,'new-health-injuries-detail')">
+            <input type="checkbox" id="new-chk-injuries" onclick="event.stopPropagation();toggleHealthCheck(this.closest('.health-check-item'),'new-health-injuries-detail')">
+            <label for="new-chk-injuries">Lesões ou limitações físicas</label>
+          </div>
+          <div class="health-detail-field" id="new-health-injuries-detail">
+            <textarea id="new-txt-injuries" class="form-control" rows="2" placeholder="Descreva as lesões ou limitações..."></textarea>
+          </div>
+          <div class="health-check-item" onclick="toggleHealthCheck(this,'new-health-conditions-detail')">
+            <input type="checkbox" id="new-chk-conditions" onclick="event.stopPropagation();toggleHealthCheck(this.closest('.health-check-item'),'new-health-conditions-detail')">
+            <label for="new-chk-conditions">Problemas de saúde</label>
+          </div>
+          <div class="health-detail-field" id="new-health-conditions-detail">
+            <textarea id="new-txt-conditions" class="form-control" rows="2" placeholder="Descreva os problemas de saúde..."></textarea>
+          </div>
+          <div class="health-check-item" onclick="toggleHealthCheck(this,'new-health-meds-detail')">
+            <input type="checkbox" id="new-chk-meds" onclick="event.stopPropagation();toggleHealthCheck(this.closest('.health-check-item'),'new-health-meds-detail')">
+            <label for="new-chk-meds">Uso de medicamentos</label>
+          </div>
+          <div class="health-detail-field" id="new-health-meds-detail">
+            <textarea id="new-txt-meds" class="form-control" rows="2" placeholder="Liste os medicamentos em uso..."></textarea>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:8px;">
+          <label>Observações gerais (opcional)</label>
+          <textarea id="new-student-obs" class="form-control" rows="3" placeholder="Ex: treina apenas à manhã, objetivo de hipertrofia..."></textarea>
+        </div>
+      </div>
+
       <!-- Revelação do código após cadastro -->
-      <div class="new-student-code-reveal" id="new-student-code-reveal">
+      <div class="new-student-code-reveal" id="new-student-code-reveal" style="display:none;">
         <div class="nsc-label">Código de acesso do aluno</div>
         <div class="nsc-code" id="new-student-code-display">—</div>
         <div class="nsc-hint">Anote ou compartilhe este código com o aluno.<br/>Ele usará para entrar em <strong>trainly.online</strong></div>
@@ -2286,28 +2494,116 @@ document.addEventListener('DOMContentLoaded',function(){
       </div>
     </div>
     <div class="modal-footer" id="add-student-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-add-student')">Cancelar</button>
-      <button id="btn-add-student" class="btn btn-primary" onclick="addStudent()">Cadastrar</button>
+      <button class="btn btn-ghost" onclick="addStudentStepBack()" id="btn-add-student-back" style="display:none;">← Voltar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-student')" id="btn-add-cancel">Cancelar</button>
+      <button id="btn-add-student" class="btn btn-primary" onclick="addStudentStepNext()">Próximo →</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL: EDITAR ALUNO -->
 <div id="modal-edit-student" class="modal-overlay hidden">
-  <div class="modal modal-sm">
+  <div class="modal" style="max-width:640px;">
     <div class="modal-header"><h3>Editar aluno</h3><button class="close-btn" onclick="closeModal('modal-edit-student')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group">
-        <label>Código de acesso</label>
-        <input id="edit-student-code-display" class="form-control" type="text" disabled style="opacity:.5;cursor:not-allowed;background:var(--surface2);"/>
+      <!-- Tabs -->
+      <div class="assessment-tabs">
+        <button class="assessment-tab active" onclick="switchEditTab('edit-tab-dados',this)">Dados pessoais</button>
+        <button class="assessment-tab" onclick="switchEditTab('edit-tab-fisico',this)">Dados físicos</button>
+        <button class="assessment-tab" onclick="switchEditTab('edit-tab-saude',this)">Saúde</button>
       </div>
-      <div class="form-group"><label>Nome completo *</label><input id="edit-student-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
-      <div class="form-group"><label>Telefone / WhatsApp</label><input id="edit-student-phone" class="form-control" type="tel" placeholder="Ex: (27) 99999-9999"/></div>
-      <div class="form-group"><label>Observações (opcional)</label><input id="edit-student-obs" class="form-control" type="text" placeholder="Ex: treina manhã, restrição no joelho..."/></div>
+
+      <!-- TAB: Dados pessoais -->
+      <div class="assessment-tab-panel active" id="edit-tab-dados">
+        <div class="form-group">
+          <label>Código de acesso</label>
+          <input id="edit-student-code-display" class="form-control" type="text" disabled style="opacity:.5;cursor:not-allowed;background:var(--surface2);"/>
+        </div>
+        <div class="form-group"><label>Nome completo *</label><input id="edit-student-name" class="form-control" type="text" placeholder="Ex: João Silva"/></div>
+        <div class="form-row">
+          <div class="form-group"><label>Telefone / WhatsApp</label><input id="edit-student-phone" class="form-control" type="tel" placeholder="(27) 99999-9999"/></div>
+          <div class="form-group"><label>E-mail</label><input id="edit-student-email" class="form-control" type="email" placeholder="email@exemplo.com"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Data de nascimento</label><input id="edit-student-dob" class="form-control" type="date" onchange="calcAgePreview('edit-student-dob','edit-student-age-preview')"/></div>
+          <div class="form-group"><label>Sexo</label>
+            <select id="edit-student-sex" class="form-control">
+              <option value="">Não informado</option>
+              <option value="M">Masculino</option>
+              <option value="F">Feminino</option>
+              <option value="O">Outro</option>
+            </select>
+          </div>
+        </div>
+        <div id="edit-student-age-preview" style="font-size:.78rem;color:var(--text3);font-weight:600;margin-top:-10px;margin-bottom:12px;display:none;"></div>
+      </div>
+
+      <!-- TAB: Dados físicos (nova avaliação) -->
+      <div class="assessment-tab-panel" id="edit-tab-fisico">
+        <div style="background:var(--accent-dim);border:1.5px solid var(--accent-soft);border-radius:var(--r);padding:10px 14px;margin-bottom:16px;font-size:.8rem;color:#8a6200;font-weight:600;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Ao salvar, estes dados serão registrados como uma nova avaliação com a data de hoje. O histórico anterior é preservado.
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Peso (kg)</label><input id="edit-student-weight" class="form-control" type="number" step="0.1" placeholder="Ex: 75.5" oninput="calcImcPreview('edit-student-weight','edit-student-height','edit-student-imc-box')"/></div>
+          <div class="form-group"><label>Altura (cm)</label><input id="edit-student-height" class="form-control" type="number" step="1" placeholder="Ex: 175" oninput="calcImcPreview('edit-student-weight','edit-student-height','edit-student-imc-box')"/></div>
+        </div>
+        <div id="edit-student-imc-box" style="display:none;" class="imc-display">
+          <div><div class="imc-display-label">IMC calculado</div><div class="imc-display-cat" id="edit-student-imc-cat"></div></div>
+          <div class="imc-display-value" id="edit-student-imc-val"></div>
+        </div>
+        <div class="form-group" style="margin-top:12px;"><label>% Gordura</label><input id="edit-student-fat" class="form-control" type="number" step="0.1" placeholder="Ex: 18.5"/></div>
+        <div class="evol-section-title" style="margin-top:4px;">Medidas corporais (cm)</div>
+        <div class="evol-grid-3">
+          <div class="form-group"><label>Peito</label><input id="edit-m-chest" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Cintura</label><input id="edit-m-waist" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Quadril</label><input id="edit-m-hip" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Braço D</label><input id="edit-m-arm-r" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Braço E</label><input id="edit-m-arm-l" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Ombro</label><input id="edit-m-shoulder" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Coxa D</label><input id="edit-m-thigh-r" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Coxa E</label><input id="edit-m-thigh-l" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Panturrilha D</label><input id="edit-m-calf-r" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Panturrilha E</label><input id="edit-m-calf-l" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Coxa Proximal</label><input id="edit-m-thigh-prox" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+          <div class="form-group"><label>Coxa Distal</label><input id="edit-m-thigh-dist" class="form-control" type="number" step="0.1" placeholder="cm"/></div>
+        </div>
+      </div>
+
+      <!-- TAB: Saúde -->
+      <div class="assessment-tab-panel" id="edit-tab-saude">
+        <div class="health-check-group">
+          <div class="health-check-item" onclick="toggleHealthCheck(this,'edit-health-injuries-detail')">
+            <input type="checkbox" id="edit-chk-injuries" onclick="event.stopPropagation();toggleHealthCheck(this.closest('.health-check-item'),'edit-health-injuries-detail')">
+            <label for="edit-chk-injuries">Lesões ou limitações físicas</label>
+          </div>
+          <div class="health-detail-field" id="edit-health-injuries-detail">
+            <textarea id="edit-txt-injuries" class="form-control" rows="2" placeholder="Descreva as lesões ou limitações..."></textarea>
+          </div>
+          <div class="health-check-item" onclick="toggleHealthCheck(this,'edit-health-conditions-detail')">
+            <input type="checkbox" id="edit-chk-conditions" onclick="event.stopPropagation();toggleHealthCheck(this.closest('.health-check-item'),'edit-health-conditions-detail')">
+            <label for="edit-chk-conditions">Problemas de saúde</label>
+          </div>
+          <div class="health-detail-field" id="edit-health-conditions-detail">
+            <textarea id="edit-txt-conditions" class="form-control" rows="2" placeholder="Descreva os problemas de saúde..."></textarea>
+          </div>
+          <div class="health-check-item" onclick="toggleHealthCheck(this,'edit-health-meds-detail')">
+            <input type="checkbox" id="edit-chk-meds" onclick="event.stopPropagation();toggleHealthCheck(this.closest('.health-check-item'),'edit-health-meds-detail')">
+            <label for="edit-chk-meds">Uso de medicamentos</label>
+          </div>
+          <div class="health-detail-field" id="edit-health-meds-detail">
+            <textarea id="edit-txt-meds" class="form-control" rows="2" placeholder="Liste os medicamentos em uso..."></textarea>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:8px;">
+          <label>Observações gerais (opcional)</label>
+          <textarea id="edit-student-obs" class="form-control" rows="3" placeholder="Ex: treina apenas à manhã, objetivo de hipertrofia..."></textarea>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-edit-student')">Cancelar</button>
-      <button id="btn-save-edit-student" class="btn btn-primary" onclick="saveEditStudent()">Salvar</button>
+      <button id="btn-save-edit-student" class="btn btn-primary" onclick="saveEditStudent()">Salvar alterações</button>
     </div>
   </div>
 </div>
@@ -2535,8 +2831,8 @@ const _app = firebase.initializeApp({
   appId:"1:501312058117:web:1b9ea06882050deeb33d6c"
 });
 const _db = firebase.firestore();
-const _col = (db, path) => db.collection(path);
-const _doc = (db, path, id) => db.collection(path).doc(id);
+const _col = (db, ...paths) => { let ref = db.collection(paths[0]); for(let i=1;i<paths.length;i+=2){ if(paths[i+1]) ref = ref.doc(paths[i]).collection(paths[i+1]); } return ref; };
+const _doc = (db, ...paths) => { let ref = db.collection(paths[0]); for(let i=1;i<paths.length;i+=2){ ref = ref.doc(paths[i]); if(i+1 < paths.length) ref = ref.collection(paths[i+1]); } return ref; };
 const _setDoc = (ref, data) => ref.set(data);
 const _getDoc = (ref) => ref.get();
 const _getDocs = (query) => query.get();
@@ -2929,80 +3225,264 @@ window.filterStudents=()=>{
     : ST.students;
   renderStudentsGrid(filtered);
 };
-window.openAddStudentModal=()=>{
-  document.getElementById('new-student-name').value='';
-  document.getElementById('new-student-phone').value='';
-  document.getElementById('new-student-obs').value='';
-  // Reset code reveal state
-  document.getElementById('add-student-form').style.display='';
-  document.getElementById('new-student-code-reveal').style.display='none';
-  document.getElementById('add-student-footer').innerHTML=
-    '<button class="btn btn-ghost" onclick="closeModal(\'modal-add-student\')">Cancelar</button>'
-    +'<button id="btn-add-student" class="btn btn-primary" onclick="addStudent()">Cadastrar</button>';
-  openModal('modal-add-student');
-  setTimeout(()=>document.getElementById('new-student-name').focus(),100);
+// ── Helpers ──
+window.calcAgePreview = function(dobId, previewId) {
+  var dob = document.getElementById(dobId).value;
+  var el = document.getElementById(previewId);
+  if(!dob || !el) return;
+  var age = calcAge(dob);
+  el.textContent = age !== null ? age + ' anos' : '';
+  el.style.display = age !== null ? 'block' : 'none';
 };
-window.addStudent=async()=>{
-  const name=document.getElementById('new-student-name').value.trim();
-  if(!name){toast('Nome obrigatório!','error');return;}
-  const btn=document.getElementById('btn-add-student');
-  btn.classList.add('btn-loading');btn.textContent='Aguarde...';
-  try{
-    const phone=document.getElementById('new-student-phone').value.trim();
-    const obs=document.getElementById('new-student-obs').value.trim();
-    let code,exists=true;
-    while(exists){code=genCode();const s=await _getDocs(_query(_col(_db,'students'),_where('code','==',code)));exists=!s.empty;}
-    const u=window.CURRENT_USER||{};
-    await _setDoc(_doc(_db,'students',Date.now().toString()),{
-      name,code,phone,obs,
-      managerId: u.username||'',
-      managerName: u.displayName||u.username||'',
-      managerPhone: u.phone||'',
-      createdAt:Date.now()
-    });
-    // Esconde o formulário e mostra o código gerado
-    document.getElementById('add-student-form').style.display='none';
-    document.getElementById('new-student-code-display').textContent=code;
-    document.getElementById('new-student-code-reveal').style.display='block';
-    document.getElementById('add-student-footer').innerHTML=
-      '<button class="btn btn-primary" onclick="closeModal(\'modal-add-student\')">Concluir</button>';
-    await loadStudents();
-  }catch(e){toast('Erro: '+e.message,'error');}
-  finally{
-    const b=document.getElementById('btn-add-student');
-    if(b){b.classList.remove('btn-loading');b.textContent='Cadastrar';}
+window.calcAge = function(dob) {
+  if(!dob) return null;
+  var d = new Date(dob + 'T12:00');
+  var today = new Date();
+  var age = today.getFullYear() - d.getFullYear();
+  var m = today.getMonth() - d.getMonth();
+  if(m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+  return age >= 0 && age < 120 ? age : null;
+};
+window.calcImcPreview = function(wId, hId, boxId) {
+  var w = parseFloat(document.getElementById(wId).value);
+  var h = parseFloat(document.getElementById(hId).value);
+  var box = document.getElementById(boxId);
+  if(!box) return;
+  if(!w || !h || h < 50) { box.style.display='none'; return; }
+  var hm = h / 100;
+  var imc = (w / (hm * hm)).toFixed(1);
+  var cat = imc < 18.5 ? 'Abaixo do peso' : imc < 25 ? 'Peso normal' : imc < 30 ? 'Sobrepeso' : imc < 35 ? 'Obesidade grau I' : imc < 40 ? 'Obesidade grau II' : 'Obesidade grau III';
+  document.getElementById(boxId.replace('-box','-val')).textContent = imc;
+  document.getElementById(boxId.replace('-box','-cat')).textContent = cat;
+  box.style.display = 'flex';
+};
+window.toggleHealthCheck = function(item, detailId) {
+  var chk = item.querySelector('input[type=checkbox]');
+  if(event && event.target === chk) { /* handled by checkbox directly */ }
+  else { chk.checked = !chk.checked; }
+  item.classList.toggle('checked', chk.checked);
+  var detail = document.getElementById(detailId);
+  if(detail) detail.classList.toggle('visible', chk.checked);
+};
+window.switchEditTab = function(tabId, btn) {
+  document.querySelectorAll('#modal-edit-student .assessment-tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#modal-edit-student .assessment-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+};
+window.readMeasures = function(prefix) {
+  var ids = ['chest','waist','hip','arm-r','arm-l','shoulder','thigh-r','thigh-l','calf-r','calf-l','thigh-prox','thigh-dist'];
+  var m = {};
+  ids.forEach(function(k) {
+    var v = parseFloat(document.getElementById(prefix + k)?.value);
+    if(!isNaN(v) && v > 0) m[k] = v;
+  });
+  return m;
+};
+window.fillMeasures = function(prefix, m) {
+  if(!m) return;
+  var ids = ['chest','waist','hip','arm-r','arm-l','shoulder','thigh-r','thigh-l','calf-r','calf-l','thigh-prox','thigh-dist'];
+  ids.forEach(function(k) {
+    var el = document.getElementById(prefix + k);
+    if(el) el.value = m[k] || '';
+  });
+};
+
+// ── Add Student Steps ──
+window._addStudentStep = 1;
+window.openAddStudentModal = () => {
+  window._addStudentStep = 1;
+  ['new-student-name','new-student-phone','new-student-email','new-student-dob','new-student-obs',
+   'new-student-weight','new-student-height','new-student-fat',
+   'new-m-chest','new-m-waist','new-m-hip','new-m-arm-r','new-m-arm-l','new-m-shoulder',
+   'new-m-thigh-r','new-m-thigh-l','new-m-calf-r','new-m-calf-l','new-m-thigh-prox','new-m-thigh-dist',
+   'new-txt-injuries','new-txt-conditions','new-txt-meds'].forEach(id => {
+    var el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  document.getElementById('new-student-sex').value = '';
+  document.getElementById('new-student-imc-box').style.display = 'none';
+  document.getElementById('new-student-age-preview').style.display = 'none';
+  ['new-chk-injuries','new-chk-conditions','new-chk-meds'].forEach(id => {
+    var el = document.getElementById(id); if(el) el.checked = false;
+  });
+  ['new-health-injuries-detail','new-health-conditions-detail','new-health-meds-detail'].forEach(id => {
+    var el = document.getElementById(id); if(el) el.classList.remove('visible');
+  });
+  document.querySelectorAll('#modal-add-student .health-check-item').forEach(el => el.classList.remove('checked'));
+  document.getElementById('new-student-code-reveal').style.display = 'none';
+  _renderAddStudentStep(1);
+  openModal('modal-add-student');
+  setTimeout(() => document.getElementById('new-student-name').focus(), 100);
+};
+window._renderAddStudentStep = function(step) {
+  window._addStudentStep = step;
+  var labels = ['','Etapa 1 de 3 — Dados pessoais','Etapa 2 de 3 — Dados físicos','Etapa 3 de 3 — Saúde'];
+  document.getElementById('add-student-step-label').textContent = labels[step] || '';
+  [1,2,3].forEach(function(s) {
+    var panel = document.getElementById('add-student-step-'+s);
+    if(panel) panel.style.display = s === step ? '' : 'none';
+    var dot = document.getElementById('add-step-dot-'+s);
+    if(dot) dot.style.background = s <= step ? 'var(--accent)' : 'var(--border)';
+  });
+  var back = document.getElementById('btn-add-student-back');
+  var cancel = document.getElementById('btn-add-cancel');
+  var next = document.getElementById('btn-add-student');
+  if(back) back.style.display = step > 1 ? '' : 'none';
+  if(cancel) cancel.style.display = step === 1 ? '' : 'none';
+  if(next) { next.textContent = step < 3 ? 'Próximo →' : 'Cadastrar'; next.onclick = step < 3 ? addStudentStepNext : addStudent; }
+};
+window.addStudentStepNext = function() {
+  if(window._addStudentStep === 1) {
+    var name = document.getElementById('new-student-name').value.trim();
+    if(!name) { toast('Nome obrigatório!', 'error'); return; }
   }
+  _renderAddStudentStep(window._addStudentStep + 1);
+};
+window.addStudentStepBack = function() {
+  _renderAddStudentStep(window._addStudentStep - 1);
+};
+window.addStudent = async () => {
+  const name = document.getElementById('new-student-name').value.trim();
+  if(!name) { toast('Nome obrigatório!', 'error'); return; }
+  const btn = document.getElementById('btn-add-student');
+  btn.classList.add('btn-loading'); btn.textContent = 'Aguarde...';
+  try {
+    const phone = document.getElementById('new-student-phone').value.trim();
+    const email = document.getElementById('new-student-email').value.trim();
+    const dob = document.getElementById('new-student-dob').value;
+    const sex = document.getElementById('new-student-sex').value;
+    const obs = document.getElementById('new-student-obs').value.trim();
+    const weight = parseFloat(document.getElementById('new-student-weight').value) || null;
+    const height = parseFloat(document.getElementById('new-student-height').value) || null;
+    const fat = parseFloat(document.getElementById('new-student-fat').value) || null;
+    const imc = (weight && height && height > 50) ? parseFloat((weight / Math.pow(height/100,2)).toFixed(1)) : null;
+    const measures = readMeasures('new-m-');
+    const injuries = document.getElementById('new-chk-injuries').checked ? document.getElementById('new-txt-injuries').value.trim() : '';
+    const conditions = document.getElementById('new-chk-conditions').checked ? document.getElementById('new-txt-conditions').value.trim() : '';
+    const meds = document.getElementById('new-chk-meds').checked ? document.getElementById('new-txt-meds').value.trim() : '';
+    let code, exists = true;
+    while(exists) { code = genCode(); const s = await _getDocs(_query(_col(_db,'students'),_where('code','==',code))); exists = !s.empty; }
+    const u = window.CURRENT_USER || {};
+    const studentId = Date.now().toString();
+    const hasPhysical = weight || height || fat || Object.keys(measures).length > 0;
+    const studentData = {
+      name, code, phone, email, dob, sex, obs,
+      injuries, conditions, meds,
+      weight: weight || null, height: height || null, imc: imc || null, fat: fat || null,
+      measures: Object.keys(measures).length ? measures : null,
+      managerId: u.username || '',
+      managerName: u.displayName || u.username || '',
+      managerPhone: u.phone || '',
+      createdAt: Date.now()
+    };
+    await _setDoc(_doc(_db,'students',studentId), studentData);
+    // Save initial assessment if physical data provided
+    if(hasPhysical) {
+      await _setDoc(_doc(_db,'students',studentId,'assessments',Date.now().toString()), {
+        date: new Date().toISOString().split('T')[0],
+        ts: Date.now(),
+        weight, height, imc, fat, measures
+      });
+    }
+    [1,2,3].forEach(s => { var p = document.getElementById('add-student-step-'+s); if(p) p.style.display='none'; });
+    document.getElementById('add-student-steps').style.display = 'none';
+    document.getElementById('add-student-step-label').textContent = '';
+    document.getElementById('new-student-code-display').textContent = code;
+    document.getElementById('new-student-code-reveal').style.display = 'block';
+    document.getElementById('add-student-footer').innerHTML = '<button class="btn btn-primary" onclick="closeModal(\'modal-add-student\')">Concluir</button>';
+    await loadStudents();
+  } catch(e) { toast('Erro: ' + e.message, 'error'); }
+  finally { const b = document.getElementById('btn-add-student'); if(b) { b.classList.remove('btn-loading'); b.textContent = 'Cadastrar'; } }
 };
 window.copyNewStudentCode=function(){
   var code=document.getElementById('new-student-code-display').textContent;
   navigator.clipboard.writeText(code).then(function(){toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Código copiado!');}).catch(function(){toast('Código: '+code);});
 };
-window.openEditStudentModal=sid=>{
-  const s=ST.students.find(x=>x.id===sid);
+window.openEditStudentModal = sid => {
+  const s = ST.students.find(x => x.id === sid);
   if(!s) return;
-  document.getElementById('edit-student-code-display').value=s.code;
-  document.getElementById('edit-student-name').value=s.name||'';
-  document.getElementById('edit-student-phone').value=s.phone||'';
-  document.getElementById('edit-student-obs').value=s.obs||'';
-  document.getElementById('btn-save-edit-student').dataset.sid=sid;
+  document.getElementById('edit-student-code-display').value = s.code;
+  document.getElementById('edit-student-name').value = s.name || '';
+  document.getElementById('edit-student-phone').value = s.phone || '';
+  document.getElementById('edit-student-email').value = s.email || '';
+  document.getElementById('edit-student-dob').value = s.dob || '';
+  document.getElementById('edit-student-sex').value = s.sex || '';
+  document.getElementById('edit-student-obs').value = s.obs || '';
+  document.getElementById('edit-student-weight').value = s.weight || '';
+  document.getElementById('edit-student-height').value = s.height || '';
+  document.getElementById('edit-student-fat').value = s.fat || '';
+  fillMeasures('edit-m-', s.measures || {});
+  // health
+  var hMap = [
+    ['edit-chk-injuries','edit-txt-injuries','edit-health-injuries-detail',s.injuries],
+    ['edit-chk-conditions','edit-txt-conditions','edit-health-conditions-detail',s.conditions],
+    ['edit-chk-meds','edit-txt-meds','edit-health-meds-detail',s.meds]
+  ];
+  hMap.forEach(function(h) {
+    var chk = document.getElementById(h[0]);
+    var txt = document.getElementById(h[1]);
+    var det = document.getElementById(h[2]);
+    var val = h[3];
+    if(chk) chk.checked = !!val;
+    if(txt) txt.value = val || '';
+    if(det) det.classList.toggle('visible', !!val);
+    var item = chk && chk.closest('.health-check-item');
+    if(item) item.classList.toggle('checked', !!val);
+  });
+  // Reset to first tab
+  document.querySelectorAll('#modal-edit-student .assessment-tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#modal-edit-student .assessment-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('edit-tab-dados').classList.add('active');
+  document.querySelector('#modal-edit-student .assessment-tab').classList.add('active');
+  // Recalc imc if values exist
+  if(s.weight && s.height) calcImcPreview('edit-student-weight','edit-student-height','edit-student-imc-box');
+  if(s.dob) calcAgePreview('edit-student-dob','edit-student-age-preview');
+  document.getElementById('btn-save-edit-student').dataset.sid = sid;
   openModal('modal-edit-student');
-  setTimeout(()=>document.getElementById('edit-student-name').focus(),100);
+  setTimeout(() => document.getElementById('edit-student-name').focus(), 100);
 };
-window.saveEditStudent=async()=>{
-  const btn=document.getElementById('btn-save-edit-student');
-  const sid=btn.dataset.sid;
-  const name=document.getElementById('edit-student-name').value.trim();
-  if(!name){toast('Nome obrigatório!','error');return;}
-  btn.classList.add('btn-loading');btn.textContent='Salvando...';
-  try{
-    const phone=document.getElementById('edit-student-phone').value.trim();
-    const obs=document.getElementById('edit-student-obs').value.trim();
-    await _updateDoc(_doc(_db,'students',sid),{name,phone,obs});
+window.saveEditStudent = async () => {
+  const btn = document.getElementById('btn-save-edit-student');
+  const sid = btn.dataset.sid;
+  const name = document.getElementById('edit-student-name').value.trim();
+  if(!name) { toast('Nome obrigatório!', 'error'); return; }
+  btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
+  try {
+    const phone = document.getElementById('edit-student-phone').value.trim();
+    const email = document.getElementById('edit-student-email').value.trim();
+    const dob = document.getElementById('edit-student-dob').value;
+    const sex = document.getElementById('edit-student-sex').value;
+    const obs = document.getElementById('edit-student-obs').value.trim();
+    const weight = parseFloat(document.getElementById('edit-student-weight').value) || null;
+    const height = parseFloat(document.getElementById('edit-student-height').value) || null;
+    const fat = parseFloat(document.getElementById('edit-student-fat').value) || null;
+    const imc = (weight && height && height > 50) ? parseFloat((weight / Math.pow(height/100,2)).toFixed(1)) : null;
+    const measures = readMeasures('edit-m-');
+    const injuries = document.getElementById('edit-chk-injuries').checked ? document.getElementById('edit-txt-injuries').value.trim() : '';
+    const conditions = document.getElementById('edit-chk-conditions').checked ? document.getElementById('edit-txt-conditions').value.trim() : '';
+    const meds = document.getElementById('edit-chk-meds').checked ? document.getElementById('edit-txt-meds').value.trim() : '';
+    const hasPhysical = weight || height || fat || Object.keys(measures).length > 0;
+    await _updateDoc(_doc(_db,'students',sid), {
+      name, phone, email, dob, sex, obs, injuries, conditions, meds,
+      weight: weight || null, height: height || null, imc: imc || null, fat: fat || null,
+      measures: Object.keys(measures).length ? measures : null
+    });
+    // Save assessment if physical data filled
+    if(hasPhysical) {
+      await _setDoc(_doc(_db,'students',sid,'assessments',Date.now().toString()), {
+        date: new Date().toISOString().split('T')[0],
+        ts: Date.now(),
+        weight, height, imc, fat, measures
+      });
+    }
     closeModal('modal-edit-student');
-    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Aluno atualizado!');
+    toast('Aluno atualizado!', 'success');
     await loadStudents();
-  }catch(e){toast('Erro: '+e.message,'error');}
-  finally{btn.classList.remove('btn-loading');btn.textContent='Salvar';}
+    // Refresh detail view if open
+    if(ST.currentStudentId === sid) openStudentDetail(sid);
+  } catch(e) { toast('Erro: ' + e.message, 'error'); }
+  finally { btn.classList.remove('btn-loading'); btn.textContent = 'Salvar alterações'; }
 };
 window.updateStats=async()=>{
   document.getElementById('stat-alunos').textContent=ST.students.length;
@@ -3023,16 +3503,20 @@ window.showStudentsList=()=>{
   document.getElementById('student-detail-view').classList.add('hidden');
 };
 
-window.openStudentDetail=async sid=>{
-  const s=ST.students.find(x=>x.id===sid);if(!s)return;ST.currentStudentId=sid;
-  const snap=await _getDocs(_query(_col(_db,'plans'),_where('studentId','==',sid)));
-  const plans=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.createdAt-a.createdAt);
-  const active=plans.filter(p=>getPlanStatus(p)==='active');
-  const upcoming=plans.filter(p=>getPlanStatus(p)==='upcoming');
-  const expired=plans.filter(p=>getPlanStatus(p)==='expired');
+window.openStudentDetail = async sid => {
+  const s = ST.students.find(x => x.id === sid); if(!s) return; ST.currentStudentId = sid;
+  const snap = await _getDocs(_query(_col(_db,'plans'),_where('studentId','==',sid)));
+  const plans = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.createdAt-a.createdAt);
+  const active = plans.filter(p=>getPlanStatus(p)==='active');
+  const upcoming = plans.filter(p=>getPlanStatus(p)==='upcoming');
+  const expired = plans.filter(p=>getPlanStatus(p)==='expired');
   document.getElementById('students-list-view').classList.add('hidden');
-  const dv=document.getElementById('student-detail-view');dv.classList.remove('hidden');
-  dv.innerHTML=`
+  const dv = document.getElementById('student-detail-view'); dv.classList.remove('hidden');
+
+  const age = s.dob ? calcAge(s.dob) : null;
+  const sexLabel = {M:'Masculino',F:'Feminino',O:'Outro'}[s.sex] || '';
+
+  dv.innerHTML = `
     <button class="back-btn" onclick="showStudentsList()">← Voltar</button>
     <div class="student-access-banner">
       <div class="student-access-banner-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
@@ -3051,21 +3535,399 @@ window.openStudentDetail=async sid=>{
       <div class="detail-info">
         <h2>${s.name}</h2>
         <div class="code">Código: ${s.code}</div>
-        ${s.phone?`<div style="font-size:.82rem;color:var(--text2);margin-top:6px;font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> ${s.phone}</div>`:''}
-        ${s.obs?`<div style="font-size:.82rem;color:var(--text2);margin-top:4px;">${s.obs}</div>`:''}
+        ${age !== null ? `<div style="font-size:.78rem;color:var(--text3);font-weight:600;margin-top:3px;">${age} anos${sexLabel?' · '+sexLabel:''}</div>` : ''}
+        ${s.phone?`<div style="font-size:.82rem;color:var(--text2);margin-top:6px;font-weight:500;">📱 ${s.phone}</div>`:''}
+        ${s.email?`<div style="font-size:.82rem;color:var(--text2);margin-top:2px;font-weight:500;">✉️ ${s.email}</div>`:''}
       </div>
       <div class="detail-actions" style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
         ${s.phone?`<button class="btn btn-whatsapp btn-sm" onclick="contactWhatsApp('${s.phone}','${s.name}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> WhatsApp</button>`:''}
-        <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">Excluir aluno</button>
+        <button class="btn btn-ghost btn-sm" onclick="openEditStudentModal('${sid}')">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">Excluir</button>
       </div>
     </div>
-    ${plans.length===0?`<div class="empty-center"><div class="empty-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>️</div><p>Nenhum plano cadastrado.</p><button class="btn btn-primary" style="margin-top:4px;" onclick="openPlanModal('${sid}')">+ Criar plano</button></div>`:`
-      ${active.length?`<div class="section-label">Planos ativos</div><div class="plans-list">${active.map((p,i)=>planCardHTML(p,sid,i,'active')).join('')}</div>`:''}
-      ${upcoming.length?`<div class="section-label upcoming-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Em breve</div><div class="plans-list">${upcoming.map((p,i)=>planCardHTML(p,sid,i,'upcoming')).join('')}</div>`:''}
-      ${!active.length&&!upcoming.length?`<div class="empty-center" style="padding:20px 0;"><div class="empty-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p style="color:var(--text2);font-size:.87rem;">Nenhum treino ativo no momento.<br><span style="color:var(--text3);font-size:.8rem;">${upcoming.length?'Próximos planos listados abaixo.':''}</span></p></div>`:''}
-      ${expired.length?`<div class="section-label expired-label" style="margin-top:8px;">Vencidos / Finalizados</div><div class="plans-list">${expired.map((p,i)=>planCardHTML(p,sid,i,'expired')).join('')}</div>`:''}
-      <button class="add-plan-btn" onclick="openPlanModal('${sid}')">+ Adicionar plano de treino</button>
-    `}`;
+
+    <!-- Frequência de Treinos — seção fixa, fora das abas -->
+    <div class="freq-inline-section" onclick="openFreqCalendar('${sid}')" style="cursor:pointer;">
+      <div class="freq-inline-title">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Frequência de Treinos
+      </div>
+      <div class="freq-inline-hint">Toque para ver o calendário completo</div>
+      <div id="freq-content-${sid}"><div class="spinner" style="width:18px;height:18px;border-width:2px;margin:6px auto;"></div></div>
+    </div>
+
+    <!-- Student Tabs -->
+    <div class="student-tabs">
+      <button class="student-tab active" onclick="switchStudentTab('stab-treinos',this,'${sid}')">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>
+        Treinos
+      </button>
+      <button class="student-tab" onclick="switchStudentTab('stab-dados',this,'${sid}')">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Dados pessoais
+      </button>
+      <button class="student-tab" onclick="switchStudentTab('stab-evolucao',this,'${sid}')">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Evolução
+      </button>
+    </div>
+
+    <!-- TAB: Treinos -->
+    <div class="student-tab-panel active" id="stab-treinos">
+      ${plans.length===0?`<div class="empty-center"><div class="empty-icon">📋</div><p>Nenhum plano cadastrado.</p><button class="btn btn-primary" style="margin-top:4px;" onclick="openPlanModal('${sid}')">+ Criar plano</button></div>`:`
+        <div class="add-plan-btn-wrap"><button class="add-plan-btn add-plan-btn--dark" onclick="openPlanModal('${sid}')">+ Adicionar plano de treino</button></div>
+        ${active.length?`<div class="section-label">Planos ativos</div><div class="plans-list">${active.map((p,i)=>planCardHTML(p,sid,i,'active')).join('')}</div>`:''}
+        ${upcoming.length?`<div class="section-label upcoming-label">Em breve</div><div class="plans-list">${upcoming.map((p,i)=>planCardHTML(p,sid,i,'upcoming')).join('')}</div>`:''}
+        ${!active.length&&!upcoming.length?`<div class="empty-center" style="padding:20px 0;"><p style="color:var(--text2);font-size:.87rem;">Nenhum treino ativo no momento.</p></div>`:''}
+        ${expired.length?`<div class="section-label expired-label" style="margin-top:8px;">Vencidos / Finalizados</div><div class="plans-list">${expired.map((p,i)=>planCardHTML(p,sid,i,'expired')).join('')}</div>`:''}
+
+      `}
+    </div>
+
+    <!-- TAB: Dados pessoais -->
+    <div class="student-tab-panel" id="stab-dados">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+        ${s.dob?`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Nascimento</div><div style="font-weight:700;font-size:.9rem;">${new Date(s.dob+'T12:00').toLocaleDateString('pt-BR')}${age!==null?' ('+age+' anos)':''}</div></div>`:''}
+        ${s.sex?`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Sexo</div><div style="font-weight:700;font-size:.9rem;">${{M:'Masculino',F:'Feminino',O:'Outro'}[s.sex]||''}</div></div>`:''}
+        ${s.weight?`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Peso atual</div><div style="font-weight:700;font-size:.9rem;">${s.weight} kg</div></div>`:''}
+        ${s.height?`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Altura</div><div style="font-weight:700;font-size:.9rem;">${s.height} cm</div></div>`:''}
+        ${s.imc?`<div style="background:var(--accent-dim);border:1.5px solid var(--accent-soft);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:#8a6200;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">IMC</div><div style="font-weight:800;font-size:1.1rem;">${s.imc}</div></div>`:''}
+        ${s.fat?`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">% Gordura</div><div style="font-weight:700;font-size:.9rem;">${s.fat}%</div></div>`:''}
+      </div>
+      ${s.measures&&Object.keys(s.measures).length?`
+        <div class="evol-section-title">Medidas corporais</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px;">
+          ${Object.entries({chest:'Peito',waist:'Cintura',hip:'Quadril','arm-r':'Braço D','arm-l':'Braço E',shoulder:'Ombro','thigh-r':'Coxa D','thigh-l':'Coxa E','calf-r':'Panturrilha D','calf-l':'Panturrilha E','thigh-prox':'Coxa Proximal','thigh-dist':'Coxa Distal'}).filter(([k])=>s.measures[k]).map(([k,label])=>`
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;">
+              <div style="font-size:.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">${label}</div>
+              <div style="font-weight:700;font-size:.92rem;">${s.measures[k]} cm</div>
+            </div>`).join('')}
+        </div>`:''}
+      ${s.injuries||s.conditions||s.meds?`
+        <div class="evol-section-title">Saúde</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+          ${s.injuries?`<div style="background:var(--red-dim);border:1px solid rgba(224,62,62,.2);border-radius:var(--r);padding:10px 14px;"><div style="font-size:.7rem;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Lesões / Limitações</div><div style="font-size:.85rem;font-weight:600;">${s.injuries}</div></div>`:''}
+          ${s.conditions?`<div style="background:rgba(245,200,0,.07);border:1px solid rgba(245,200,0,.25);border-radius:var(--r);padding:10px 14px;"><div style="font-size:.7rem;font-weight:800;color:#8a6200;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Problemas de saúde</div><div style="font-size:.85rem;font-weight:600;">${s.conditions}</div></div>`:''}
+          ${s.meds?`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;"><div style="font-size:.7rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Medicamentos</div><div style="font-size:.85rem;font-weight:600;">${s.meds}</div></div>`:''}
+        </div>`:''}
+      ${s.obs?`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Observações</div><div style="font-size:.85rem;line-height:1.6;">${s.obs}</div></div>`:''}
+      <button class="btn btn-ghost" style="margin-top:16px;" onclick="openEditStudentModal('${sid}')">✏️ Editar dados</button>
+    </div>
+
+    <!-- TAB: Evolução -->
+    <div class="student-tab-panel" id="stab-evolucao">
+      <div id="evolucao-content-${sid}">
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Frequência -->
+    <div class="student-tab-panel" id="stab-freq">
+      <div id="freq-content-${sid}">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  `;
+  // Load assessments async
+  loadStudentEvolution(sid);
+  // Load frequency inline (not a tab)
+  loadStudentFrequency(sid);
+};
+
+window.switchStudentTab = function(tabId, btn, sid) {
+  var dv = document.getElementById('student-detail-view');
+  dv.querySelectorAll('.student-tab-panel').forEach(p => p.classList.remove('active'));
+  dv.querySelectorAll('.student-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+};
+
+window.loadStudentEvolution = async function(sid) {
+  const container = document.getElementById('evolucao-content-'+sid);
+  if(!container) return;
+  try {
+    const snap = await _getDocs(_query(_col(_db,'students',sid,'assessments'),_orderBy('ts','desc')));
+    const assessments = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(!assessments.length) {
+      container.innerHTML = `<div class="empty-state" style="padding:40px 20px;text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">📊</div>
+        <div style="font-family:var(--head);font-weight:800;font-size:.95rem;color:var(--text2);margin-bottom:6px;">Nenhuma avaliação registrada</div>
+        <div style="font-size:.82rem;color:var(--text3);margin-bottom:16px;">Adicione dados físicos na aba "Editar" para começar o acompanhamento.</div>
+        <button class="new-assessment-btn" onclick="openEditStudentModal('${sid}');document.querySelectorAll('#modal-edit-student .assessment-tab')[1].click();">+ Nova avaliação</button>
+      </div>`;
+      return;
+    }
+    const latest = assessments[0];
+    const prev = assessments[1] || null;
+    const LABELS = {weight:'Peso (kg)',fat:'% Gordura',chest:'Peito',waist:'Cintura',hip:'Quadril','arm-r':'Braço D','arm-l':'Braço E',shoulder:'Ombro','thigh-r':'Coxa D','thigh-l':'Coxa E','calf-r':'Panturrilha D','calf-l':'Panturrilha E','thigh-prox':'Coxa Proximal','thigh-dist':'Coxa Distal'};
+    const fmtDate = ts => { try { var d=new Date(ts); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){return ts;} };
+    const diffRow = (label, currVal, prevVal, unit) => {
+      if(currVal === null || currVal === undefined) return '';
+      const curr = parseFloat(currVal);
+      const p = prevVal !== null && prevVal !== undefined ? parseFloat(prevVal) : null;
+      const diff = p !== null ? (curr - p) : null;
+      const diffStr = diff !== null ? (diff >= 0 ? '+'+diff.toFixed(1) : diff.toFixed(1)) : '—';
+      const cls = diff === null || diff === 0 ? 'evo-diff-zero' : diff < 0 ? 'evo-diff-neg' : 'evo-diff-pos';
+      return `<div class="evo-metric-row">
+        <span class="evo-metric-label">${label}</span>
+        <div class="evo-metric-values">
+          ${p!==null?`<span class="evo-metric-prev">${p.toFixed(1)}${unit}</span><span style="color:var(--border2);">→</span>`:''}
+          <span class="evo-metric-curr">${curr.toFixed(1)}${unit}</span>
+          <span class="evo-metric-diff ${cls}">${diffStr}${unit}</span>
+        </div>
+      </div>`;
+    };
+    let compareRows = '';
+    compareRows += diffRow('Peso', latest.weight, prev?.weight, ' kg');
+    compareRows += diffRow('% Gordura', latest.fat, prev?.fat, '%');
+    const m = latest.measures || {};
+    const pm = prev?.measures || {};
+    Object.entries(LABELS).forEach(([k,label]) => {
+      if(k === 'weight' || k === 'fat') return;
+      if(m[k] !== undefined) compareRows += diffRow(label, m[k], pm[k], ' cm');
+    });
+    if(latest.imc) compareRows += `<div class="evo-metric-row"><span class="evo-metric-label">IMC</span><div class="evo-metric-values"><span class="evo-metric-curr">${latest.imc}</span></div></div>`;
+
+    const historyHTML = assessments.map((a,i) => {
+      const summary = [a.weight?a.weight+'kg':null, a.fat?a.fat+'%gordura':null, a.measures&&a.measures.waist?'cintura '+a.measures.waist+'cm':null].filter(Boolean).join(' · ') || 'Sem resumo';
+      return `<div class="evo-history-item" id="assessment-item-${a.id}">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="flex:1;min-width:0;">
+            <div class="evo-history-date">${fmtDate(a.ts||a.date)}${i===0?' <span style="background:var(--green-dim);color:var(--green);border-radius:99px;padding:1px 7px;font-size:.65rem;font-weight:800;">Atual</span>':''}</div>
+            <div class="evo-history-summary">${summary}</div>
+          </div>
+          <button onclick="deleteAssessment('${sid}','${a.id}')" title="Excluir avaliação" style="flex-shrink:0;background:var(--red-dim);border:1px solid rgba(224,62,62,.2);color:var(--red);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='rgba(224,62,62,.18)'" onmouseout="this.style.background='var(--red-dim)'">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-family:var(--head);font-size:1rem;font-weight:800;">Acompanhamento de evolução</div>
+        <button class="new-assessment-btn" onclick="openEditStudentModal('${sid}');setTimeout(()=>document.querySelectorAll('#modal-edit-student .assessment-tab')[1].click(),200);">+ Nova avaliação</button>
+      </div>
+      ${compareRows ? `<div class="evo-compare-card">
+        <div class="evo-compare-header">
+          <span class="evo-compare-title">Comparativo — última avaliação</span>
+          <span class="evo-compare-date">${fmtDate(latest.ts||latest.date)}${prev?` vs ${fmtDate(prev.ts||prev.date)}`:''}</span>
+        </div>
+        <div class="evo-compare-body">${compareRows}</div>
+      </div>` : ''}
+      <div class="evol-section-title" style="margin-top:8px;">Histórico de avaliações (${assessments.length})</div>
+      <div class="evo-history-list">${historyHTML}</div>
+    `;
+  } catch(e) {
+    container.innerHTML = `<div style="color:var(--text3);padding:20px;font-size:.85rem;">Erro ao carregar avaliações: ${e.message}</div>`;
+  }
+};
+
+// ── Frequência de Treinos ──
+window._freqCalState = {}; // { sid: { year, month } }
+
+window.loadStudentFrequency = async function(sid) {
+  const container = document.getElementById('freq-content-' + sid);
+  if (!container) return;
+  // If already loaded and not spinner, don't reload
+  if (container.querySelector('.freq-tl-row')) return;
+  container.innerHTML = '<div class="spinner"></div>';
+  try {
+    // Busca notificações de treino deste aluno
+    const snap = await _getDocs(_query(
+      _col(_db, 'notifications'),
+      _where('studentId', '==', sid)
+    ));
+    const allNotifs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const workoutNotifs = allNotifs.filter(n =>
+      n.type === 'workout_started' || n.type === 'workout_done' || n.type === 'workout_finished'
+    );
+
+    // Extrai datas únicas no formato 'YYYY-MM-DD'
+    const trainedDays = new Set();
+    workoutNotifs.forEach(n => {
+      const ts = n.timestamp || n.ts || n.date;
+      if (!ts) return;
+      const d = new Date(typeof ts === 'number' ? ts : ts);
+      if (isNaN(d)) return;
+      trainedDays.add(d.toISOString().slice(0, 10));
+    });
+
+    renderFrequencySection(sid, trainedDays, container);
+  } catch(e) {
+    container.innerHTML = `<div style="color:var(--text3);padding:20px;font-size:.85rem;">Erro ao carregar frequência: ${e.message}</div>`;
+  }
+};
+
+function renderFrequencySection(sid, trainedDays, container) {
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+  const DAY_LABELS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  // ── Semana atual (Seg–Dom) ──
+  const weekStart = new Date(now);
+  const dow = now.getDay();
+  const diffToMon = (dow === 0) ? -6 : 1 - dow;
+  weekStart.setDate(now.getDate() + diffToMon);
+
+  let dotsHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    const ds = d.toISOString().slice(0, 10);
+    const trained  = trainedDays.has(ds);
+    const isToday  = ds === todayStr;
+    const isFuture = ds > todayStr;
+    const isPast   = ds < todayStr;
+    const dayLabel = DAY_LABELS[d.getDay()];
+
+    // linha conectora antes de cada bolinha (exceto a primeira)
+    const lineClass = trained ? ' trained' : (isPast && !isToday ? ' missed' : '');
+    const line = i > 0
+      ? `<div class="freq-tl-line${lineClass}"></div>`
+      : '';
+
+    let dotClass = 'freq-tl-dot';
+    let dotInner = '';
+
+    if (trained) {
+      dotClass += ' trained';
+      dotInner = `<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    } else if (isFuture) {
+      dotClass += ' future';
+      dotInner = `<div style="width:5px;height:5px;border-radius:50%;background:var(--border2);opacity:.4;"></div>`;
+    } else if (isToday) {
+      dotClass += ' today';
+      dotInner = `<div style="width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.7;"></div>`;
+    } else {
+      // dia passado sem treino → !
+      dotClass += ' missed';
+      dotInner = `<span style="font-size:.7rem;font-weight:900;color:var(--red);line-height:1;">!</span>`;
+    }
+
+    dotsHTML += `
+      ${line}
+      <div class="freq-tl-item">
+        <div class="${dotClass}">${dotInner}</div>
+        <span class="freq-tl-lbl${isToday ? ' today' : ''}">${dayLabel}</span>
+      </div>`;
+  }
+
+  container.innerHTML = `<div class="freq-tl-row">${dotsHTML}</div>`;
+
+  // Armazena dados para o calendário
+  window._freqData = window._freqData || {};
+  window._freqData[sid] = trainedDays;
+  window._freqCalState[sid] = { year: now.getFullYear(), month: now.getMonth() };
+}
+
+window.toggleFreqCalendar = function(sid) {
+  const chevron = document.getElementById('freq-chevron-' + sid);
+  if (chevron) chevron.classList.toggle('open');
+  openFreqCalendar(sid);
+};
+
+window.openFreqCalendar = function(sid) {
+  // Remove calendário existente se houver
+  const existing = document.getElementById('freq-cal-overlay-' + sid);
+  if (existing) { existing.remove(); return; }
+
+  const state = window._freqCalState[sid] || { year: new Date().getFullYear(), month: new Date().getMonth() };
+  renderFreqCalendar(sid, state.year, state.month);
+};
+
+window.renderFreqCalendar = function(sid, year, month) {
+  const existing = document.getElementById('freq-cal-overlay-' + sid);
+  if (existing) existing.remove();
+
+  const trainedDays = window._freqData && window._freqData[sid] ? window._freqData[sid] : new Set();
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const WDAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startOffset = firstDay.getDay(); // 0=Dom
+  const totalDays = lastDay.getDate();
+
+  // Dias treinados neste mês
+  const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+  const monthCount = [...trainedDays].filter(d => d.startsWith(monthPrefix)).length;
+
+  let gridHTML = '';
+  // Células vazias antes do primeiro dia
+  for (let i = 0; i < startOffset; i++) {
+    gridHTML += '<div class="freq-cal-day empty"></div>';
+  }
+  // Dias do mês
+  for (let d = 1; d <= totalDays; d++) {
+    const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const trained = trainedDays.has(ds);
+    const isToday = ds === todayStr;
+    gridHTML += `<div class="freq-cal-day${trained ? ' trained' : ''}${isToday ? ' today-cal' : ''}">${d}</div>`;
+  }
+
+  const wdaysHTML = WDAYS.map(w => `<div class="freq-cal-wday">${w}</div>`).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'freq-cal-overlay';
+  overlay.id = 'freq-cal-overlay-' + sid;
+  overlay.innerHTML = `
+    <div class="freq-cal-modal">
+      <div class="freq-cal-header">
+        <div class="freq-cal-title">${MONTHS[month]} ${year}</div>
+        <div class="freq-cal-nav">
+          <button onclick="freqCalNav('${sid}',${year},${month},-1)" title="Mês anterior">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button onclick="freqCalNav('${sid}',${year},${month},1)" title="Próximo mês">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="freq-cal-body">
+        <div class="freq-cal-weekdays">${wdaysHTML}</div>
+        <div class="freq-cal-grid">${gridHTML}</div>
+      </div>
+      <div class="freq-cal-footer">
+        <div class="freq-cal-month-stat"><strong>${monthCount}</strong> dia${monthCount !== 1 ? 's' : ''} treinado${monthCount !== 1 ? 's' : ''} em ${MONTHS[month]}</div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('freq-cal-overlay-${sid}').remove();document.getElementById('freq-chevron-${sid}') && document.getElementById('freq-chevron-${sid}').classList.remove('open')">Fechar</button>
+      </div>
+    </div>
+  `;
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) {
+      overlay.remove();
+      const chevron = document.getElementById('freq-chevron-' + sid);
+      if (chevron) chevron.classList.remove('open');
+    }
+  });
+  document.body.appendChild(overlay);
+  window._freqCalState[sid] = { year, month };
+};
+
+window.freqCalNav = function(sid, year, month, delta) {
+  let m = month + delta;
+  let y = year;
+  if (m < 0) { m = 11; y--; }
+  if (m > 11) { m = 0; y++; }
+  renderFreqCalendar(sid, y, m);
+};
+
+// ── Delete assessment ──
+window.deleteAssessment = async function(sid, assessId) {
+  if(!confirm('Excluir esta avaliação? Esta ação não pode ser desfeita.')) return;
+  try {
+    await _deleteDoc(_doc(_db,'students',sid,'assessments',assessId));
+    // Remove o item da UI imediatamente
+    var el = document.getElementById('assessment-item-'+assessId);
+    if(el) el.remove();
+    // Recarrega a aba de evolução para atualizar comparativo e contagem
+    await loadStudentEvolution(sid);
+    toast('✅ Avaliação excluída.');
+  } catch(e) {
+    toast('Erro ao excluir: '+e.message, 'error');
+  }
 };
 
 // WhatsApp direct contact
@@ -3309,6 +4171,9 @@ const planCardHTML=(p,sid,idx,status='active')=>{
           <div class="plan-meta">${metaParts.join(' · ')}</div>
         </div>
         <span class="badge ${badgeClass}" style="flex-shrink:0;">${badgeLabel}</span>
+        <button class="plan-collapse-btn" id="collapse-btn-${p.id}" onclick="event.stopPropagation();togglePlanWorkouts('${p.id}')" title="Recolher/expandir treinos">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
         <div class="ctx-menu-wrap">
           <button class="ctx-menu-btn" onclick="event.stopPropagation();toggleCtxMenu('ctx_${p.id}')" title="Mais opções">•••</button>
           <div class="ctx-menu hidden" id="ctx_${p.id}">
@@ -3323,7 +4188,7 @@ const planCardHTML=(p,sid,idx,status='active')=>{
         <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePlan('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Excluir</button>
       </div>
     </div>
-    <div class="plan-workouts">
+    <div class="plan-workouts" id="plan-workouts-${p.id}">
       ${(p.workouts||[]).map((w,wi)=>`
         <div class="workout-row">
           <div class="workout-row-header">
@@ -3335,6 +4200,14 @@ const planCardHTML=(p,sid,idx,status='active')=>{
         </div>`).join('')}
     </div>
   </div>`;
+};
+
+window.togglePlanWorkouts = function(pid) {
+  const workouts = document.getElementById('plan-workouts-' + pid);
+  const btn = document.getElementById('collapse-btn-' + pid);
+  if (!workouts || !btn) return;
+  const isCollapsed = workouts.classList.toggle('collapsed');
+  btn.classList.toggle('collapsed', isCollapsed);
 };
 
 window.deleteStudent=async id=>{
@@ -3420,6 +4293,10 @@ window.updateIsometria=(bi,ei,checked)=>{
 };
 
 window.renderWorkoutsEditor=()=>{
+  // Salva posição de scroll antes de re-renderizar
+  const modalBody = document.querySelector('#modal-plan .modal-body');
+  const savedScroll = modalBody ? modalBody.scrollTop : 0;
+
   document.getElementById('workouts-editor').innerHTML=ST.workoutBlocks.map((wb,bi)=>{
     const daysHTML=DAYS.map((d,di)=>`<button type="button" class="day-toggle ${(wb.days||[]).includes(di)?'selected':''}" onclick="toggleBlockDay(${bi},${di},this)">${d}</button>`).join('');
     const exHTML=wb.exercises.map((ex,ei)=>{
@@ -3500,6 +4377,8 @@ window.renderWorkoutsEditor=()=>{
       </div>
     </div>`;
   }).join('');
+  // Restaura posição de scroll após re-renderizar
+  if (modalBody) modalBody.scrollTop = savedScroll;
   // Activate drag-and-drop after render
   setTimeout(initDragDrop, 0);
 };
@@ -3571,12 +4450,12 @@ window.initDragDrop=function(){
 
 // Update series count → rebuild repsArr and re-render
 window.updateSeriesCount=(bi,ei,val,typing)=>{
-  // Se o campo estiver vazio E ainda estiver digitando, permite ficar em branco
-  if((val===''||val===null||val===undefined) && typing) {
-    ST.workoutBlocks[bi].exercises[ei].series='';
+  // Se ainda estiver digitando, apenas salva o valor sem re-renderizar
+  if(typing) {
+    ST.workoutBlocks[bi].exercises[ei].series = val === '' ? '' : (parseInt(val)||1);
     return;
   }
-  // Se estiver em branco ao desfocar (blur), volta para 1
+  // Ao desfocar (blur), valida e re-renderiza com scroll preservado
   const n=Math.max(1,Math.min(20,parseInt(val)||1));
   const ex=ST.workoutBlocks[bi].exercises[ei];
   ex.series=n;
@@ -3584,7 +4463,6 @@ window.updateSeriesCount=(bi,ei,val,typing)=>{
   while(arr.length<n) arr.push(arr[arr.length-1]||'12');
   arr=arr.slice(0,n);
   ex.repsArr=arr;
-  // Update display reps string
   ex.reps=arr.join(', ');
   renderWorkoutsEditor();
 };
@@ -4402,7 +5280,7 @@ window.deleteChatGestor = async function(sid, name) {
     for(var d of snap.docs) {
       await _db.collection('chats').doc(sid).collection('messages').doc(d.id).delete();
     }
-    toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Conversa limpa!');
+    toast('Conversa limpa!');
     if(window._chatActiveSid === sid) window.closeChatDetail();
     window.loadChatList();
   } catch(e) { toast('Erro: '+e.message,'error'); }
