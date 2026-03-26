@@ -213,6 +213,36 @@
     .nav-page { display: none; }
     .nav-page.active { display: block; }
 
+    /* ── Evolução ── */
+    .evol-page-wrap { padding: 20px; }
+    .evol-page-title { font-family: var(--head); font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .evol-page-sub { font-size: .82rem; color: var(--text3); margin-bottom: 20px; }
+    .evol-section-title { font-size: .72rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .evol-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .evo-compare-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+    .evo-compare-header { padding: 14px 18px; background: #111110; display: flex; align-items: center; justify-content: space-between; }
+    .evo-compare-title { font-family: var(--head); font-size: .92rem; font-weight: 800; color: #fff; }
+    .evo-compare-date { font-size: .72rem; color: rgba(255,255,255,.5); font-weight: 600; }
+    .evo-compare-body { padding: 6px 0; }
+    .evo-metric-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; border-bottom: 1px solid var(--border); }
+    .evo-metric-row:last-child { border-bottom: none; }
+    .evo-metric-label { font-size: .83rem; color: var(--text2); font-weight: 600; }
+    .evo-metric-values { display: flex; align-items: center; gap: 8px; }
+    .evo-metric-prev { font-size: .82rem; color: var(--text3); font-weight: 500; }
+    .evo-metric-curr { font-size: .88rem; color: var(--text); font-weight: 700; }
+    .evo-metric-diff { font-size: .75rem; font-weight: 800; padding: 2px 7px; border-radius: 99px; }
+    .evo-diff-pos { background: var(--red-dim); color: var(--red); }
+    .evo-diff-neg { background: var(--green-dim); color: var(--green); }
+    .evo-diff-zero { background: var(--surface2); color: var(--text3); }
+    .evo-history-list { display: flex; flex-direction: column; gap: 10px; }
+    .evo-history-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; }
+    .evo-history-date { font-size: .85rem; font-weight: 800; color: var(--text); margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+    .evo-history-summary { font-size: .78rem; color: var(--text3); font-weight: 500; }
+    .evol-empty { text-align: center; padding: 60px 20px; }
+    .evol-empty-icon { font-size: 3rem; margin-bottom: 14px; }
+    .evol-empty-title { font-family: var(--head); font-weight: 800; font-size: 1rem; color: var(--text2); margin-bottom: 6px; }
+    .evol-empty-sub { font-size: .83rem; color: var(--text3); line-height: 1.5; }
+
     @media (max-width: 768px) {
       #nav-sidebar { display: none; }
       #nav-bottom { display: block; }
@@ -1068,6 +1098,10 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Histórico
       </button>
+      <button class="nav-item" onclick="switchTab('evolucao')" id="nav-evolucao">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Evolução
+      </button>
       <div class="nav-sidebar-bottom">
         <div style="padding:4px 14px 8px;font-size:.78rem;color:var(--text2);font-weight:700;" id="student-pill-sidebar">—</div>
         <button class="nav-item" onclick="doLogout()">
@@ -1103,6 +1137,11 @@
       <div id="page-historico" class="nav-page">
         <div class="content" id="content-historico"><div class="spinner"></div></div>
       </div>
+
+      <!-- PAGE: EVOLUÇÃO -->
+      <div id="page-evolucao" class="nav-page">
+        <div id="content-evolucao"><div class="spinner" style="margin:60px auto;"></div></div>
+      </div>
     </div>
   </div>
 
@@ -1116,6 +1155,10 @@
       <button class="nav-bottom-item" onclick="switchTab('historico')" id="nav-bottom-historico">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span>Histórico</span>
+      </button>
+      <button class="nav-bottom-item" onclick="switchTab('evolucao')" id="nav-bottom-evolucao">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Evolução</span>
       </button>
     </div>
   </nav>
@@ -1300,6 +1343,7 @@ window.confirmStartWorkout=async function(){
     const studentName=_currentStudent?.name||'Aluno';
     await addDoc(collection(db,'notifications'),{
       type:'workout_started',
+      studentId: _currentStudent?.id||'',
       studentName,
       managerId: _currentStudent?.managerId||'felipereis',
       planTitle: _pendingStartPlanTitle||'',
@@ -1363,6 +1407,7 @@ window.confirmFinishWorkout=async function(){
     const studentName=_currentStudent?.name||'Aluno';
     await addDoc(collection(db,'notifications'),{
       type:'workout_finished',
+      studentId: _currentStudent?.id||'',
       studentName,
       managerId: _currentStudent?.managerId||'felipereis',
       planTitle: planTitle||'',
@@ -1741,9 +1786,12 @@ window.switchTab=function(tab){
   if(botItem) botItem.classList.add('active');
 
   // Topbar title
-  const titles={treinos:'Treinos',historico:'Histórico'};
+  const titles={treinos:'Treinos',historico:'Histórico',evolucao:'Evolução'};
   const titleEl=document.getElementById('topbar-page-title');
   if(titleEl) titleEl.textContent=titles[tab]||'';
+
+  // Carrega evolução na primeira vez
+  if(tab==='evolucao' && _currentStudent) loadEvolucao(_currentStudent.id);
 };
 
 // ── Check ──
@@ -1800,7 +1848,7 @@ function renderPlan(p, status){
   // Letter index among all plans of same status — use wi placeholder, fix after append
   wrap.innerHTML=`
     <div class="plan-card-header ${headerClass} ${startsOpen?'open':''}" onclick="togglePlanWorkouts('${p.id}',this)" id="${planToggleId}">
-      <div class="plan-card-num">${status==="active"?'<span class="plan-card-num-inner">▶</span><span class="plan-status-dot active-dot"></span>':status==="upcoming"?'<span class="plan-card-num-inner">◷</span><span class="plan-status-dot upcoming-dot"></span>':'<span class="plan-card-num-inner" style="color:#bbb">✓</span>'}</div>
+      <div class="plan-card-num">${status==="active"?'<span class="plan-card-num-inner"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></span><span class="plan-status-dot active-dot"></span>':status==="upcoming"?'<span class="plan-card-num-inner"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></span><span class="plan-status-dot upcoming-dot"></span>':'<span class="plan-card-num-inner" style="color:#bbb"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></span>'}</div>
       <div class="plan-card-info">
         <div class="plan-card-title">${p.title}</div>
         <div class="plan-card-meta">
@@ -1812,7 +1860,7 @@ function renderPlan(p, status){
       <div class="plan-card-right">
         <span class="plan-card-badge ${badgeClass}">${badgeLabel}</span>
       </div>
-      <div class="plan-card-arrow">▶</div>
+      <div class="plan-card-arrow"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
     </div>`;
 
   const workoutsWrap = document.createElement('div');
@@ -1916,7 +1964,7 @@ function renderPlan(p, status){
           </div>
         </div>
         <span class="wa-ex-count">${total} ex.</span>
-        <div class="wa-arrow">▶</div>
+        <div class="wa-arrow"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       </div>
       <div class="workout-days-row" style="display:none;">
         ${(w.days||[]).map(d=>`<span class="day-chip ${d===TODAY&&!expired?'today':''}">${DAYS_ABBR[d]}</span>`).join('')}
@@ -1961,6 +2009,91 @@ window.togglePlanWorkouts=function(planId, headerEl){
   if(!workoutsWrap) return;
   const isOpen = workoutsWrap.classList.toggle('open');
   headerEl.classList.toggle('open', isOpen);
+};
+
+// ── Evolução do Aluno ──
+let _evolucaoLoaded = false;
+window.loadEvolucao = async function(sid) {
+  if(_evolucaoLoaded) return;
+  const container = document.getElementById('content-evolucao');
+  if(!container) return;
+  container.innerHTML = '<div class="spinner" style="margin:60px auto;"></div>';
+  try {
+    await ensureAuth();
+    const snap = await getDocs(query(collection(db,'students',sid,'assessments'), orderBy('ts','desc')));
+    const assessments = snap.docs.map(d=>({id:d.id,...d.data()}));
+    _evolucaoLoaded = true;
+
+    if(!assessments.length) {
+      container.innerHTML = `<div class="evol-empty">
+        <div class="evol-empty-icon">📊</div>
+        <div class="evol-empty-title">Nenhuma avaliação registrada</div>
+        <div class="evol-empty-sub">Seu treinador ainda não registrou avaliações físicas. Quando ele registrar, seu progresso aparecerá aqui.</div>
+      </div>`;
+      return;
+    }
+
+    const latest = assessments[0];
+    const prev = assessments[1] || null;
+    const LABELS = {weight:'Peso',fat:'% Gordura',chest:'Peito',waist:'Cintura',hip:'Quadril','arm-r':'Braço D','arm-l':'Braço E',shoulder:'Ombro','thigh-r':'Coxa D','thigh-l':'Coxa E','calf-r':'Panturrilha D','calf-l':'Panturrilha E','thigh-prox':'Coxa Proximal','thigh-dist':'Coxa Distal'};
+    const fmtDate = ts => { try { return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){return ts;} };
+
+    const diffRow = (label, unit, currVal, prevVal) => {
+      if(currVal===null||currVal===undefined) return '';
+      const curr = parseFloat(currVal);
+      const p = prevVal!==null&&prevVal!==undefined ? parseFloat(prevVal) : null;
+      const diff = p!==null ? (curr-p) : null;
+      const diffStr = diff!==null ? (diff>=0?'+'+diff.toFixed(1):diff.toFixed(1)) : '—';
+      const cls = diff===null||diff===0 ? 'evo-diff-zero' : diff<0 ? 'evo-diff-neg' : 'evo-diff-pos';
+      return `<div class="evo-metric-row">
+        <span class="evo-metric-label">${label}</span>
+        <div class="evo-metric-values">
+          ${p!==null?`<span class="evo-metric-prev">${p.toFixed(1)}${unit}</span><span style="color:var(--border2);">→</span>`:''}
+          <span class="evo-metric-curr">${curr.toFixed(1)}${unit}</span>
+          <span class="evo-metric-diff ${cls}">${diffStr}${unit}</span>
+        </div>
+      </div>`;
+    };
+
+    let compareRows = '';
+    compareRows += diffRow('Peso', ' kg', latest.weight, prev?.weight);
+    compareRows += diffRow('% Gordura', '%', latest.fat, prev?.fat);
+    const m = latest.measures||{}, pm = prev?.measures||{};
+    Object.entries(LABELS).forEach(([k,label]) => {
+      if(k==='weight'||k==='fat') return;
+      if(m[k]!==undefined) compareRows += diffRow(label, ' cm', m[k], pm[k]);
+    });
+    if(latest.imc) compareRows += `<div class="evo-metric-row"><span class="evo-metric-label">IMC</span><div class="evo-metric-values"><span class="evo-metric-curr">${latest.imc}</span></div></div>`;
+
+    const historyHTML = assessments.map((a,i) => {
+      const parts = [a.weight?a.weight+'kg':null, a.fat?a.fat+'% gordura':null, a.measures?.waist?'cintura '+a.measures.waist+'cm':null].filter(Boolean);
+      const summary = parts.join(' · ') || 'Sem resumo';
+      return `<div class="evo-history-item">
+        <div class="evo-history-date">
+          ${fmtDate(a.ts||a.date)}
+          ${i===0?'<span style="background:var(--green-dim);color:var(--green);border-radius:99px;padding:1px 8px;font-size:.65rem;font-weight:800;">Atual</span>':''}
+        </div>
+        <div class="evo-history-summary">${summary}</div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = `<div class="evol-page-wrap">
+      <div class="evol-page-title">Minha Evolução</div>
+      <div class="evol-page-sub">Acompanhe seu progresso físico ao longo do tempo.</div>
+      ${compareRows ? `
+        <div class="evo-compare-card">
+          <div class="evo-compare-header">
+            <span class="evo-compare-title">Última avaliação</span>
+            <span class="evo-compare-date">${fmtDate(latest.ts||latest.date)}${prev?' vs '+fmtDate(prev.ts||prev.date):''}</span>
+          </div>
+          <div class="evo-compare-body">${compareRows}</div>
+        </div>` : ''}
+      <div class="evol-section-title">Histórico (${assessments.length} avaliações)</div>
+      <div class="evo-history-list">${historyHTML}</div>
+    </div>`;
+  } catch(e) {
+    container.innerHTML = `<div style="padding:40px 20px;text-align:center;color:var(--text3);font-size:.85rem;">Erro ao carregar evolução: ${e.message}</div>`;
+  }
 };
 
 (async function init(){
