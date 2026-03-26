@@ -6073,47 +6073,105 @@ async function processPaymentWithToken(token) {
 
 // ── Ativa assinatura no Firestore e na sessao local ───────────────────────────
 async function activateSubscription(managerId, plan, paymentResult) {
-  try {
-    var now = Date.now();
-    var subEndsAt = plan === 'annual'
-      ? now + 365 * 24 * 60 * 60 * 1000
-      : now +  30 * 24 * 60 * 60 * 1000;
+  var now = Date.now();
+  var subEndsAt = plan === 'annual'
+    ? now + 365 * 24 * 60 * 60 * 1000
+    : now +  30  * 24 * 60 * 60 * 1000;
 
-    // Se managerId vazio, tenta buscar pelo username da sessão
-    if(!managerId && window.CURRENT_USER && window.CURRENT_USER.username) {
-      try {
-        var snap = await _getDocs(_query(_col(_db,'managers'), _where('username','==',window.CURRENT_USER.username)));
-        if(!snap.empty) {
-          managerId = snap.docs[0].id;
-          window.CURRENT_USER.id = managerId;
-        }
-      } catch(e) { console.warn('activateSubscription: nao achou managerId', e); }
-    }
+  // Aguarda Auth inicializar
+  var attempts = 0;
+  while (!_auth && attempts < 20) { await new Promise(r => setTimeout(r, 100)); attempts++; }
 
-    if(managerId) {
-      await _updateDoc(_doc(_db, 'managers', managerId), {
-        subEndsAt:   subEndsAt,
-        trialEndsAt: null,
-        lastPayment: {
-          plan,
-          amount:    getSelectedAmount(),
-          paymentId: String(paymentResult.id || ''),
-          status:    paymentResult.status || 'approved',
-          date:      Date.now()
-        }
+  // ── CORREÇÃO: Garante que o Firebase Auth tem sessão ativa ───────────────
+  // O Firestore exige isAuth() para escrever. Se o Auth expirou ou não foi
+  // restaurado (ex: usuário veio da sessão localStorage), faz re-login silencioso.
+  if (_auth && !_auth.currentUser && window.CURRENT_USER && window.CURRENT_USER.username) {
+    try {
+      var authEmail = _authEmail(window.CURRENT_USER.username);
+      // Tenta restaurar sessão via onAuthStateChanged (pode já estar carregando)
+      await new Promise(function(resolve) {
+        var unsub = _auth.onAuthStateChanged(function(user) {
+          unsub();
+          resolve(user);
+        });
       });
-      console.log('activateSubscription: subEndsAt salvo para', managerId);
-    } else {
-      console.error('activateSubscription: managerId nao encontrado, assinatura NAO salva no Firestore!');
+    } catch(authRestoreErr) {
+      console.warn('activateSubscription: nao conseguiu restaurar Auth:', authRestoreErr.message);
     }
+  }
 
-    if(window.CURRENT_USER) {
-      window.CURRENT_USER.subEndsAt   = subEndsAt;
-      window.CURRENT_USER.trialEndsAt = null;
-      window.CURRENT_USER.subStatus   = { ok: true, type: 'active', daysLeft: plan === 'annual' ? 365 : 30 };
-      try { localStorage.setItem('forge_gestor_session', JSON.stringify(window.CURRENT_USER)); } catch(e) {}
+  // Se managerId vazio, tenta buscar pelo username da sessão
+  if (!managerId && window.CURRENT_USER && window.CURRENT_USER.username) {
+    try {
+      var snap = await _getDocs(_query(_col(_db,'managers'), _where('username','==',window.CURRENT_USER.username)));
+      if (!snap.empty) { managerId = snap.docs[0].id; window.CURRENT_USER.id = managerId; }
+    } catch(e) { console.warn('activateSubscription: busca por username falhou', e); }
+  }
+
+  var savedToFirestore = false;
+  if (managerId) {
+    var paymentData = {
+      subEndsAt:   subEndsAt,
+      trialEndsAt: null,
+      lastPayment: {
+        plan:      plan,
+        amount:    typeof getSelectedAmount === 'function' ? getSelectedAmount() : 0,
+        paymentId: String(paymentResult.id || ''),
+        status:    paymentResult.status || 'approved',
+        date:      now
+      }
+    };
+
+    // ── Tentativa 1: Firestore direto (requer Auth ativo) ────────────────
+    try {
+      await _updateDoc(_doc(_db, 'managers', managerId), paymentData);
+      savedToFirestore = true;
+      console.log('activateSubscription OK: managerId=', managerId, 'subEndsAt=', new Date(subEndsAt).toLocaleDateString('pt-BR'));
+    } catch(fsErr) {
+      console.error('activateSubscription FIRESTORE FALHOU:', fsErr.code, fsErr.message);
+
+      // ── Tentativa 2: Backend /activate com Admin SDK (não depende de Auth do cliente) ──
+      try {
+        var fbResp = await fetch(MP_BACKEND_URL + '/activate', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            managerId:  managerId,
+            plan:       plan,
+            subEndsAt:  subEndsAt,
+            paymentId:  String(paymentResult.id || ''),
+            username:   (window.CURRENT_USER || {}).username || ''
+          })
+        });
+        if (fbResp.ok) {
+          savedToFirestore = true;
+          console.log('activateSubscription: salvo via backend /activate');
+        } else {
+          var fbBody = await fbResp.text().catch(function(){return '';});
+          console.error('activateSubscription backend /activate retornou erro:', fbResp.status, fbBody);
+        }
+      } catch(bErr) {
+        console.error('activateSubscription backend fallback falhou:', bErr.message);
+      }
     }
-  } catch(e) { console.error('activateSubscription error:', e); }
+  } else {
+    console.error('activateSubscription: managerId nao encontrado — assinatura NAO salva no Firestore!');
+  }
+
+  // Atualiza sessão local para acesso imediato sem depender do Firestore
+  if (window.CURRENT_USER) {
+    window.CURRENT_USER.subEndsAt   = subEndsAt;
+    window.CURRENT_USER.trialEndsAt = null;
+    window.CURRENT_USER.subStatus   = { ok: true, type: 'active', daysLeft: plan === 'annual' ? 365 : 30 };
+    try { localStorage.setItem('forge_gestor_session', JSON.stringify(window.CURRENT_USER)); } catch(e) {}
+  }
+
+  if (!savedToFirestore) {
+    // Avisa o usuário que o acesso está ativo agora mas pode ser perdido
+    console.warn('activateSubscription: sessao local OK mas Firestore nao salvo. Usuario perdera acesso apos logout.');
+    toast('⚠️ Assinatura ativa nesta sessão, mas houve um problema ao salvar. Contate o suporte se o acesso sumir após relogar.');
+  }
+  return savedToFirestore;
 }
 
 // ── Entra no painel apos pagamento ───────────────────────────────────────────
