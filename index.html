@@ -504,6 +504,10 @@
     @media (min-width: 601px) {
       #chat-fab { bottom: 28px; right: 24px; }
     }
+    /* No mobile, sobe acima do menu inferior (~60px) + safe area */
+    @media (max-width: 600px) {
+      #chat-fab { bottom: calc(68px + env(safe-area-inset-bottom)); right: 18px; }
+    }
     #chat-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,0,0,.4); }
     #chat-fab svg { width: 24px; height: 24px; color: #fff; }
 
@@ -1226,16 +1230,44 @@ function saveSession(s){ try{ localStorage.setItem(LS_KEY,JSON.stringify(s)); }c
 function loadSession(){ try{ const r=localStorage.getItem(LS_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
 function clearSession(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} }
 
-// ── Workout Timer State (per session per workout) ──
-// Key: planId_workoutIdx  → { started: bool, startTimestamp: ms }
+// ── Workout Timer State (per student per workout) ──
+// Key: trainly_timer_{studentCode}_{planId}_{workoutIdx}
+// Inclui o código do aluno na chave para que timers de alunos diferentes
+// nunca se misturem no mesmo navegador.
 const LS_TIMER_PREFIX='trainly_timer_';
 
-function getTimerKey(planId, wi){ return `${LS_TIMER_PREFIX}${planId}_${wi}`; }
+// Retorna o código do aluno atual (em minúsculas, sem espaços)
+function _timerStudentCode(){
+  return (_currentStudent&&_currentStudent.code
+    ? String(_currentStudent.code).toLowerCase().replace(/\s+/g,'')
+    : 'unknown');
+}
+
+function getTimerKey(planId, wi){
+  return `${LS_TIMER_PREFIX}${_timerStudentCode()}_${planId}_${wi}`;
+}
+
+// Retorna a data local no formato "YYYY-MM-DD"
+function _todayStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
 function loadTimerState(planId, wi){
   try{
     const raw=localStorage.getItem(getTimerKey(planId,wi));
-    return raw?JSON.parse(raw):null;
+    if(!raw) return null;
+    const state=JSON.parse(raw);
+    // Se o timer foi iniciado em outro dia, descarta automaticamente
+    if(state&&state.startTimestamp){
+      const startDay=new Date(state.startTimestamp);
+      const startDayStr=`${startDay.getFullYear()}-${String(startDay.getMonth()+1).padStart(2,'0')}-${String(startDay.getDate()).padStart(2,'0')}`;
+      if(startDayStr!==_todayStr()){
+        clearTimerState(planId,wi);
+        return null;
+      }
+    }
+    return state;
   }catch(e){ return null; }
 }
 
@@ -1247,6 +1279,40 @@ function saveTimerState(planId, wi, state){
 
 function clearTimerState(planId, wi){
   try{ localStorage.removeItem(getTimerKey(planId,wi)); }catch(e){}
+}
+
+// Remove do localStorage todos os timers que NÃO pertencem ao aluno atual.
+// Chamado no login para garantir que timers de outros alunos não apareçam.
+function clearForeignTimers(){
+  const myPrefix=`${LS_TIMER_PREFIX}${_timerStudentCode()}_`;
+  const toRemove=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith(LS_TIMER_PREFIX)&&!k.startsWith(myPrefix)){
+      toRemove.push(k);
+    }
+  }
+  toRemove.forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+}
+
+// Remove timers do aluno atual que foram iniciados em outro dia.
+function clearExpiredTimers(){
+  const myPrefix=`${LS_TIMER_PREFIX}${_timerStudentCode()}_`;
+  const toRemove=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith(myPrefix)){
+      try{
+        const state=JSON.parse(localStorage.getItem(k));
+        if(state&&state.startTimestamp){
+          const startDay=new Date(state.startTimestamp);
+          const startDayStr=`${startDay.getFullYear()}-${String(startDay.getMonth()+1).padStart(2,'0')}-${String(startDay.getDate()).padStart(2,'0')}`;
+          if(startDayStr!==_todayStr()) toRemove.push(k);
+        }
+      }catch(e){ toRemove.push(k); }
+    }
+  }
+  toRemove.forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
 }
 
 // ── Global workout state ──
@@ -1271,6 +1337,19 @@ function startTimerTick(){
   if(_timerInterval) clearInterval(_timerInterval);
   _timerInterval=setInterval(()=>{
     if(!_activeWorkout) return;
+    // Verifica se virou o dia — se sim, zera o cronômetro automaticamente
+    const startDay=new Date(_activeWorkout.startTimestamp);
+    const startDayStr=`${startDay.getFullYear()}-${String(startDay.getMonth()+1).padStart(2,'0')}-${String(startDay.getDate()).padStart(2,'0')}`;
+    if(startDayStr!==_todayStr()){
+      // Virou o dia: para e limpa o timer sem registrar conclusão
+      clearTimerState(_activeWorkout.planId, _activeWorkout.wi);
+      if(_timerInterval){ clearInterval(_timerInterval); _timerInterval=null; }
+      _activeWorkout=null;
+      hideTimerBar();
+      const display=document.getElementById('timer-display');
+      if(display) display.textContent='00:00';
+      return;
+    }
     const elapsed=Date.now()-_activeWorkout.startTimestamp;
     const display=document.getElementById('timer-display');
     if(display) display.textContent=formatTime(elapsed);
@@ -1577,15 +1656,30 @@ function showApp(student){
 
 // ── Restore timer on app load ──
 function restoreActiveTimer(student){
-  // Search localStorage for any active timer for this student
+  // Limpa timers de outros alunos e timers expirados (virou o dia)
+  clearForeignTimers();
+  clearExpiredTimers();
+
+  // Prefixo exclusivo deste aluno
+  const myPrefix=`${LS_TIMER_PREFIX}${_timerStudentCode()}_`;
+
+  // Procura timer ativo do aluno atual
   for(let i=0;i<localStorage.length;i++){
     const key=localStorage.key(i);
-    if(key&&key.startsWith(LS_TIMER_PREFIX)){
+    if(key&&key.startsWith(myPrefix)){
       try{
         const state=JSON.parse(localStorage.getItem(key));
         if(state&&state.startTimestamp){
-          // Extract planId and wi from key
-          const suffix=key.replace(LS_TIMER_PREFIX,'');
+          // Checa se o timer ainda é do dia de hoje
+          const startDay=new Date(state.startTimestamp);
+          const startDayStr=`${startDay.getFullYear()}-${String(startDay.getMonth()+1).padStart(2,'0')}-${String(startDay.getDate()).padStart(2,'0')}`;
+          if(startDayStr!==_todayStr()){
+            // Expirou — remove e ignora
+            localStorage.removeItem(key);
+            continue;
+          }
+          // Extract planId and wi from key  (formato: myPrefix + planId + "_" + wi)
+          const suffix=key.replace(myPrefix,'');
           const lastUnderscore=suffix.lastIndexOf('_');
           const planId=suffix.substring(0,lastUnderscore);
           const wi=parseInt(suffix.substring(lastUnderscore+1));
