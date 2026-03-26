@@ -164,13 +164,13 @@
     .toast.error::before { content: ''; position: absolute; left: 0; top: 0; width: 3px; height: 100%; background: var(--red); border-radius: 3px 0 0 3px; }
     @keyframes toastIn { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-    .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.35); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding: 16px; overflow-y: auto; touch-action: pan-y; }
+    .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.35); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding: 16px; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; }
     .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 760px; max-height: calc(100dvh - 32px); display: flex; flex-direction: column; box-shadow: var(--shadow-md); overscroll-behavior: contain; margin: auto 0; }
     .modal-sm { max-width: 460px; }
     .modal-header { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); background: #111110; z-index: 1; border-radius: 20px 20px 0 0; }
     .modal-header h3 { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: #ffffff; }
     .modal-header p, .modal-header span { color: rgba(255,255,255,0.6) !important; }
-    .modal-body { flex: 1; overflow-y: auto; padding: 24px; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+    .modal-body { flex: 1; overflow-y: auto; padding: 24px; touch-action: pan-y; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
     .modal-footer { flex-shrink: 0; padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
     @media(max-width:520px){ .modal-footer { padding: 12px 16px; gap: 6px; } .modal-footer .btn { flex: 1; min-width: 0; justify-content: center; font-size: .8rem; padding: 9px 10px; } }
     .close-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: .95rem; transition: all .15s; }
@@ -619,7 +619,8 @@
       position: fixed; bottom: 0; left: 0; right: 0;
       background: var(--surface);
       border-top: 1px solid var(--border);
-      padding: 6px 0 env(safe-area-inset-bottom);
+      padding: 6px 0 0;
+      padding-bottom: max(env(safe-area-inset-bottom), 6px);
       z-index: 100;
       box-shadow: 0 -2px 16px rgba(0,0,0,.07);
     }
@@ -652,7 +653,7 @@
 
     @media(max-width:768px){
       .sidebar { display: none; }
-      .main-content { padding: 14px; padding-bottom: 80px; }
+      .main-content { padding: 14px; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
       .mobile-nav { display: block; }
       .students-grid { grid-template-columns: 1fr; }
       .exercise-controls { grid-template-columns: 1fr 1fr; }
@@ -2559,6 +2560,21 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </div>
 
+<!-- MODAL: CONFIRMAR FECHAR MÓDULO -->
+<div id="modal-confirm-close-module" class="modal-overlay hidden" style="z-index:1200;">
+  <div class="modal confirm-modal">
+    <div class="modal-header"><h3>Fechar sem salvar?</h3><button class="close-btn" onclick="closeModal('modal-confirm-close-module')">✕</button></div>
+    <div class="modal-body" style="padding-bottom:0;">
+      <p style="font-size:.88rem;color:var(--text2);">Você tem alterações não salvas neste módulo. O que deseja fazer?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="discardModuleAndClose()">Descartar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm-close-module')">Continuar editando</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-confirm-close-module');saveModule()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: CLONAR TREINO -->
 <div id="modal-clone" class="modal-overlay hidden">
   <div class="modal modal-sm">
@@ -3027,8 +3043,42 @@ function hasSession(){ try{ return !!localStorage.getItem(LS_GESTOR); }catch(e){
 function getSession(){ try{ var v=localStorage.getItem(LS_GESTOR); if(!v) return null; try{ var s=JSON.parse(v); if(s && typeof s==='object'){ s.phone=s.phone||''; if(!s.role) s.role=s.isMaster?'master':'comum'; return s; } return null; }catch(e){ return null; } }catch(e){ return null; } }
 
 const toast=(msg,type='success')=>{const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=msg;document.getElementById('toast-container').appendChild(t);setTimeout(()=>t.remove(),3500)};
-window.openModal=id=>document.getElementById(id).classList.remove('hidden');
-window.closeModal=id=>document.getElementById(id).classList.add('hidden');
+window.openModal=function(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.classList.remove('hidden');
+  window._openModalCount=(window._openModalCount||0)+1;
+  if(window._openModalCount===1){
+    window._bodyScrollY=window.scrollY;
+    document.body.style.overflow='hidden';
+    document.body.style.touchAction='none';
+  }
+  el.addEventListener('touchmove',_modalTouchMove,{passive:false});
+};
+window.closeModal=function(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  if(!el.classList.contains('hidden')){
+    el.classList.add('hidden');
+    el.removeEventListener('touchmove',_modalTouchMove);
+    window._openModalCount=Math.max(0,(window._openModalCount||1)-1);
+    if(window._openModalCount===0){
+      document.body.style.overflow='';
+      document.body.style.touchAction='';
+    }
+  }
+};
+function _modalTouchMove(e){
+  var body=e.currentTarget.querySelector('.modal-body');
+  if(!body){e.preventDefault();return;}
+  var touch=e.touches[0];
+  var node=document.elementFromPoint(touch.clientX,touch.clientY);
+  while(node&&node!==e.currentTarget){
+    if(node===body)return;
+    node=node.parentNode;
+  }
+  e.preventDefault();
+}
 const genCode=()=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('')};
 const initials=n=>{const p=n.trim().split(' ');return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():n.slice(0,2).toUpperCase()};
 
@@ -3827,7 +3877,12 @@ window.toggleFreqCalendar = function(sid) {
 window.openFreqCalendar = function(sid) {
   // Remove calendário existente se houver
   const existing = document.getElementById('freq-cal-overlay-' + sid);
-  if (existing) { existing.remove(); return; }
+  if (existing) {
+    existing.remove();
+    document.body.style.overflow='';
+    document.body.style.touchAction='';
+    return;
+  }
 
   const state = window._freqCalState[sid] || { year: new Date().getFullYear(), month: new Date().getMonth() };
   renderFreqCalendar(sid, state.year, state.month);
@@ -3888,7 +3943,7 @@ window.renderFreqCalendar = function(sid, year, month) {
       </div>
       <div class="freq-cal-footer">
         <div class="freq-cal-month-stat"><strong>${monthCount}</strong> dia${monthCount !== 1 ? 's' : ''} treinado${monthCount !== 1 ? 's' : ''} em ${MONTHS[month]}</div>
-        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('freq-cal-overlay-${sid}').remove();document.getElementById('freq-chevron-${sid}') && document.getElementById('freq-chevron-${sid}').classList.remove('open')">Fechar</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('freq-cal-overlay-${sid}').remove();document.body.style.overflow='';document.body.style.touchAction='';document.getElementById('freq-chevron-${sid}') && document.getElementById('freq-chevron-${sid}').classList.remove('open')">Fechar</button>
       </div>
     </div>
   `;
@@ -3897,9 +3952,20 @@ window.renderFreqCalendar = function(sid, year, month) {
       overlay.remove();
       const chevron = document.getElementById('freq-chevron-' + sid);
       if (chevron) chevron.classList.remove('open');
+      document.body.style.overflow='';
+      document.body.style.touchAction='';
     }
   });
+  // Previne scroll da página atrás do overlay
+  overlay.addEventListener('touchmove', function(e) {
+    var inner = overlay.querySelector('.freq-cal-modal');
+    var node = e.target;
+    while (node && node !== overlay) { if (node === inner) return; node = node.parentNode; }
+    e.preventDefault();
+  }, {passive: false});
   document.body.appendChild(overlay);
+  document.body.style.overflow='hidden';
+  document.body.style.touchAction='none';
   window._freqCalState[sid] = { year, month };
 };
 
@@ -5061,7 +5127,17 @@ window.updateIsometriaModule=(bi,ei,checked)=>{
 
 window.confirmCloseModule=()=>{
   const changed=JSON.stringify(ST.workoutBlocks&&ST.workoutBlocks[0])!==(ST._moduleSnapshot||'{}');
-  if(changed&&!confirm('Descartar alterações no módulo?'))return;
+  if(changed){
+    openModal('modal-confirm-close-module');
+  } else {
+    closeModal('modal-module');
+  }
+};
+
+window.discardModuleAndClose=function(){
+  ST.workoutBlocks=[];
+  ST._moduleSnapshot='{}';
+  closeModal('modal-confirm-close-module');
   closeModal('modal-module');
 };
 
@@ -5069,18 +5145,40 @@ window.saveModule=async()=>{
   const wb=ST.workoutBlocks&&ST.workoutBlocks[0];
   if(!wb)return;
   if(!wb.exercises.filter(e=>e.name).length){document.getElementById('module-error').textContent='Adicione ao menos um exercício.';return;}
-  const btn=document.getElementById('btn-save-module');btn.classList.add('btn-loading');btn.textContent='Salvando...';
+  const errEl=document.getElementById('module-error');
+  errEl.textContent='';
+  const btn=document.getElementById('btn-save-module');
+  // Evita duplo clique durante o save
+  if(btn.classList.contains('btn-loading')) return;
+  btn.classList.add('btn-loading');btn.textContent='Salvando...';
   const moduleData={title:wb.title||'Treino',days:wb.days||[],exercises:wb.exercises.filter(e=>e.name).map(e=>({name:e.name==='__custom__'?(e.customName||'Personalizado'):e.name,series:Number(e.series)||1,reps:e.reps||'12',repsArr:e.repsArr||[e.reps||'12'],videoUrl:e.videoUrl||'',unilateral:!!e.unilateral,biset:e.biset||'',bisetName:e.biset||'',isometria:!!e.isometria,isometriaSegs:e.isometriaSegs||'',restPause:!!e.restPause,obs:e.obs||''}))};
+  // Timeout de segurança: 15s — desbloqueia o botão mesmo se a Promise travar
+  const safetyTimer=setTimeout(()=>{
+    btn.classList.remove('btn-loading');btn.textContent='Salvar módulo';
+    errEl.textContent='Tempo esgotado. Verifique sua conexão e tente novamente.';
+  },15000);
   try{
-    const snap=await _getDoc(_doc(_db,'plans',ST.modulePlanId));
-    if(!snap.exists)throw new Error('Plano não encontrado.');
+    // Busca o plano com retry (resolve race condition de leitura)
+    let snap,attempts=0;
+    while(attempts<3){
+      try{snap=await _getDoc(_doc(_db,'plans',ST.modulePlanId));break;}
+      catch(fetchErr){attempts++;if(attempts>=3)throw fetchErr;await new Promise(r=>setTimeout(r,600));}
+    }
+    if(!snap||!snap.exists)throw new Error('Plano não encontrado.');
     const workouts=[...(snap.data().workouts||[])];
     if(ST.moduleIndex!==null&&ST.moduleIndex!==undefined){workouts[ST.moduleIndex]=moduleData;}else{workouts.push(moduleData);}
     await _updateDoc(_doc(_db,'plans',ST.modulePlanId),{workouts});
+    clearTimeout(safetyTimer);
+    // Atualiza snapshot para evitar falso alerta de "alterações não salvas"
+    ST._moduleSnapshot=JSON.stringify(ST.workoutBlocks&&ST.workoutBlocks[0]);
     toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Módulo salvo!');
     closeModal('modal-module');
     await openStudentDetail(ST.moduleStudentId);
-  }catch(e){document.getElementById('module-error').textContent='Erro: '+e.message;toast('Erro ao salvar.','error');}
+  }catch(e){
+    clearTimeout(safetyTimer);
+    errEl.textContent='Erro: '+e.message;
+    toast('Erro ao salvar. Tente novamente.','error');
+  }
   finally{btn.classList.remove('btn-loading');btn.textContent='Salvar módulo';}
 };
 
