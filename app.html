@@ -6074,10 +6074,21 @@ async function processPaymentWithToken(token) {
 // ── Ativa assinatura no Firestore e na sessao local ───────────────────────────
 async function activateSubscription(managerId, plan, paymentResult) {
   try {
-    var now      = Date.now();
+    var now = Date.now();
     var subEndsAt = plan === 'annual'
       ? now + 365 * 24 * 60 * 60 * 1000
       : now +  30 * 24 * 60 * 60 * 1000;
+
+    // Se managerId vazio, tenta buscar pelo username da sessão
+    if(!managerId && window.CURRENT_USER && window.CURRENT_USER.username) {
+      try {
+        var snap = await _getDocs(_query(_col(_db,'managers'), _where('username','==',window.CURRENT_USER.username)));
+        if(!snap.empty) {
+          managerId = snap.docs[0].id;
+          window.CURRENT_USER.id = managerId;
+        }
+      } catch(e) { console.warn('activateSubscription: nao achou managerId', e); }
+    }
 
     if(managerId) {
       await _updateDoc(_doc(_db, 'managers', managerId), {
@@ -6091,7 +6102,11 @@ async function activateSubscription(managerId, plan, paymentResult) {
           date:      Date.now()
         }
       });
+      console.log('activateSubscription: subEndsAt salvo para', managerId);
+    } else {
+      console.error('activateSubscription: managerId nao encontrado, assinatura NAO salva no Firestore!');
     }
+
     if(window.CURRENT_USER) {
       window.CURRENT_USER.subEndsAt   = subEndsAt;
       window.CURRENT_USER.trialEndsAt = null;
@@ -7088,11 +7103,17 @@ window.regSubmitPayment = async function() {
     document.getElementById('reg-processing').style.display = 'none';
 
     if(result.status==='approved'||result.status==='authorized') {
+      try {
+        var now = Date.now();
+        var subEndsAt = _regSelectedPlan==='annual' ? now+365*24*60*60*1000 : now+30*24*60*60*1000;
+        await _db.collection('managers').doc(_regNewId).update({
+          subEndsAt: subEndsAt, trialEndsAt: null,
+          lastPayment: { plan:_regSelectedPlan, amount:regGetAmount(), paymentId:String(result.id||''), status:result.status||'approved', date:Date.now() }
+        });
+      } catch(fsErr){ console.error('activateSubscription reg error:', fsErr); }
       document.getElementById('reg-success').style.display = 'block';
       document.getElementById('reg-success-msg').textContent =
-        _regSelectedPlan==='annual'
-          ? 'Plano anual ativado! Acesso liberado por 12 meses.'
-          : 'Plano mensal ativado! Acesso liberado por 30 dias.';
+        _regSelectedPlan==='annual' ? 'Plano anual ativado! Acesso liberado por 12 meses.' : 'Plano mensal ativado! Acesso liberado por 30 dias.';
     } else if(result.status==='pending'||result.status==='in_process') {
       document.getElementById('reg-success').style.display = 'block';
       document.getElementById('reg-success-msg').textContent = 'Pagamento em análise. Você receberá a confirmação em breve.';
