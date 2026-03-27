@@ -45,8 +45,8 @@
       --shadow: 0 2px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
       --shadow-md: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
     }
-    html { scroll-behavior: smooth; touch-action: pan-x pan-y; overflow-x: hidden; }
-    body { font-family: var(--body); background: var(--bg); color: var(--text); min-height: 100vh; touch-action: pan-x pan-y; overflow-x: hidden; }
+    html { scroll-behavior: smooth; overflow: hidden; height: 100%; overscroll-behavior: none; }
+    body { font-family: var(--body); background: var(--bg); color: var(--text); height: 100%; overflow: hidden; overscroll-behavior: none; }
     button, a, label, [onclick] { touch-action: manipulation; cursor: pointer; }
     button { border: none; font-family: inherit; }
     input, select, textarea { font-family: inherit; touch-action: manipulation; }
@@ -113,13 +113,20 @@
     .freq-cal-weekdays { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 6px; }
     .freq-cal-wday { text-align: center; font-size: .62rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; padding: 4px 0; }
     .freq-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
-    .freq-cal-day { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 600; color: var(--text2); position: relative; }
+    .freq-cal-day { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 600; color: var(--text2); position: relative; transition: transform .1s, box-shadow .1s; }
     .freq-cal-day.empty { pointer-events: none; }
     .freq-cal-day.trained { background: var(--green-dim); color: var(--green); font-weight: 800; border: 1.5px solid rgba(46,125,82,.35); }
     .freq-cal-day.trained::after { content: '✓'; position: absolute; bottom: 2px; right: 3px; font-size: .5rem; color: var(--green); font-weight: 900; }
+    .freq-cal-day.missed-cal { background: var(--red-dim); color: var(--red); font-weight: 700; border: 1.5px solid rgba(224,62,62,.25); }
+    .freq-cal-day.missed-cal::after { content: '!'; position: absolute; bottom: 2px; right: 3px; font-size: .5rem; color: var(--red); font-weight: 900; }
+    .freq-cal-day.rest-cal { background: var(--surface2); color: var(--text3); font-weight: 600; border: 1.5px solid var(--border); }
+    .freq-cal-day.rest-cal::after { content: 'Z'; position: absolute; bottom: 2px; right: 3px; font-size: .45rem; color: var(--text3); font-weight: 900; }
+    .freq-cal-day[style*="cursor:pointer"]:hover { transform: scale(1.12); box-shadow: 0 2px 8px rgba(0,0,0,.12); z-index: 1; }
     .freq-cal-day.today-cal { border: 2px solid var(--accent); font-weight: 800; color: #8a6200; }
     .freq-cal-day.trained.today-cal { color: var(--green); }
-    .freq-cal-footer { padding: 14px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .freq-tl-dot-clickable { transition: transform .12s, box-shadow .12s; }
+    .freq-tl-dot-clickable:hover { transform: scale(1.18); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    .freq-cal-footer { padding: 14px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .freq-cal-month-stat { font-size: .8rem; font-weight: 700; color: var(--text2); }
     .freq-cal-month-stat strong { color: var(--text); }
 
@@ -208,9 +215,10 @@
 
     #screen-login {
       display: flex; align-items: flex-start; justify-content: center;
-      min-height: 100vh; padding: 80px 24px 24px;
+      height: 100%; padding: 80px 24px 24px;
       background: #f0f0ef;
-      position: relative; overflow: hidden;
+      position: relative; overflow: auto;
+      overscroll-behavior: none;
     }
     #login-bg-canvas {
       position: absolute; inset: 0; z-index: 0; pointer-events: none;
@@ -251,7 +259,7 @@
     #screen-login .form-control::placeholder { color: rgba(255,255,255,0.38); }
     #screen-login .form-control:focus { border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.22); box-shadow: 0 0 0 3px rgba(255,255,255,0.10); color: #ffffff; outline: none; }
 
-    #screen-dashboard { display: none; flex-direction: column; min-height: 100vh; }
+    #screen-dashboard { display: none; flex-direction: column; height: 100%; overflow: hidden; }
     .topbar { background: #111110; border-bottom: 1px solid #2e2e2a; padding: 0 24px; height: 62px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.3); }
     .topbar-brand { font-family: var(--head); font-size: 1.2rem; font-weight: 800; color: #ffffff; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
     .topbar-brand .dot { width: 8px; height: 8px; border-radius: 50%; background: #ffffff; }
@@ -263,14 +271,14 @@
     .gear-btn:hover { color: var(--accent); background: rgba(245,200,0,.1); transform: rotate(45deg); }
 
     .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); min-height: 0; }
-    .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 10px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; overflow-y: auto; }
+    .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 10px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
     .sidebar-section { font-size: .68rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .12em; padding: 14px 12px 8px; }
     .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--r); font-size: .88rem; font-weight: 600; color: var(--text2); cursor: pointer; transition: all .15s; position: relative; }
     .sidebar-item:hover { background: var(--surface2); color: var(--text); }
     .sidebar-item.active { background: var(--accent-dim); color: #111110; font-weight: 700; }
     .sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 60%; background: var(--accent); border-radius: 0 3px 3px 0; }
 
-    .main-content { flex: 1; overflow-y: auto; padding: 28px; background: var(--bg); display: flex; flex-direction: column; }
+    .main-content { flex: 1; overflow-y: auto; padding: 28px; background: var(--bg); display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; flex: 1; }
     /* O tab de chat precisa de flex para distribuir altura */
@@ -3077,6 +3085,7 @@ function _modalTouchMove(e){
 }
 const genCode=()=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('')};
 const initials=n=>{const p=n.trim().split(' ');return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():n.slice(0,2).toUpperCase()};
+const fmtLocalYMD=(date=new Date())=>{const d=new Date(date);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 
 window.isExpired=p=>{if(!p.expiry)return false;return new Date(p.expiry)<new Date(new Date().toDateString())};
 window.isNotStarted=p=>{if(!p.startDate)return false;return new Date(p.startDate+'T00:00')>new Date(new Date().toDateString())};
@@ -3423,7 +3432,7 @@ window.addStudent = async () => {
     // Save initial assessment if physical data provided
     if(hasPhysical) {
       await _setDoc(_doc(_db,'students',studentId,'assessments',Date.now().toString()), {
-        date: new Date().toISOString().split('T')[0],
+        date: fmtLocalYMD(),
         ts: Date.now(),
         weight, height, imc, fat, measures
       });
@@ -3514,7 +3523,7 @@ window.saveEditStudent = async () => {
     // Save assessment if physical data filled
     if(hasPhysical) {
       await _setDoc(_doc(_db,'students',sid,'assessments',Date.now().toString()), {
-        date: new Date().toISOString().split('T')[0],
+        date: fmtLocalYMD(),
         ts: Date.now(),
         weight, height, imc, fat, measures
       });
@@ -3547,6 +3556,15 @@ window.showStudentsList=()=>{
 };
 
 window.openStudentDetail = async sid => {
+  // Cancela listener de frequência do aluno anterior, se houver
+  if (window._freqUnsubMap) {
+    Object.keys(window._freqUnsubMap).forEach(prevSid => {
+      if (prevSid !== sid && window._freqUnsubMap[prevSid]) {
+        window._freqUnsubMap[prevSid]();
+        delete window._freqUnsubMap[prevSid];
+      }
+    });
+  }
   const s = ST.students.find(x => x.id === sid); if(!s) return; ST.currentStudentId = sid;
   const snap = await _getDocs(_query(_col(_db,'plans'),_where('studentId','==',sid)));
   const plans = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.createdAt-a.createdAt);
@@ -3767,102 +3785,161 @@ window.loadStudentEvolution = async function(sid) {
 };
 
 // ── Frequência de Treinos ──
-window._freqCalState = {}; // { sid: { year, month } }
+// ══════════════════════════════════════════════════════════════
+// SISTEMA DE FREQUÊNCIA — attendance/{studentId}/days/{YYYY-MM-DD}
+// Hora sempre via API do Brasil, fallback Intl
+// Treinador pode clicar em qualquer bolinha para alternar status
+// ══════════════════════════════════════════════════════════════
+
+window._freqCalState    = {}; // { sid: { year, month } }
+window._freqAttData     = {}; // { sid: { 'YYYY-MM-DD': 'trained'|'missed'|'rest' } }
+window._freqUnsubMap    = {}; // { sid: unsubFn }
+window._freqTodayBRCache = null;
+
+// Obtém data BR (America/Sao_Paulo) em YYYY-MM-DD via API, fallback Intl
+async function _trainerFreqGetTodayBR() {
+  if (window._freqTodayBRCache) return window._freqTodayBRCache;
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 3000);
+    const r = await fetch('https://worldtimeapi.org/api/timezone/America/Sao_Paulo', {signal: ctrl.signal});
+    clearTimeout(tid);
+    const j = await r.json();
+    const ds = j.datetime.slice(0,10);
+    window._freqTodayBRCache = ds;
+    const now = new Date(j.datetime);
+    const msTilMid = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1) - now;
+    setTimeout(() => { window._freqTodayBRCache = null; }, msTilMid + 500);
+    return ds;
+  } catch(e) {
+    const ds = new Date().toLocaleDateString('sv-SE', {timeZone:'America/Sao_Paulo'});
+    window._freqTodayBRCache = ds;
+    setTimeout(() => { window._freqTodayBRCache = null; }, 60000);
+    return ds;
+  }
+}
+
+// Escreve um status de attendance (trainer pode editar qualquer dia)
+async function _trainerFreqWrite(sid, dateStr, status) {
+  await _db.collection('attendance').doc(sid).collection('days').doc(dateStr).set({
+    status,
+    updatedAt: Date.now(),
+    updatedBy: (window.CURRENT_USER && window.CURRENT_USER.username) || 'trainer'
+  }, {merge: true});
+}
+
+// Inicia listener onSnapshot para um aluno
+function _trainerFreqStartListener(sid) {
+  if (window._freqUnsubMap[sid]) { window._freqUnsubMap[sid](); }
+  const ref = _db.collection('attendance').doc(sid).collection('days');
+  window._freqUnsubMap[sid] = ref.onSnapshot(snap => {
+    const att = {};
+    snap.docs.forEach(d => { att[d.id] = d.data().status || 'trained'; });
+    window._freqAttData[sid] = att;
+    // Re-renderiza se o container ainda estiver na tela
+    const container = document.getElementById('freq-content-' + sid);
+    if (container) _trainerRenderFreqSection(sid, container);
+  }, err => console.warn('freq listener trainer:', err));
+}
 
 window.loadStudentFrequency = async function(sid) {
   const container = document.getElementById('freq-content-' + sid);
   if (!container) return;
-  // If already loaded and not spinner, don't reload
-  if (container.querySelector('.freq-tl-row')) return;
-  container.innerHTML = '<div class="spinner"></div>';
-  try {
-    // Busca notificações de treino deste aluno
-    const snap = await _getDocs(_query(
-      _col(_db, 'notifications'),
-      _where('studentId', '==', sid)
-    ));
-    const allNotifs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const workoutNotifs = allNotifs.filter(n =>
-      n.type === 'workout_started' || n.type === 'workout_done' || n.type === 'workout_finished'
-    );
-
-    // Extrai datas únicas no formato 'YYYY-MM-DD'
-    const trainedDays = new Set();
-    workoutNotifs.forEach(n => {
-      const ts = n.timestamp || n.ts || n.date;
-      if (!ts) return;
-      const d = new Date(typeof ts === 'number' ? ts : ts);
-      if (isNaN(d)) return;
-      trainedDays.add(d.toISOString().slice(0, 10));
-    });
-
-    renderFrequencySection(sid, trainedDays, container);
-  } catch(e) {
-    container.innerHTML = `<div style="color:var(--text3);padding:20px;font-size:.85rem;">Erro ao carregar frequência: ${e.message}</div>`;
-  }
+  container.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:6px auto;"></div>';
+  // Garante data BR em cache
+  await _trainerFreqGetTodayBR();
+  // Inicia listener (substitui eventual listener anterior deste sid)
+  _trainerFreqStartListener(sid);
 };
 
-function renderFrequencySection(sid, trainedDays, container) {
-  const now = new Date();
-  const todayStr = now.toISOString().slice(0, 10);
+function _trainerRenderFreqSection(sid, container) {
+  const att = window._freqAttData[sid] || {};
+  const todayStr = window._freqTodayBRCache || new Date().toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'});
   const DAY_LABELS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
-  // ── Semana atual (Seg–Dom) ──
-  const weekStart = new Date(now);
-  const dow = now.getDay();
-  const diffToMon = (dow === 0) ? -6 : 1 - dow;
-  weekStart.setDate(now.getDate() + diffToMon);
+  const todayDate = new Date(todayStr + 'T12:00:00');
+  const dow = todayDate.getDay();
+  const weekStart = new Date(todayDate);
+  weekStart.setDate(todayDate.getDate() + ((dow === 0) ? -6 : 1 - dow));
 
   let dotsHTML = '';
   for (let i = 0; i < 7; i++) {
     const d = new Date(weekStart);
     d.setDate(weekStart.getDate() + i);
-    const ds = d.toISOString().slice(0, 10);
-    const trained  = trainedDays.has(ds);
+    const ds = d.toLocaleDateString('sv-SE');
+    const status   = att[ds] || null;
+    const trained  = status === 'trained';
+    const missed   = status === 'missed';
+    const rest     = status === 'rest';
     const isToday  = ds === todayStr;
     const isFuture = ds > todayStr;
     const isPast   = ds < todayStr;
     const dayLabel = DAY_LABELS[d.getDay()];
 
-    // linha conectora antes de cada bolinha (exceto a primeira)
-    const lineClass = trained ? ' trained' : (isPast && !isToday ? ' missed' : '');
-    const line = i > 0
-      ? `<div class="freq-tl-line${lineClass}"></div>`
-      : '';
+    let lineClass = '';
+    if (trained) lineClass = ' trained';
+    else if (missed || (isPast && !isToday && !rest)) lineClass = ' missed';
 
-    let dotClass = 'freq-tl-dot';
+    const line = i > 0 ? `<div class="freq-tl-line${lineClass}"></div>` : '';
+
+    let dotClass = 'freq-tl-dot freq-tl-dot-clickable';
     let dotInner = '';
+    // Tooltip para indicar que é clicável
+    const tipMap = {trained:'Treinado — clique para alterar', missed:'Faltou — clique para alterar',
+      rest:'Descanso — clique para alterar', future:'Dia futuro', today:'Hoje — clique para marcar'};
+    let tip = '';
 
     if (trained) {
-      dotClass += ' trained';
+      dotClass += ' trained'; tip = tipMap.trained;
       dotInner = `<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    } else if (rest) {
+      dotClass += ' future'; tip = tipMap.rest;
+      dotInner = `<span style="font-size:.62rem;font-weight:900;color:var(--text3);line-height:1;">Z</span>`;
     } else if (isFuture) {
-      dotClass += ' future';
+      dotClass += ' future'; tip = tipMap.future;
       dotInner = `<div style="width:5px;height:5px;border-radius:50%;background:var(--border2);opacity:.4;"></div>`;
     } else if (isToday) {
-      dotClass += ' today';
+      dotClass += ' today'; tip = tipMap.today;
       dotInner = `<div style="width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.7;"></div>`;
-    } else {
-      // dia passado sem treino → !
-      dotClass += ' missed';
+    } else if (missed) {
+      dotClass += ' missed'; tip = tipMap.missed;
+      dotInner = `<span style="font-size:.7rem;font-weight:900;color:var(--red);line-height:1;">!</span>`;
+    } else if (isPast) {
+      dotClass += ' missed'; tip = tipMap.missed;
       dotInner = `<span style="font-size:.7rem;font-weight:900;color:var(--red);line-height:1;">!</span>`;
     }
+
+    // Dias futuros não são editáveis
+    const clickable = !isFuture;
+    const clickAttr = clickable
+      ? `onclick="event.stopPropagation();_trainerFreqToggle('${sid}','${ds}')" title="${tip}" style="cursor:pointer;"`
+      : `title="${tip}"`;
 
     dotsHTML += `
       ${line}
       <div class="freq-tl-item">
-        <div class="${dotClass}">${dotInner}</div>
+        <div class="${dotClass}" ${clickAttr}>${dotInner}</div>
         <span class="freq-tl-lbl${isToday ? ' today' : ''}">${dayLabel}</span>
       </div>`;
   }
 
   container.innerHTML = `<div class="freq-tl-row">${dotsHTML}</div>`;
-
-  // Armazena dados para o calendário
-  window._freqData = window._freqData || {};
-  window._freqData[sid] = trainedDays;
-  window._freqCalState[sid] = { year: now.getFullYear(), month: now.getMonth() };
+  window._freqCalState[sid] = { year: todayDate.getFullYear(), month: todayDate.getMonth() };
 }
+
+// Toggle de status ao clicar numa bolinha (trainer)
+// Ciclo: sem registro → trained → missed → rest → trained
+window._trainerFreqToggle = async function(sid, ds) {
+  const att = window._freqAttData[sid] || {};
+  const cur = att[ds] || null;
+  const next = cur === null ? 'trained' : cur === 'trained' ? 'missed' : cur === 'missed' ? 'rest' : 'trained';
+  try {
+    await _trainerFreqWrite(sid, ds, next);
+    // onSnapshot atualiza automaticamente
+  } catch(e) {
+    toast('Erro ao salvar frequência: ' + e.message, 'error');
+  }
+};
 
 window.toggleFreqCalendar = function(sid) {
   const chevron = document.getElementById('freq-chevron-' + sid);
@@ -3871,15 +3948,13 @@ window.toggleFreqCalendar = function(sid) {
 };
 
 window.openFreqCalendar = function(sid) {
-  // Remove calendário existente se houver
   const existing = document.getElementById('freq-cal-overlay-' + sid);
   if (existing) {
     existing.remove();
-    document.body.style.overflow='';
-    document.body.style.touchAction='';
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
     return;
   }
-
   const state = window._freqCalState[sid] || { year: new Date().getFullYear(), month: new Date().getMonth() };
   renderFreqCalendar(sid, state.year, state.month);
 };
@@ -3888,34 +3963,36 @@ window.renderFreqCalendar = function(sid, year, month) {
   const existing = document.getElementById('freq-cal-overlay-' + sid);
   if (existing) existing.remove();
 
-  const trainedDays = window._freqData && window._freqData[sid] ? window._freqData[sid] : new Set();
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const att = window._freqAttData[sid] || {};
+  const todayStr = window._freqTodayBRCache || new Date().toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'});
   const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const WDAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const WDAYS  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
   const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const startOffset = firstDay.getDay(); // 0=Dom
-  const totalDays = lastDay.getDate();
-
-  // Dias treinados neste mês
-  const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
-  const monthCount = [...trainedDays].filter(d => d.startsWith(monthPrefix)).length;
+  const lastDay  = new Date(year, month + 1, 0);
+  const startOffset = firstDay.getDay();
+  const totalDays   = lastDay.getDate();
+  const monthPrefix = `${year}-${String(month+1).padStart(2,'0')}`;
+  const monthCount  = Object.keys(att).filter(d => d.startsWith(monthPrefix) && att[d]==='trained').length;
 
   let gridHTML = '';
-  // Células vazias antes do primeiro dia
-  for (let i = 0; i < startOffset; i++) {
-    gridHTML += '<div class="freq-cal-day empty"></div>';
-  }
-  // Dias do mês
+  for (let i = 0; i < startOffset; i++) gridHTML += '<div class="freq-cal-day empty"></div>';
   for (let d = 1; d <= totalDays; d++) {
-    const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const trained = trainedDays.has(ds);
+    const ds = `${monthPrefix}-${String(d).padStart(2,'0')}`;
+    const status  = att[ds] || null;
+    const trained = status === 'trained';
+    const missed  = status === 'missed';
+    const rest    = status === 'rest';
     const isToday = ds === todayStr;
-    gridHTML += `<div class="freq-cal-day${trained ? ' trained' : ''}${isToday ? ' today-cal' : ''}">${d}</div>`;
+    const isFuture = ds > todayStr;
+    let cls = 'freq-cal-day';
+    if (trained) cls += ' trained';
+    else if (missed) cls += ' missed-cal';
+    else if (rest)   cls += ' rest-cal';
+    if (isToday) cls += ' today-cal';
+    const clickable = !isFuture;
+    gridHTML += `<div class="${cls}"${clickable ? ` onclick="_trainerFreqToggle('${sid}','${ds}')" style="cursor:pointer;" title="Clique para alternar status"` : ''}>${d}</div>`;
   }
-
-  const wdaysHTML = WDAYS.map(w => `<div class="freq-cal-wday">${w}</div>`).join('');
 
   const overlay = document.createElement('div');
   overlay.className = 'freq-cal-overlay';
@@ -3925,51 +4002,71 @@ window.renderFreqCalendar = function(sid, year, month) {
       <div class="freq-cal-header">
         <div class="freq-cal-title">${MONTHS[month]} ${year}</div>
         <div class="freq-cal-nav">
-          <button onclick="freqCalNav('${sid}',${year},${month},-1)" title="Mês anterior">
+          <button data-dir="-1" title="Mês anterior">
             <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <button onclick="freqCalNav('${sid}',${year},${month},1)" title="Próximo mês">
+          <button data-dir="1" title="Próximo mês">
             <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
       </div>
       <div class="freq-cal-body">
-        <div class="freq-cal-weekdays">${wdaysHTML}</div>
+        <div class="freq-cal-weekdays">${WDAYS.map(w => `<div class="freq-cal-wday">${w}</div>`).join('')}</div>
         <div class="freq-cal-grid">${gridHTML}</div>
       </div>
       <div class="freq-cal-footer">
-        <div class="freq-cal-month-stat"><strong>${monthCount}</strong> dia${monthCount !== 1 ? 's' : ''} treinado${monthCount !== 1 ? 's' : ''} em ${MONTHS[month]}</div>
-        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('freq-cal-overlay-${sid}').remove();document.body.style.overflow='';document.body.style.touchAction='';document.getElementById('freq-chevron-${sid}') && document.getElementById('freq-chevron-${sid}').classList.remove('open')">Fechar</button>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <div class="freq-cal-month-stat"><strong>${monthCount}</strong> dia${monthCount !== 1 ? 's' : ''} treinado${monthCount !== 1 ? 's' : ''} em ${MONTHS[month]}</div>
+          <div style="font-size:.68rem;color:var(--text3);font-weight:600;">Clique nos dias para editar</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="freq-cal-close-${sid}">Fechar</button>
       </div>
     </div>
   `;
+
+  overlay.querySelectorAll('.freq-cal-nav button').forEach(btn => {
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      const dir = parseInt(btn.dataset.dir);
+      let m = month + dir, y = year;
+      if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; }
+      renderFreqCalendar(sid, y, m);
+    };
+  });
+
+  overlay.querySelector('#freq-cal-close-' + sid).onclick = function() {
+    overlay.remove();
+    const chevron = document.getElementById('freq-chevron-' + sid);
+    if (chevron) chevron.classList.remove('open');
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+  };
+
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay) {
       overlay.remove();
       const chevron = document.getElementById('freq-chevron-' + sid);
       if (chevron) chevron.classList.remove('open');
-      document.body.style.overflow='';
-      document.body.style.touchAction='';
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
     }
   });
-  // Previne scroll da página atrás do overlay
   overlay.addEventListener('touchmove', function(e) {
-    var inner = overlay.querySelector('.freq-cal-modal');
-    var node = e.target;
+    const inner = overlay.querySelector('.freq-cal-modal');
+    let node = e.target;
     while (node && node !== overlay) { if (node === inner) return; node = node.parentNode; }
     e.preventDefault();
   }, {passive: false});
+
   document.body.appendChild(overlay);
-  document.body.style.overflow='hidden';
-  document.body.style.touchAction='none';
+  document.body.style.overflow = 'hidden';
+  document.body.style.touchAction = 'none';
   window._freqCalState[sid] = { year, month };
 };
 
 window.freqCalNav = function(sid, year, month, delta) {
-  let m = month + delta;
-  let y = year;
-  if (m < 0) { m = 11; y--; }
-  if (m > 11) { m = 0; y++; }
+  let m = month + delta, y = year;
+  if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; }
   renderFreqCalendar(sid, y, m);
 };
 
