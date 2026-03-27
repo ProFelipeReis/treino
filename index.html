@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Trainly — Bem-vindo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --accent: #f5c800;
+      --head: 'Nunito', sans-serif;
+      --body: 'Plus Jakarta Sans', sans-serif;
+    }
+    html, body { height: 100%; font-family: var(--body); overflow: hidden; }
+
+    #screen {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background: #f0f0ef;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 80px;
+      overflow: hidden;
+    }
+
+    canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 380px;
+      padding: 0 24px;
+    }
+
+    .logo {
+      height: 160px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      margin-bottom: 44px;
+      filter: drop-shadow(0 4px 24px rgba(0,0,0,0.5));
+      animation: fadeDown .6s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .welcome-label {
+      font-family: var(--head);
+      font-size: .72rem;
+      font-weight: 800;
+      color: rgba(255,255,255,0.65);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      margin-bottom: 10px;
+      animation: fadeDown .6s cubic-bezier(.22,1,.36,1) .1s both;
+    }
+
+    .welcome-title {
+      font-family: var(--head);
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: #ffffff;
+      text-align: center;
+      line-height: 1.25;
+      margin-bottom: 36px;
+      animation: fadeDown .6s cubic-bezier(.22,1,.36,1) .15s both;
+    }
+
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      animation: fadeUp .65s cubic-bezier(.22,1,.36,1) .25s both;
+    }
+
+    /* 
+      TRUQUE: o ::before do card copia a imagem de fundo exatamente
+      igual à página, mas aplica filter: blur() só nela.
+      Resultado: transparência embaçada real, sem depender de backdrop-filter sobre canvas.
+    */
+    .choice-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 20px 22px;
+      border-radius: 20px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .18s cubic-bezier(.22,1,.36,1), box-shadow .18s;
+      position: relative;
+      overflow: hidden;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.28);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.30), 0 1.5px 0 rgba(255,255,255,0.18) inset;
+    }
+
+    /* Camada embaçada: copia o fundo da página e aplica blur */
+    .choice-card::before {
+      content: '';
+      position: absolute;
+      inset: -4px; /* margem extra pra o blur não cortar nas bordas */
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.08) 60%),
+        url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed;
+      filter: blur(14px);
+      z-index: 0;
+    }
+
+    .choice-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.07);
+      z-index: 1;
+      border-radius: 0;
+    }
+
+    .choice-card.personal::after {
+      background: rgba(10,10,8,0.20);
+    }
+
+    /* brilho no topo */
+    .card-shine {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.13) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    .choice-card.personal {
+      border-color: rgba(255,255,255,0.22);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 1.5px 0 rgba(255,255,255,0.14) inset;
+    }
+
+    .choice-card.personal .card-shine {
+      background: linear-gradient(135deg, rgba(255,255,255,0.13) 0%, transparent 55%);
+    }
+
+    .choice-card:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 1.5px 0 rgba(255,255,255,0.14) inset;
+    }
+
+    .choice-card:active { transform: translateY(0) scale(0.99); }
+
+    /* Todos os filhos diretos do card ficam acima do blur */
+    .card-icon, .card-text, .card-arrow, .card-shine {
+      position: relative;
+      z-index: 3;
+    }
+
+    .card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.30);
+      color: #ffffff;
+    }
+
+    .choice-card.personal .card-icon {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.30);
+      color: #ffffff;
+    }
+
+    .card-text { flex: 1; }
+
+    .card-title {
+      font-family: var(--head);
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+
+    .choice-card.personal .card-title { color: #ffffff; }
+
+    .card-sub {
+      font-size: .78rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.68);
+    }
+
+    .choice-card.personal .card-sub { color: rgba(255,255,255,0.68); }
+
+    .card-arrow {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.30);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.90);
+      flex-shrink: 0;
+      transition: background .18s, transform .18s;
+    }
+
+    .choice-card:hover .card-arrow {
+      background: rgba(255,255,255,0.28);
+      transform: translateX(2px);
+    }
+
+    .choice-card.personal .card-arrow {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.30);
+      color: rgba(255,255,255,0.90);
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+<script>
+  // Redireciona automaticamente se o usuário já escolheu antes
+  (function(){
+    try {
+      var role = localStorage.getItem('trainly_role');
+      if (role === 'trainer') { window.location.replace('https://trainly.online/app'); }
+      else if (role === 'aluno') { window.location.replace('https://trainly.online/aluno'); }
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+<div id="screen">
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="content">
+    <img src="https://i.imgur.com/orva0oM.png" alt="Trainly" class="logo"/>
+
+    <div class="welcome-label">Bem-vindo ao Trainly</div>
+    <div class="welcome-title">Quem é você?</div>
+
+    <div class="cards">
+
+      <!-- Personal Trainer -->
+      <a href="https://trainly.online/app" class="choice-card personal" onclick="try{localStorage.setItem('trainly_role','trainer')}catch(e){}">
+        <div class="card-shine"></div>
+        <div class="card-text">
+          <div class="card-title">Personal Trainer</div>
+          <div class="card-sub">Gerencie alunos e treinos</div>
+        </div>
+        <div class="card-arrow">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </a>
+
+      <!-- Aluno -->
+      <a href="https://trainly.online/aluno" class="choice-card" onclick="try{localStorage.setItem('trainly_role','aluno')}catch(e){}">
+        <div class="card-shine"></div>
+        <div class="card-text">
+          <div class="card-title">Aluno</div>
+          <div class="card-sub">Acesse seus treinos e evolução</div>
+        </div>
+        <div class="card-arrow">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, squares;
+
+  const bgImg = new Image();
+  bgImg.crossOrigin = 'anonymous';
+  bgImg.src = 'https://i.imgur.com/Fjj25UX.jpeg';
+  let bgLoaded = false;
+  bgImg.onload = function(){ bgLoaded = true; };
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function mkSquare(){
+    const size = 28 + Math.random() * 68;
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      size,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.007,
+      alpha: 0.05 + Math.random() * 0.12,
+      dx: (Math.random() - 0.5) * 0.35,
+      dy: -(0.25 + Math.random() * 0.45),
+    };
+  }
+
+  function init(){
+    resize();
+    squares = Array.from({length: 40}, mkSquare);
+  }
+
+  function getDividerY(px){
+    const leftY  = H * 1.05;
+    const rightY = H * 0.82;
+    return leftY + (px / W) * (rightY - leftY);
+  }
+
+  function isAbove(px, py){ return py < getDividerY(px); }
+
+  function drawBg(){
+    const leftY  = getDividerY(0);
+    const rightY = getDividerY(W);
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(W, 0);
+    ctx.lineTo(W, rightY);
+    ctx.lineTo(0, leftY);
+    ctx.closePath();
+    ctx.fillStyle = '#111110';
+    ctx.fill();
+
+    if(bgLoaded){
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(W, 0);
+      ctx.lineTo(W, rightY);
+      ctx.lineTo(0, leftY);
+      ctx.closePath();
+      ctx.clip();
+      const iw = bgImg.naturalWidth, ih = bgImg.naturalHeight;
+      const scale = Math.max(W / iw, Math.max(leftY, rightY) / ih);
+      const dw = iw * scale, dh = ih * scale;
+      const dx = (W - dw) / 2, dy = -dh * 0.05;
+      ctx.globalAlpha = 0.22;
+      ctx.drawImage(bgImg, dx, dy, dw, dh);
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(0, leftY);
+    ctx.lineTo(W, rightY);
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  function drawSquare(s){
+    const above = isAbove(s.x, s.y);
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.rotate(s.rot);
+    ctx.globalAlpha = s.alpha;
+    ctx.strokeStyle = above ? 'rgba(255,255,255,0.18)' : 'rgba(17,17,16,0.22)';
+    ctx.fillStyle   = above ? 'rgba(46,46,42,0.30)'    : 'rgba(46,46,42,0.08)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.rect(-s.size/2, -s.size/2, s.size, s.size);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function step(){
+    ctx.clearRect(0, 0, W, H);
+    drawBg();
+    squares.forEach(s => {
+      s.x += s.dx; s.y += s.dy; s.rot += s.rotSpeed;
+      if(s.y + s.size < 0){ s.y = H + s.size; s.x = Math.random() * W; }
+      if(s.x - s.size > W) s.x = -s.size;
+      if(s.x + s.size < 0) s.x = W + s.size;
+      drawSquare(s);
+    });
+    requestAnimationFrame(step);
+  }
+
+  init();
+  step();
+  window.addEventListener('resize', resize);
+})();
+</script>
+</body>
+</html>
