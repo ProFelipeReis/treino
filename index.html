@@ -235,8 +235,10 @@
   </style>
 <script>
   // Redireciona automaticamente se o usuário já escolheu antes
+  // ?choose=1 na URL significa que o usuário clicou em "Trocar perfil" — não redireciona
   (function(){
     try {
+      if (new URLSearchParams(window.location.search).get('choose') === '1') return;
       var role = localStorage.getItem('trainly_role');
       if (role === 'trainer') { window.location.replace('https://trainly.online/app'); }
       else if (role === 'aluno') { window.location.replace('https://trainly.online/aluno'); }
