@@ -352,6 +352,9 @@
     .freq-cal-day.empty { pointer-events: none; }
     .freq-cal-day.trained { background: var(--green-dim); color: var(--green); font-weight: 800; border: 1.5px solid rgba(46,125,82,.3); }
     .freq-cal-day.trained::after { content: '✓'; position: absolute; bottom: 1px; right: 2px; font-size: .48rem; color: var(--green); font-weight: 900; }
+    .freq-cal-day.missed-cal { background: var(--red-dim); color: var(--red); font-weight: 700; border: 1.5px solid rgba(224,62,62,.25); }
+    .freq-cal-day.missed-cal::after { content: '!'; position: absolute; bottom: 1px; right: 3px; font-size: .48rem; color: var(--red); font-weight: 900; }
+    .freq-cal-day.rest-cal { background: var(--surface2); color: var(--text3); font-weight: 600; border: 1.5px solid var(--border); }
     .freq-cal-day.today-cal { border: 2px solid var(--accent); font-weight: 800; color: #8a6200; }
     .freq-cal-day.trained.today-cal { color: var(--green); }
     .freq-cal-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
@@ -1818,85 +1821,132 @@ window.doLogout=(skipMessage)=>{
 // ══════════════════════════════════════════════════════
 // FREQUÊNCIA DE TREINOS — ALUNO
 // ══════════════════════════════════════════════════════
-window._freqTrainedDays = new Set(); // dias treinados (YYYY-MM-DD)
-window._freqCalState    = { year: new Date().getFullYear(), month: new Date().getMonth() };
+// ══════════════════════════════════════════════════════════════
+// SISTEMA DE FREQUÊNCIA — attendance/{studentId}/days/{YYYY-MM-DD}
+// Hora sempre via API do Brasil (worldtimeapi), fallback local
+// ══════════════════════════════════════════════════════════════
 
-function _freqTodayStr(){
-  const d=new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+window._freqAttendance   = {};   // { 'YYYY-MM-DD': 'trained'|'missed'|'rest' }
+window._freqTodayStrCache = null;
+window._freqUnsub        = null; // listener onSnapshot ativo
+window._freqCalState     = { year: new Date().getFullYear(), month: new Date().getMonth() };
+
+// Obtém a data atual no Brasil (America/Sao_Paulo) em formato YYYY-MM-DD
+// Usa a API worldtimeapi com fallback para Intl (não depende do relógio local)
+async function _freqGetTodayBR(){
+  if(window._freqTodayStrCache) return window._freqTodayStrCache;
+  try{
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),3000);
+    const r=await fetch('https://worldtimeapi.org/api/timezone/America/Sao_Paulo',{signal:ctrl.signal});
+    clearTimeout(tid);
+    const j=await r.json();
+    // datetime ex: "2025-03-26T23:10:00.123456-03:00"
+    const ds=j.datetime.slice(0,10);
+    window._freqTodayStrCache=ds;
+    // Expira o cache à meia-noite (recalcula no próximo dia)
+    const now=new Date(j.datetime);
+    const msTilMidnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1)-now;
+    setTimeout(()=>{ window._freqTodayStrCache=null; },msTilMidnight+500);
+    return ds;
+  }catch(e){
+    // Fallback: Intl com timezone de SP (não depende do relógio local estar certo)
+    const ds=new Date().toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'});
+    window._freqTodayStrCache=ds;
+    setTimeout(()=>{ window._freqTodayStrCache=null; },60000);
+    return ds;
+  }
+}
+
+// Grava ou atualiza presença de hoje na coleção attendance
+async function _freqWriteAttendance(studentId, status, note=''){
+  const todayStr=await _freqGetTodayBR();
+  const ref=doc(db,'attendance',studentId,'days',todayStr);
+  await setDoc(ref,{
+    status,
+    note,
+    updatedAt: Date.now(),
+    updatedBy: 'student'
+  },{merge:true});
+  return todayStr;
+}
+
+// Inicia escuta em tempo real da coleção attendance do aluno
+function _freqStartListener(studentId){
+  if(window._freqUnsub){ window._freqUnsub(); window._freqUnsub=null; }
+  const col=collection(db,'attendance',studentId,'days');
+  window._freqUnsub=onSnapshot(col,snap=>{
+    const att={};
+    snap.docs.forEach(d=>{ att[d.id]=d.data().status||'trained'; });
+    window._freqAttendance=att;
+    _renderFreqSection();
+  },err=>console.warn('freq listener:',err));
 }
 
 async function loadFrequencySection(student){
   const wrap=document.getElementById('freq-wrap');
   if(!wrap) return;
-  wrap.innerHTML=''; // limpa
-
-  try{
-    // Busca notificações de treino deste aluno
-    const snap=await getDocs(query(
-      collection(db,'notifications'),
-      where('studentId','==',student.id)
-    ));
-    const trainedDays=new Set();
-    snap.docs.forEach(d=>{
-      const n=d.data();
-      if(n.type==='workout_started'||n.type==='workout_done'||n.type==='workout_finished'){
-        const ts=n.timestamp||n.ts;
-        if(!ts) return;
-        const day=new Date(ts);
-        if(!isNaN(day)) trainedDays.add(day.toISOString().slice(0,10));
-      }
-    });
-    window._freqTrainedDays=trainedDays;
-  }catch(e){
-    window._freqTrainedDays=new Set();
-  }
-
-  renderFreqSection();
+  wrap.innerHTML='';
+  // Garante data BR em cache antes de renderizar
+  await _freqGetTodayBR();
+  _freqStartListener(student.id);
 }
 
-function renderFreqSection(){
+function _renderFreqSection(){
   const wrap=document.getElementById('freq-wrap');
   if(!wrap) return;
 
-  const trainedDays=window._freqTrainedDays;
-  const now=new Date();
-  const todayStr=_freqTodayStr();
+  const att=window._freqAttendance;
+  const todayStr=window._freqTodayStrCache||new Date().toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'});
   const DAY_LABELS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
-  // Semana atual: Seg → Dom
-  const weekStart=new Date(now);
-  const dow=now.getDay();
-  weekStart.setDate(now.getDate()+((dow===0)?-6:1-dow));
+  // Semana atual: Seg → Dom, calculada a partir de todayStr (BR)
+  const todayDate=new Date(todayStr+'T12:00:00');
+  const dow=todayDate.getDay();
+  const weekStart=new Date(todayDate);
+  weekStart.setDate(todayDate.getDate()+((dow===0)?-6:1-dow));
 
   let dotsHTML='';
   for(let i=0;i<7;i++){
     const d=new Date(weekStart);
     d.setDate(weekStart.getDate()+i);
-    const ds=d.toISOString().slice(0,10);
-    const trained  = trainedDays.has(ds);
+    const ds=d.toLocaleDateString('sv-SE'); // YYYY-MM-DD sem depender de toISOString
+    const status   = att[ds]||null;
+    const trained  = status==='trained';
+    const missed   = status==='missed';
+    const rest     = status==='rest';
     const isToday  = ds===todayStr;
     const isFuture = ds>todayStr;
     const isPast   = ds<todayStr;
     const dayLabel = DAY_LABELS[d.getDay()];
 
-    const lineClass=trained?' trained':(isPast&&!isToday?' missed':'');
+    let lineClass='';
+    if(trained) lineClass=' trained';
+    else if(missed||(isPast&&!isToday&&!rest)) lineClass=' missed';
+
     const line=i>0?`<div class="freq-tl-line${lineClass}"></div>`:'';
 
     let dotClass='freq-tl-dot';
     let dotInner='';
-    let dotId=isToday?'freq-today-dot':'';
+    const dotId=isToday?'freq-today-dot':'';
 
     if(trained){
       dotClass+=' trained';
       dotInner=`<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    }else if(rest){
+      dotClass+=' future'; // estilo neutro = descanso
+      dotInner=`<span style="font-size:.62rem;font-weight:900;color:var(--text3);line-height:1;">Z</span>`;
     }else if(isFuture){
       dotClass+=' future';
       dotInner=`<div style="width:5px;height:5px;border-radius:50%;background:var(--border2);opacity:.4;"></div>`;
     }else if(isToday){
       dotClass+=' today';
       dotInner=`<div style="width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.75;"></div>`;
-    }else{
+    }else if(missed){
+      dotClass+=' missed';
+      dotInner=`<span style="font-size:.7rem;font-weight:900;color:var(--red);line-height:1;">!</span>`;
+    }else if(isPast){
+      // passado sem registro = sem treino
       dotClass+=' missed';
       dotInner=`<span style="font-size:.7rem;font-weight:900;color:var(--red);line-height:1;">!</span>`;
     }
@@ -1920,21 +1970,17 @@ function renderFreqSection(){
     </div>`;
 }
 
-// Chamada quando o aluno INICIA um treino — anima a bolinha de hoje
-function freqMarkTodayTrained(){
-  const todayStr=_freqTodayStr();
-  if(window._freqTrainedDays.has(todayStr)) return; // já marcado
-  window._freqTrainedDays.add(todayStr);
-
-  // Re-renderiza a timeline
-  renderFreqSection();
-
-  // Aplica animação na bolinha de hoje
+// Chamada quando o aluno INICIA um treino — grava attendance E anima bolinha
+async function freqMarkTodayTrained(){
+  if(!_currentStudent) return;
+  try{
+    await _freqWriteAttendance(_currentStudent.id,'trained');
+  }catch(e){ console.warn('freq write:',e); }
+  // A animação é disparada pelo onSnapshot que atualiza _freqAttendance
   requestAnimationFrame(()=>{
     const dot=document.getElementById('freq-today-dot');
     if(!dot) return;
     dot.classList.remove('trained','today','just-trained');
-    // Força reflow para reiniciar animação
     void dot.offsetWidth;
     dot.classList.add('trained','just-trained');
     dot.innerHTML=`<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
@@ -1952,8 +1998,8 @@ window.renderStudentFreqCalendar=function(year, month){
   const existing=document.getElementById('student-freq-cal-overlay');
   if(existing) existing.remove();
 
-  const trainedDays=window._freqTrainedDays;
-  const todayStr=_freqTodayStr();
+  const att=window._freqAttendance||{};
+  const todayStr=window._freqTodayStrCache||new Date().toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'});
   const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const WDAYS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
@@ -1962,15 +2008,23 @@ window.renderStudentFreqCalendar=function(year, month){
   const startOffset=firstDay.getDay();
   const totalDays=lastDay.getDate();
   const monthPrefix=`${year}-${String(month+1).padStart(2,'0')}`;
-  const monthCount=[...trainedDays].filter(d=>d.startsWith(monthPrefix)).length;
+  const monthCount=Object.keys(att).filter(d=>d.startsWith(monthPrefix)&&att[d]==='trained').length;
 
   let gridHTML='';
   for(let i=0;i<startOffset;i++) gridHTML+='<div class="freq-cal-day empty"></div>';
   for(let d=1;d<=totalDays;d++){
     const ds=`${monthPrefix}-${String(d).padStart(2,'0')}`;
-    const trained=trainedDays.has(ds);
+    const status=att[ds]||null;
+    const trained=status==='trained';
+    const missed=status==='missed';
+    const rest=status==='rest';
     const isToday=ds===todayStr;
-    gridHTML+=`<div class="freq-cal-day${trained?' trained':''}${isToday?' today-cal':''}">${d}</div>`;
+    let cls='freq-cal-day';
+    if(trained) cls+=' trained';
+    else if(missed) cls+=' missed-cal';
+    else if(rest) cls+=' rest-cal';
+    if(isToday) cls+=' today-cal';
+    gridHTML+=`<div class="${cls}">${d}</div>`;
   }
 
   const overlay=document.createElement('div');
@@ -1981,10 +2035,10 @@ window.renderStudentFreqCalendar=function(year, month){
       <div class="freq-cal-header">
         <div class="freq-cal-title">${MONTHS[month]} ${year}</div>
         <div class="freq-cal-nav">
-          <button onclick="event.stopPropagation();renderStudentFreqCalendar(${year},${month},-1)" title="Mês anterior">
+          <button data-dir="-1" title="Mês anterior">
             <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <button onclick="event.stopPropagation();renderStudentFreqCalendar(${year},${month},1)" title="Próximo mês">
+          <button data-dir="1" title="Próximo mês">
             <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
@@ -1995,27 +2049,30 @@ window.renderStudentFreqCalendar=function(year, month){
       </div>
       <div class="freq-cal-footer">
         <div class="freq-cal-month-stat"><strong>${monthCount}</strong> dia${monthCount!==1?'s':''} treinado${monthCount!==1?'s':''} em ${MONTHS[month]}</div>
-        <button class="btn-cancel" style="padding:7px 14px;border-radius:8px;font-size:.8rem;font-weight:700;background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);cursor:pointer;" onclick="event.stopPropagation();document.getElementById('student-freq-cal-overlay').remove();document.body.style.overflow='';document.body.style.touchAction='';">Fechar</button>
+        <button class="btn-cancel" style="padding:7px 14px;border-radius:8px;font-size:.8rem;font-weight:700;background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);cursor:pointer;" id="freq-cal-close">Fechar</button>
       </div>
     </div>`;
 
-  // Navegação de mês com delta
-  overlay.querySelectorAll('.freq-cal-nav button').forEach((btn,idx)=>{
+  overlay.querySelectorAll('.freq-cal-nav button').forEach(btn=>{
     btn.onclick=function(e){
       e.stopPropagation();
-      let m=month+(idx===0?-1:1), y=year;
+      const dir=parseInt(btn.dataset.dir);
+      let m=month+dir, y=year;
       if(m<0){m=11;y--;} if(m>11){m=0;y++;}
       window._freqStudentCalState={year:y,month:m};
       renderStudentFreqCalendar(y,m);
     };
   });
 
+  overlay.querySelector('#freq-cal-close').onclick=function(e){
+    e.stopPropagation();
+    overlay.remove();
+    document.body.style.overflow='';
+    document.body.style.touchAction='';
+  };
+
   overlay.addEventListener('click',function(e){
-    if(e.target===overlay){
-      overlay.remove();
-      document.body.style.overflow='';
-      document.body.style.touchAction='';
-    }
+    if(e.target===overlay){ overlay.remove(); document.body.style.overflow=''; document.body.style.touchAction=''; }
   });
   overlay.addEventListener('touchmove',function(e){
     const inner=overlay.querySelector('.freq-cal-modal');
