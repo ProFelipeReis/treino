@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Mercado Pago SDK -->
+  <script>try{localStorage.setItem('trainly_role','trainer')}catch(e){}</script>
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <!-- Firebase SDK loaded early so login can query Firestore immediately -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
@@ -206,51 +207,49 @@
     .section-label.expired-label { color: var(--text3); }
 
     #screen-login {
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 24px;
+      display: flex; align-items: flex-start; justify-content: center;
+      min-height: 100vh; padding: 80px 24px 24px;
       background: #f0f0ef;
       position: relative; overflow: hidden;
     }
     #login-bg-canvas {
-      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
     }
     .login-card { position: relative; z-index: 2; }
     .login-card {
       width: 100%; max-width: 340px;
-      background: rgba(255,255,255,0.22);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
-      border: 1px solid rgba(255,255,255,0.22);
-      border-radius: 28px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 24px;
       padding: 36px 32px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.28), 0 1.5px 0 rgba(255,255,255,0.18) inset, 0 -1px 0 rgba(0,0,0,0.12) inset;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.30), 0 1.5px 0 rgba(255,255,255,0.18) inset;
       overflow: hidden;
     }
+    /* Camada embaçada com imagem de fundo */
     .login-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 52%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 60%, transparent 100%);
-      border-radius: 28px 28px 60% 60% / 28px 28px 40px 40px;
-      pointer-events: none;
+      inset: -4px;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.50) 0%, rgba(0,0,0,0.25) 60%),
+        url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed;
+      filter: blur(14px);
       z-index: 0;
     }
+    /* Overlay escuro moderado */
     .login-card::after {
       content: '';
       position: absolute;
       inset: 0;
-      border-radius: 28px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
-      pointer-events: none;
-      z-index: 0;
+      background: rgba(10,10,8,0.28);
+      z-index: 1;
     }
-    .login-card > * { position: relative; z-index: 1; }
+    .login-card > * { position: relative; z-index: 3; }
 
-    #screen-login .form-group label { color: rgba(255,255,255,0.75); }
-    #screen-login .form-control { background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1.5px solid rgba(255,255,255,0.22); color: #ffffff; }
+    #screen-login .form-group label { color: rgba(255,255,255,0.80); font-weight: 700; }
+    #screen-login .form-control { background: rgba(255,255,255,0.14); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1.5px solid rgba(255,255,255,0.28); color: #ffffff; }
     #screen-login .form-control::placeholder { color: rgba(255,255,255,0.38); }
-    #screen-login .form-control:focus { border-color: rgba(245,200,0,0.6); background: rgba(255,255,255,0.18); box-shadow: 0 0 0 3px rgba(245,200,0,.15); color: #ffffff; }
+    #screen-login .form-control:focus { border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.22); box-shadow: 0 0 0 3px rgba(255,255,255,0.10); color: #ffffff; outline: none; }
 
     #screen-dashboard { display: none; flex-direction: column; min-height: 100vh; }
     .topbar { background: #111110; border-bottom: 1px solid #2e2e2a; padding: 0 24px; height: 62px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.3); }
@@ -1144,6 +1143,10 @@
 
 <!-- LOGIN -->
 <div id="screen-login">
+<a href="https://trainly.online?choose=1" onclick="try{localStorage.removeItem('trainly_role')}catch(e){}" style="position:absolute;bottom:28px;left:24px;z-index:10;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:50px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);color:rgba(255,255,255,0.80);font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 20px rgba(0,0,0,0.25);transition:all .2s cubic-bezier(.22,1,.36,1);" onmouseover="this.style.background='rgba(255,255,255,0.20)';this.style.color='#fff';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.80)';this.style.transform='translateY(0)'">
+  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  Trocar perfil
+</a>
 <canvas id="login-bg-canvas"></canvas>
 <script>
 (function(){
@@ -1182,74 +1185,66 @@
     squares=Array.from({length:40},mkSquare);
   }
 
-  // Triangle: top-left corner → top-right corner → one point dipping down in the middle
-  function getTrianglePoints(){
-    const dipX=W*0.5;       // peak dips at center
-    const dipY=H*0.62;      // how far down the center point goes
-    const leftY=H*0.40;     // left edge height
-    const rightY=H*0.44;    // right edge height (slightly different = less symmetric)
-    return [
-      {x:0,      y:0},
-      {x:W,      y:0},
-      {x:W,      y:rightY},
-      {x:dipX,   y:dipY},
-      {x:0,      y:leftY},
-    ];
+  // Diagonal divider: single straight line, off-center, lower on screen
+  function getDividerY(px){
+    const leftY  = H * 1.05;   // left edge — below viewport (matches entrada)
+    const rightY = H * 0.82;   // right edge — rises toward the right
+    return leftY + (px / W) * (rightY - leftY);
   }
 
   function isAboveTriangle(px,py){
-    const pts=getTrianglePoints();
-    // Use the bottom edge segments only: leftY→dipY→rightY
-    // Segment 1: left edge (0,leftY) → center (dipX,dipY)
-    const leftY=pts[4].y, dipY=pts[3].y, rightY=pts[2].y;
-    const dipX=pts[3].x;
-    let wy;
-    if(px<=dipX){
-      const t=px/dipX;
-      wy=leftY+t*(dipY-leftY);
-    } else {
-      const t=(px-dipX)/(W-dipX);
-      wy=dipY+t*(rightY-dipY);
-    }
-    return py<wy;
+    return py < getDividerY(px);
   }
 
   function drawBg(){
-    const pts=getTrianglePoints();
+    const leftY  = getDividerY(0);
+    const rightY = getDividerY(W);
 
-    // 1. Fill black triangle base
+    // 1. Fill dark area (above the diagonal line)
     ctx.beginPath();
-    ctx.moveTo(pts[0].x,pts[0].y);
-    pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.moveTo(0, 0);
+    ctx.lineTo(W, 0);
+    ctx.lineTo(W, rightY);
+    ctx.lineTo(0, leftY);
     ctx.closePath();
     ctx.fillStyle='#111110';
     ctx.fill();
 
-    // 2. Draw photo clipped to the triangle, with transparency
+    // 2. Fill light area below diagonal
+    ctx.beginPath();
+    ctx.moveTo(0, leftY);
+    ctx.lineTo(W, rightY);
+    ctx.lineTo(W, H);
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    ctx.fillStyle='#f0f0ef';
+    ctx.fill();
+
+    // 2b. Draw photo clipped to the dark area
     if(bgLoaded){
       ctx.save();
       ctx.beginPath();
-      ctx.moveTo(pts[0].x,pts[0].y);
-      pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));
+      ctx.moveTo(0, 0);
+      ctx.lineTo(W, 0);
+      ctx.lineTo(W, rightY);
+      ctx.lineTo(0, leftY);
       ctx.closePath();
       ctx.clip();
       const iw=bgImg.naturalWidth, ih=bgImg.naturalHeight;
-      const scale=Math.max(W/iw, pts[3].y/ih);
+      const scale=Math.max(W/iw, Math.max(leftY,rightY)/ih);
       const dw=iw*scale, dh=ih*scale;
-      const dx=(W-dw)/2, dy=-dh*0.18;
-      ctx.globalAlpha=0.18;
+      const dx=(W-dw)/2, dy=-dh*0.05;
+      ctx.globalAlpha=0.22;
       ctx.drawImage(bgImg,dx,dy,dw,dh);
       ctx.globalAlpha=1;
       ctx.restore();
     }
 
-    // 3. Edge glow
-    const dipX=pts[3].x, dipY=pts[3].y, leftY=pts[4].y, rightY=pts[2].y;
+    // 3. Single straight edge line (subtle glow)
     ctx.beginPath();
-    ctx.moveTo(0,leftY);
-    ctx.lineTo(dipX,dipY);
-    ctx.lineTo(W,rightY);
-    ctx.strokeStyle='rgba(255,255,255,0.10)';
+    ctx.moveTo(0, leftY);
+    ctx.lineTo(W, rightY);
+    ctx.strokeStyle='rgba(255,255,255,0.12)';
     ctx.lineWidth=1.5;
     ctx.stroke();
   }
@@ -1301,9 +1296,10 @@
   }
 })();
 </script>
-  <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px;position:relative;z-index:2;margin-top:-140px;">
-    <img src="https://i.imgur.com/orva0oM.png" alt="Trainly" style="height:180px;width:auto;max-width:100%;object-fit:contain;margin-bottom:48px;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.5));"/>
+  <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px;position:relative;z-index:2;margin-top:0px;">
+    <img src="https://i.imgur.com/orva0oM.png" alt="Trainly" style="height:160px;width:auto;max-width:100%;object-fit:contain;margin-bottom:44px;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.5));"/>
     <div class="login-card" style="width:100%;">
+      <div style="position:absolute;inset:0;z-index:2;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.13) 0%,transparent 55%);pointer-events:none;"></div>
       <form id="login-form" onsubmit="return false;">
         <div class="form-group"><label>Usuário</label><input id="login-user" class="form-control" type="text" placeholder="Usuário" required autocomplete="username"/></div>
         <div class="form-group"><label>Senha</label><input id="login-pass" class="form-control" type="password" placeholder="••••••••" required autocomplete="current-password"/></div>
@@ -1311,8 +1307,8 @@
       </form>
     </div>
     <div style="margin-top:18px;text-align:center;">
-      <button onclick="openRegisterScreen()" style="background:none;border:none;cursor:pointer;font-family:var(--body);font-size:.84rem;color:#333330;transition:color .15s;">
-        Novo aqui? <span style="color:#111110;font-weight:700;text-decoration:underline;">Criar conta</span>
+      <button onclick="openRegisterScreen()" style="background:none;border:none;cursor:pointer;font-family:var(--body);font-size:.84rem;color:rgba(255,255,255,0.65);transition:color .15s;">
+        Novo aqui? <span style="color:#ffffff;font-weight:700;text-decoration:underline;">Criar conta</span>
       </button>
     </div>
   </div>
@@ -7884,6 +7880,7 @@ window.doLogout = async function() {
     if (_auth && _auth.currentUser) await _auth.signOut();
   } catch(e) {}
   try { localStorage.removeItem('forge_gestor_session'); } catch(e) {}
+  try { localStorage.removeItem('trainly_role'); } catch(e) {}
   location.reload();
 };
 
