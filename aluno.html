@@ -3090,8 +3090,7 @@ window.dismissSuspendedPopup = function() {
 (function() {
   function isIOSSafari() {
     var ua = navigator.userAgent;
-    var isIOS = /iP(hone|od|ad)/.test(ua);
-    if (!isIOS) return false;
+    if (!/iP(hone|od|ad)/.test(ua)) return false;
     return /Safari/.test(ua) && !/CriOS/.test(ua) && !/FxiOS/.test(ua) && !/OPiOS/.test(ua);
   }
 
@@ -3100,10 +3099,18 @@ window.dismissSuspendedPopup = function() {
            (window.matchMedia('(display-mode: standalone)').matches);
   }
 
+  function shouldShow() {
+    if (!isIOSSafari()) return false;
+    if (isInStandaloneMode()) return false;
+    try { if (localStorage.getItem('trainly_safari_tutorial_dismissed') === '1') return false; } catch(e) {}
+    return true;
+  }
+
   function openSafariTutorial() {
     var overlay = document.getElementById('safari-tutorial-overlay');
-    if (overlay) overlay.classList.add('on');
-    var vid = overlay ? overlay.querySelector('video') : null;
+    if (!overlay) return;
+    overlay.classList.add('on');
+    var vid = overlay.querySelector('video');
     if (vid) { try { vid.play().catch(function(){}); } catch(e){} }
   }
 
@@ -3118,31 +3125,37 @@ window.dismissSuspendedPopup = function() {
     if (vid) { try { vid.pause(); } catch(e){} }
   };
 
-  // Hook na função showApp do aluno
-  var _origShowApp = null;
-  function hookShowApp() {
-    if (typeof window.showApp === 'function') {
-      _origShowApp = window.showApp;
-      window.showApp = function(student) {
-        _origShowApp(student);
-        setTimeout(function() {
-          if (!isIOSSafari()) return;
-          if (isInStandaloneMode()) return;
-          try {
-            if (localStorage.getItem('trainly_safari_tutorial_dismissed') === '1') return;
-          } catch(e) {}
-          openSafariTutorial();
-        }, 900);
-      };
-    } else {
-      setTimeout(hookShowApp, 100);
+  function tryShow() {
+    if (!shouldShow()) return;
+
+    var appScreen = document.getElementById('screen-app');
+    if (!appScreen) return;
+
+    // Já está visível (usuário com sessão salva)
+    var currentDisplay = appScreen.style.display || getComputedStyle(appScreen).display;
+    if (currentDisplay && currentDisplay !== 'none') {
+      setTimeout(openSafariTutorial, 900);
+      return;
     }
+
+    // Aguarda ficar visível (usuário que faz login agora)
+    var shown = false;
+    var observer = new MutationObserver(function() {
+      if (shown) return;
+      var s = appScreen.style.display;
+      if (s && s !== 'none') {
+        shown = true;
+        observer.disconnect();
+        setTimeout(openSafariTutorial, 900);
+      }
+    });
+    observer.observe(appScreen, { attributes: true, attributeFilter: ['style'] });
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', hookShowApp);
+    document.addEventListener('DOMContentLoaded', tryShow);
   } else {
-    hookShowApp();
+    tryShow();
   }
 })();
 </script>
