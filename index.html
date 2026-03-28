@@ -232,6 +232,16 @@
       from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+  
+    /* ── Desativa seleção de texto apenas em dispositivos touch/mobile ── */
+    @media (hover: none) and (pointer: coarse) {
+      * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+      }
+    }
   </style>
 <script>
   // Redireciona automaticamente se o usuário já escolheu antes
@@ -410,6 +420,15 @@
   init();
   step();
   window.addEventListener('resize', resize);
+})();
+</script>
+
+<script>
+/* Bloqueia long-press / seleção apenas em touch */
+(function(){
+  if (!window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
+  document.addEventListener('selectstart', function(e){ e.preventDefault(); });
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 })();
 </script>
 </body>
