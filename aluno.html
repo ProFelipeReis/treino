@@ -836,6 +836,16 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.2);
     }
     .suspended-ok-btn:hover { background: #2a2a28; transform: translateY(-1px); }
+  
+    /* ── Desativa seleção de texto apenas em dispositivos touch/mobile ── */
+    @media (hover: none) and (pointer: coarse) {
+      * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2818,6 +2828,15 @@ window.dismissSuspendedPopup = function() {
   var popup = document.getElementById('suspended-popup-overlay');
   if(popup) popup.classList.add('hidden');
 };
+</script>
+
+<script>
+/* Bloqueia long-press / seleção apenas em touch */
+(function(){
+  if (!window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
+  document.addEventListener('selectstart', function(e){ e.preventDefault(); });
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+})();
 </script>
 </body>
 </html>
