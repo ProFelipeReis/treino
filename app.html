@@ -1141,6 +1141,16 @@
     }
     .trial-dash-btn:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(245,200,0,.4); }
     .has-invite #screen-login { display: none !important; }
+  
+    /* ── Desativa seleção de texto apenas em dispositivos touch/mobile ── */
+    @media (hover: none) and (pointer: coarse) {
+      * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+      }
+    }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png"/>
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png"/>
@@ -4260,6 +4270,15 @@ window.exportPlanPDF=function(planId, studentName){
 </div>
 <scr'+'ipt>window.onload=function(){window.print();}<\/script>
 
+
+<script>
+/* Bloqueia long-press / seleção apenas em touch */
+(function(){
+  if (!window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
+  document.addEventListener('selectstart', function(e){ e.preventDefault(); });
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+})();
+</script>
 </body>
 </html>`;
 
