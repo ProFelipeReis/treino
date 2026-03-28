@@ -423,13 +423,5 @@
 })();
 </script>
 
-<script>
-/* Bloqueia long-press / seleção apenas em touch */
-(function(){
-  if (!window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
-  document.addEventListener('selectstart', function(e){ e.preventDefault(); });
-  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-})();
-</script>
 </body>
 </html>
