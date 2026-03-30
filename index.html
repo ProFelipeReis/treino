@@ -2,7 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta name="theme-color" content="#111110"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <title>Trainly — Bem-vindo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,18 +16,19 @@
       --head: 'Nunito', sans-serif;
       --body: 'Plus Jakarta Sans', sans-serif;
     }
-    html, body { height: 100%; font-family: var(--body); overflow: hidden; }
+    html, body { height: 100%; font-family: var(--body); overflow: hidden; background: #111110; }
 
     #screen {
       position: relative;
       width: 100%;
       height: 100vh;
+      height: 100dvh;
       background: #f0f0ef;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding-top: 80px;
+      padding-top: calc(80px + env(safe-area-inset-top));
       overflow: hidden;
     }
 
