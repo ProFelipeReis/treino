@@ -1278,10 +1278,10 @@
     .topbar {
       background: #111110;
       border-bottom: 1px solid #2e2e2a;
-      padding: env(safe-area-inset-top) 24px 0;
-      height: calc(62px + env(safe-area-inset-top));
+      padding: 0 24px;
+      height: 62px;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
@@ -3222,6 +3222,12 @@
     }
 
     @media(max-width:768px) {
+      .topbar {
+        padding: env(safe-area-inset-top) 24px 0;
+        height: calc(62px + env(safe-area-inset-top));
+        align-items: flex-end;
+      }
+
       .sidebar {
         display: none;
       }
