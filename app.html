@@ -3,7 +3,9 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#111110"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <title>Trainly — Painel do Gestor</title>
 
 
@@ -1276,10 +1278,10 @@
     .topbar {
       background: #111110;
       border-bottom: 1px solid #2e2e2a;
-      padding: 0 24px;
-      height: 62px;
+      padding: env(safe-area-inset-top) 24px 0;
+      height: calc(62px + env(safe-area-inset-top));
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       position: sticky;
       top: 0;
