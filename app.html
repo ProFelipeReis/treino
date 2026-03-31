@@ -70,12 +70,20 @@
 
     body {
       font-family: var(--body);
-      background: linear-gradient(to bottom, #111110 50%, var(--bg) 50%);
-      background-attachment: fixed;
+      background: var(--bg);
       color: var(--text);
       height: 100dvh;
       overflow: hidden;
       overscroll-behavior: none;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to bottom, #111110 50%, var(--bg) 50%);
+      z-index: -1;
+      pointer-events: none;
     }
 
     button,
@@ -3143,7 +3151,7 @@
       background: var(--surface);
       border-top: 1px solid var(--border);
       padding: 6px 0 0;
-      padding-bottom: max(env(safe-area-inset-bottom), 6px);
+      padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px);
       z-index: 100;
       box-shadow: 0 -2px 16px rgba(0,0,0,.07);
     }
@@ -3223,7 +3231,7 @@
 
       .main-content {
         padding: 14px;
-        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(80px + max(env(safe-area-inset-bottom, 20px), 20px));
       }
 
       .mobile-nav {
