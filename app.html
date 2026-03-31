@@ -1361,7 +1361,7 @@
     .app-layout {
       display: flex;
       flex: 1;
-      height: calc(100vh - 62px);
+      height: calc(100vh - 62px - env(safe-area-inset-top, 0px));
       min-height: 0;
     }
 
@@ -3223,24 +3223,14 @@
 
     @media(max-width:768px) {
       .topbar {
-        padding-top: 0;
-        height: 62px;
-        align-items: center;
-      }
-
-      .topbar::before {
-        content: '';
-        display: block;
-        position: absolute;
-        top: calc(-1 * env(safe-area-inset-top));
-        left: 0;
-        right: 0;
-        height: env(safe-area-inset-top);
-        background: #111110;
+        padding-top: env(safe-area-inset-top);
+        height: calc(62px + env(safe-area-inset-top));
+        align-items: flex-end;
+        padding-bottom: 0;
       }
 
       body {
-        padding-top: env(safe-area-inset-top);
+        padding-top: 0;
       }
 
       .sidebar {
