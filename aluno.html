@@ -3,8 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <meta name="theme-color" content="#111110"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/9DDa1Th.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/9DDa1Th.png" />
@@ -26,7 +25,7 @@
     }
 
     :root {
-      --bg: #f7f7f5;
+      --bg: #111110;
       --bg2: #ffffff;
       --surface: #ffffff;
       --surface2: #f0f0ed;
@@ -688,7 +687,7 @@
       z-index: 200;
       background: var(--surface);
       border-top: 1px solid var(--border);
-      padding: 6px 0 max(env(safe-area-inset-bottom), 8px);
+      padding: 6px 0 env(safe-area-inset-bottom);
       box-shadow: 0 -2px 16px rgba(0, 0, 0, .07);
     }
 
@@ -928,7 +927,7 @@
       }
 
       #app-main {
-        padding-bottom: calc(64px + max(env(safe-area-inset-bottom), 8px));
+        padding-bottom: 72px;
       }
     }
 
@@ -2437,7 +2436,7 @@
     /* No mobile, sobe acima do menu inferior (~60px) + safe area */
     @media (max-width: 600px) {
       #chat-fab {
-        bottom: calc(72px + max(env(safe-area-inset-bottom), 8px));
+        bottom: calc(68px + env(safe-area-inset-bottom));
         right: 18px;
       }
     }
