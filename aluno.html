@@ -691,10 +691,10 @@
       left: 0;
       right: 0;
       z-index: 200;
-      background: #111110;
-      border-top: 1px solid #2e2e2a;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
       padding: 6px 0 env(safe-area-inset-bottom);
-      box-shadow: 0 -2px 16px rgba(0, 0, 0, .30);
+      box-shadow: 0 -2px 16px rgba(0, 0, 0, .07);
     }
 
     .nav-bottom-items {
@@ -712,7 +712,7 @@
       gap: 3px;
       font-size: .6rem;
       font-weight: 700;
-      color: rgba(255, 255, 255, .4);
+      color: var(--text3);
       cursor: pointer;
       border: none;
       background: none;
@@ -724,7 +724,7 @@
     }
 
     .nav-bottom-item.active {
-      color: var(--accent);
+      color: #111110;
     }
 
     .nav-bottom-item svg {
