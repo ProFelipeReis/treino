@@ -1278,15 +1278,22 @@
     .topbar {
       background: #111110;
       border-bottom: 1px solid #2e2e2a;
-      padding: 0 24px;
-      height: 62px;
+      padding: env(safe-area-inset-top, 0px) 24px 0 24px;
+      height: calc(62px + env(safe-area-inset-top, 0px));
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 16px rgba(0, 0, 0, .3);
+    }
+
+    .topbar-brand,
+    .topbar-right {
+      height: 62px;
+      display: flex;
+      align-items: center;
     }
 
     .topbar-brand {
@@ -3223,10 +3230,9 @@
 
     @media(max-width:768px) {
       .topbar {
-        padding-top: env(safe-area-inset-top);
-        height: calc(62px + env(safe-area-inset-top));
+        padding: env(safe-area-inset-top, 0px) 16px 0 16px;
+        height: calc(62px + env(safe-area-inset-top, 0px));
         align-items: flex-end;
-        padding-bottom: 0;
       }
 
       body {
