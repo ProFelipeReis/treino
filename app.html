@@ -64,7 +64,7 @@
     html {
       scroll-behavior: smooth;
       overflow: hidden;
-      height: 100dvh;
+      height: var(--app-height, 100dvh);
       overscroll-behavior: none;
     }
 
@@ -5213,6 +5213,16 @@
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png" />
+  <script>
+    // Fix para altura real no iOS PWA
+    function setVh() {
+      var h = window.innerHeight;
+      document.documentElement.style.setProperty('--app-height', h + 'px');
+    }
+    setVh();
+    window.addEventListener('resize', setVh);
+    window.addEventListener('orientationchange', function() { setTimeout(setVh, 300); });
+  </script>
 </head>
 
 <body>
