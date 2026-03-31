@@ -1351,7 +1351,7 @@
       transform: rotate(45deg);
     }
 
-    .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); min-height: 0; }
+    .app-layout { display: flex; flex: 1; height: calc(100dvh - 62px - env(safe-area-inset-top, 0px)); min-height: 0; }
 
     .sidebar {
       width: 220px;
