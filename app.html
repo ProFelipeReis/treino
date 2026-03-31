@@ -3,9 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#111110"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trainly — Painel do Gestor</title>
 
 
@@ -61,37 +59,9 @@
       --shadow-md: 0 8px 32px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .07);
     }
 
-    html {
-      scroll-behavior: smooth;
-      overflow: hidden;
-      height: 100%;
-      overscroll-behavior: none;
-      background: #111110;
-    }
+    html { scroll-behavior: smooth; overflow: hidden; height: 100%; overscroll-behavior: none; }
 
-    body {
-      font-family: var(--body);
-      background: #111110;
-      color: var(--text);
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      overscroll-behavior: none;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(to bottom, #111110 50%, var(--bg) 50%);
-      z-index: -1;
-      pointer-events: none;
-    }
+    body { font-family: var(--body); background: var(--bg); color: var(--text); height: 100%; overflow: hidden; overscroll-behavior: none; }
 
     button,
     a,
@@ -1198,7 +1168,7 @@
       color: var(--text3);
     }
 
-    #screen-login { display: flex; align-items: flex-start; justify-content: center; height: var(--app-height, 100dvh); max-height: var(--app-height, 100dvh); padding: 80px 24px 24px; background: #f0f0ef; position: relative; overflow: hidden; overscroll-behavior: none; }
+    #screen-login { display: flex; align-items: flex-start; justify-content: center; height: 100%; padding: 80px 24px 24px; background: #f0f0ef; position: relative; overflow: hidden; overscroll-behavior: none; }
 
     #login-bg-canvas {
       position: absolute;
@@ -1366,7 +1336,7 @@
       transform: rotate(45deg);
     }
 
-    .app-layout { display: flex; flex: 1; height: calc(100dvh - 62px - env(safe-area-inset-top, 0px)); min-height: 0; }
+    .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); min-height: 0; }
 
     .sidebar {
       width: 220px;
@@ -3158,7 +3128,7 @@
       background: var(--surface);
       border-top: 1px solid var(--border);
       padding: 6px 0 0;
-      padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px);
+      padding-bottom: max(env(safe-area-inset-bottom), 6px), 6px);
       z-index: 100;
       box-shadow: 0 -2px 16px rgba(0,0,0,.07);
     }
@@ -3238,7 +3208,7 @@
 
       .main-content {
         padding: 14px;
-        padding-bottom: calc(80px + max(env(safe-area-inset-bottom, 20px), 20px));
+        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)));
       }
 
       .mobile-nav {
@@ -5220,16 +5190,6 @@
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png" />
-  <script>
-    // Fix para altura real no iOS PWA
-    function setVh() {
-      var h = window.innerHeight;
-      document.documentElement.style.setProperty('--app-height', h + 'px');
-    }
-    setVh();
-    window.addEventListener('resize', setVh);
-    window.addEventListener('orientationchange', function() { setTimeout(setVh, 300); });
-  </script>
 </head>
 
 <body>
