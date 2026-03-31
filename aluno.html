@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <meta name="theme-color" content="#111110"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/9DDa1Th.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/9DDa1Th.png" />
@@ -58,6 +57,7 @@
       scroll-behavior: smooth;
       touch-action: pan-x pan-y;
       overflow-x: hidden;
+      overscroll-behavior: none;
     }
 
     * {
@@ -67,9 +67,10 @@
     body {
       overflow-x: hidden;
       font-family: var(--body);
-      background: #111110;
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      overscroll-behavior: none;
     }
 
     button {
@@ -4026,7 +4027,6 @@
     function showApp(student) {
       _currentStudent = student;
       document.getElementById('screen-login').style.display = 'none';
-      document.body.style.background = '#f7f7f5';
       document.getElementById('screen-app').style.cssText = 'display:flex;flex-direction:column;';
       document.getElementById('student-pill').textContent = student.name;
       const sidebarPill = document.getElementById('student-pill-sidebar');
@@ -4132,7 +4132,6 @@
       const sp = document.getElementById('suspended-popup-overlay');
       if (sp) sp.classList.add('hidden');
       document.getElementById('screen-app').style.display = 'none';
-      document.body.style.background = '#111110';
       document.getElementById('screen-login').style.display = 'flex';
       document.getElementById('login-code').value = '';
       document.getElementById('content').innerHTML = '<div class="spinner"></div>';
