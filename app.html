@@ -3223,9 +3223,24 @@
 
     @media(max-width:768px) {
       .topbar {
-        padding: env(safe-area-inset-top) 24px 0;
-        height: calc(62px + env(safe-area-inset-top));
-        align-items: flex-end;
+        padding-top: 0;
+        height: 62px;
+        align-items: center;
+      }
+
+      .topbar::before {
+        content: '';
+        display: block;
+        position: absolute;
+        top: calc(-1 * env(safe-area-inset-top));
+        left: 0;
+        right: 0;
+        height: env(safe-area-inset-top);
+        background: #111110;
+      }
+
+      body {
+        padding-top: env(safe-area-inset-top);
       }
 
       .sidebar {
