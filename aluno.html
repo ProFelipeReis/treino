@@ -524,7 +524,9 @@
     #screen-app {
       display: none;
       flex-direction: column;
-      min-height: 100vh;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
       background: var(--bg);
     }
 
@@ -4030,7 +4032,7 @@
     function showApp(student) {
       _currentStudent = student;
       document.getElementById('screen-login').style.display = 'none';
-      document.getElementById('screen-app').style.cssText = 'display:flex;flex-direction:column;';
+      document.getElementById('screen-app').style.cssText = 'display:flex;flex-direction:column;background:#f7f7f5;';
       document.getElementById('student-pill').textContent = student.name;
       const sidebarPill = document.getElementById('student-pill-sidebar');
       if (sidebarPill) sidebarPill.textContent = student.name;
