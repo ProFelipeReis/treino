@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/9DDa1Th.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/9DDa1Th.png" />
@@ -387,7 +387,8 @@
       align-items: flex-start;
       justify-content: center;
       min-height: 100vh;
-      padding: 80px 24px 24px;
+      min-height: 100dvh;
+      padding: calc(80px + env(safe-area-inset-top)) 24px 24px;
       background: #111110;
       position: relative;
       overflow: hidden;
