@@ -2,22 +2,8 @@
 <html lang="pt-BR">
 
 <head>
-  <script>
-    // Trava o height do viewport no load — impede Android de redimensionar quando teclado abre
-    (function() {
-      function lockHeight() {
-        var h = window.innerHeight;
-        document.documentElement.style.setProperty('--app-height', h + 'px');
-      }
-      lockHeight();
-      // Só re-trava em orientação, nunca em resize de teclado
-      window.addEventListener('orientationchange', function() {
-        setTimeout(lockHeight, 300);
-      });
-    })();
-  </script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#111110"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <title>Trainly — Painel do Gestor</title>
@@ -78,7 +64,7 @@
     html {
       scroll-behavior: smooth;
       overflow: hidden;
-      height: var(--app-height, 100dvh);
+      height: 100dvh;
       overscroll-behavior: none;
     }
 
@@ -86,7 +72,7 @@
       font-family: var(--body);
       background: #111110;
       color: var(--text);
-      height: var(--app-height, 100dvh);
+      height: 100dvh;
       overflow: hidden;
       overscroll-behavior: none;
     }
@@ -894,7 +880,7 @@
       border-radius: 20px;
       width: 100%;
       max-width: 760px;
-      max-height: calc(var(--app-height, 100dvh) - 32px);
+      max-height: calc(100dvh - 32px);
       display: flex;
       flex-direction: column;
       box-shadow: var(--shadow-md);
@@ -1196,7 +1182,7 @@
       color: var(--text3);
     }
 
-    #screen-login { display: flex; align-items: flex-start; justify-content: center; height: 100%; padding: 80px 24px 24px; background: #f0f0ef; position: relative; overflow: auto; overscroll-behavior: none; }
+    #screen-login { display: flex; align-items: flex-start; justify-content: center; height: var(--app-height, 100dvh); max-height: var(--app-height, 100dvh); padding: 80px 24px 24px; background: #f0f0ef; position: relative; overflow: hidden; overscroll-behavior: none; }
 
     #login-bg-canvas {
       position: absolute;
@@ -1364,7 +1350,7 @@
       transform: rotate(45deg);
     }
 
-    .app-layout { display: flex; flex: 1; height: calc(var(--app-height, 100dvh) - 62px); min-height: 0; }
+    .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); min-height: 0; }
 
     .sidebar {
       width: 220px;
@@ -3323,7 +3309,7 @@
 
       #chat-detail-panel {
         flex: none;
-        height: calc(var(--app-height, 100dvh) - 180px);
+        height: calc(100dvh - 180px);
       }
 
       .notif-panel {
