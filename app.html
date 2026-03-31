@@ -63,17 +63,13 @@
 
     html {
       scroll-behavior: smooth;
-      overflow: hidden;
-      height: 100dvh;
       overscroll-behavior: none;
     }
 
     body {
       font-family: var(--body);
-      background: #111110;
+      background: var(--bg);
       color: var(--text);
-      height: 100dvh;
-      overflow: hidden;
       overscroll-behavior: none;
     }
 
@@ -1272,7 +1268,9 @@
       display: none;
       flex-direction: column;
       height: 100dvh;
+      min-height: 100dvh;
       overflow: hidden;
+      background: var(--bg);
     }
 
     .topbar {
@@ -1368,8 +1366,8 @@
     .app-layout {
       display: flex;
       flex: 1;
-      height: calc(100dvh - 62px - env(safe-area-inset-top, 0px));
       min-height: 0;
+      overflow: hidden;
     }
 
     .sidebar {
@@ -3164,7 +3162,8 @@
       right: 0;
       background: var(--surface);
       border-top: 1px solid var(--border);
-      padding: 6px 0 env(safe-area-inset-bottom);
+      padding: 6px 0;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       z-index: 200;
       box-shadow: 0 -2px 16px rgba(0, 0, 0, .07);
     }
