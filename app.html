@@ -4559,10 +4559,11 @@
       inset: 0;
       z-index: 6000;
       background: #f7f7f5;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 24px;
+      padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     #screen-register.on {
@@ -4575,9 +4576,10 @@
       border-radius: 24px;
       width: 100%;
       max-width: 420px;
-      overflow: hidden;
+      overflow: visible;
       box-shadow: 0 8px 40px rgba(0, 0, 0, .1);
       position: relative;
+      margin: auto 0;
     }
 
     .reg-head {
