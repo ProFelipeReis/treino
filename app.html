@@ -5476,6 +5476,7 @@
           role: role,
           isMaster: role === 'master' || role === 'ceo',
           isCeo: role === 'ceo',
+          isTester: !!mgr.isTester,
           displayName: mgr.name || user,
           phone: mgr.phone || '',
           subStatus: subStatus,
@@ -5536,11 +5537,11 @@
     }
 
     function _applyUserUI() {
+      if (window._applyUserUI) { window._applyUserUI(); return; }
+      // fallback — executa direto se window._applyUserUI ainda não foi definido
       var u = window.CURRENT_USER || {};
-      // topbar pill (oculto, mantido para compatibilidade)
       var pill = document.getElementById('topbar-user-pill');
       if (pill) pill.textContent = u.displayName || u.username || 'gestor';
-      // saudação no dashboard
       var greetingEl = document.getElementById('dashboard-greeting');
       if (greetingEl) {
         var _h = new Date().getHours();
@@ -5548,12 +5549,17 @@
         var _fn = ((u.displayName || u.username || '').split(' ')[0]) || 'você';
         greetingEl.textContent = _p + ', ' + _fn + ' 👋';
       }
-      // show/hide Gestores tab
-      var show = !!u.isMaster;
-      document.querySelectorAll('.sidebar-item-gestores, .mobile-nav-item-gestores').forEach(function (el) {
-        el.classList.toggle('hidden', !show);
+      document.querySelectorAll('.sidebar-item-gestores,.mobile-nav-item-gestores').forEach(function (el) {
+        el.classList.toggle('hidden', !(u.role === 'master' || u.role === 'ceo' || !!u.isMaster));
+      });
+      document.querySelectorAll('.sidebar-item-report,.mobile-nav-item-report').forEach(function (el) {
+        el.classList.toggle('hidden', !u.isTester);
+      });
+      document.querySelectorAll('.sidebar-item-ceo').forEach(function (el) {
+        el.classList.toggle('hidden', u.role !== 'ceo');
       });
     }
+    window._applyUserUIEarly = _applyUserUI;
 
     document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('login-form').addEventListener('keydown', function (e) {
@@ -6173,11 +6179,16 @@
               <option value="monthly">Renovar +1 mês</option>
               <option value="setdate">Definir data de vencimento</option>
               <option value="expire">Expirar agora</option>
+              <option value="tester">&#x1F9EA; Tornar testador</option>
             </select>
           </div>
           <div class="form-group" id="ceo-custom-days-wrap" style="display:none;">
             <label>Nº de dias</label>
             <input id="ceo-edit-days" class="form-control" type="number" min="1" placeholder="Ex: 30" />
+          </div>
+          <div class="form-group" id="ceo-tester-days-wrap" style="display:none;">
+            <label>Dias como testador</label>
+            <input id="ceo-edit-tester-days" class="form-control" type="number" min="1" placeholder="Ex: 14" />
           </div>
         </div>
         <div class="form-group" id="ceo-edit-date-wrap" style="display:none;">
@@ -6318,6 +6329,12 @@
           Chat
           <span class="sidebar-item-chat-badge hidden" id="chat-sidebar-badge">0</span>
         </div>
+        <div class="sidebar-item sidebar-item-report hidden" data-tab="tab-report" onclick="switchTab('tab-report',this)">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+          </svg>
+          Report
+        </div>
         <div class="sidebar-item sidebar-item-ceo hidden" data-tab="tab-ceo" onclick="switchTab('tab-ceo',this)"
           style="margin-top:8px;border-top:1px solid var(--border);padding-top:12px;">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -6327,6 +6344,13 @@
           <span
             style="background:linear-gradient(135deg,#f5c800,#e0a800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">Painel
             CEO</span>
+        </div>
+        <div class="sidebar-item sidebar-item-ceo hidden" data-tab="tab-ceo-reports" onclick="switchTab('tab-ceo-reports',this)">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+          </svg>
+          <span style="background:linear-gradient(135deg,#f5c800,#e0a800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">Reports</span>
+          <span id="ceo-reports-badge" class="sidebar-item-chat-badge hidden" style="background:var(--red);">0</span>
         </div>
       </div>
       <div class="main-content">
@@ -6687,6 +6711,76 @@
             </table>
           </div>
         </div>
+
+        <!-- ══ ABA REPORT (apenas testadores) ══ -->
+        <div id="tab-report" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title" style="display:flex;align-items:center;gap:10px;">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+              Report
+            </div>
+          </div>
+          <div style="background:var(--accent-dim);border:1px solid var(--accent-soft);border-radius:var(--r);padding:14px 16px;margin-bottom:22px;">
+            <div style="font-weight:700;font-size:.84rem;color:var(--text);margin-bottom:4px;">&#x1F9EA; Voc&#xea; &#xe9; um testador oficial</div>
+            <div style="font-size:.78rem;color:var(--text2);line-height:1.6;">Use este espa&#xe7;o para nos contar o que encontrou. Qualquer bug, inconsist&#xea;ncia ou sugest&#xe3;o &#xe9; muito bem-vindo!</div>
+          </div>
+
+          <div class="form-group">
+            <label style="font-weight:700;font-size:.84rem;">O que aconteceu?</label>
+            <select id="report-category" class="form-control" onchange="reportCategoryChange()" style="margin-top:6px;">
+              <option value="">— Selecione uma categoria —</option>
+              <option value="crash">App travou / fechou sozinho</option>
+              <option value="load">Conteúdo não carregou</option>
+              <option value="login">Problema no login / acesso</option>
+              <option value="aluno">Erro relacionado a alunos</option>
+              <option value="treino">Erro nos treinos ou planos</option>
+              <option value="evolucao">Evolução / avaliação com problema</option>
+              <option value="chat">Chat com defeito</option>
+              <option value="pagamento">Problema com pagamento / assinatura</option>
+              <option value="visual">Elemento visual quebrado / desalinhado</option>
+              <option value="lentidao">App lento ou travando</option>
+              <option value="notificacao">Notificação não chegou</option>
+              <option value="sugestao">Sugestão de melhoria</option>
+              <option value="outro">Outro (descreva abaixo)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:16px;">
+            <label style="font-weight:700;font-size:.84rem;">Descri&#xe7;&#xe3;o</label>
+            <textarea id="report-description" class="form-control" rows="5" placeholder="Descreva com detalhes o que aconteceu. Quanto mais informa&#xe7;&#xe3;o, melhor conseguimos corrigir!" style="margin-top:6px;resize:vertical;"></textarea>
+          </div>
+
+          <div id="report-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:16px;margin-bottom:8px;"></div>
+
+          <button class="btn btn-primary" onclick="submitReport()" id="btn-submit-report" style="width:100%;padding:13px;font-size:.92rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+            Enviar Report
+          </button>
+        </div>
+
+        <!-- ══ ABA REPORTS RECEBIDOS (apenas CEO) ══ -->
+        <div id="tab-ceo-reports" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title" style="display:flex;align-items:center;gap:10px;">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+              Reports Recebidos
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+            <div style="font-size:.82rem;color:var(--text2);">Feedbacks enviados pelos testadores.</div>
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn-ghost btn-sm" onclick="loadCeoReports()">&#x21BA; Atualizar</button>
+              <button class="btn btn-danger btn-sm" onclick="clearAllReports()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                Limpar tudo
+              </button>
+            </div>
+          </div>
+          <div id="ceo-reports-list">
+            <div style="text-align:center;padding:40px;color:var(--text3);">Carregando reports...</div>
+          </div>
+        </div>
+
       </div>
     </div>
     <div class="mobile-nav">
@@ -6733,12 +6827,24 @@
           <span class="mobile-nav-label">Chat</span>
           <span class="mobile-nav-chat-badge hidden" id="chat-mobile-badge">0</span>
         </div>
+        <div class="mobile-nav-item mobile-nav-item-report hidden" data-tab="tab-report" onclick="switchTab('tab-report',this)">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+          </svg>
+          <span class="mobile-nav-label">Report</span>
+        </div>
         <div class="mobile-nav-item sidebar-item-ceo hidden" data-tab="tab-ceo" onclick="switchTab('tab-ceo',this)">
           <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <polygon
               points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
           <span class="mobile-nav-label" style="color:var(--accent);font-weight:800;">CEO</span>
+        </div>
+        <div class="mobile-nav-item sidebar-item-ceo hidden" data-tab="tab-ceo-reports" onclick="switchTab('tab-ceo-reports',this)">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+          </svg>
+          <span class="mobile-nav-label" style="color:var(--accent);font-weight:800;">Reports</span>
         </div>
       </div>
     </div>
@@ -6749,6 +6855,34 @@
   <div id="mobile-sidebar"></div>
 
   <!-- MODAL: INDICAÇÃO DE AMIGO -->
+  <div id="modal-tester-welcome" class="modal-overlay hidden">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>&#x1F9EA; Modo Testador</h3>
+        <button class="close-btn" onclick="closeTesterWelcome()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align:center;padding:8px 0 20px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          </div>
+          <div style="font-family:var(--head);font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:8px;">Voc&#xea; &#xe9; um testador oficial!</div>
+          <div style="font-size:.82rem;color:var(--text2);line-height:1.65;margin-bottom:20px;">
+            Voc&#xea; foi selecionado para fazer parte de um grupo especial de usu&#xe1;rios que testam o Trainly antes de todos.<br><br>
+            Sua miss&#xe3;o &#xe9; usar a plataforma normalmente e nos contar o que encontrar — bugs, melhorias, incomod&#xe2;ncias. Tudo conta!
+          </div>
+          <div style="background:var(--accent-dim);border:1px solid var(--accent-soft);border-radius:var(--r);padding:14px 16px;text-align:left;margin-bottom:20px;">
+            <div style="font-weight:700;font-size:.82rem;color:var(--text);margin-bottom:6px;">&#x1F44B; A equipe Trainly agradece!</div>
+            <div style="font-size:.78rem;color:var(--text2);line-height:1.6;">Obrigado por aceitar esse papel t&#xe3;o importante. Voc&#xea; ter&#xe1; acesso &#xe0; aba <strong>Report</strong> para nos enviar seus feedbacks diretamente. Voc&#xea; est&#xe1; ajudando a construir algo incrivel.</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" style="width:100%;" onclick="closeTesterWelcome()">Entendido, vamos testar! &#x1F680;</button>
+      </div>
+    </div>
+  </div>
+
   <div id="modal-debugmode" class="modal-overlay hidden">
     <div class="modal modal-sm">
       <div class="modal-header">
@@ -7864,7 +7998,7 @@
       document.getElementById('screen-login').style.display = 'none';
       document.getElementById('screen-sub-wall').style.display = 'none';
       document.getElementById('screen-dashboard').style.cssText = 'display:flex;flex-direction:column;';
-      _applyUserUI();
+      (window._applyUserUI || window._applyUserUIEarly || function(){})();
       loadStudents();
       startNotifPolling();
       (function waitChat() { if (window.startChatBadgePolling) { startChatBadgePolling(); } else { setTimeout(waitChat, 200); } })();
@@ -7893,12 +8027,20 @@
           var mgr = snap.docs[0].data();
           window.CURRENT_USER.displayName = mgr.name || u.username;
           window.CURRENT_USER.phone = mgr.phone || '';
+          window.CURRENT_USER.isTester = !!mgr.isTester;
           // Revalida assinatura
           if (u.role !== 'ceo') {
             var sub = _checkSubscription(mgr);
             window.CURRENT_USER.subStatus = sub;
             if (!sub.ok) { showSubscriptionWall(); return; }
-            if (sub.type === 'trial') {
+            // Modal testador (só na primeira vez)
+            if (mgr.isTester && !mgr.testerModalSeen) {
+              setTimeout(function () {
+                var docId = snap.docs[0].id;
+                openModal('modal-tester-welcome');
+                try { _updateDoc(_doc(_db, 'managers', docId), { testerModalSeen: true }); } catch (e) { }
+              }, 1200);
+            } else if (sub.type === 'trial') {
               showTrialBanner(sub.daysLeft);
               // Modal especial DEBUGMODE (só na primeira vez)
               var isDebugUser = (mgr.referredBy || '').toUpperCase() === '' && sub.daysLeft > 50;
@@ -7922,7 +8064,7 @@
             }
           }
           try { localStorage.setItem(LS_GESTOR, JSON.stringify(window.CURRENT_USER)); } catch (e) { }
-          _applyUserUI();
+          (window._applyUserUI || window._applyUserUIEarly || function(){})();
         }
       }).catch(function () { });
     };
@@ -10224,7 +10366,7 @@
         window.CURRENT_USER.phone = finalPhone;
         try { localStorage.setItem(LS_GESTOR, JSON.stringify(window.CURRENT_USER)); } catch (e) { }
 
-        _applyUserUI();
+        (window._applyUserUI || window._applyUserUIEarly || function(){})();
         closeModal('modal-profile');
         toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Perfil atualizado!');
       } catch (e) {
@@ -10247,6 +10389,11 @@
       var showCeo = u.role === 'ceo';
       document.querySelectorAll('.sidebar-item-ceo').forEach(function (el) {
         el.classList.toggle('hidden', !showCeo);
+      });
+      // Report tab: visível apenas para testadores
+      var showReport = !!u.isTester;
+      document.querySelectorAll('.sidebar-item-report,.mobile-nav-item-report').forEach(function (el) {
+        el.classList.toggle('hidden', !showReport);
       });
       // Badge de role na topbar
       var existingBadge = document.getElementById('role-topbar-badge');
@@ -11397,6 +11544,7 @@
       var type = document.getElementById('ceo-edit-sub-type').value;
       document.getElementById('ceo-custom-days-wrap').style.display = type === 'custom' ? 'block' : 'none';
       document.getElementById('ceo-edit-date-wrap').style.display = type === 'setdate' ? 'block' : 'none';
+      document.getElementById('ceo-tester-days-wrap').style.display = type === 'tester' ? 'block' : 'none';
     };
 
     window.ceoSaveManagerEdits = async function () {
@@ -11439,6 +11587,14 @@
           upd.trialEndsAt = null;
         } else if (subType === 'expire') {
           upd.subEndsAt = now - 1000;
+          upd.trialEndsAt = null;
+        } else if (subType === 'tester') {
+          var testerDays = parseInt(document.getElementById('ceo-edit-tester-days').value) || 0;
+          if (!testerDays) { errEl.textContent = 'Informe o número de dias como testador.'; btn.classList.remove('btn-loading'); btn.textContent = 'Salvar'; return; }
+          upd.isTester = true;
+          upd.testerEndsAt = now + testerDays * 24 * 60 * 60 * 1000;
+          upd.testerModalSeen = false;
+          upd.subEndsAt = now + testerDays * 24 * 60 * 60 * 1000;
           upd.trialEndsAt = null;
         }
 
@@ -11525,6 +11681,121 @@
         btn.classList.remove('btn-loading'); btn.textContent = 'Cadastrar';
       }
     };
+
+    // ── Testador: fechar modal de boas-vindas ──
+    window.closeTesterWelcome = function () {
+      closeModal('modal-tester-welcome');
+    };
+
+    // ── Report: categoria changed ──
+    window.reportCategoryChange = function () {
+      document.getElementById('report-error').textContent = '';
+    };
+
+    // ── Report: enviar ──
+    window.submitReport = async function () {
+      var btn = document.getElementById('btn-submit-report');
+      var errEl = document.getElementById('report-error');
+      errEl.textContent = '';
+      var category = document.getElementById('report-category').value;
+      var description = document.getElementById('report-description').value.trim();
+      if (!category) { errEl.textContent = 'Selecione uma categoria.'; return; }
+      if (!description || description.length < 10) { errEl.textContent = 'Descreva o problema com pelo menos 10 caracteres.'; return; }
+      var u = window.CURRENT_USER || {};
+      btn.disabled = true; btn.textContent = 'Enviando...';
+      try {
+        var categoryLabels = {
+          crash: 'App travou / fechou sozinho', load: 'Conteúdo não carregou',
+          login: 'Problema no login / acesso', aluno: 'Erro relacionado a alunos',
+          treino: 'Erro nos treinos ou planos', evolucao: 'Evolução / avaliação com problema',
+          chat: 'Chat com defeito', pagamento: 'Problema com pagamento / assinatura',
+          visual: 'Elemento visual quebrado / desalinhado', lentidao: 'App lento ou travando',
+          notificacao: 'Notificação não chegou', sugestao: 'Sugestão de melhoria', outro: 'Outro'
+        };
+        await _db.collection('reports').add({
+          username: u.username || '?',
+          displayName: u.displayName || u.username || '?',
+          category: category,
+          categoryLabel: categoryLabels[category] || category,
+          description: description,
+          sentAt: Date.now()
+        });
+        toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Report enviado! Obrigado pelo feedback.');
+        document.getElementById('report-category').value = '';
+        document.getElementById('report-description').value = '';
+      } catch (e) {
+        errEl.textContent = 'Erro ao enviar: ' + e.message;
+      } finally {
+        btn.disabled = false; btn.textContent = 'Enviar Report';
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg> Enviar Report';
+      }
+    };
+
+    // ── CEO: carregar reports recebidos ──
+    window.loadCeoReports = async function () {
+      var listEl = document.getElementById('ceo-reports-list');
+      if (!listEl) return;
+      listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">Carregando...</div>';
+      try {
+        var snap = await _getDocs(_query(_col(_db, 'reports'), _orderBy('sentAt', 'desc')));
+        if (snap.empty) {
+          listEl.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text3);"><div style="font-size:2rem;margin-bottom:12px;">&#x1F4ED;</div><div style="font-weight:600;font-size:.9rem;">Nenhum report recebido ainda.</div></div>';
+          var badge = document.getElementById('ceo-reports-badge');
+          if (badge) badge.classList.add('hidden');
+          return;
+        }
+        var html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+        snap.docs.forEach(function (doc) {
+          var r = doc.data();
+          var dt = new Date(r.sentAt);
+          var dtStr = dt.toLocaleDateString('pt-BR') + ' às ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          html += '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;">' +
+            '<div style="background:#111110;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent-dim);border:1.5px solid var(--accent-soft);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:.78rem;font-weight:800;color:var(--accent);">' + (r.displayName || r.username || '?').slice(0, 2).toUpperCase() + '</div>' +
+            '<div><div style="font-weight:700;font-size:.88rem;color:#fff;">' + (r.displayName || r.username || '?') + '</div>' +
+            '<div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:600;">@' + (r.username || '?') + '</div></div></div>' +
+            '<div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:600;">' + dtStr + '</div>' +
+            '</div>' +
+            '<div style="padding:14px 16px;">' +
+            '<span style="display:inline-block;background:var(--accent-dim);border:1px solid var(--accent-soft);border-radius:99px;padding:3px 11px;font-size:.72rem;font-weight:800;color:#8a6200;margin-bottom:10px;">' + (r.categoryLabel || r.category || '—') + '</span>' +
+            '<div style="font-size:.86rem;color:var(--text2);line-height:1.65;white-space:pre-wrap;">' + (r.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+            '</div></div>';
+        });
+        html += '</div>';
+        listEl.innerHTML = html;
+        var badge = document.getElementById('ceo-reports-badge');
+        if (badge) { badge.textContent = snap.size; badge.classList.remove('hidden'); }
+      } catch (e) {
+        listEl.innerHTML = '<div style="color:var(--red);padding:20px;font-size:.84rem;">Erro ao carregar: ' + e.message + '</div>';
+      }
+    };
+
+    // ── CEO: limpar todos os reports ──
+    window.clearAllReports = async function () {
+      if (!confirm('Limpar todos os reports recebidos? Esta ação não pode ser desfeita.')) return;
+      try {
+        var snap = await _getDocs(_col(_db, 'reports'));
+        var batch = _db.batch ? _db.batch() : null;
+        if (batch) {
+          snap.docs.forEach(function (d) { batch.delete(d.ref); });
+          await batch.commit();
+        } else {
+          for (var d of snap.docs) { await _deleteDoc(d.ref); }
+        }
+        toast('Reports apagados.');
+        loadCeoReports();
+      } catch (e) { toast('Erro: ' + e.message, 'error'); }
+    };
+
+    // ── Carregar reports ao entrar na aba CEO Reports ──
+    (function () {
+      var origSwitch = window.switchTab;
+      window.switchTab = function (tabId, el) {
+        origSwitch(tabId, el);
+        if (tabId === 'tab-ceo-reports') loadCeoReports();
+      };
+    })();
 
     // ── Pricing ──
     window.loadPricing = async function () {
@@ -12639,6 +12910,7 @@
           role: role,
           isMaster: role === 'master' || role === 'ceo',
           isCeo: role === 'ceo',
+          isTester: !!mgr.isTester,
           displayName: mgr.name || user,
           phone: mgr.phone || '',
           subStatus: subStatus,
