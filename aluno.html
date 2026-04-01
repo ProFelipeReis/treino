@@ -328,14 +328,340 @@
     }
 
     /* CRONÔMETRO */
-    #workout-timer-bar {
-      background: #111110;
-      padding: 9px 20px;
+    /* ── EXERCISE CHECKED: colapsa tudo exceto número + nome ── */
+    .exercise-row.checked .ex-inline,
+    .exercise-row.checked .ex-obs,
+    .exercise-row.checked .ex-video-wrap {
+      display: none !important;
+    }
+    .exercise-row.checked .ex-main {
+      padding: 0 12px;
+    }
+    .exercise-row.checked .ex-name {
+      margin-bottom: 0;
+      font-size: .84rem;
+    }
+    .exercise-row.checked {
+      min-height: 46px;
+      border-color: rgba(46, 125, 82, .35);
+      background: rgba(46, 125, 82, .05);
+      transition: min-height .22s ease, background .2s;
+    }
+    .exercise-row.checked .ex-side {
+      background: rgba(46, 125, 82, .1);
+      border-right-color: rgba(46, 125, 82, .25);
+    }
+    .exercise-row.checked .ex-side-bar { display: none; }
+
+    /* ── MODAIS ESTILIZADOS — padrão visual do gestor ── */
+    .modal-box-trainly {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      animation: modalIn .22s cubic-bezier(.22,1,.36,1);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header-trainly {
+      flex-shrink: 0;
       display: flex;
       align-items: center;
-      gap: 12px;
-      border-top: 1px solid #2e2e2a;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      background: #111110;
+      border-radius: 20px 20px 0 0;
+    }
+    .modal-header-trainly-green {
+      background: linear-gradient(135deg, #172e1f 0%, #111a14 100%);
+    }
+    .modal-header-trainly-left {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+    .mht-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.08);
+      border: 1.5px solid rgba(255,255,255,.13);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .mht-icon-green {
+      background: rgba(46,125,82,.28);
+      border-color: rgba(46,125,82,.45);
+    }
+    .mht-icon-red {
+      background: rgba(224,62,62,.22);
+      border-color: rgba(224,62,62,.38);
+    }
+    .mht-icon-yellow {
+      background: rgba(245,200,0,.18);
+      border-color: rgba(245,200,0,.35);
+    }
+    .mht-title {
+      font-family: var(--head);
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -.01em;
+    }
+    .mht-sub {
+      font-size: .72rem;
+      color: rgba(255,255,255,.45);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    .mht-close {
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,.7);
+      font-size: .88rem;
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+    .mht-close:hover {
+      background: rgba(255,255,255,.2);
+      color: #fff;
+    }
+    .modal-body-trainly {
+      padding: 20px 22px 16px;
+    }
+    .modal-body-trainly p {
+      font-size: .88rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+    .modal-footer-trainly {
+      padding: 0 22px 20px;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* Botões do sistema do gestor */
+    .btn-t {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      border-radius: var(--r);
+      font-size: .86rem;
+      font-weight: 700;
+      font-family: var(--body);
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+    }
+    .btn-t-ghost {
+      background: var(--surface2);
+      color: var(--text2);
+      border: 1.5px solid var(--border);
+    }
+    .btn-t-ghost:hover { background: var(--surface3); color: var(--text); }
+    .btn-t-primary {
+      background: linear-gradient(135deg, #3d3830 0%, #28231a 50%, #1a1610 100%);
+      color: #ffffff;
+      border: 1px solid rgba(245,200,0,.18);
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      font-weight: 800;
+    }
+    .btn-t-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.22); }
+    .btn-t-green {
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(46,125,82,.25);
+    }
+    .btn-t-green:hover { background: #235f3e; transform: translateY(-1px); }
+    .btn-t-danger {
+      background: var(--red-dim);
+      color: var(--red);
+      border: 1px solid rgba(224,62,62,.25);
+      font-weight: 700;
+    }
+    .btn-t-danger:hover { background: rgba(224,62,62,.15); }
+
+    /* ── ANIMAÇÕES DE TRANSIÇÃO DO TREINO ── */
+    /* Topbar entra suavemente */
+    @keyframes timerBarIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes timerBarOut {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(-12px); }
+    }
+    #workout-timer-bar.workout-mode {
+      animation: timerBarIn .4s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    /* Cronômetro pulsa ao iniciar */
+    @keyframes timerPop {
+      0%   { transform: scale(0.7); opacity: 0; }
+      60%  { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    #workout-timer-bar.workout-mode #topbar-timer-display {
+      animation: timerPop .5s cubic-bezier(.22,1,.36,1) .25s both;
+    }
+
+    /* Botão Finalizar desliza da esquerda */
+    @keyframes finishBtnIn {
+      from { opacity: 0; transform: translateX(-16px) scale(.95); }
+      to   { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    #topbar-finish-btn {
+      animation: none;
+    }
+    #workout-timer-bar.workout-mode #topbar-finish-btn {
+      animation: finishBtnIn .4s cubic-bezier(.22,1,.36,1) .15s both;
+    }
+
+    /* Static header desliza de cima */
+    @keyframes staticHeaderIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    body.workout-mode .workout-static-header {
+      display: block;
+      animation: staticHeaderIn .35s cubic-bezier(.22,1,.36,1) .3s both;
+    }
+
+    /* Dot pulsante no botão finalizar durante treino */
+    @keyframes liveDot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(224,62,62,.5); }
+      50%       { opacity: .7; box-shadow: 0 0 0 5px rgba(224,62,62,0); }
+    }
+    #topbar-finish-btn .tb-icon {
+      animation: liveDot 2s ease-in-out infinite;
+    }
+
+    /* Completion time número conta para cima visualmente */
+    @keyframes numberReveal {
+      from { opacity: 0; transform: translateY(12px) scale(.9); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .completion-time {
+      animation: numberReveal .45s cubic-bezier(.22,1,.36,1) .2s both;
+    }
+
+    /* Overlay fade-in mais suave */
+    @keyframes overlayFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .modal-overlay:not(.hidden) {
+      animation: overlayFadeIn .2s ease both;
+    }
+
+    /* ── WORKOUT TOPBAR: substitui topbar-main durante treino ── */
+    .topbar-main { transition: all .2s; }
+    .topbar.workout-active .topbar-main {
+      display: none !important;
+    }
+    #workout-timer-bar.workout-mode {
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 20px 14px;
+      background: #111110;
+      border-top: none;
       width: 100%;
+    }
+    #workout-timer-bar.workout-mode .timer-top-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #workout-timer-bar.workout-mode .timer-dot { display: none; }
+    #workout-timer-bar.workout-mode .timer-label { display: none; }
+    #workout-timer-bar.workout-mode .timer-workout-name { display: none; }
+
+    /* Centro da topbar durante treino — removido, layout agora é coluna centralizada */
+    /* Finish button inside topbar */
+    #topbar-finish-btn {
+      width: auto;
+      padding: 9px 22px 9px 9px;
+      border-radius: 99px;
+      background: rgba(224, 62, 62, .1);
+      color: var(--red);
+      font-family: var(--body);
+      font-size: .88rem;
+      font-weight: 700;
+      border: 1.5px solid rgba(224, 62, 62, .25);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      letter-spacing: .01em;
+      transition: all .15s;
+    }
+    #topbar-finish-btn:hover {
+      background: rgba(224, 62, 62, .16);
+      box-shadow: 0 4px 14px rgba(224, 62, 62, .2);
+      transform: translateY(-1px);
+    }
+    #topbar-finish-btn .tb-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    #topbar-timer-display {
+      font-family: var(--head);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: rgba(255,255,255,.55);
+      letter-spacing: .1em;
+    }
+
+    /* Static header na área branca durante treino */
+    .workout-static-header {
+      display: none;
+      padding: 16px 20px 12px;
+      text-align: center;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    body.workout-mode .workout-static-header {
+      display: block;
+    }
+    .wsh-plan-title {
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: 3px;
+    }
+    .wsh-module-title {
+      font-family: var(--head);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
     }
 
     .timer-dot {
@@ -958,15 +1284,7 @@
     }
 
     .plan-status-bar {
-      margin: 12px 20px 0;
-      border-radius: var(--r);
-      padding: 13px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: .82rem;
-      font-weight: 600;
-      border: 1px solid;
+      display: none !important;
     }
 
     .plan-status-bar.active {
@@ -1000,105 +1318,164 @@
       margin-left: 4px;
     }
 
-    .today-card {
-      margin: 12px 20px 0;
+    /* ── CARD UNIFICADO: HOJE + FREQUÊNCIA ── */
+    .today-freq-card {
+      margin: 14px 20px 0;
       background: #ffffff;
       border: 1px solid var(--border);
-      border-radius: var(--r2);
-      padding: 18px 20px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,.07);
+      position: relative;
+    }
+
+    /* Seção superior: treino de hoje */
+    .tfc-top {
+      padding: 18px 20px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, .07);
+      gap: 12px;
       position: relative;
-      overflow: hidden;
     }
-
-    .today-card::before {
+    .tfc-top::after {
       content: '';
       position: absolute;
-      top: -40px;
-      right: -40px;
-      width: 140px;
-      height: 140px;
+      bottom: 0; left: 20px; right: 20px;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Bolinha decorativa */
+    .tfc-top::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 120px; height: 120px;
       border-radius: 50%;
-      background: rgba(245, 200, 0, .12);
+      background: rgba(245,200,0,.10);
       pointer-events: none;
     }
 
-    .today-card-label {
-      font-size: .68rem;
+    .tfc-left { flex: 1; min-width: 0; }
+
+    .tfc-label {
+      font-size: .65rem;
       font-weight: 800;
       color: #b8940a;
       text-transform: uppercase;
-      letter-spacing: .12em;
-      margin-bottom: 6px;
+      letter-spacing: .13em;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
-    .today-card-workout {
+    .tfc-workout {
       font-family: var(--head);
-      font-size: 1.2rem;
+      font-size: 1.18rem;
       font-weight: 800;
       color: #111110;
       line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .today-card-day {
-      font-size: .78rem;
-      color: #888880;
+    .tfc-day {
+      font-size: .75rem;
+      color: #999990;
       font-weight: 600;
-      margin-top: 5px;
+      margin-top: 4px;
     }
 
-    .today-card-actions {
-      margin-left: 14px;
+    .tfc-right {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
-    .today-card-skip-btn {
-      border: 1px solid rgba(17, 17, 16, .2);
-      background-color: #fffbf0;
-      color: #754d00;
-      border-radius: 999px;
-      padding: 7px 11px;
+    /* Botão Pular — redesenhado */
+    .skip-btn-new {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border2);
+      color: var(--text2);
+      font-size: .78rem;
       font-weight: 700;
-      font-size: .85rem;
+      font-family: var(--body);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .skip-btn-new:hover {
+      background: var(--surface3);
+      border-color: var(--border2);
+      color: var(--text);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0,0,0,.08);
+    }
+    .skip-btn-new:active { transform: none; }
+    .skip-btn-new svg { opacity: .6; flex-shrink: 0; }
+
+    /* Ícone decorativo do card */
+    .tfc-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: rgba(245,200,0,.10);
+      border: 1px solid rgba(245,200,0,.2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Seção inferior: frequência */
+    .tfc-bottom {
+      padding: 14px 20px 14px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .tfc-bottom:hover { background: var(--surface2); }
+
+    .tfc-freq-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 13px;
+    }
+
+    .tfc-freq-title {
       display: flex;
       align-items: center;
       gap: 6px;
-      transition: transform .15s ease, box-shadow .15s ease, background .2s ease;
-      box-shadow: 0 2px 6px rgba(0,0,0,.08);
-    }
-    .today-card-skip-btn:hover {
-      transform: translateY(-1px);
-      background-color: #fff2d7;
-      box-shadow: 0 4px 12px rgba(0,0,0,.12);
-    }
-    .today-card-skip-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(0,0,0,.12);
-    }
-    .today-card-skip-btn .skip-arrow {
-      display: inline-flex;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      align-items: center;
-      justify-content: center;
-      color: #754d00;
-      background: #ffe5b7;
-      font-size: .9rem;
-      line-height: 1;
+      font-size: .65rem;
+      font-weight: 800;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .12em;
     }
 
-    .today-card-icon {
-      font-size: 2.4rem;
-      flex-shrink: 0;
-      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .4));
-      position: relative;
-      z-index: 1;
+    .tfc-freq-hint {
+      font-size: .65rem;
+      color: var(--text3);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: .7;
+    }
+
+    @media(max-width:480px) {
+      .today-freq-card { margin-left: 14px; margin-right: 14px; }
+      .tfc-workout { font-size: 1.05rem; }
+    }
+
+    /* ── FREQUÊNCIA DE TREINOS (aluno) ── */
+    .freq-section {
+      display: none; /* substituído pelo card unificado */
     }
 
     .content {
@@ -2076,19 +2453,7 @@
     }
 
     .finish-workout-btn {
-      background: rgba(224, 62, 62, .08);
-      color: var(--red);
-      border: 1.5px solid rgba(224, 62, 62, .2);
-      margin-top: 4px;
-    }
-
-    .finish-workout-btn:hover {
-      background: rgba(224, 62, 62, .14);
-      box-shadow: 0 4px 14px rgba(224, 62, 62, .2);
-    }
-
-    .finish-workout-btn .wa-btn-icon {
-      background: var(--red);
+      display: none !important;
     }
 
     .workout-started-indicator {
@@ -2964,6 +3329,40 @@
       transform: translateY(-1px);
     }
 
+    /* ── WORKOUT MODE: esconde elementos desnecessários durante o treino ── */
+    body.workout-mode .greeting-wrap,
+    body.workout-mode #plan-status-wrap,
+    body.workout-mode #today-wrap,
+    body.workout-mode #freq-wrap,
+    body.workout-mode .trainer-bar-hide,
+    body.workout-mode #trainer-bar {
+      display: none !important;
+    }
+    /* Planos que não estão em treino ficam ocultos */
+    body.workout-mode .plan-wrap:not(.workout-mode-active) {
+      display: none !important;
+    }
+    /* No plano ativo, esconder o plan-card-header (título do plano fica via static-header) */
+    body.workout-mode .plan-wrap.workout-mode-active .plan-card-header {
+      display: none !important;
+    }
+    /* No workout ativo, esconder módulos que não estão em treino */
+    body.workout-mode .workout-accordion:not(.workout-mode-active) {
+      display: none !important;
+    }
+    /* No módulo ativo, esconder o accordion header (título do módulo fica via static-header) */
+    body.workout-mode .workout-accordion.workout-mode-active .workout-accordion-header {
+      display: none !important;
+    }
+    /* Esconder o botão "Finalizar Treino" dentro do card durante workout-mode (só o da topbar fica) */
+    body.workout-mode .finish-workout-btn {
+      display: none !important;
+    }
+    /* Esconder "Em andamento" indicator dentro do card */
+    body.workout-mode .workout-started-indicator {
+      display: none !important;
+    }
+
     /* ── Desativa seleção de texto apenas em dispositivos touch/mobile ── */
     @media (hover: none) and (pointer: coarse) {
       * {
@@ -3074,82 +3473,123 @@
 
   <!-- MODAL: INICIAR TREINO -->
   <div id="modal-start" class="modal-overlay hidden">
-    <div class="modal-box">
-      <div class="modal-head" style="padding-bottom:10px;">
-        <div class="modal-title">Iniciar treino?</div>
+    <div class="modal-box modal-box-trainly">
+      <div class="modal-header-trainly">
+        <div class="modal-header-trainly-left">
+          <div class="mht-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div>
+            <h3 class="mht-title">Iniciar treino</h3>
+            <p class="mht-sub">O cronômetro será iniciado automaticamente</p>
+          </div>
+        </div>
+        <button class="mht-close" onclick="closeStartModal()">✕</button>
       </div>
-      <div class="modal-body">
-        <p>Deseja iniciar o seu treino? O cronômetro será iniciado automaticamente.</p>
+      <div class="modal-body-trainly">
+        <p>Você está prestes a começar. Fique focado e bora treinar! 💪</p>
       </div>
-      <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeStartModal()">Cancelar</button>
-        <button class="btn-confirm green" onclick="confirmStartWorkout()">Sim, iniciar</button>
+      <div class="modal-footer-trainly">
+        <button class="btn-t btn-t-ghost" onclick="closeStartModal()">Cancelar</button>
+        <button class="btn-t btn-t-primary" onclick="confirmStartWorkout()">Sim, iniciar</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL: PULAR TREINO -->
   <div id="modal-skip" class="modal-overlay hidden">
-    <div class="modal-box">
-      <div class="modal-head" style="padding-bottom:10px;">
-        <div class="modal-title">Pular treino?</div>
+    <div class="modal-box modal-box-trainly">
+      <div class="modal-header-trainly">
+        <div class="modal-header-trainly-left">
+          <div class="mht-icon mht-icon-yellow">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width=".5"><polygon points="5,4 15,12 5,20"/><line x1="19" y1="5" x2="19" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <h3 class="mht-title">Pular treino?</h3>
+            <p class="mht-sub">Avança para o próximo módulo da sequência</p>
+          </div>
+        </div>
+        <button class="mht-close" onclick="closeSkipWorkoutModal()">✕</button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body-trainly">
         <p>Você tem certeza que deseja pular o treino de hoje e seguir para o próximo módulo da sequência?</p>
       </div>
-      <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeSkipWorkoutModal()">Não, manter</button>
-        <button class="btn-confirm red" onclick="confirmSkipWorkout()">Sim, pular módulo</button>
+      <div class="modal-footer-trainly">
+        <button class="btn-t btn-t-ghost" onclick="closeSkipWorkoutModal()">Não, manter</button>
+        <button class="btn-t btn-t-danger" onclick="confirmSkipWorkout()">Sim, pular módulo</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL: FINALIZAR TREINO -->
   <div id="modal-finish" class="modal-overlay hidden">
-    <div class="modal-box">
-      <div class="modal-head" style="padding-bottom:10px;">
-        <div class="modal-title">Finalizar treino?</div>
+    <div class="modal-box modal-box-trainly">
+      <div class="modal-header-trainly">
+        <div class="modal-header-trainly-left">
+          <div class="mht-icon mht-icon-red">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+          </div>
+          <div>
+            <h3 class="mht-title">Finalizar treino?</h3>
+            <p class="mht-sub">O cronômetro será parado e a conclusão registrada</p>
+          </div>
+        </div>
+        <button class="mht-close" onclick="closeFinishModal()">✕</button>
       </div>
-      <div class="modal-body">
-        <p>Deseja finalizar o seu treino? Isso irá parar o cronômetro e registrar a conclusão.</p>
+      <div class="modal-body-trainly">
+        <p>Deseja encerrar o treino agora? Seu progresso será salvo.</p>
       </div>
-      <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeFinishModal()">Cancelar</button>
-        <button class="btn-confirm green" onclick="confirmFinishWorkout()">Sim, finalizar</button>
+      <div class="modal-footer-trainly">
+        <button class="btn-t btn-t-ghost" onclick="closeFinishModal()">Cancelar</button>
+        <button class="btn-t btn-t-primary" onclick="confirmFinishWorkout()">Sim, finalizar</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL: CONCLUSÃO + FEEDBACK -->
   <div id="modal-completion" class="modal-overlay hidden">
-    <div class="modal-box completion-modal">
+    <div class="modal-box modal-box-trainly completion-modal">
       <div id="completion-view">
-        <div class="modal-head" style="padding-top:24px;">
-          <div class="completion-title">Treino Concluído</div>
+        <div class="modal-header-trainly">
+          <div class="modal-header-trainly-left">
+            <div class="mht-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <h3 class="mht-title">Treino Concluído!</h3>
+              <p class="mht-sub">Parabéns pelo esforço de hoje 🎉</p>
+            </div>
+          </div>
         </div>
-        <div class="modal-body" style="padding-top:0;">
-          <div class="completion-time" id="completion-time-display">00:00</div>
+        <div class="modal-body-trainly" style="text-align:center;padding:28px 24px 20px;">
           <div class="completion-time-label">Tempo total de treino</div>
+          <div class="completion-time" id="completion-time-display">00:00</div>
         </div>
-        <div class="modal-footer" style="flex-direction:column;gap:8px;">
-          <button class="btn-confirm green" style="border-radius:var(--r);" onclick="openFeedbackView()">Dar
-            Feedback</button>
-          <button class="btn-cancel" style="border-radius:var(--r);" onclick="closeCompletionModal()">Fechar</button>
+        <div class="modal-footer-trainly" style="flex-direction:column;gap:8px;">
+          <button class="btn-t btn-t-primary" style="width:100%;justify-content:center;" onclick="openFeedbackView()">Dar Feedback</button>
+          <button class="btn-t btn-t-ghost" style="width:100%;justify-content:center;" onclick="closeCompletionModal()">Fechar</button>
         </div>
       </div>
       <div id="feedback-view" class="hidden">
-        <div class="modal-head" style="padding-bottom:10px;">
-          <div class="modal-title">Seu feedback</div>
-        </div>
-        <div class="modal-body">
-          <div id="feedback-area">
-            <textarea id="feedback-text" class="form-control"
-              placeholder="Conte como foi o treino, dificuldades, pontos de melhoria..."></textarea>
+        <div class="modal-header-trainly">
+          <div class="modal-header-trainly-left">
+            <div class="mht-icon" style="background:rgba(245,200,0,.15);border-color:rgba(245,200,0,.3);">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div>
+              <h3 class="mht-title">Seu feedback</h3>
+              <p class="mht-sub">Conta como foi o treino de hoje</p>
+            </div>
           </div>
+          <button class="mht-close" onclick="cancelFeedback()">✕</button>
         </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" onclick="cancelFeedback()">Cancelar</button>
-          <button class="btn-confirm" id="btn-send-feedback" onclick="sendFeedback()">Enviar</button>
+        <div class="modal-body-trainly">
+          <textarea id="feedback-text" class="form-control" style="min-height:100px;resize:vertical;"
+            placeholder="Conte como foi o treino, dificuldades, pontos de melhoria..."></textarea>
+        </div>
+        <div class="modal-footer-trainly">
+          <button class="btn-t btn-t-ghost" onclick="cancelFeedback()">Cancelar</button>
+          <button class="btn-t btn-t-primary" id="btn-send-feedback" onclick="sendFeedback()">Enviar</button>
         </div>
       </div>
     </div>
@@ -3344,7 +3784,7 @@
   <div id="screen-app">
 
     <!-- TOPBAR — largura total, igual gestor -->
-    <div class="topbar">
+    <div class="topbar" id="main-topbar">
       <div class="topbar-main">
         <div class="topbar-brand">
           <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly" style="height:28px;width:auto;object-fit:contain;" />
@@ -3355,10 +3795,19 @@
         </div>
       </div>
       <div id="workout-timer-bar" style="display:none;">
-        <div class="timer-dot"></div>
-        <span class="timer-label">Em treino</span>
-        <span class="timer-value" id="timer-display">00:00</span>
-        <span class="timer-workout-name" id="timer-workout-name"></span>
+        <button id="topbar-finish-btn" onclick="openFinishModal()">
+          <div class="tb-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="white"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div>
+          Finalizar Treino
+        </button>
+        <div id="topbar-timer-display">00:00</div>
+        <!-- legacy + hidden -->
+        <div id="topbar-plan-name-static" style="display:none;"></div>
+        <div id="topbar-module-name-static" style="display:none;"></div>
+        <div id="topbar-workout-name" style="display:none;"></div>
+        <div class="timer-dot" style="display:none;"></div>
+        <span class="timer-label" style="display:none;"></span>
+        <span class="timer-value" id="timer-display" style="display:none;">00:00</span>
+        <span class="timer-workout-name" id="timer-workout-name" style="display:none;"></span>
       </div>
     </div>
 
@@ -3427,6 +3876,11 @@
 
         <!-- PAGE: TREINOS -->
         <div id="page-treinos" class="nav-page active">
+          <!-- Header estático exibido durante treino, na área branca, centralizado -->
+          <div class="workout-static-header" id="workout-static-header">
+            <div class="wsh-plan-title" id="wsh-plan-title"></div>
+            <div class="wsh-module-title" id="wsh-module-title"></div>
+          </div>
           <div class="greeting-wrap">
             <div class="greeting" id="greeting-text">Olá! 👋</div>
           </div>
@@ -3698,26 +4152,109 @@
           if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
           _activeWorkout = null;
           hideTimerBar();
+          exitWorkoutMode();
           const display = document.getElementById('timer-display');
           if (display) display.textContent = '00:00';
+          const topbarDisplay = document.getElementById('topbar-timer-display');
+          if (topbarDisplay) topbarDisplay.textContent = '00:00';
           return;
         }
         const elapsed = Date.now() - _activeWorkout.startTimestamp;
         const display = document.getElementById('timer-display');
+        const topbarDisplay = document.getElementById('topbar-timer-display');
         if (display) display.textContent = formatTime(elapsed);
+        if (topbarDisplay) topbarDisplay.textContent = formatTime(elapsed);
       }, 1000);
     }
 
     function showTimerBar(workoutTitle) {
       const bar = document.getElementById('workout-timer-bar');
+      const topbar = document.getElementById('main-topbar');
       const nameEl = document.getElementById('timer-workout-name');
-      if (bar) { bar.style.display = 'flex'; }
-      if (nameEl) { nameEl.textContent = workoutTitle ? `· ${workoutTitle}` : ''; }
+      const topbarName = document.getElementById('topbar-workout-name');
+      const finishBtn = document.getElementById('topbar-finish-btn');
+      if (bar) { bar.style.display = 'flex'; bar.classList.add('workout-mode'); }
+      if (topbar) topbar.classList.add('workout-active');
+      if (nameEl) nameEl.textContent = workoutTitle ? `· ${workoutTitle}` : '';
+      if (topbarName) topbarName.textContent = workoutTitle || '';
+      if (finishBtn) finishBtn.style.display = 'flex';
     }
 
     function hideTimerBar() {
       const bar = document.getElementById('workout-timer-bar');
-      if (bar) bar.style.display = 'none';
+      const topbar = document.getElementById('main-topbar');
+      const finishBtn = document.getElementById('topbar-finish-btn');
+      if (bar) { bar.style.display = 'none'; bar.classList.remove('workout-mode'); }
+      if (topbar) topbar.classList.remove('workout-active');
+      if (finishBtn) finishBtn.style.display = 'none';
+    }
+
+    function enterWorkoutMode(planId, wi, planTitle, workoutTitle) {
+      document.body.classList.add('workout-mode');
+
+      // Atualiza o header estático na área branca
+      const wshPlan = document.getElementById('wsh-plan-title');
+      const wshModule = document.getElementById('wsh-module-title');
+      if (wshPlan) wshPlan.textContent = planTitle || '';
+      if (wshModule) wshModule.textContent = workoutTitle || '';
+
+      // Marca o plan-wrap correto como ativo
+      document.querySelectorAll('.plan-wrap').forEach(pw => {
+        pw.classList.remove('workout-mode-active');
+      });
+      // Tenta encontrar o plan-wrap pelo plan-card-header id
+      const planHeader = document.getElementById(`plan-toggle-${planId}`);
+      if (planHeader) {
+        const planWrap = planHeader.closest('.plan-wrap');
+        if (planWrap) planWrap.classList.add('workout-mode-active');
+      }
+
+      // Marca o workout-accordion correto como ativo
+      document.querySelectorAll('.workout-accordion').forEach(acc => {
+        acc.classList.remove('workout-mode-active');
+      });
+      const exBody = document.getElementById(`exercises-body-${planId}-${wi}`);
+      if (exBody) {
+        const acc = exBody.closest('.workout-accordion');
+        if (acc) {
+          acc.classList.add('workout-mode-active');
+          // Garante que o accordion está aberto
+          acc.classList.add('open');
+          const daysRow = acc.querySelector('.workout-days-row');
+          if (daysRow) daysRow.style.display = 'none'; // esconde dias durante workout mode
+          exBody.style.display = 'flex';
+        }
+      }
+    }
+
+    function exitWorkoutMode() {
+      document.body.classList.remove('workout-mode');
+
+      // Limpa marcações
+      document.querySelectorAll('.plan-wrap').forEach(pw => pw.classList.remove('workout-mode-active'));
+      document.querySelectorAll('.workout-accordion').forEach(acc => acc.classList.remove('workout-mode-active'));
+
+      // Limpa o header estático
+      const wshPlan = document.getElementById('wsh-plan-title');
+      const wshModule = document.getElementById('wsh-module-title');
+      if (wshPlan) wshPlan.textContent = '';
+      if (wshModule) wshModule.textContent = '';
+    }
+
+    function clearAllChecks() {
+      // Desmarca todos os checks visualmente e no estado
+      Object.keys(checkState).forEach(k => { checkState[k] = false; });
+      // Remove UI checked classes
+      document.querySelectorAll('.exercise-row.checked').forEach(row => row.classList.remove('checked'));
+      // Reset progress bars
+      document.querySelectorAll('.progress-bar-fill').forEach(fill => fill.style.width = '0%');
+      document.querySelectorAll('.progress-label').forEach(lbl => {
+        // tenta manter o total lendo o texto atual
+        const m = lbl.textContent.match(/\/(\d+)/);
+        if (m) lbl.textContent = '0/' + m[1] + ' exercícios';
+      });
+      // Salva estado zerado
+      _saveCheckState();
     }
 
     // ── Modal: iniciar treino ──
@@ -3834,8 +4371,14 @@
 
       // Start timer
       showTimerBar(_pendingStartWorkoutTitle);
+      enterWorkoutMode(planId, wi, _pendingStartPlanTitle, _pendingStartWorkoutTitle);
+      // Força re-trigger da animação do timer bar
+      const bar = document.getElementById('workout-timer-bar');
+      if (bar) { bar.classList.remove('workout-mode'); void bar.offsetWidth; bar.classList.add('workout-mode'); }
       const display = document.getElementById('timer-display');
       if (display) display.textContent = '00:00';
+      const topbarDisplay = document.getElementById('topbar-timer-display');
+      if (topbarDisplay) topbarDisplay.textContent = '00:00';
       startTimerTick();
 
       // Marca frequência de hoje na timeline (com animação)
@@ -3881,6 +4424,8 @@
       if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
       clearTimerState(planId, wi);
       hideTimerBar();
+      exitWorkoutMode();
+      clearAllChecks();
 
       // Store elapsed for feedback modal
       window._lastElapsed = elapsed;
@@ -3898,12 +4443,15 @@
       if (startedInd) startedInd.classList.add('hidden');
       if (finishBtn) finishBtn.classList.add('hidden');
 
-      // Show completion modal
+      // Show completion modal with animation
       document.getElementById('completion-time-display').textContent = timeStr;
       document.getElementById('completion-view').classList.remove('hidden');
       document.getElementById('feedback-view').classList.add('hidden');
       document.getElementById('feedback-text').value = '';
       document.getElementById('modal-completion').classList.remove('hidden');
+      // Força animação do número
+      const ct = document.getElementById('completion-time-display');
+      if (ct) { ct.style.animation = 'none'; void ct.offsetWidth; ct.style.animation = ''; }
 
       // Atualiza sequência (para o próximo dia) se estiver ativada no plano
       try {
@@ -4140,6 +4688,7 @@
               const wi = parseInt(suffix.substring(lastUnderscore + 1));
               _activeWorkout = { planId, wi, planTitle: '', workoutTitle: '', startTimestamp: state.startTimestamp };
               showTimerBar('');
+              // Workout mode será aplicado após renderPlans carregar o DOM
               startTimerTick();
               // Immediately update display
               const elapsed = Date.now() - state.startTimestamp;
@@ -4160,6 +4709,7 @@
       if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
       _activeWorkout = null;
       hideTimerBar();
+      exitWorkoutMode();
       // Esconde popup de suspensão se estiver aberto
       const sp = document.getElementById('suspended-popup-overlay');
       if (sp) sp.classList.add('hidden');
@@ -4259,9 +4809,6 @@
     }
 
     function _renderFreqSection() {
-      const wrap = document.getElementById('freq-wrap');
-      if (!wrap) return;
-
       const att = window._freqAttendance;
       const todayStr = window._freqTodayStrCache || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
       const DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -4276,7 +4823,7 @@
       for (let i = 0; i < 7; i++) {
         const d = new Date(weekStart);
         d.setDate(weekStart.getDate() + i);
-        const ds = d.toLocaleDateString('sv-SE'); // YYYY-MM-DD sem depender de toISOString
+        const ds = d.toLocaleDateString('sv-SE');
         const status = att[ds] || null;
         const trained = status === 'trained';
         const missed = status === 'missed';
@@ -4300,7 +4847,7 @@
           dotClass += ' trained';
           dotInner = `<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
         } else if (rest) {
-          dotClass += ' future'; // estilo neutro = descanso
+          dotClass += ' future';
           dotInner = `<span style="font-size:.62rem;font-weight:900;color:var(--text3);line-height:1;">Z</span>`;
         } else if (isFuture) {
           dotClass += ' future';
@@ -4312,7 +4859,6 @@
           dotClass += ' missed';
           dotInner = `<span style="font-size:.7rem;font-weight:900;color:var(--red);line-height:1;">!</span>`;
         } else if (isPast) {
-          // passado sem registro = sem treino
           dotClass += ' missed';
           dotInner = `<span style="font-size:.7rem;font-weight:900;color:var(--red);line-height:1;">!</span>`;
         }
@@ -4325,7 +4871,14 @@
       </div>`;
       }
 
-      wrap.innerHTML = `
+      // Injeta no card unificado se existir, senão no freq-wrap legado
+      const dotsRow = document.getElementById('tfc-dots-row');
+      if (dotsRow) {
+        dotsRow.innerHTML = dotsHTML;
+      } else {
+        const wrap = document.getElementById('freq-wrap');
+        if (!wrap) return;
+        wrap.innerHTML = `
     <div class="freq-section" onclick="openStudentFreqCalendar()" title="Ver calendário completo">
       <div class="freq-section-title">
         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -4334,6 +4887,7 @@
       <div class="freq-section-hint">Toque para ver o calendário completo</div>
       <div class="freq-tl-row">${dotsHTML}</div>
     </div>`;
+      }
     }
 
     // Chamada quando o aluno INICIA um treino — grava attendance E anima bolinha
@@ -4527,8 +5081,44 @@
           }
         }
         if (todayWorkouts.length) {
-          const skipBtnHtml = hasSequentialToday ? `<div class="today-card-actions"><button class="today-card-skip-btn" onclick="openSkipWorkoutModal()"><span class="skip-arrow">→</span> Pular Treino</button></div>` : '';
-          todayWrap.innerHTML = `<div class="today-card"><div class="today-card-left"><div class="today-card-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Treino de hoje</div><div class="today-card-workout">${todayWorkouts.join(' · ')}</div><div class="today-card-day">${DAYS_FULL[TODAY]}</div></div>${skipBtnHtml}<div class="today-card-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#111110"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg></div></div>`;
+          const skipBtnHtml = hasSequentialToday
+            ? `<button class="skip-btn-new" onclick="openSkipWorkoutModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,4 15,12 5,20"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+                Pular
+               </button>`
+            : '';
+          todayWrap.innerHTML = `
+            <div class="today-freq-card">
+              <div class="tfc-top">
+                <div class="tfc-left">
+                  <div class="tfc-label">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    Treino de hoje
+                  </div>
+                  <div class="tfc-workout">${todayWorkouts.join(' · ')}</div>
+                  <div class="tfc-day">${DAYS_FULL[TODAY]}</div>
+                </div>
+                <div class="tfc-right">
+                  ${skipBtnHtml}
+                  <div class="tfc-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#b8940a"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div class="tfc-bottom" onclick="openStudentFreqCalendar()" id="tfc-freq-body">
+                <div class="tfc-freq-header">
+                  <div class="tfc-freq-title">
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Frequência da semana
+                  </div>
+                  <div class="tfc-freq-hint">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Ver calendário
+                  </div>
+                </div>
+                <div class="freq-tl-row" id="tfc-dots-row"></div>
+              </div>
+            </div>`;
         }
 
         if (!plans.length) {
@@ -4618,6 +5208,8 @@
           if (startBtn) startBtn.classList.add('hidden');
           if (startedInd) startedInd.classList.remove('hidden');
           if (finishBtn) finishBtn.classList.remove('hidden');
+          // Entra no workout mode (restaurado após reload)
+          enterWorkoutMode(_activeWorkout.planId, _activeWorkout.wi, _activeWorkout.planTitle, _activeWorkout.workoutTitle);
         }
       } catch (err) {
         content.innerHTML = `<div class="empty-state"><p>Erro ao carregar: ${err.message}</p></div>`;
