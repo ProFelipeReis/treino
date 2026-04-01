@@ -847,6 +847,35 @@
     }
 
     /* ── NAV MENU ── */
+    /* ── SPLASH PÓS-LOGIN ── */
+    #login-splash {
+      position: fixed;
+      inset: 0;
+      background: #111110;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .4s ease;
+    }
+    #login-splash.splash-in {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+    }
+    #login-splash.splash-out {
+      opacity: 0;
+    }
+    #login-splash video {
+      width: min(260px, 55vw);
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
     #screen-app {
       display: none;
       flex-direction: column;
@@ -4547,8 +4576,29 @@
     function showApp(student) {
       _currentStudent = student;
       _loadCheckState();
+
+      // ── Splash pós-login ──
+      var splash = document.getElementById('login-splash');
+      var vid = document.getElementById('login-splash-video');
       document.getElementById('screen-login').style.display = 'none';
-      document.getElementById('screen-app').style.cssText = 'display:flex;flex-direction:column;background:#f7f7f5;';
+      if (splash && vid) {
+        splash.classList.add('splash-in');
+        vid.currentTime = 0;
+        vid.play().catch(function(){});
+        var _splashTimeout = setTimeout(_revealApp, 5000);
+        vid.onended = function () { clearTimeout(_splashTimeout); _revealApp(); };
+      } else {
+        _revealApp();
+      }
+      function _revealApp() {
+        if (splash) {
+          splash.classList.add('splash-out');
+          setTimeout(function () { splash.classList.remove('splash-in', 'splash-out'); if(vid) vid.pause(); }, 420);
+        }
+        document.getElementById('screen-app').style.cssText = 'display:flex;flex-direction:column;background:#f7f7f5;';
+      }
+      // ─────────────────────────────────────
+
       document.getElementById('student-pill').textContent = student.name;
       const sidebarPill = document.getElementById('student-pill-sidebar');
       if (sidebarPill) sidebarPill.textContent = student.name;
@@ -6106,6 +6156,15 @@
       }
     })();
   </script>
+
+  <!-- ── SPLASH PÓS-LOGIN ── -->
+  <div id="login-splash">
+    <video id="login-splash-video"
+      src="https://felipereiscruz.github.io/videos/imput.webm"
+      muted playsinline webkit-playsinline
+      disablePictureInPicture preload="auto">
+    </video>
+  </div>
 
 </body>
 
