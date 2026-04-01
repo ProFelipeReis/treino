@@ -8013,9 +8013,10 @@
     window.showDashboardAfterLogin = window.showDashboard = function (userData) {
       var u = userData || window.CURRENT_USER || {};
       window.CURRENT_USER = u;
-      // Sempre zera isTester até o Firestore confirmar — evita que sessão antiga do localStorage
-      // mantenha o botão Report visível para quem já foi testador mas não é mais
-      window.CURRENT_USER.isTester = false;
+      // isTester: usa o valor do localStorage apenas se testerEndsAt ainda não expirou.
+      // O Firestore vai confirmar o valor real logo abaixo e re-aplicar o menu sem flicker.
+      var _teMs = (function(v){ if(!v) return null; if(typeof v==='number') return v; if(typeof v.toMillis==='function') return v.toMillis(); if(typeof v.seconds==='number') return v.seconds*1000; return null; })(u.testerEndsAt);
+      window.CURRENT_USER.isTester = !!(u.isTester && (!_teMs || _teMs > Date.now()));
       document.getElementById('screen-login').style.display = 'none';
       document.getElementById('screen-sub-wall').style.display = 'none';
       document.getElementById('screen-dashboard').style.cssText = 'display:flex;flex-direction:column;';
@@ -8042,13 +8043,14 @@
       }, 5 * 60 * 1000);
       // Verifica notificação pendente de revogação de bônus de indicação
       setTimeout(function () { if (window._checkPendingReferralRevokeNotice) _checkPendingReferralRevokeNotice(); }, 1500);
-      // Atualiza dados do Firestore
+      // Atualiza dados do Firestore — fonte da verdade para isTester
       _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username))).then(function (snap) {
         if (!snap.empty) {
           var mgr = snap.docs[0].data();
           window.CURRENT_USER.displayName = mgr.name || u.username;
           window.CURRENT_USER.phone = mgr.phone || '';
           window.CURRENT_USER.isTester = _isTesterActive(mgr);
+          window.CURRENT_USER.testerEndsAt = mgr.testerEndsAt || null;
           // Revalida assinatura
           if (u.role !== 'ceo') {
             var sub = _checkSubscription(mgr);
