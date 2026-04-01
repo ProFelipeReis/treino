@@ -1247,6 +1247,35 @@
 
     #screen-dashboard { display: none; flex-direction: column; height: 100%; overflow: hidden; }
 
+    /* ── SPLASH PÓS-LOGIN ── */
+    #login-splash {
+      position: fixed;
+      inset: 0;
+      background: #111110;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .4s ease;
+    }
+    #login-splash.splash-in {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+    }
+    #login-splash.splash-out {
+      opacity: 0;
+    }
+    #login-splash video {
+      width: min(260px, 55vw);
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
     .topbar {
       background: #111110;
       border-bottom: 1px solid #2e2e2a;
@@ -8090,9 +8119,33 @@
       window.CURRENT_USER = u;
       // Garante que isTester começa como false até o Firestore confirmar
       if (window.CURRENT_USER.isTester === undefined) window.CURRENT_USER.isTester = false;
+
+      // ── Splash pós-login ──
+      var splash = document.getElementById('login-splash');
+      var vid = document.getElementById('login-splash-video');
       document.getElementById('screen-login').style.display = 'none';
       document.getElementById('screen-sub-wall').style.display = 'none';
-      document.getElementById('screen-dashboard').style.cssText = 'display:flex;flex-direction:column;';
+      if (splash && vid) {
+        splash.classList.add('splash-in');
+        vid.currentTime = 0;
+        vid.play().catch(function(){});
+        function _afterSplash() {
+          splash.classList.add('splash-out');
+          setTimeout(function () {
+            splash.classList.remove('splash-in', 'splash-out');
+            vid.pause();
+          }, 420);
+          document.getElementById('screen-dashboard').style.cssText = 'display:flex;flex-direction:column;';
+        }
+        vid.onended = _afterSplash;
+        // Segurança: se o vídeo travar ou demorar mais que 5s, passa mesmo assim
+        var _splashTimeout = setTimeout(_afterSplash, 5000);
+        vid.onended = function () { clearTimeout(_splashTimeout); _afterSplash(); };
+      } else {
+        document.getElementById('screen-dashboard').style.cssText = 'display:flex;flex-direction:column;';
+      }
+      // ─────────────────────────────────────────────
+
       (window._applyUserUI || window._applyUserUIEarly || function(){})();
       loadStudents();
       startNotifPolling();
@@ -13777,6 +13830,15 @@
         <button class="safari-tutorial-btn" onclick="closeSafariTutorial()">Entendi</button>
       </div>
     </div>
+  </div>
+
+  <!-- ── SPLASH PÓS-LOGIN ── -->
+  <div id="login-splash">
+    <video id="login-splash-video"
+      src="https://felipereiscruz.github.io/videos/imput.webm"
+      muted playsinline webkit-playsinline
+      disablePictureInPicture preload="auto">
+    </video>
   </div>
 
   <script>
