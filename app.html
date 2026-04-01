@@ -6778,24 +6778,48 @@
 
         <!-- ══ ABA REPORTS RECEBIDOS (apenas CEO) ══ -->
         <div id="tab-ceo-reports" class="tab-panel">
-          <div class="page-header">
-            <div class="page-title" style="display:flex;align-items:center;gap:10px;">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-              Reports Recebidos
+
+          <!-- Cabeçalho institucional -->
+          <div style="border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:24px;">
+            <div style="background:#111110;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div style="width:40px;height:40px;border-radius:10px;background:rgba(245,200,0,.12);border:1.5px solid rgba(245,200,0,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f5c800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <div>
+                  <div style="font-family:var(--head);font-size:1rem;font-weight:800;color:#fff;letter-spacing:.01em;">Registro de Incidentes — Beta</div>
+                  <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:600;margin-top:2px;">Trainly · Painel de Qualidade Interno · Acesso restrito</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button class="btn btn-ghost btn-sm" onclick="loadCeoReports()" style="border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.7);">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  Atualizar
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="clearAllReports()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                  Arquivar tudo
+                </button>
+              </div>
+            </div>
+            <div style="padding:14px 22px;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+              <div style="font-size:.75rem;color:var(--text3);font-weight:600;">
+                <span style="color:var(--text2);">Total registrado:</span>
+                <span id="rpt-total-count" style="font-weight:800;color:var(--text);margin-left:4px;">—</span>
+              </div>
+              <div style="font-size:.75rem;color:var(--text3);font-weight:600;">
+                <span style="color:var(--text2);">Última entrada:</span>
+                <span id="rpt-last-date" style="font-weight:700;color:var(--text);margin-left:4px;">—</span>
+              </div>
+              <div id="rpt-severity-summary" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
-            <div style="font-size:.82rem;color:var(--text2);">Feedbacks enviados pelos testadores.</div>
-            <div style="display:flex;gap:10px;">
-              <button class="btn btn-ghost btn-sm" onclick="loadCeoReports()">&#x21BA; Atualizar</button>
-              <button class="btn btn-danger btn-sm" onclick="clearAllReports()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                Limpar tudo
-              </button>
-            </div>
-          </div>
+
           <div id="ceo-reports-list">
-            <div style="text-align:center;padding:40px;color:var(--text3);">Carregando reports...</div>
+            <div style="text-align:center;padding:48px;color:var(--text3);">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="opacity:.4;display:block;margin:0 auto 12px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Carregando registros...
+            </div>
           </div>
         </div>
 
@@ -8013,10 +8037,8 @@
     window.showDashboardAfterLogin = window.showDashboard = function (userData) {
       var u = userData || window.CURRENT_USER || {};
       window.CURRENT_USER = u;
-      // isTester: usa o valor do localStorage apenas se testerEndsAt ainda não expirou.
-      // O Firestore vai confirmar o valor real logo abaixo e re-aplicar o menu sem flicker.
-      var _teMs = (function(v){ if(!v) return null; if(typeof v==='number') return v; if(typeof v.toMillis==='function') return v.toMillis(); if(typeof v.seconds==='number') return v.seconds*1000; return null; })(u.testerEndsAt);
-      window.CURRENT_USER.isTester = !!(u.isTester && (!_teMs || _teMs > Date.now()));
+      // Garante que isTester começa como false até o Firestore confirmar
+      if (window.CURRENT_USER.isTester === undefined) window.CURRENT_USER.isTester = false;
       document.getElementById('screen-login').style.display = 'none';
       document.getElementById('screen-sub-wall').style.display = 'none';
       document.getElementById('screen-dashboard').style.cssText = 'display:flex;flex-direction:column;';
@@ -8043,14 +8065,13 @@
       }, 5 * 60 * 1000);
       // Verifica notificação pendente de revogação de bônus de indicação
       setTimeout(function () { if (window._checkPendingReferralRevokeNotice) _checkPendingReferralRevokeNotice(); }, 1500);
-      // Atualiza dados do Firestore — fonte da verdade para isTester
+      // Atualiza dados do Firestore
       _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username))).then(function (snap) {
         if (!snap.empty) {
           var mgr = snap.docs[0].data();
           window.CURRENT_USER.displayName = mgr.name || u.username;
           window.CURRENT_USER.phone = mgr.phone || '';
           window.CURRENT_USER.isTester = _isTesterActive(mgr);
-          window.CURRENT_USER.testerEndsAt = mgr.testerEndsAt || null;
           // Revalida assinatura
           if (u.role !== 'ceo') {
             var sub = _checkSubscription(mgr);
@@ -11596,29 +11617,24 @@
         if (subType === 'trial7') {
           upd.trialEndsAt = now + 7 * 24 * 60 * 60 * 1000;
           upd.subEndsAt = null;
-          upd.isTester = false; upd.testerEndsAt = null;
         } else if (subType === 'custom') {
           var days = parseInt(document.getElementById('ceo-edit-days').value) || 0;
           if (!days) { errEl.textContent = 'Informe o número de dias.'; return; }
           upd.trialEndsAt = null;
           upd.subEndsAt = now + days * 24 * 60 * 60 * 1000;
-          upd.isTester = false; upd.testerEndsAt = null;
         } else if (subType === 'monthly') {
           var m = window._ceoAllManagers.find(function (x) { return x.id === id; }) || {};
           var base = (m.subEndsAt && m.subEndsAt > now) ? m.subEndsAt : now;
           upd.subEndsAt = base + 30 * 24 * 60 * 60 * 1000;
           upd.trialEndsAt = null;
-          upd.isTester = false; upd.testerEndsAt = null;
         } else if (subType === 'setdate') {
           var dateVal = document.getElementById('ceo-edit-date').value;
           if (!dateVal) { errEl.textContent = 'Selecione uma data.'; return; }
           upd.subEndsAt = new Date(dateVal).getTime();
           upd.trialEndsAt = null;
-          upd.isTester = false; upd.testerEndsAt = null;
         } else if (subType === 'expire') {
           upd.subEndsAt = now - 1000;
           upd.trialEndsAt = null;
-          upd.isTester = false; upd.testerEndsAt = null;
         } else if (subType === 'tester') {
           var testerDays = parseInt(document.getElementById('ceo-edit-tester-days').value) || 0;
           if (!testerDays) { errEl.textContent = 'Informe o número de dias como testador.'; btn.classList.remove('btn-loading'); btn.textContent = 'Salvar'; return; }
@@ -11766,39 +11782,142 @@
     window.loadCeoReports = async function () {
       var listEl = document.getElementById('ceo-reports-list');
       if (!listEl) return;
-      listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">Carregando...</div>';
+      listEl.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text3);"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="opacity:.4;display:block;margin:0 auto 12px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Carregando registros...</div>';
       try {
         var snap = await _getDocs(_query(_col(_db, 'reports'), _orderBy('sentAt', 'desc')));
+
+        // ── Metadados de categoria ──
+        var catMeta = {
+          crash:       { label: 'Travamento / Crash',          sev: 'critical', color: '#c0392b', bg: 'rgba(192,57,43,.08)', border: 'rgba(192,57,43,.22)', icon: '🔴' },
+          load:        { label: 'Conteúdo não carregou',        sev: 'high',     color: '#e67e22', bg: 'rgba(230,126,34,.08)', border: 'rgba(230,126,34,.22)', icon: '🟠' },
+          login:       { label: 'Problema no login / acesso',   sev: 'high',     color: '#e67e22', bg: 'rgba(230,126,34,.08)', border: 'rgba(230,126,34,.22)', icon: '🟠' },
+          pagamento:   { label: 'Pagamento / assinatura',       sev: 'high',     color: '#e67e22', bg: 'rgba(230,126,34,.08)', border: 'rgba(230,126,34,.22)', icon: '🟠' },
+          aluno:       { label: 'Erro em alunos',               sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
+          treino:      { label: 'Erro em treinos / planos',     sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
+          evolucao:    { label: 'Evolução / avaliação',         sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
+          chat:        { label: 'Chat com defeito',             sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
+          lentidao:    { label: 'Lentidão / travamento',        sev: 'low',      color: '#2e7d52', bg: 'rgba(46,125,82,.08)',  border: 'rgba(46,125,82,.22)',  icon: '🟢' },
+          visual:      { label: 'Visual quebrado',              sev: 'low',      color: '#2e7d52', bg: 'rgba(46,125,82,.08)',  border: 'rgba(46,125,82,.22)',  icon: '🟢' },
+          notificacao: { label: 'Notificação não chegou',       sev: 'low',      color: '#2e7d52', bg: 'rgba(46,125,82,.08)',  border: 'rgba(46,125,82,.22)',  icon: '🟢' },
+          sugestao:    { label: 'Sugestão de melhoria',         sev: 'info',     color: '#2980b9', bg: 'rgba(41,128,185,.08)', border: 'rgba(41,128,185,.22)', icon: '🔵' },
+          outro:       { label: 'Outro',                        sev: 'info',     color: '#2980b9', bg: 'rgba(41,128,185,.08)', border: 'rgba(41,128,185,.22)', icon: '🔵' }
+        };
+        var sevLabel = { critical: 'CRÍTICO', high: 'ALTO', medium: 'MÉDIO', low: 'BAIXO', info: 'INFO' };
+
+        // Atualiza badge do menu
+        var badge = document.getElementById('ceo-reports-badge');
+        if (badge) { badge.textContent = snap.size; badge.classList.toggle('hidden', snap.size === 0); }
+
         if (snap.empty) {
-          listEl.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text3);"><div style="font-size:2rem;margin-bottom:12px;">&#x1F4ED;</div><div style="font-weight:600;font-size:.9rem;">Nenhum report recebido ainda.</div></div>';
-          var badge = document.getElementById('ceo-reports-badge');
-          if (badge) badge.classList.add('hidden');
+          listEl.innerHTML = '<div style="text-align:center;padding:64px 20px;color:var(--text3);"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="opacity:.3;display:block;margin:0 auto 14px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div style="font-weight:700;font-size:.92rem;margin-bottom:6px;">Nenhum registro encontrado</div><div style="font-size:.78rem;opacity:.6;">Os relatórios enviados pelos testadores aparecerão aqui.</div></div>';
+          // Limpa summary
+          var tc = document.getElementById('rpt-total-count'); if (tc) tc.textContent = '0';
+          var ld = document.getElementById('rpt-last-date'); if (ld) ld.textContent = '—';
+          var ss = document.getElementById('rpt-severity-summary'); if (ss) ss.innerHTML = '';
           return;
         }
-        var html = '<div style="display:flex;flex-direction:column;gap:12px;">';
-        snap.docs.forEach(function (doc) {
+
+        // ── Summary bar ──
+        var sevCount = {};
+        snap.docs.forEach(function(doc) {
           var r = doc.data();
+          var m = catMeta[r.category] || catMeta.outro;
+          sevCount[m.sev] = (sevCount[m.sev] || 0) + 1;
+        });
+        var sevOrder = ['critical','high','medium','low','info'];
+        var sevColors = { critical:'#c0392b', high:'#e67e22', medium:'#b7860b', low:'#2e7d52', info:'#2980b9' };
+        var summaryHtml = '';
+        sevOrder.forEach(function(s) {
+          if (!sevCount[s]) return;
+          summaryHtml += '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.04);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:800;color:' + sevColors[s] + ';">'
+            + '<span style="width:7px;height:7px;border-radius:50%;background:' + sevColors[s] + ';flex-shrink:0;"></span>'
+            + sevLabel[s] + ' <span style="color:var(--text2);font-weight:700;">×' + sevCount[s] + '</span></span>';
+        });
+        var tc = document.getElementById('rpt-total-count'); if (tc) tc.textContent = snap.size;
+        var ss = document.getElementById('rpt-severity-summary'); if (ss) ss.innerHTML = summaryHtml;
+        var firstDoc = snap.docs[0].data();
+        var ld = document.getElementById('rpt-last-date');
+        if (ld && firstDoc.sentAt) {
+          var fd = new Date(firstDoc.sentAt);
+          ld.textContent = fd.toLocaleDateString('pt-BR') + ' ' + fd.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+        }
+
+        // ── Renderiza cada report como documento ──
+        var html = '<div style="display:flex;flex-direction:column;gap:16px;">';
+        snap.docs.forEach(function(doc, idx) {
+          var r = doc.data();
+          var docId = doc.id;
+          var m = catMeta[r.category] || catMeta.outro;
           var dt = new Date(r.sentAt);
-          var dtStr = dt.toLocaleDateString('pt-BR') + ' às ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-          html += '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;">' +
-            '<div style="background:#111110;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
-            '<div style="display:flex;align-items:center;gap:10px;">' +
-            '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent-dim);border:1.5px solid var(--accent-soft);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:.78rem;font-weight:800;color:var(--accent);">' + (r.displayName || r.username || '?').slice(0, 2).toUpperCase() + '</div>' +
-            '<div><div style="font-weight:700;font-size:.88rem;color:#fff;">' + (r.displayName || r.username || '?') + '</div>' +
-            '<div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:600;">@' + (r.username || '?') + '</div></div></div>' +
-            '<div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:600;">' + dtStr + '</div>' +
-            '</div>' +
-            '<div style="padding:14px 16px;">' +
-            '<span style="display:inline-block;background:var(--accent-dim);border:1px solid var(--accent-soft);border-radius:99px;padding:3px 11px;font-size:.72rem;font-weight:800;color:#8a6200;margin-bottom:10px;">' + (r.categoryLabel || r.category || '—') + '</span>' +
-            '<div style="font-size:.86rem;color:var(--text2);line-height:1.65;white-space:pre-wrap;">' + (r.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
-            '</div></div>';
+          var dateStr = dt.toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'});
+          var timeStr = dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+          var protocol = 'RPT-' + String(r.sentAt).slice(-6).toUpperCase();
+          var initials = (r.displayName || r.username || '?').split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+
+          html += '<div style="border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);">'
+
+            // ── Topo: protocolo + severidade + reporter
+            + '<div style="background:var(--surface2);border-bottom:1.5px solid var(--border);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'
+              + '<div style="display:flex;align-items:center;gap:12px;">'
+                + '<div style="font-family:monospace;font-size:.72rem;font-weight:700;color:var(--text3);letter-spacing:.05em;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;padding:3px 9px;">' + protocol + '</div>'
+                + '<span style="display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:3px 10px;font-size:.68rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;background:' + m.bg + ';border:1px solid ' + m.border + ';color:' + m.color + ';">'
+                  + '<span style="width:6px;height:6px;border-radius:50%;background:' + m.color + ';flex-shrink:0;"></span>'
+                  + sevLabel[m.sev]
+                + '</span>'
+              + '</div>'
+              + '<div style="font-size:.72rem;color:var(--text3);font-weight:600;letter-spacing:.01em;">'
+                + '<span style="color:var(--text2);">' + dateStr + '</span>'
+                + ' &nbsp;·&nbsp; <span style="font-family:monospace;">' + timeStr + '</span>'
+              + '</div>'
+            + '</div>'
+
+            // ── Corpo: reporter + categoria + descrição
+            + '<div style="padding:18px 18px 16px;">'
+
+              // Reporter
+              + '<div style="display:flex;align-items:center;gap:11px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);">'
+                + '<div style="width:36px;height:36px;border-radius:50%;background:#111110;border:2px solid rgba(245,200,0,.25);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:.78rem;font-weight:800;color:#f5c800;flex-shrink:0;">' + initials + '</div>'
+                + '<div>'
+                  + '<div style="font-weight:700;font-size:.88rem;color:var(--text);">' + (r.displayName || r.username || '?') + '</div>'
+                  + '<div style="font-size:.72rem;color:var(--text3);font-weight:600;margin-top:1px;">@' + (r.username || '?') + ' &nbsp;·&nbsp; Testador oficial</div>'
+                + '</div>'
+              + '</div>'
+
+              // Categoria
+              + '<div style="margin-bottom:12px;">'
+                + '<div style="font-size:.65rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">Categoria do incidente</div>'
+                + '<div style="display:inline-flex;align-items:center;gap:7px;background:' + m.bg + ';border:1.5px solid ' + m.border + ';border-radius:8px;padding:6px 13px;">'
+                  + '<span style="font-size:.9rem;">' + m.icon + '</span>'
+                  + '<span style="font-size:.82rem;font-weight:700;color:var(--text);">' + m.label + '</span>'
+                + '</div>'
+              + '</div>'
+
+              // Descrição
+              + '<div>'
+                + '<div style="font-size:.65rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Descrição do testador</div>'
+                + '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid ' + m.color + ';border-radius:0 8px 8px 0;padding:13px 15px;font-size:.86rem;color:var(--text2);line-height:1.7;white-space:pre-wrap;font-family:var(--body);">'
+                  + (r.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                + '</div>'
+              + '</div>'
+
+            + '</div>'
+
+            // ── Rodapé: ações
+            + '<div style="background:var(--surface2);border-top:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">'
+              + '<div style="font-size:.7rem;color:var(--text3);font-weight:600;">ID do documento: <span style="font-family:monospace;color:var(--text2);">' + docId + '</span></div>'
+              + '<button onclick="deleteOneReport(\'' + docId + '\',this)" style="background:none;border:1px solid var(--border2);border-radius:6px;padding:5px 12px;font-size:.72rem;font-weight:700;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--body);transition:all .15s;" onmouseover="this.style.borderColor=\'var(--red)\';this.style.color=\'var(--red)\'" onmouseout="this.style.borderColor=\'var(--border2)\';this.style.color=\'var(--text3)\'">'
+                + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>'
+                + 'Arquivar registro'
+              + '</button>'
+            + '</div>'
+
+          + '</div>';
         });
         html += '</div>';
         listEl.innerHTML = html;
-        var badge = document.getElementById('ceo-reports-badge');
-        if (badge) { badge.textContent = snap.size; badge.classList.remove('hidden'); }
+
       } catch (e) {
-        listEl.innerHTML = '<div style="color:var(--red);padding:20px;font-size:.84rem;">Erro ao carregar: ' + e.message + '</div>';
+        listEl.innerHTML = '<div style="color:var(--red);padding:20px;font-size:.84rem;font-weight:600;">Erro ao carregar registros: ' + e.message + '</div>';
       }
     };
 
@@ -11817,6 +11936,16 @@
         toast('Reports apagados.');
         loadCeoReports();
       } catch (e) { toast('Erro: ' + e.message, 'error'); }
+    };
+
+    // ── CEO: arquivar um report individual ──
+    window.deleteOneReport = async function (docId, btn) {
+      if (!confirm('Arquivar este registro? A ação não pode ser desfeita.')) return;
+      if (btn) { btn.disabled = true; btn.textContent = 'Arquivando...'; }
+      try {
+        await _deleteDoc(_doc(_db, 'reports', docId));
+        loadCeoReports();
+      } catch (e) { toast('Erro: ' + e.message, 'error'); if (btn) { btn.disabled = false; btn.textContent = 'Arquivar registro'; } }
     };
 
     // ── Carregar reports ao entrar na aba CEO Reports ──
