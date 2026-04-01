@@ -5476,7 +5476,7 @@
           role: role,
           isMaster: role === 'master' || role === 'ceo',
           isCeo: role === 'ceo',
-          isTester: !!mgr.isTester,
+          isTester: !!mgr.isTester && (!mgr.testerEndsAt || mgr.testerEndsAt > Date.now()),
           displayName: mgr.name || user,
           phone: mgr.phone || '',
           subStatus: subStatus,
@@ -8029,7 +8029,7 @@
           var mgr = snap.docs[0].data();
           window.CURRENT_USER.displayName = mgr.name || u.username;
           window.CURRENT_USER.phone = mgr.phone || '';
-          window.CURRENT_USER.isTester = !!mgr.isTester;
+          window.CURRENT_USER.isTester = !!mgr.isTester && (!mgr.testerEndsAt || mgr.testerEndsAt > Date.now());
           // Revalida assinatura
           if (u.role !== 'ceo') {
             var sub = _checkSubscription(mgr);
@@ -12915,7 +12915,7 @@
           role: role,
           isMaster: role === 'master' || role === 'ceo',
           isCeo: role === 'ceo',
-          isTester: !!mgr.isTester,
+          isTester: !!mgr.isTester && (!mgr.testerEndsAt || mgr.testerEndsAt > Date.now()),
           displayName: mgr.name || user,
           phone: mgr.phone || '',
           subStatus: subStatus,
