@@ -11593,24 +11593,39 @@
         if (subType === 'trial7') {
           upd.trialEndsAt = now + 7 * 24 * 60 * 60 * 1000;
           upd.subEndsAt = null;
+          // Remove testador quando outra ação de assinatura for aplicada
+          upd.isTester = false;
+          upd.testerEndsAt = null;
         } else if (subType === 'custom') {
           var days = parseInt(document.getElementById('ceo-edit-days').value) || 0;
           if (!days) { errEl.textContent = 'Informe o número de dias.'; return; }
           upd.trialEndsAt = null;
           upd.subEndsAt = now + days * 24 * 60 * 60 * 1000;
+          // Remove testador quando outra ação de assinatura for aplicada
+          upd.isTester = false;
+          upd.testerEndsAt = null;
         } else if (subType === 'monthly') {
           var m = window._ceoAllManagers.find(function (x) { return x.id === id; }) || {};
           var base = (m.subEndsAt && m.subEndsAt > now) ? m.subEndsAt : now;
           upd.subEndsAt = base + 30 * 24 * 60 * 60 * 1000;
           upd.trialEndsAt = null;
+          // Remove testador quando outra ação de assinatura for aplicada
+          upd.isTester = false;
+          upd.testerEndsAt = null;
         } else if (subType === 'setdate') {
           var dateVal = document.getElementById('ceo-edit-date').value;
           if (!dateVal) { errEl.textContent = 'Selecione uma data.'; return; }
           upd.subEndsAt = new Date(dateVal).getTime();
           upd.trialEndsAt = null;
+          // Remove testador quando outra ação de assinatura for aplicada
+          upd.isTester = false;
+          upd.testerEndsAt = null;
         } else if (subType === 'expire') {
           upd.subEndsAt = now - 1000;
           upd.trialEndsAt = null;
+          // Remove testador quando outra ação de assinatura for aplicada
+          upd.isTester = false;
+          upd.testerEndsAt = null;
         } else if (subType === 'tester') {
           var testerDays = parseInt(document.getElementById('ceo-edit-tester-days').value) || 0;
           if (!testerDays) { errEl.textContent = 'Informe o número de dias como testador.'; btn.classList.remove('btn-loading'); btn.textContent = 'Salvar'; return; }
