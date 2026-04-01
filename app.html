@@ -6024,7 +6024,7 @@
 
         <div id="reg-processing" style="display:none;text-align:center;padding:20px 0;">
           <div class="spinner" style="margin:0 auto 16px;"></div>
-          <p style="font-weight:700;font-size:.95rem;color:var(--text);">Processando pagamento...</p>
+          <p id="reg-processing-title" style="font-weight:700;font-size:.95rem;color:var(--text);">Criando sua conta...</p>
           <p style="font-size:.82rem;color:var(--text3);margin-top:6px;">Aguarde, isso leva alguns segundos.</p>
         </div>
 
@@ -6749,6 +6749,34 @@
   <div id="mobile-sidebar"></div>
 
   <!-- MODAL: INDICAÇÃO DE AMIGO -->
+  <div id="modal-debugmode" class="modal-overlay hidden">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Ambiente de Desenvolvimento</h3>
+        <button class="close-btn" onclick="closeModal('modal-debugmode')">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align:center;padding:8px 0 20px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div style="font-family:var(--head);font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:8px;">Voc&#xea; est&#xe1; no modo de teste</div>
+          <div style="font-size:.82rem;color:var(--text2);line-height:1.65;margin-bottom:20px;">
+            Bem-vindo! Voc&#xea; utilizou o c&#xf3;digo especial <strong style="color:var(--text);font-family:var(--head);letter-spacing:.04em;">DEBUGMODE</strong> e ganhou <strong>60 dias gr&#xe1;tis</strong> para explorar o Trainly &#xe0; vontade.<br><br>
+            Este app est&#xe1; em <strong>est&#xe1;gio de desenvolvimento ativo</strong>. Voc&#xea; pode encontrar instabilidades ou funcionalidades incompletas &#x2014; seu feedback &#xe9; essencial para a evolu&#xe7;&#xe3;o da plataforma.
+          </div>
+          <div style="background:var(--accent-dim);border:1px solid var(--accent-soft);border-radius:var(--r);padding:14px 16px;text-align:left;margin-bottom:20px;">
+            <div style="font-weight:700;font-size:.82rem;color:var(--text);margin-bottom:6px;">&#x1F44B; A equipe agradece!</div>
+            <div style="font-size:.78rem;color:var(--text2);line-height:1.6;">Obrigado por fazer parte desta fase. Qualquer bug, sugest&#xe3;o ou elogio &#xe9; bem-vindo. Voc&#xea; est&#xe1; ajudando a construir algo especial.</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" style="width:100%;" onclick="closeModal('modal-debugmode')">Entendido, vamos l&#xe1;! &#x1F680;</button>
+      </div>
+    </div>
+  </div>
+
   <div id="modal-referral" class="modal-overlay hidden">
     <div class="modal modal-sm">
       <div class="modal-header">
@@ -7840,6 +7868,23 @@
       loadStudents();
       startNotifPolling();
       (function waitChat() { if (window.startChatBadgePolling) { startChatBadgePolling(); } else { setTimeout(waitChat, 200); } })();
+      // Re-valida trial enquanto o painel está aberto (a cada 5 minutos)
+      if (window._trialCheckInterval) clearInterval(window._trialCheckInterval);
+      window._trialCheckInterval = setInterval(async function () {
+        var u = window.CURRENT_USER || {};
+        if (!u.username || u.role === 'ceo') return;
+        try {
+          var snap = await _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username)));
+          if (snap.empty) return;
+          var mgr = snap.docs[0].data();
+          var sub = _checkSubscription(mgr);
+          if (!sub.ok) {
+            clearInterval(window._trialCheckInterval);
+            window._trialCheckInterval = null;
+            showSubscriptionWall();
+          }
+        } catch (e) { }
+      }, 5 * 60 * 1000);
       // Verifica notificação pendente de revogação de bônus de indicação
       setTimeout(function () { if (window._checkPendingReferralRevokeNotice) _checkPendingReferralRevokeNotice(); }, 1500);
       // Atualiza dados do Firestore
@@ -7855,11 +7900,19 @@
             if (!sub.ok) { showSubscriptionWall(); return; }
             if (sub.type === 'trial') {
               showTrialBanner(sub.daysLeft);
-              // Mostra modal de assinatura 3s após entrar (só uma vez — flag no Firestore)
-              if (!mgr.trialModalShown) {
+              // Modal especial DEBUGMODE (só na primeira vez)
+              var isDebugUser = (mgr.referredBy || '').toUpperCase() === '' && sub.daysLeft > 50;
+              // Detecta via flag dedicada
+              if (!mgr.debugModalShown && mgr.trialEndsAt && (mgr.trialEndsAt - Date.now()) > 55 * 24 * 60 * 60 * 1000) {
+                setTimeout(function () {
+                  var docId = snap.docs[0].id;
+                  openModal('modal-debugmode');
+                  try { _updateDoc(_doc(_db, 'managers', docId), { debugModalShown: true }); } catch (e) { }
+                }, 1200);
+              } else if (!mgr.trialModalShown) {
+                // Mostra modal de assinatura 3s após entrar (só uma vez — flag no Firestore)
                 setTimeout(function () {
                   if (window.showTrialWelcomeModal) showTrialWelcomeModal(sub.daysLeft);
-                  // Marca no Firestore que já foi mostrado
                   try {
                     var docId = snap.docs[0].id;
                     _updateDoc(_doc(_db, 'managers', docId), { trialModalShown: true });
@@ -7886,6 +7939,7 @@
       clearSession();
       window.CURRENT_USER = null;
       if (window._notifInterval) { clearInterval(window._notifInterval); window._notifInterval = null; }
+      if (window._trialCheckInterval) { clearInterval(window._trialCheckInterval); window._trialCheckInterval = null; }
       if (window._chatSnapshotUnsubs) { window._chatSnapshotUnsubs.forEach(function (fn) { try { fn(); } catch (e) { } }); window._chatSnapshotUnsubs = []; }
       if (window._chatSnapshotUnsubs) { window._chatSnapshotUnsubs = []; }
       // Oculta todas as telas
@@ -10155,7 +10209,7 @@
           var snap = await _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username)));
           if (!snap.empty) {
             var upd = { name: finalName, phone: finalPhone };
-            if (pass) upd.password = pass;
+            if (pass) { upd.passwordHash = await _sha256(pass); upd.password = null; }
             await _updateDoc(_doc(_db, 'managers', snap.docs[0].id), upd);
             // Propaga para alunos
             var studSnap2 = await _getDocs(_query(_col(_db, 'students'), _where('managerId', '==', u.username)));
@@ -10251,7 +10305,7 @@
       try {
         if (editId) {
           var upd = { name, phone, isMaster };
-          if (pass) upd.password = pass;
+          if (pass) { upd.passwordHash = await _sha256(pass); upd.password = null; }
           await _updateDoc(_doc(_db, 'managers', editId), upd);
           // Propagate phone and name update to all students of this manager
           var studSnap = await _getDocs(_query(_col(_db, 'students'), _where('managerId', '==', username)));
@@ -11601,9 +11655,16 @@
       document.getElementById('referral-link-input').value = link;
 
       // Carrega estatísticas de indicações
+      // Busca tanto por referralCode (fluxo ?ref=) quanto por username (fluxo ?invite=)
       try {
-        var snap = await _db.collection('managers').where('referredBy', '==', refCode).get();
-        var count = snap.size;
+        var u = window.CURRENT_USER || {};
+        var snapByCode = await _db.collection('managers').where('referredBy', '==', refCode).get();
+        var snapByUser = await _db.collection('managers').where('referredBy', '==', u.username || '').get();
+        // Une os IDs sem duplicar
+        var ids = new Set();
+        snapByCode.docs.forEach(function(d) { ids.add(d.id); });
+        snapByUser.docs.forEach(function(d) { ids.add(d.id); });
+        var count = ids.size;
         document.getElementById('ref-stat-sent').textContent = count;
         document.getElementById('ref-stat-days').textContent = (count * 7) + ' dias';
       } catch (e) {
@@ -11986,7 +12047,7 @@
     };
 
     function regShowStep(n) {
-      [1, 2].forEach(function (i) {
+      [1, 2, 3].forEach(function (i) {
         var s = document.getElementById('reg-step' + i);
         if (s) s.style.display = i === n ? 'block' : 'none';
         var dot = document.getElementById('reg-dot-' + i);
@@ -12041,22 +12102,27 @@
       var refCodeWrap = document.getElementById('reg-ref-code-wrap');
       var refManual = refInput ? refInput.value.trim() : '';
       if (refManual && !window._pendingRefCode && refCodeWrap && refCodeWrap.style.display !== 'none') {
-        var btn1 = document.querySelector('#reg-step1 .btn-primary');
-        if (btn1) { btn1.classList.add('btn-loading'); btn1.textContent = 'Verificando...'; }
-        try {
-          // Busca pelo campo referralCode (código aleatório), não pelo username
-          var snap = await _db.collection('managers').where('referralCode', '==', refManual).get();
-          if (snap.empty) {
-            errEl.textContent = 'Código de indicação inválido. Verifique com quem te indicou.';
-            if (btn1) { btn1.classList.remove('btn-loading'); btn1.textContent = 'Continuar →'; }
-            return;
-          }
-          // Código válido — armazena para usar no cadastro
+        if (refManual.toUpperCase() === 'DEBUGMODE') {
+          // Código especial — aceita diretamente sem buscar no Firestore
           window._pendingRefCode = refManual;
-        } catch (e) {
-          // Erro de rede — deixa passar sem bloquear o cadastro
+        } else {
+          var btn1 = document.querySelector('#reg-step1 .btn-primary');
+          if (btn1) { btn1.classList.add('btn-loading'); btn1.textContent = 'Verificando...'; }
+          try {
+            // Busca pelo campo referralCode (código aleatório), não pelo username
+            var snap = await _db.collection('managers').where('referralCode', '==', refManual).get();
+            if (snap.empty) {
+              errEl.textContent = 'Código de indicação inválido. Verifique com quem te indicou.';
+              if (btn1) { btn1.classList.remove('btn-loading'); btn1.textContent = 'Continuar →'; }
+              return;
+            }
+            // Código válido — armazena para usar no cadastro
+            window._pendingRefCode = refManual;
+          } catch (e) {
+            // Erro de rede — deixa passar sem bloquear o cadastro
+          }
+          if (btn1) { btn1.classList.remove('btn-loading'); btn1.textContent = 'Continuar →'; }
         }
-        if (btn1) { btn1.classList.remove('btn-loading'); btn1.textContent = 'Continuar →'; }
       }
 
       regShowStep(2);
@@ -12126,6 +12192,7 @@
 
       regShowStep('processing');
       document.getElementById('reg-processing').style.display = 'block';
+      var _rpt = document.getElementById('reg-processing-title'); if (_rpt) _rpt.textContent = 'Processando pagamento...';
       document.getElementById('reg-step1').style.display = 'none';
       document.getElementById('reg-step2').style.display = 'none';
       document.getElementById('reg-step3').style.display = 'none';
@@ -12607,6 +12674,7 @@
         var el = document.getElementById('reg-step' + i); if (el) el.style.display = 'none';
       });
       document.getElementById('reg-processing').style.display = 'block';
+      var _rpt = document.getElementById('reg-processing-title'); if (_rpt) _rpt.textContent = 'Criando sua conta...';
 
       // Helper para mostrar erro e voltar ao step 2
       function showErr(msg) {
@@ -12658,6 +12726,11 @@
           || (document.getElementById('reg-ref-code') ? document.getElementById('reg-ref-code').value.trim() : '')
           || '';
 
+        // Calcula dias de trial: 7 base + 7 se veio com código de indicação; DEBUGMODE = 2 meses
+        var isDebugMode = refCode.toUpperCase() === 'DEBUGMODE';
+        var trialDays = isDebugMode ? 60 : (refCode ? 14 : 7);
+        var trialEndsAt = Date.now() + trialDays * 24 * 60 * 60 * 1000;
+
         // Salva no Firestore
         try {
           await _db.collection('managers').doc(_regNewId).set({
@@ -12665,9 +12738,9 @@
             email: email || authEmail,
             authUid: uid,
             role: 'comum', isMaster: false,
-            trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
+            trialEndsAt: trialEndsAt, subEndsAt: null,
             blocked: false, createdAt: Date.now(),
-            referredBy: refCode
+            referredBy: isDebugMode ? '' : refCode
           });
         } catch (fsErr) {
           // Firestore falhou — deleta a conta do Auth para não deixar "fantasma"
@@ -12678,8 +12751,8 @@
           showErr('Erro ao salvar conta: ' + fsErr.message); return;
         }
 
-        // Aplica bônus de indicação
-        if (refCode) {
+        // Aplica bônus de indicação (não aplica para DEBUGMODE)
+        if (refCode && !isDebugMode) {
           try { await _applyReferralBonus(refCode); } catch (e) { }
         }
 
