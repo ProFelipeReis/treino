@@ -6780,45 +6780,96 @@
         <div id="tab-ceo-reports" class="tab-panel">
 
           <!-- Cabeçalho institucional -->
-          <div style="border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:24px;">
-            <div style="background:#111110;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div style="border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:20px;">
+            <div style="background:#111110;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
               <div style="display:flex;align-items:center;gap:14px;">
-                <div style="width:40px;height:40px;border-radius:10px;background:rgba(245,200,0,.12);border:1.5px solid rgba(245,200,0,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f5c800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <div style="width:38px;height:38px;border-radius:10px;background:rgba(245,200,0,.12);border:1.5px solid rgba(245,200,0,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="#f5c800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 </div>
                 <div>
-                  <div style="font-family:var(--head);font-size:1rem;font-weight:800;color:#fff;letter-spacing:.01em;">Registro de Incidentes — Beta</div>
-                  <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:600;margin-top:2px;">Trainly · Painel de Qualidade Interno · Acesso restrito</div>
+                  <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:#fff;">Registro de Incidentes</div>
+                  <div style="font-size:.7rem;color:rgba(255,255,255,.4);font-weight:600;margin-top:1px;">Painel de Qualidade · Acesso restrito</div>
                 </div>
               </div>
-              <div style="display:flex;gap:8px;align-items:center;">
-                <button class="btn btn-ghost btn-sm" onclick="loadCeoReports()" style="border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.7);">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <button onclick="loadCeoReports()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.75);font-size:.75rem;font-weight:700;cursor:pointer;font-family:var(--body);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.14)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
                   Atualizar
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="clearAllReports()">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                <button onclick="exportReportsToExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(46,125,82,.2);border:1px solid rgba(46,125,82,.4);border-radius:8px;color:#4ade80;font-size:.75rem;font-weight:700;cursor:pointer;font-family:var(--body);transition:all .15s;" onmouseover="this.style.background='rgba(46,125,82,.32)'" onmouseout="this.style.background='rgba(46,125,82,.2)'">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Exportar Excel
+                </button>
+                <button onclick="clearAllReports()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(224,62,62,.15);border:1px solid rgba(224,62,62,.3);border-radius:8px;color:#f87171;font-size:.75rem;font-weight:700;cursor:pointer;font-family:var(--body);transition:all .15s;" onmouseover="this.style.background='rgba(224,62,62,.25)'" onmouseout="this.style.background='rgba(224,62,62,.15)'">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
                   Arquivar tudo
                 </button>
               </div>
             </div>
-            <div style="padding:14px 22px;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
-              <div style="font-size:.75rem;color:var(--text3);font-weight:600;">
-                <span style="color:var(--text2);">Total registrado:</span>
-                <span id="rpt-total-count" style="font-weight:800;color:var(--text);margin-left:4px;">—</span>
+
+            <!-- KPI strip -->
+            <div style="padding:0;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);">
+              <div style="padding:12px 16px;border-right:1px solid var(--border);">
+                <div style="font-size:.62rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:4px;">Total abertos</div>
+                <div style="font-family:var(--head);font-size:1.5rem;font-weight:800;color:var(--text);line-height:1;" id="rpt-total-count">—</div>
               </div>
-              <div style="font-size:.75rem;color:var(--text3);font-weight:600;">
-                <span style="color:var(--text2);">Última entrada:</span>
-                <span id="rpt-last-date" style="font-weight:700;color:var(--text);margin-left:4px;">—</span>
+              <div style="padding:12px 16px;border-right:1px solid var(--border);">
+                <div style="font-size:.62rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:4px;">Críticos</div>
+                <div style="font-family:var(--head);font-size:1.5rem;font-weight:800;color:#e03e3e;line-height:1;" id="rpt-critical-count">—</div>
               </div>
-              <div id="rpt-severity-summary" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+              <div style="padding:12px 16px;border-right:1px solid var(--border);">
+                <div style="font-size:.62rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:4px;">Resolvidos</div>
+                <div style="font-family:var(--head);font-size:1.5rem;font-weight:800;color:var(--green);line-height:1;" id="rpt-resolved-count">—</div>
+              </div>
+              <div style="padding:12px 16px;">
+                <div style="font-size:.62rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:4px;">Última entrada</div>
+                <div style="font-size:.8rem;font-weight:700;color:var(--text);line-height:1.3;" id="rpt-last-date">—</div>
+              </div>
             </div>
+
+            <!-- Severity badges -->
+            <div style="padding:10px 16px;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:.65rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-right:2px;">Distribuição:</span>
+              <div id="rpt-severity-summary" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            </div>
+          </div>
+
+          <!-- Filtro de severidade + busca -->
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+            <div style="display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;flex-shrink:0;">
+              <button id="rpt-filter-all" onclick="filterReports('all')" style="padding:5px 11px;border-radius:7px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:var(--body);border:none;background:var(--text);color:var(--bg);transition:all .15s;">Todos</button>
+              <button id="rpt-filter-critical" onclick="filterReports('critical')" style="padding:5px 11px;border-radius:7px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:var(--body);border:none;background:none;color:var(--text3);transition:all .15s;">🔴 Crítico</button>
+              <button id="rpt-filter-high" onclick="filterReports('high')" style="padding:5px 11px;border-radius:7px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:var(--body);border:none;background:none;color:var(--text3);transition:all .15s;">🟠 Alto</button>
+              <button id="rpt-filter-medium" onclick="filterReports('medium')" style="padding:5px 11px;border-radius:7px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:var(--body);border:none;background:none;color:var(--text3);transition:all .15s;">🟡 Médio</button>
+              <button id="rpt-filter-low" onclick="filterReports('low')" style="padding:5px 11px;border-radius:7px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:var(--body);border:none;background:none;color:var(--text3);transition:all .15s;">🟢 Baixo</button>
+            </div>
+            <input id="rpt-search" oninput="filterReports(window._rptCurrentFilter||'all')" placeholder="Buscar por nome, categoria, descrição..." style="flex:1;min-width:180px;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.8rem;font-family:var(--body);color:var(--text);background:var(--surface);outline:none;font-weight:500;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+
+          <!-- Sub-tabs: Abertos / Resolvidos -->
+          <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px;">
+            <button id="rpt-tab-open" onclick="switchReportTab('open')" style="padding:9px 16px;font-size:.8rem;font-weight:800;color:var(--text);background:none;border:none;border-bottom:2px solid var(--accent);margin-bottom:-2px;cursor:pointer;font-family:var(--body);display:flex;align-items:center;gap:6px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Abertos
+              <span id="rpt-open-count-badge" style="background:var(--red);color:#fff;border-radius:99px;font-size:.62rem;font-weight:900;padding:1px 6px;min-width:18px;text-align:center;">0</span>
+            </button>
+            <button id="rpt-tab-resolved" onclick="switchReportTab('resolved')" style="padding:9px 16px;font-size:.8rem;font-weight:800;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:var(--body);display:flex;align-items:center;gap:6px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Resolvidos
+              <span id="rpt-resolved-count-badge" style="background:var(--green);color:#fff;border-radius:99px;font-size:.62rem;font-weight:900;padding:1px 6px;min-width:18px;text-align:center;">0</span>
+            </button>
           </div>
 
           <div id="ceo-reports-list">
             <div style="text-align:center;padding:48px;color:var(--text3);">
               <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="opacity:.4;display:block;margin:0 auto 12px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Carregando registros...
+            </div>
+          </div>
+          <div id="ceo-reports-resolved-list" style="display:none;">
+            <div style="text-align:center;padding:48px;color:var(--text3);">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="opacity:.4;display:block;margin:0 auto 12px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Nenhum ticket resolvido ainda.
             </div>
           </div>
         </div>
@@ -11778,6 +11829,146 @@
       }
     };
 
+    // ── CEO REPORTS: estado global ──
+    window._rptAllDocs = [];
+    window._rptResolvedDocs = [];
+    window._rptCurrentFilter = 'all';
+    window._rptCurrentTab = 'open';
+
+    var _catMeta = {
+      crash:       { label: 'Travamento / Crash',          sev: 'critical', color: '#c0392b', bg: 'rgba(192,57,43,.08)', border: 'rgba(192,57,43,.22)', icon: '🔴' },
+      load:        { label: 'Conteúdo não carregou',        sev: 'high',     color: '#e67e22', bg: 'rgba(230,126,34,.08)', border: 'rgba(230,126,34,.22)', icon: '🟠' },
+      login:       { label: 'Problema no login / acesso',   sev: 'high',     color: '#e67e22', bg: 'rgba(230,126,34,.08)', border: 'rgba(230,126,34,.22)', icon: '🟠' },
+      pagamento:   { label: 'Pagamento / assinatura',       sev: 'high',     color: '#e67e22', bg: 'rgba(230,126,34,.08)', border: 'rgba(230,126,34,.22)', icon: '🟠' },
+      aluno:       { label: 'Erro em alunos',               sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
+      treino:      { label: 'Erro em treinos / planos',     sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
+      evolucao:    { label: 'Evolução / avaliação',         sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
+      chat:        { label: 'Chat com defeito',             sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
+      lentidao:    { label: 'Lentidão / travamento',        sev: 'low',      color: '#2e7d52', bg: 'rgba(46,125,82,.08)',  border: 'rgba(46,125,82,.22)',  icon: '🟢' },
+      visual:      { label: 'Visual quebrado',              sev: 'low',      color: '#2e7d52', bg: 'rgba(46,125,82,.08)',  border: 'rgba(46,125,82,.22)',  icon: '🟢' },
+      notificacao: { label: 'Notificação não chegou',       sev: 'low',      color: '#2e7d52', bg: 'rgba(46,125,82,.08)',  border: 'rgba(46,125,82,.22)',  icon: '🟢' },
+      sugestao:    { label: 'Sugestão de melhoria',         sev: 'info',     color: '#2980b9', bg: 'rgba(41,128,185,.08)', border: 'rgba(41,128,185,.22)', icon: '🔵' },
+      outro:       { label: 'Outro',                        sev: 'info',     color: '#2980b9', bg: 'rgba(41,128,185,.08)', border: 'rgba(41,128,185,.22)', icon: '🔵' }
+    };
+    var _sevLabel = { critical: 'CRÍTICO', high: 'ALTO', medium: 'MÉDIO', low: 'BAIXO', info: 'INFO' };
+    var _sevOrder = ['critical','high','medium','low','info'];
+    var _sevColors = { critical:'#c0392b', high:'#e67e22', medium:'#b7860b', low:'#2e7d52', info:'#2980b9' };
+
+    function _buildReportCard(r, docId, resolved) {
+      var m = _catMeta[r.category] || _catMeta.outro;
+      var dt = new Date(r.sentAt);
+      var dateStr = dt.toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
+      var timeStr = dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+      var protocol = 'RPT-' + String(r.sentAt).slice(-6).toUpperCase();
+      var initials = (r.displayName || r.username || '?').split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+      var leftBorderColor = resolved ? '#2e7d52' : m.color;
+
+      var footerBtns = resolved
+        ? '<div style="font-size:.7rem;color:var(--green);font-weight:700;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Resolvido em ' + (r.resolvedAt ? new Date(r.resolvedAt).toLocaleDateString('pt-BR') : 'data desconhecida') + '</div>'
+          + '<button onclick="reopenReport(\'' + docId + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid var(--border2);border-radius:7px;padding:5px 11px;font-size:.72rem;font-weight:700;color:var(--text3);cursor:pointer;font-family:var(--body);transition:all .15s;" onmouseover="this.style.borderColor=\'var(--accent)\';this.style.color=\'var(--text)\'" onmouseout="this.style.borderColor=\'var(--border2)\';this.style.color=\'var(--text3)\'">↩ Reabrir</button>'
+        : '<button onclick="resolveOneReport(\'' + docId + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:rgba(46,125,82,.1);border:1px solid rgba(46,125,82,.3);border-radius:7px;padding:5px 11px;font-size:.72rem;font-weight:800;color:#2e7d52;cursor:pointer;font-family:var(--body);transition:all .15s;" onmouseover="this.style.background=\'rgba(46,125,82,.2)\'" onmouseout="this.style.background=\'rgba(46,125,82,.1)\'">'
+          + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Marcar resolvido</button>'
+          + '<button onclick="deleteOneReport(\'' + docId + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid var(--border2);border-radius:7px;padding:5px 11px;font-size:.72rem;font-weight:700;color:var(--text3);cursor:pointer;font-family:var(--body);transition:all .15s;" onmouseover="this.style.borderColor=\'var(--red)\';this.style.color=\'var(--red)\'" onmouseout="this.style.borderColor=\'var(--border2)\';this.style.color=\'var(--text3)\'"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Arquivar</button>';
+
+      return '<div data-sev="' + m.sev + '" data-search="' + ((r.displayName||'') + ' ' + (r.username||'') + ' ' + (r.category||'') + ' ' + (r.description||'')).toLowerCase() + '" style="border:1.5px solid var(--border);border-left:3px solid ' + leftBorderColor + ';border-radius:var(--r2);overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05);background:var(--surface);transition:box-shadow .15s;" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.09)\'" onmouseout="this.style.boxShadow=\'0 1px 6px rgba(0,0,0,.05)\'">'
+        // Header strip
+        + '<div style="background:var(--surface2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">'
+          + '<div style="display:flex;align-items:center;gap:10px;">'
+            + '<code style="font-size:.68rem;font-weight:700;color:var(--text3);background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:2px 8px;">' + protocol + '</code>'
+            + '<span style="display:inline-flex;align-items:center;gap:4px;border-radius:5px;padding:2px 9px;font-size:.65rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;background:' + m.bg + ';border:1px solid ' + m.border + ';color:' + m.color + ';">'
+              + '<span style="width:5px;height:5px;border-radius:50%;background:' + m.color + ';flex-shrink:0;"></span>'
+              + _sevLabel[m.sev]
+            + '</span>'
+            + '<span style="display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;color:var(--text2);">' + m.icon + ' ' + m.label + '</span>'
+          + '</div>'
+          + '<span style="font-size:.7rem;color:var(--text3);font-family:monospace;font-weight:600;">' + dateStr + ' · ' + timeStr + '</span>'
+        + '</div>'
+        // Body
+        + '<div style="padding:14px 16px;">'
+          + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+            + '<div style="width:32px;height:32px;border-radius:50%;background:#111110;border:2px solid rgba(245,200,0,.2);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:.72rem;font-weight:800;color:#f5c800;flex-shrink:0;">' + initials + '</div>'
+            + '<div>'
+              + '<div style="font-weight:700;font-size:.85rem;color:var(--text);">' + (r.displayName || r.username || '?') + '</div>'
+              + '<div style="font-size:.68rem;color:var(--text3);font-weight:600;">@' + (r.username || '?') + '</div>'
+            + '</div>'
+          + '</div>'
+          + '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid ' + leftBorderColor + ';border-radius:0 8px 8px 0;padding:11px 14px;font-size:.84rem;color:var(--text2);line-height:1.65;white-space:pre-wrap;font-family:var(--body);">'
+            + (r.description || '').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          + '</div>'
+        + '</div>'
+        // Footer
+        + '<div style="background:var(--surface2);border-top:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">'
+          + footerBtns
+        + '</div>'
+      + '</div>';
+    }
+
+    function _renderReportList(docs, containerEl, resolved) {
+      if (!docs.length) {
+        containerEl.innerHTML = '<div style="text-align:center;padding:56px 20px;color:var(--text3);"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="opacity:.3;display:block;margin:0 auto 14px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div style="font-weight:700;font-size:.9rem;margin-bottom:6px;">' + (resolved ? 'Nenhum ticket resolvido' : 'Nenhum registro encontrado') + '</div><div style="font-size:.76rem;opacity:.6;">' + (resolved ? 'Tickets marcados como resolvidos aparecerão aqui.' : 'Os relatórios enviados pelos testadores aparecerão aqui.') + '</div></div>';
+        return;
+      }
+      // Group by severity
+      var groups = {};
+      _sevOrder.forEach(function(s){ groups[s] = []; });
+      docs.forEach(function(item){ groups[item.sev] = groups[item.sev] || []; groups[item.sev].push(item); });
+      var html = '';
+      _sevOrder.forEach(function(s){
+        if (!groups[s] || !groups[s].length) return;
+        html += '<div style="margin-bottom:20px;">'
+          + '<div style="font-size:.65rem;font-weight:900;color:' + _sevColors[s] + ';text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:7px;">'
+          + '<span style="width:7px;height:7px;border-radius:50%;background:' + _sevColors[s] + ';flex-shrink:0;"></span>' + _sevLabel[s] + ' <span style="color:var(--text3);font-weight:700;">(' + groups[s].length + ')</span>'
+          + '<span style="flex:1;height:1px;background:' + _sevColors[s] + ';opacity:.2;"></span>'
+          + '</div>'
+          + '<div style="display:flex;flex-direction:column;gap:10px;">';
+        groups[s].forEach(function(item){ html += _buildReportCard(item.data, item.id, resolved); });
+        html += '</div></div>';
+      });
+      containerEl.innerHTML = html;
+    }
+
+    window.filterReports = function(sev) {
+      window._rptCurrentFilter = sev;
+      // update filter buttons
+      ['all','critical','high','medium','low'].forEach(function(s){
+        var btn = document.getElementById('rpt-filter-' + s);
+        if (!btn) return;
+        if (s === sev) { btn.style.background = 'var(--text)'; btn.style.color = 'var(--bg)'; }
+        else { btn.style.background = 'none'; btn.style.color = 'var(--text3)'; }
+      });
+      var q = (document.getElementById('rpt-search') || {}).value || '';
+      q = q.toLowerCase().trim();
+      var source = window._rptCurrentTab === 'resolved' ? window._rptResolvedDocs : window._rptAllDocs;
+      var filtered = source.filter(function(item){
+        var sevMatch = sev === 'all' || item.sev === sev;
+        var qMatch = !q || item.searchStr.indexOf(q) >= 0;
+        return sevMatch && qMatch;
+      });
+      var containerEl = document.getElementById(window._rptCurrentTab === 'resolved' ? 'ceo-reports-resolved-list' : 'ceo-reports-list');
+      if (containerEl) _renderReportList(filtered, containerEl, window._rptCurrentTab === 'resolved');
+    };
+
+    window.switchReportTab = function(tab) {
+      window._rptCurrentTab = tab;
+      var openList = document.getElementById('ceo-reports-list');
+      var resolvedList = document.getElementById('ceo-reports-resolved-list');
+      var tabOpen = document.getElementById('rpt-tab-open');
+      var tabResolved = document.getElementById('rpt-tab-resolved');
+      if (tab === 'open') {
+        if (openList) openList.style.display = '';
+        if (resolvedList) resolvedList.style.display = 'none';
+        if (tabOpen) { tabOpen.style.color = 'var(--text)'; tabOpen.style.borderBottomColor = 'var(--accent)'; }
+        if (tabResolved) { tabResolved.style.color = 'var(--text3)'; tabResolved.style.borderBottomColor = 'transparent'; }
+      } else {
+        if (openList) openList.style.display = 'none';
+        if (resolvedList) resolvedList.style.display = '';
+        if (tabOpen) { tabOpen.style.color = 'var(--text3)'; tabOpen.style.borderBottomColor = 'transparent'; }
+        if (tabResolved) { tabResolved.style.color = 'var(--text)'; tabResolved.style.borderBottomColor = 'var(--accent)'; }
+        _renderReportList(window._rptResolvedDocs, resolvedList, true);
+      }
+      filterReports(window._rptCurrentFilter);
+    };
+
     // ── CEO: carregar reports recebidos ──
     window.loadCeoReports = async function () {
       var listEl = document.getElementById('ceo-reports-list');
@@ -11785,145 +11976,148 @@
       listEl.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text3);"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="opacity:.4;display:block;margin:0 auto 12px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Carregando registros...</div>';
       try {
         var snap = await _getDocs(_query(_col(_db, 'reports'), _orderBy('sentAt', 'desc')));
+        var snapR = await _getDocs(_query(_col(_db, 'reports_resolved'), _orderBy('resolvedAt', 'desc')));
 
-        // ── Metadados de categoria ──
-        var catMeta = {
-          crash:       { label: 'Travamento / Crash',          sev: 'critical', color: '#c0392b', bg: 'rgba(192,57,43,.08)', border: 'rgba(192,57,43,.22)', icon: '🔴' },
-          load:        { label: 'Conteúdo não carregou',        sev: 'high',     color: '#e67e22', bg: 'rgba(230,126,34,.08)', border: 'rgba(230,126,34,.22)', icon: '🟠' },
-          login:       { label: 'Problema no login / acesso',   sev: 'high',     color: '#e67e22', bg: 'rgba(230,126,34,.08)', border: 'rgba(230,126,34,.22)', icon: '🟠' },
-          pagamento:   { label: 'Pagamento / assinatura',       sev: 'high',     color: '#e67e22', bg: 'rgba(230,126,34,.08)', border: 'rgba(230,126,34,.22)', icon: '🟠' },
-          aluno:       { label: 'Erro em alunos',               sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
-          treino:      { label: 'Erro em treinos / planos',     sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
-          evolucao:    { label: 'Evolução / avaliação',         sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
-          chat:        { label: 'Chat com defeito',             sev: 'medium',   color: '#b7860b', bg: 'rgba(183,134,11,.08)', border: 'rgba(183,134,11,.22)', icon: '🟡' },
-          lentidao:    { label: 'Lentidão / travamento',        sev: 'low',      color: '#2e7d52', bg: 'rgba(46,125,82,.08)',  border: 'rgba(46,125,82,.22)',  icon: '🟢' },
-          visual:      { label: 'Visual quebrado',              sev: 'low',      color: '#2e7d52', bg: 'rgba(46,125,82,.08)',  border: 'rgba(46,125,82,.22)',  icon: '🟢' },
-          notificacao: { label: 'Notificação não chegou',       sev: 'low',      color: '#2e7d52', bg: 'rgba(46,125,82,.08)',  border: 'rgba(46,125,82,.22)',  icon: '🟢' },
-          sugestao:    { label: 'Sugestão de melhoria',         sev: 'info',     color: '#2980b9', bg: 'rgba(41,128,185,.08)', border: 'rgba(41,128,185,.22)', icon: '🔵' },
-          outro:       { label: 'Outro',                        sev: 'info',     color: '#2980b9', bg: 'rgba(41,128,185,.08)', border: 'rgba(41,128,185,.22)', icon: '🔵' }
-        };
-        var sevLabel = { critical: 'CRÍTICO', high: 'ALTO', medium: 'MÉDIO', low: 'BAIXO', info: 'INFO' };
+        // Build open docs list
+        window._rptAllDocs = [];
+        snap.docs.forEach(function(doc) {
+          var r = doc.data();
+          var m = _catMeta[r.category] || _catMeta.outro;
+          window._rptAllDocs.push({ id: doc.id, data: r, sev: m.sev, searchStr: ((r.displayName||'')+ ' '+(r.username||'')+' '+(r.category||'')+' '+(r.description||'')).toLowerCase() });
+        });
+
+        // Build resolved docs list
+        window._rptResolvedDocs = [];
+        snapR.docs.forEach(function(doc) {
+          var r = doc.data();
+          var m = _catMeta[r.category] || _catMeta.outro;
+          window._rptResolvedDocs.push({ id: doc.id, data: r, sev: m.sev, searchStr: ((r.displayName||'')+ ' '+(r.username||'')+' '+(r.category||'')+' '+(r.description||'')).toLowerCase() });
+        });
 
         // Atualiza badge do menu
         var badge = document.getElementById('ceo-reports-badge');
         if (badge) { badge.textContent = snap.size; badge.classList.toggle('hidden', snap.size === 0); }
 
-        if (snap.empty) {
-          listEl.innerHTML = '<div style="text-align:center;padding:64px 20px;color:var(--text3);"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="opacity:.3;display:block;margin:0 auto 14px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div style="font-weight:700;font-size:.92rem;margin-bottom:6px;">Nenhum registro encontrado</div><div style="font-size:.78rem;opacity:.6;">Os relatórios enviados pelos testadores aparecerão aqui.</div></div>';
-          // Limpa summary
-          var tc = document.getElementById('rpt-total-count'); if (tc) tc.textContent = '0';
-          var ld = document.getElementById('rpt-last-date'); if (ld) ld.textContent = '—';
-          var ss = document.getElementById('rpt-severity-summary'); if (ss) ss.innerHTML = '';
-          return;
-        }
-
-        // ── Summary bar ──
-        var sevCount = {};
-        snap.docs.forEach(function(doc) {
-          var r = doc.data();
-          var m = catMeta[r.category] || catMeta.outro;
-          sevCount[m.sev] = (sevCount[m.sev] || 0) + 1;
-        });
-        var sevOrder = ['critical','high','medium','low','info'];
-        var sevColors = { critical:'#c0392b', high:'#e67e22', medium:'#b7860b', low:'#2e7d52', info:'#2980b9' };
-        var summaryHtml = '';
-        sevOrder.forEach(function(s) {
-          if (!sevCount[s]) return;
-          summaryHtml += '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.04);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:800;color:' + sevColors[s] + ';">'
-            + '<span style="width:7px;height:7px;border-radius:50%;background:' + sevColors[s] + ';flex-shrink:0;"></span>'
-            + sevLabel[s] + ' <span style="color:var(--text2);font-weight:700;">×' + sevCount[s] + '</span></span>';
-        });
+        // KPIs
         var tc = document.getElementById('rpt-total-count'); if (tc) tc.textContent = snap.size;
-        var ss = document.getElementById('rpt-severity-summary'); if (ss) ss.innerHTML = summaryHtml;
-        var firstDoc = snap.docs[0].data();
+        var rc = document.getElementById('rpt-resolved-count'); if (rc) rc.textContent = snapR.size;
+        var critCount = window._rptAllDocs.filter(function(d){ return d.sev === 'critical'; }).length;
+        var cc = document.getElementById('rpt-critical-count'); if (cc) cc.textContent = critCount;
         var ld = document.getElementById('rpt-last-date');
-        if (ld && firstDoc.sentAt) {
-          var fd = new Date(firstDoc.sentAt);
-          ld.textContent = fd.toLocaleDateString('pt-BR') + ' ' + fd.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+        if (ld) {
+          if (snap.size > 0 && snap.docs[0].data().sentAt) {
+            var fd = new Date(snap.docs[0].data().sentAt);
+            ld.textContent = fd.toLocaleDateString('pt-BR', {day:'2-digit',month:'short'}) + ' ' + fd.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+          } else { ld.textContent = '—'; }
         }
 
-        // ── Renderiza cada report como documento ──
-        var html = '<div style="display:flex;flex-direction:column;gap:16px;">';
-        snap.docs.forEach(function(doc, idx) {
-          var r = doc.data();
-          var docId = doc.id;
-          var m = catMeta[r.category] || catMeta.outro;
-          var dt = new Date(r.sentAt);
-          var dateStr = dt.toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'});
-          var timeStr = dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-          var protocol = 'RPT-' + String(r.sentAt).slice(-6).toUpperCase();
-          var initials = (r.displayName || r.username || '?').split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
-
-          html += '<div style="border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);">'
-
-            // ── Topo: protocolo + severidade + reporter
-            + '<div style="background:var(--surface2);border-bottom:1.5px solid var(--border);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'
-              + '<div style="display:flex;align-items:center;gap:12px;">'
-                + '<div style="font-family:monospace;font-size:.72rem;font-weight:700;color:var(--text3);letter-spacing:.05em;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;padding:3px 9px;">' + protocol + '</div>'
-                + '<span style="display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:3px 10px;font-size:.68rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;background:' + m.bg + ';border:1px solid ' + m.border + ';color:' + m.color + ';">'
-                  + '<span style="width:6px;height:6px;border-radius:50%;background:' + m.color + ';flex-shrink:0;"></span>'
-                  + sevLabel[m.sev]
-                + '</span>'
-              + '</div>'
-              + '<div style="font-size:.72rem;color:var(--text3);font-weight:600;letter-spacing:.01em;">'
-                + '<span style="color:var(--text2);">' + dateStr + '</span>'
-                + ' &nbsp;·&nbsp; <span style="font-family:monospace;">' + timeStr + '</span>'
-              + '</div>'
-            + '</div>'
-
-            // ── Corpo: reporter + categoria + descrição
-            + '<div style="padding:18px 18px 16px;">'
-
-              // Reporter
-              + '<div style="display:flex;align-items:center;gap:11px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);">'
-                + '<div style="width:36px;height:36px;border-radius:50%;background:#111110;border:2px solid rgba(245,200,0,.25);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:.78rem;font-weight:800;color:#f5c800;flex-shrink:0;">' + initials + '</div>'
-                + '<div>'
-                  + '<div style="font-weight:700;font-size:.88rem;color:var(--text);">' + (r.displayName || r.username || '?') + '</div>'
-                  + '<div style="font-size:.72rem;color:var(--text3);font-weight:600;margin-top:1px;">@' + (r.username || '?') + ' &nbsp;·&nbsp; Testador oficial</div>'
-                + '</div>'
-              + '</div>'
-
-              // Categoria
-              + '<div style="margin-bottom:12px;">'
-                + '<div style="font-size:.65rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">Categoria do incidente</div>'
-                + '<div style="display:inline-flex;align-items:center;gap:7px;background:' + m.bg + ';border:1.5px solid ' + m.border + ';border-radius:8px;padding:6px 13px;">'
-                  + '<span style="font-size:.9rem;">' + m.icon + '</span>'
-                  + '<span style="font-size:.82rem;font-weight:700;color:var(--text);">' + m.label + '</span>'
-                + '</div>'
-              + '</div>'
-
-              // Descrição
-              + '<div>'
-                + '<div style="font-size:.65rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Descrição do testador</div>'
-                + '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid ' + m.color + ';border-radius:0 8px 8px 0;padding:13px 15px;font-size:.86rem;color:var(--text2);line-height:1.7;white-space:pre-wrap;font-family:var(--body);">'
-                  + (r.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                + '</div>'
-              + '</div>'
-
-            + '</div>'
-
-            // ── Rodapé: ações
-            + '<div style="background:var(--surface2);border-top:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">'
-              + '<div style="font-size:.7rem;color:var(--text3);font-weight:600;">ID do documento: <span style="font-family:monospace;color:var(--text2);">' + docId + '</span></div>'
-              + '<button onclick="deleteOneReport(\'' + docId + '\',this)" style="background:none;border:1px solid var(--border2);border-radius:6px;padding:5px 12px;font-size:.72rem;font-weight:700;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--body);transition:all .15s;" onmouseover="this.style.borderColor=\'var(--red)\';this.style.color=\'var(--red)\'" onmouseout="this.style.borderColor=\'var(--border2)\';this.style.color=\'var(--text3)\'">'
-                + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>'
-                + 'Arquivar registro'
-              + '</button>'
-            + '</div>'
-
-          + '</div>';
+        // Severity summary pills
+        var _sevBg  = { critical:'rgba(192,57,43,.10)',  high:'rgba(230,126,34,.10)', medium:'rgba(183,134,11,.10)', low:'rgba(46,125,82,.10)',  info:'rgba(41,128,185,.10)' };
+        var _sevBdr = { critical:'rgba(192,57,43,.28)',  high:'rgba(230,126,34,.28)', medium:'rgba(183,134,11,.28)', low:'rgba(46,125,82,.28)',  info:'rgba(41,128,185,.28)' };
+        var sevCount = {};
+        window._rptAllDocs.forEach(function(item){ sevCount[item.sev] = (sevCount[item.sev]||0)+1; });
+        var summaryHtml = '';
+        _sevOrder.forEach(function(s) {
+          if (!sevCount[s]) return;
+          summaryHtml += '<span style="display:inline-flex;align-items:center;gap:4px;background:' + _sevBg[s] + ';border:1px solid ' + _sevBdr[s] + ';border-radius:5px;padding:2px 8px;font-size:.67rem;font-weight:800;color:' + _sevColors[s] + ';">'
+            + '<span style="width:5px;height:5px;border-radius:50%;background:' + _sevColors[s] + ';flex-shrink:0;"></span>'
+            + _sevLabel[s] + ' <span style="opacity:.7;font-weight:700;">×' + sevCount[s] + '</span></span>';
         });
-        html += '</div>';
-        listEl.innerHTML = html;
+        var ss = document.getElementById('rpt-severity-summary'); if (ss) ss.innerHTML = summaryHtml || '<span style="font-size:.72rem;color:var(--text3);">Sem registros abertos</span>';
+
+        // Badges
+        var ob = document.getElementById('rpt-open-count-badge'); if (ob) ob.textContent = snap.size;
+        var rb = document.getElementById('rpt-resolved-count-badge'); if (rb) rb.textContent = snapR.size;
+
+        // Render
+        filterReports(window._rptCurrentFilter || 'all');
 
       } catch (e) {
-        listEl.innerHTML = '<div style="color:var(--red);padding:20px;font-size:.84rem;font-weight:600;">Erro ao carregar registros: ' + e.message + '</div>';
+        var listEl2 = document.getElementById('ceo-reports-list');
+        if (listEl2) listEl2.innerHTML = '<div style="color:var(--red);padding:20px;font-size:.84rem;font-weight:600;">Erro ao carregar registros: ' + e.message + '</div>';
       }
+    };
+
+    // ── CEO: marcar como resolvido ──
+    window.resolveOneReport = async function(docId, btn) {
+      if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Resolvendo...'; }
+      try {
+        var docRef = _doc(_db, 'reports', docId);
+        var snap = await _getDocs(_query(_col(_db, 'reports')));
+        var found = snap.docs.find(function(d){ return d.id === docId; });
+        if (found) {
+          var data = found.data();
+          data.resolvedAt = Date.now();
+          await _db.collection('reports_resolved').doc(docId).set(data);
+          await _deleteDoc(docRef);
+        }
+        toast('✅ Ticket marcado como resolvido!', 'success');
+        loadCeoReports();
+      } catch(e) { toast('Erro: ' + e.message, 'error'); if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Marcar resolvido'; } }
+    };
+
+    // ── CEO: reabrir ticket resolvido ──
+    window.reopenReport = async function(docId, btn) {
+      if (btn) { btn.disabled = true; btn.textContent = 'Reabrindo...'; }
+      try {
+        var snap = await _getDocs(_col(_db, 'reports_resolved'));
+        var found = snap.docs.find(function(d){ return d.id === docId; });
+        if (found) {
+          var data = found.data();
+          delete data.resolvedAt;
+          await _db.collection('reports').doc(docId).set(data);
+          await _db.collection('reports_resolved').doc(docId).delete();
+        }
+        toast('Ticket reaberto.', 'success');
+        switchReportTab('open');
+        loadCeoReports();
+      } catch(e) { toast('Erro: ' + e.message, 'error'); if(btn){ btn.disabled=false; btn.textContent='↩ Reabrir'; } }
+    };
+
+    // ── CEO: exportar para Excel (CSV) ──
+    window.exportReportsToExcel = function() {
+      var all = window._rptAllDocs.concat(window._rptResolvedDocs);
+      if (!all.length) { toast('Nenhum registro para exportar.', 'error'); return; }
+      // Sort by severity order then date
+      var sevRank = { critical:0, high:1, medium:2, low:3, info:4 };
+      all.sort(function(a,b){ return (sevRank[a.sev]||9) - (sevRank[b.sev]||9) || b.data.sentAt - a.data.sentAt; });
+      var rows = [['Protocolo','Severidade','Categoria','Testador','Username','Data','Hora','Descrição','Status']];
+      all.forEach(function(item){
+        var r = item.data;
+        var m = _catMeta[r.category] || _catMeta.outro;
+        var dt = new Date(r.sentAt);
+        var protocol = 'RPT-' + String(r.sentAt).slice(-6).toUpperCase();
+        var resolved = !!r.resolvedAt;
+        rows.push([
+          protocol,
+          _sevLabel[m.sev] || m.sev,
+          m.label,
+          r.displayName || r.username || '?',
+          '@' + (r.username || '?'),
+          dt.toLocaleDateString('pt-BR'),
+          dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
+          (r.description || '').replace(/\n/g,' '),
+          resolved ? 'RESOLVIDO' : 'ABERTO'
+        ]);
+      });
+      var csv = rows.map(function(row){ return row.map(function(c){ return '"' + String(c).replace(/"/g,'""') + '"'; }).join(';'); }).join('\n');
+      var bom = '\uFEFF';
+      var blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      var now = new Date();
+      a.download = 'trainly_incidentes_' + now.toISOString().slice(0,10) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('📊 Excel exportado com ' + (rows.length - 1) + ' registros!', 'success');
     };
 
     // ── CEO: limpar todos os reports ──
     window.clearAllReports = async function () {
-      if (!confirm('Limpar todos os reports recebidos? Esta ação não pode ser desfeita.')) return;
+      if (!confirm('Arquivar todos os reports recebidos? Esta ação não pode ser desfeita.')) return;
       try {
         var snap = await _getDocs(_col(_db, 'reports'));
         var batch = _db.batch ? _db.batch() : null;
@@ -11945,7 +12139,7 @@
       try {
         await _deleteDoc(_doc(_db, 'reports', docId));
         loadCeoReports();
-      } catch (e) { toast('Erro: ' + e.message, 'error'); if (btn) { btn.disabled = false; btn.textContent = 'Arquivar registro'; } }
+      } catch (e) { toast('Erro: ' + e.message, 'error'); if (btn) { btn.disabled = false; btn.textContent = 'Arquivar'; } }
     };
 
     // ── Carregar reports ao entrar na aba CEO Reports ──
