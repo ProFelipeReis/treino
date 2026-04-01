@@ -3646,8 +3646,34 @@
     let _activeWorkout = null; // { planId, wi, planTitle, workoutTitle, startTimestamp }
     let _timerInterval = null;
 
-    // ── Check state (in-memory) ──
+    // ── Check state (persistido no localStorage por aluno + data) ──
     const checkState = {};
+
+    function _checkStateKey() {
+      const sid = (_currentStudent && _currentStudent.id) ? _currentStudent.id : 'unknown';
+      return `trainly_checks_${sid}`;
+    }
+
+    function _saveCheckState() {
+      try {
+        localStorage.setItem(_checkStateKey(), JSON.stringify({ date: _todayStr(), checks: checkState }));
+      } catch (e) { }
+    }
+
+    function _loadCheckState() {
+      try {
+        const raw = localStorage.getItem(_checkStateKey());
+        if (raw) {
+          const saved = JSON.parse(raw);
+          // Se os checks foram salvos num dia diferente, descarta — novo dia, novo treino
+          if (saved.date && saved.date === _todayStr()) {
+            Object.assign(checkState, saved.checks || {});
+          } else {
+            localStorage.removeItem(_checkStateKey());
+          }
+        }
+      } catch (e) { }
+    }
 
     // ── Timer display ──
     function formatTime(ms) {
@@ -4031,6 +4057,7 @@
 
     function showApp(student) {
       _currentStudent = student;
+      _loadCheckState();
       document.getElementById('screen-login').style.display = 'none';
       document.getElementById('screen-app').style.cssText = 'display:flex;flex-direction:column;background:#f7f7f5;';
       document.getElementById('student-pill').textContent = student.name;
@@ -4554,6 +4581,34 @@
           }
         }
 
+        // After render: restore check state from localStorage
+        for (const key of Object.keys(checkState)) {
+          if (!checkState[key]) continue;
+          const row = document.getElementById('exrow_' + key);
+          if (!row) continue;
+          row.classList.add('checked');
+          // Atualiza barra de progresso usando data attributes do botão de check
+          const btn = row.querySelector('[data-plan]');
+          if (btn) {
+            const planId = btn.dataset.plan;
+            const wi = parseInt(btn.dataset.wi);
+            const total = parseInt(btn.dataset.total);
+            const progressId = btn.dataset.prog;
+            if (total > 0 && progressId) {
+              const pw = document.getElementById(progressId);
+              if (pw) {
+                let done = 0;
+                for (let i = 0; i < total; i++) { if (checkState[planId + '_' + wi + '_' + i]) done++; }
+                const pct = Math.round((done / total) * 100);
+                const fill = pw.querySelector('.progress-bar-fill');
+                const label = pw.querySelector('.progress-label');
+                if (fill) fill.style.width = pct + '%';
+                if (label) label.textContent = done + '/' + total + ' exercícios';
+              }
+            }
+          }
+        }
+
         // After render: restore lock state for active timers
         if (_activeWorkout) {
           refreshWorkoutLockState(_activeWorkout.planId, _activeWorkout.wi, true);
@@ -4608,6 +4663,7 @@
       const row = document.getElementById(`exrow_${planId}_${wi}_${ei}`);
       if (checkState[key]) row.classList.add('checked');
       else row.classList.remove('checked');
+      _saveCheckState();
       // progress
       let done = 0;
       for (let i = 0; i < total; i++) { if (checkState[`${planId}_${wi}_${i}`]) done++; }
