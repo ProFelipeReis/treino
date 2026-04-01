@@ -5476,7 +5476,7 @@
           role: role,
           isMaster: role === 'master' || role === 'ceo',
           isCeo: role === 'ceo',
-          isTester: !!mgr.isTester && (!mgr.testerEndsAt || mgr.testerEndsAt > Date.now()),
+          isTester: _isTesterActive(mgr),
           displayName: mgr.name || user,
           phone: mgr.phone || '',
           subStatus: subStatus,
@@ -5503,13 +5503,31 @@
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    // Normaliza Timestamp do Firestore (objeto {seconds,nanoseconds}) ou número em ms
+    function _tsToMs(v) {
+      if (!v) return null;
+      if (typeof v === 'number') return v;
+      if (typeof v.toMillis === 'function') return v.toMillis();
+      if (typeof v.seconds === 'number') return v.seconds * 1000;
+      return Number(v) || null;
+    }
+
+    function _isTesterActive(mgr) {
+      if (!mgr.isTester) return false;
+      var ends = _tsToMs(mgr.testerEndsAt);
+      if (!ends) return true;
+      return ends > Date.now();
+    }
+
     function _checkSubscription(mgr) {
       var now = Date.now();
-      if (mgr.trialEndsAt && now < mgr.trialEndsAt) {
-        return { ok: true, type: 'trial', daysLeft: Math.ceil((mgr.trialEndsAt - now) / 86400000) };
+      var trialMs = _tsToMs(mgr.trialEndsAt);
+      var subMs = _tsToMs(mgr.subEndsAt);
+      if (trialMs && now < trialMs) {
+        return { ok: true, type: 'trial', daysLeft: Math.ceil((trialMs - now) / 86400000) };
       }
-      if (mgr.subEndsAt && now < mgr.subEndsAt) {
-        return { ok: true, type: 'active', daysLeft: Math.ceil((mgr.subEndsAt - now) / 86400000) };
+      if (subMs && now < subMs) {
+        return { ok: true, type: 'active', daysLeft: Math.ceil((subMs - now) / 86400000) };
       }
       return { ok: false, type: 'expired' };
     }
@@ -7938,7 +7956,7 @@
     function saveSession(data) { try { localStorage.setItem(LS_GESTOR, typeof data === 'string' ? data : JSON.stringify(data)); } catch (e) { } }
     function clearSession() { try { localStorage.removeItem(LS_GESTOR); } catch (e) { } }
     function hasSession() { try { return !!localStorage.getItem(LS_GESTOR); } catch (e) { return false; } }
-    function getSession() { try { var v = localStorage.getItem(LS_GESTOR); if (!v) return null; try { var s = JSON.parse(v); if (s && typeof s === 'object') { s.phone = s.phone || ''; if (!s.role) s.role = s.isMaster ? 'master' : 'comum'; if (s.isTester && s.testerEndsAt && s.testerEndsAt <= Date.now()) { s.isTester = false; } return s; } return null; } catch (e) { return null; } } catch (e) { return null; } }
+    function getSession() { try { var v = localStorage.getItem(LS_GESTOR); if (!v) return null; try { var s = JSON.parse(v); if (s && typeof s === 'object') { s.phone = s.phone || ''; if (!s.role) s.role = s.isMaster ? 'master' : 'comum'; var _te = s.testerEndsAt; var _teMs = (typeof _te === "number") ? _te : (_te && typeof _te.toMillis === "function") ? _te.toMillis() : (_te && typeof _te.seconds === "number") ? _te.seconds * 1000 : null; if (s.isTester && _teMs && _teMs <= Date.now()) { s.isTester = false; } return s; } return null; } catch (e) { return null; } } catch (e) { return null; } }
 
     const toast = (msg, type = 'success') => { const t = document.createElement('div'); t.className = `toast ${type}`; t.innerHTML = msg; document.getElementById('toast-container').appendChild(t); setTimeout(() => t.remove(), 3500) };
     window.openModal = function (id) {
@@ -8029,7 +8047,7 @@
           var mgr = snap.docs[0].data();
           window.CURRENT_USER.displayName = mgr.name || u.username;
           window.CURRENT_USER.phone = mgr.phone || '';
-          window.CURRENT_USER.isTester = !!mgr.isTester && (!mgr.testerEndsAt || mgr.testerEndsAt > Date.now());
+          window.CURRENT_USER.isTester = _isTesterActive(mgr);
           // Revalida assinatura
           if (u.role !== 'ceo') {
             var sub = _checkSubscription(mgr);
@@ -12915,7 +12933,7 @@
           role: role,
           isMaster: role === 'master' || role === 'ceo',
           isCeo: role === 'ceo',
-          isTester: !!mgr.isTester && (!mgr.testerEndsAt || mgr.testerEndsAt > Date.now()),
+          isTester: _isTesterActive(mgr),
           displayName: mgr.name || user,
           phone: mgr.phone || '',
           subStatus: subStatus,
