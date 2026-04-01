@@ -7995,6 +7995,8 @@
     window.showDashboardAfterLogin = window.showDashboard = function (userData) {
       var u = userData || window.CURRENT_USER || {};
       window.CURRENT_USER = u;
+      // Garante que isTester começa como false até o Firestore confirmar
+      if (window.CURRENT_USER.isTester === undefined) window.CURRENT_USER.isTester = false;
       document.getElementById('screen-login').style.display = 'none';
       document.getElementById('screen-sub-wall').style.display = 'none';
       document.getElementById('screen-dashboard').style.cssText = 'display:flex;flex-direction:column;';
@@ -8093,6 +8095,9 @@
       setTimeout(function () { location.reload(); }, 800);
     };
     window.switchTab = (tabId, el) => {
+      // Protege abas restritas
+      if (tabId === 'tab-report' && !(window.CURRENT_USER || {}).isTester) return;
+      if ((tabId === 'tab-ceo' || tabId === 'tab-ceo-reports') && (window.CURRENT_USER || {}).role !== 'ceo') return;
       document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       document.querySelectorAll('.sidebar-item,.mobile-nav-item').forEach(i => i.classList.remove('active'));
