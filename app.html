@@ -767,6 +767,104 @@
       margin-top: 2px;
     }
 
+    /* ── Fat Calculator ── */
+    .fat-calc-block {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      padding: 14px 16px;
+      margin-top: 12px;
+    }
+    .fat-calc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+    .fat-clear-btn {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--text3);
+      background: none;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 3px 9px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .fat-clear-btn:hover { color: var(--red); border-color: var(--red); }
+    .fat-fields-group { margin-top: 4px; }
+    .fat-fields-label {
+      font-size: .7rem;
+      font-weight: 800;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 6px;
+      margin-top: 6px;
+    }
+    .fat-result-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1.5px solid var(--green-soft);
+      border-radius: var(--r);
+      padding: 12px 16px;
+      margin-top: 12px;
+      transition: all .3s ease;
+    }
+    .fat-result-box.hidden { display: none; }
+    .fat-result-pct {
+      font-family: var(--head);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--green);
+      white-space: nowrap;
+      min-width: 72px;
+    }
+    .fat-result-info { flex: 1; }
+    .fat-result-class {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .fat-result-formula {
+      font-size: .72rem;
+      color: var(--text3);
+      font-weight: 600;
+    }
+    .fat-missing-msg {
+      font-size: .75rem;
+      color: var(--text3);
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: var(--surface3);
+      border-radius: var(--r);
+    }
+    .fat-missing-msg.hidden { display: none; }
+
+    .fat-formula-desc {
+      margin-top: 7px;
+      padding: 9px 12px;
+      background: var(--accent-dim);
+      border: 1.5px solid var(--accent-soft);
+      border-radius: var(--r);
+      font-size: .78rem;
+      color: var(--text2);
+      line-height: 1.55;
+      font-weight: 500;
+    }
+    .fat-formula-desc.hidden { display: none; }
+    /* Color coding for fat classification */
+    .fat-class-essential .fat-result-pct { color: #2563eb; }
+    .fat-class-athlete .fat-result-pct { color: #16a34a; }
+    .fat-class-fitness .fat-result-pct { color: #22c55e; }
+    .fat-class-average .fat-result-pct { color: #d97706; }
+    .fat-class-above .fat-result-pct { color: #ea580c; }
+    .fat-class-obese .fat-result-pct { color: var(--red); }
+
     .new-assessment-btn {
       display: inline-flex;
       align-items: center;
@@ -7536,7 +7634,7 @@
                 oninput="calcImcPreview('new-student-weight','new-student-height','new-student-imc-box')" /></div>
             <div class="form-group"><label>Altura (cm)</label><input id="new-student-height" class="form-control"
                 type="number" step="1" placeholder="Ex: 175"
-                oninput="calcImcPreview('new-student-weight','new-student-height','new-student-imc-box')" /></div>
+                oninput="calcImcPreview('new-student-weight','new-student-height','new-student-imc-box'); if(document.getElementById('new-fat-formula')?.value==='navy') fatCalc('new'); var _nvh=document.getElementById('new-nv-height'); if(_nvh) _nvh.value=this.value;" /></div>
           </div>
           <div id="new-student-imc-box" style="display:none;" class="imc-display">
             <div>
@@ -7545,39 +7643,120 @@
             </div>
             <div class="imc-display-value" id="new-student-imc-val"></div>
           </div>
-          <div class="form-row" style="margin-top:12px;">
-            <div class="form-group"><label>% Gordura</label><input id="new-student-fat" class="form-control"
-                type="number" step="0.1" placeholder="Ex: 18.5" /></div>
-            <div class="form-group" style="display:flex;align-items:flex-end;"><span
-                style="font-size:.78rem;color:var(--text3);padding-bottom:11px;">Medidas em cm →</span></div>
+          <!-- hidden fat field populated by calculator -->
+          <input type="hidden" id="new-student-fat" />
+          <input type="hidden" id="new-student-fat-formula" />
+          <input type="hidden" id="new-student-fat-class" />
+
+          <!-- FAT CALCULATOR: new student -->
+          <div class="fat-calc-block" id="new-fat-calc">
+            <div class="fat-calc-header">
+              <span class="evol-section-title" style="margin:0;">% Gordura Corporal</span>
+              <button type="button" class="fat-clear-btn" onclick="fatClearAll('new')">Limpar</button>
+            </div>
+
+            <div class="form-group" style="margin-top:10px;">
+              <label>Fórmula</label>
+              <select id="new-fat-formula" class="form-control" onchange="fatFormulaChange('new')">
+                <option value="">— Selecione uma fórmula —</option>
+                <option value="jp3">Jackson-Pollock 3 dobras</option>
+                <option value="jp7">Jackson-Pollock 7 dobras</option>
+                <option value="dw">Durnin-Womersley</option>
+                <option value="faulkner">Faulkner</option>
+                <option value="navy">US Navy</option>
+              </select>
+              <div id="new-fat-formula-desc" class="fat-formula-desc hidden"></div>
+            </div>
+
+            <!-- JP3 fields -->
+            <div id="new-fat-jp3" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Peitoral</label><input id="new-jp3-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Abdômen</label><input id="new-jp3-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Coxa</label><input id="new-jp3-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+              </div>
+            </div>
+
+            <!-- JP7 fields -->
+            <div id="new-fat-jp7" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Peitoral</label><input id="new-jp7-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Abdômen</label><input id="new-jp7-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Coxa</label><input id="new-jp7-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Tríceps</label><input id="new-jp7-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Subescapular</label><input id="new-jp7-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Supra-ilíaca</label><input id="new-jp7-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Axilar média</label><input id="new-jp7-axil" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+              </div>
+            </div>
+
+            <!-- DW fields -->
+            <div id="new-fat-dw" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Bíceps</label><input id="new-dw-bi" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Tríceps</label><input id="new-dw-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Subescapular</label><input id="new-dw-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Supra-ilíaca</label><input id="new-dw-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+              </div>
+            </div>
+
+            <!-- Faulkner fields -->
+            <div id="new-fat-faulkner" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Tríceps</label><input id="new-fk-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Subescapular</label><input id="new-fk-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Supra-ilíaca</label><input id="new-fk-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Abdômen</label><input id="new-fk-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('new')" /></div>
+              </div>
+            </div>
+
+            <!-- Navy fields -->
+            <div id="new-fat-navy" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Circunferências (cm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Altura (cm)</label><input id="new-nv-height" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" readonly tabindex="-1" style="background:var(--surface2);color:var(--text3);cursor:not-allowed;border-style:dashed;" /></div>
+                <div class="form-group"><label>Pescoço (cm)</label><input id="new-nv-neck" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="fatCalc('new')" /></div>
+                <div class="form-group"><label>Cintura (cm)</label><input id="new-nv-waist" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="fatCalc('new')" /></div>
+                <div class="form-group" id="new-nv-hip-group" style="display:none;"><label>Quadril (cm) <span style="font-size:.7rem;color:var(--text3);">feminino</span></label><input id="new-nv-hip" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="fatCalc('new')" /></div>
+              </div>
+            </div>
+
+            <!-- Result box -->
+            <div id="new-fat-result" class="fat-result-box hidden">
+              <div class="fat-result-pct" id="new-fat-result-pct">—</div>
+              <div class="fat-result-info">
+                <div class="fat-result-class" id="new-fat-result-class">—</div>
+                <div class="fat-result-formula" id="new-fat-result-formula">—</div>
+              </div>
+            </div>
+            <div id="new-fat-missing" class="fat-missing-msg hidden">Preencha todos os campos obrigatórios para calcular.</div>
           </div>
-          <div class="evol-section-title" style="margin-top:4px;">Medidas corporais</div>
+
+          <!-- Body measurements (collapsible) -->
+          <div class="medidas-collapsible-header" onclick="toggleMedidasSection(this)" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:10px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);font-weight:700;font-size:.85rem;color:var(--text2);">
+            <span>Medidas corporais (cm)</span>
+            <svg class="medidas-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="medidas-collapsible-body" style="display:none;margin-top:8px;">
           <div class="evol-grid-3">
-            <div class="form-group"><label>Peito</label><input id="new-m-chest" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Cintura</label><input id="new-m-waist" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Quadril</label><input id="new-m-hip" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Braço D</label><input id="new-m-arm-r" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Braço E</label><input id="new-m-arm-l" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Ombro</label><input id="new-m-shoulder" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Coxa D</label><input id="new-m-thigh-r" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Coxa E</label><input id="new-m-thigh-l" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Panturrilha D</label><input id="new-m-calf-r" class="form-control"
-                type="number" step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Panturrilha E</label><input id="new-m-calf-l" class="form-control"
-                type="number" step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Coxa Proximal</label><input id="new-m-thigh-prox" class="form-control"
-                type="number" step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Coxa Distal</label><input id="new-m-thigh-dist" class="form-control"
-                type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Peitoral</label><input id="new-m-chest" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Cintura</label><input id="new-m-waist" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Quadril</label><input id="new-m-hip" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Braço D</label><input id="new-m-arm-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Braço E</label><input id="new-m-arm-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Ombro</label><input id="new-m-shoulder" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa D</label><input id="new-m-thigh-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa E</label><input id="new-m-thigh-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Panturrilha D</label><input id="new-m-calf-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Panturrilha E</label><input id="new-m-calf-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa Proximal</label><input id="new-m-thigh-prox" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa Distal</label><input id="new-m-thigh-dist" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
           </div>
+          </div><!-- end medidas-collapsible-body -->
         </div>
 
 
@@ -7707,7 +7886,7 @@
                 oninput="calcImcPreview('edit-student-weight','edit-student-height','edit-student-imc-box')" /></div>
             <div class="form-group"><label>Altura (cm)</label><input id="edit-student-height" class="form-control"
                 type="number" step="1" placeholder="Ex: 175"
-                oninput="calcImcPreview('edit-student-weight','edit-student-height','edit-student-imc-box')" /></div>
+                oninput="calcImcPreview('edit-student-weight','edit-student-height','edit-student-imc-box'); if(document.getElementById('edit-fat-formula')?.value==='navy') fatCalc('edit'); var _nvh=document.getElementById('edit-nv-height'); if(_nvh) _nvh.value=this.value;" /></div>
           </div>
           <div id="edit-student-imc-box" style="display:none;" class="imc-display">
             <div>
@@ -7716,35 +7895,120 @@
             </div>
             <div class="imc-display-value" id="edit-student-imc-val"></div>
           </div>
-          <div class="form-group" style="margin-top:12px;"><label>% Gordura</label><input id="edit-student-fat"
-              class="form-control" type="number" step="0.1" placeholder="Ex: 18.5" /></div>
-          <div class="evol-section-title" style="margin-top:4px;">Medidas corporais (cm)</div>
-          <div class="evol-grid-3">
-            <div class="form-group"><label>Peito</label><input id="edit-m-chest" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Cintura</label><input id="edit-m-waist" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Quadril</label><input id="edit-m-hip" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Braço D</label><input id="edit-m-arm-r" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Braço E</label><input id="edit-m-arm-l" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Ombro</label><input id="edit-m-shoulder" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Coxa D</label><input id="edit-m-thigh-r" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Coxa E</label><input id="edit-m-thigh-l" class="form-control" type="number"
-                step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Panturrilha D</label><input id="edit-m-calf-r" class="form-control"
-                type="number" step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Panturrilha E</label><input id="edit-m-calf-l" class="form-control"
-                type="number" step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Coxa Proximal</label><input id="edit-m-thigh-prox" class="form-control"
-                type="number" step="0.1" placeholder="cm" /></div>
-            <div class="form-group"><label>Coxa Distal</label><input id="edit-m-thigh-dist" class="form-control"
-                type="number" step="0.1" placeholder="cm" /></div>
+          <!-- hidden fat field populated by calculator -->
+          <input type="hidden" id="edit-student-fat" />
+          <input type="hidden" id="edit-student-fat-formula" />
+          <input type="hidden" id="edit-student-fat-class" />
+
+          <!-- FAT CALCULATOR: edit student -->
+          <div class="fat-calc-block" id="edit-fat-calc" style="margin-top:12px;">
+            <div class="fat-calc-header">
+              <span class="evol-section-title" style="margin:0;">% Gordura Corporal</span>
+              <button type="button" class="fat-clear-btn" onclick="fatClearAll('edit')">Limpar</button>
+            </div>
+
+            <div class="form-group" style="margin-top:10px;">
+              <label>Fórmula</label>
+              <select id="edit-fat-formula" class="form-control" onchange="fatFormulaChange('edit')">
+                <option value="">— Selecione uma fórmula —</option>
+                <option value="jp3">Jackson-Pollock 3 dobras</option>
+                <option value="jp7">Jackson-Pollock 7 dobras</option>
+                <option value="dw">Durnin-Womersley</option>
+                <option value="faulkner">Faulkner</option>
+                <option value="navy">US Navy</option>
+              </select>
+              <div id="edit-fat-formula-desc" class="fat-formula-desc hidden"></div>
+            </div>
+
+            <!-- JP3 fields -->
+            <div id="edit-fat-jp3" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Peitoral</label><input id="edit-jp3-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Abdômen</label><input id="edit-jp3-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Coxa</label><input id="edit-jp3-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+              </div>
+            </div>
+
+            <!-- JP7 fields -->
+            <div id="edit-fat-jp7" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Peitoral</label><input id="edit-jp7-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Abdômen</label><input id="edit-jp7-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Coxa</label><input id="edit-jp7-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Tríceps</label><input id="edit-jp7-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Subescapular</label><input id="edit-jp7-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Supra-ilíaca</label><input id="edit-jp7-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Axilar média</label><input id="edit-jp7-axil" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+              </div>
+            </div>
+
+            <!-- DW fields -->
+            <div id="edit-fat-dw" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Bíceps</label><input id="edit-dw-bi" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Tríceps</label><input id="edit-dw-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Subescapular</label><input id="edit-dw-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Supra-ilíaca</label><input id="edit-dw-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+              </div>
+            </div>
+
+            <!-- Faulkner fields -->
+            <div id="edit-fat-faulkner" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Tríceps</label><input id="edit-fk-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Subescapular</label><input id="edit-fk-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Supra-ilíaca</label><input id="edit-fk-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Abdômen</label><input id="edit-fk-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('edit')" /></div>
+              </div>
+            </div>
+
+            <!-- Navy fields -->
+            <div id="edit-fat-navy" class="fat-fields-group hidden">
+              <div class="fat-fields-label">Circunferências (cm)</div>
+              <div class="evol-grid-3">
+                <div class="form-group"><label>Altura (cm)</label><input id="edit-nv-height" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" readonly tabindex="-1" style="background:var(--surface2);color:var(--text3);cursor:not-allowed;border-style:dashed;" /></div>
+                <div class="form-group"><label>Pescoço (cm)</label><input id="edit-nv-neck" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group"><label>Cintura (cm)</label><input id="edit-nv-waist" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="fatCalc('edit')" /></div>
+                <div class="form-group" id="edit-nv-hip-group" style="display:none;"><label>Quadril (cm) <span style="font-size:.7rem;color:var(--text3);">feminino</span></label><input id="edit-nv-hip" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="fatCalc('edit')" /></div>
+              </div>
+            </div>
+
+            <!-- Result box -->
+            <div id="edit-fat-result" class="fat-result-box hidden">
+              <div class="fat-result-pct" id="edit-fat-result-pct">—</div>
+              <div class="fat-result-info">
+                <div class="fat-result-class" id="edit-fat-result-class">—</div>
+                <div class="fat-result-formula" id="edit-fat-result-formula">—</div>
+              </div>
+            </div>
+            <div id="edit-fat-missing" class="fat-missing-msg hidden">Preencha todos os campos obrigatórios para calcular.</div>
           </div>
+
+          <!-- Body measurements -->
+          <div class="medidas-collapsible-header" onclick="toggleMedidasSection(this)" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:10px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);font-weight:700;font-size:.85rem;color:var(--text2);">
+            <span>Medidas corporais (cm)</span>
+            <svg class="medidas-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="medidas-collapsible-body" style="display:none;margin-top:8px;">
+          <div class="evol-grid-3">
+            <div class="form-group"><label>Peitoral</label><input id="edit-m-chest" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Cintura</label><input id="edit-m-waist" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Quadril</label><input id="edit-m-hip" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Braço D</label><input id="edit-m-arm-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Braço E</label><input id="edit-m-arm-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Ombro</label><input id="edit-m-shoulder" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa D</label><input id="edit-m-thigh-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa E</label><input id="edit-m-thigh-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Panturrilha D</label><input id="edit-m-calf-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Panturrilha E</label><input id="edit-m-calf-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa Proximal</label><input id="edit-m-thigh-prox" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa Distal</label><input id="edit-m-thigh-dist" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+          </div>
+          </div><!-- end medidas-collapsible-body -->
         </div>
 
 
@@ -8747,6 +9011,14 @@
       document.getElementById(boxId.replace('-box', '-cat')).textContent = cat;
       box.style.display = 'flex';
     };
+    window.toggleMedidasSection = function (header) {
+      var body = header.nextElementSibling;
+      var arrow = header.querySelector('.medidas-arrow');
+      var open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : 'block';
+      if (arrow) arrow.style.transform = open ? 'rotate(-90deg)' : 'rotate(0deg)';
+    };
+
     window.toggleHealthCheck = function (item, detailId) {
       var chk = item.querySelector('input[type=checkbox]');
       if (event && event.target === chk) { /* handled by checkbox directly */ }
@@ -8779,6 +9051,273 @@
       });
     };
 
+    // ── Fat % Calculator ──
+    const FAT_FORMULA_LABELS = {
+      'jp3': 'Jackson-Pollock 3 dobras',
+      'jp7': 'Jackson-Pollock 7 dobras',
+      'dw': 'Durnin-Womersley',
+      'faulkner': 'Faulkner',
+      'navy': 'US Navy'
+    };
+
+    function fatGetSex(prefix) {
+      // use the sex field from the form (new-student-sex or edit-student-sex)
+      const sexId = prefix === 'new' ? 'new-student-sex' : 'edit-student-sex';
+      const el = document.getElementById(sexId);
+      return el ? el.value : '';
+    }
+
+    function fatGetAge(prefix) {
+      const dobId = prefix === 'new' ? 'new-student-dob' : 'edit-student-dob';
+      const el = document.getElementById(dobId);
+      if (!el || !el.value) return null;
+      const dob = new Date(el.value);
+      const now = new Date();
+      let age = now.getFullYear() - dob.getFullYear();
+      const m = now.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+      return age > 0 ? age : null;
+    }
+
+    function fatClassify(pct, sex) {
+      // Classification tables (male/female)
+      const isMale = sex === 'M';
+      if (isMale) {
+        if (pct < 6) return { label: 'Gordura essencial', cls: 'fat-class-essential' };
+        if (pct < 14) return { label: 'Atleta', cls: 'fat-class-athlete' };
+        if (pct < 18) return { label: 'Fitness', cls: 'fat-class-fitness' };
+        if (pct < 25) return { label: 'Média', cls: 'fat-class-average' };
+        if (pct < 30) return { label: 'Acima da média', cls: 'fat-class-above' };
+        return { label: 'Obeso', cls: 'fat-class-obese' };
+      } else {
+        if (pct < 14) return { label: 'Gordura essencial', cls: 'fat-class-essential' };
+        if (pct < 21) return { label: 'Atleta', cls: 'fat-class-athlete' };
+        if (pct < 25) return { label: 'Fitness', cls: 'fat-class-fitness' };
+        if (pct < 32) return { label: 'Média', cls: 'fat-class-average' };
+        if (pct < 38) return { label: 'Acima da média', cls: 'fat-class-above' };
+        return { label: 'Obeso', cls: 'fat-class-obese' };
+      }
+    }
+
+    function siriFormula(density) {
+      return (495 / density) - 450;
+    }
+
+    function fatCalcValue(prefix) {
+      const formula = document.getElementById(prefix + '-fat-formula').value;
+      const sex = fatGetSex(prefix);
+      const age = fatGetAge(prefix);
+      const g = (id) => { const el = document.getElementById(id); return el ? parseFloat(el.value) : NaN; };
+
+      let pct = null;
+      let missing = false;
+
+      if (formula === 'jp3') {
+        const chest = g(prefix + '-jp3-chest');
+        const abd = g(prefix + '-jp3-abd');
+        const thigh = g(prefix + '-jp3-thigh');
+        if (isNaN(chest) || isNaN(abd) || isNaN(thigh) || !sex || !age) { missing = true; }
+        else {
+          const S = chest + abd + thigh;
+          let density;
+          if (sex === 'M') {
+            density = 1.10938 - (0.0008267 * S) + (0.0000016 * S * S) - (0.0002574 * age);
+          } else {
+            density = 1.0994921 - (0.0009929 * S) + (0.0000023 * S * S) - (0.0001392 * age);
+          }
+          pct = siriFormula(density);
+        }
+      } else if (formula === 'jp7') {
+        const chest = g(prefix + '-jp7-chest'), abd = g(prefix + '-jp7-abd'), thigh = g(prefix + '-jp7-thigh');
+        const tri = g(prefix + '-jp7-tri'), sub = g(prefix + '-jp7-sub'), supra = g(prefix + '-jp7-supra'), axil = g(prefix + '-jp7-axil');
+        if ([chest,abd,thigh,tri,sub,supra,axil].some(isNaN) || !sex || !age) { missing = true; }
+        else {
+          const S = chest + abd + thigh + tri + sub + supra + axil;
+          let density;
+          if (sex === 'M') {
+            density = 1.112 - (0.00043499 * S) + (0.00000055 * S * S) - (0.00028826 * age);
+          } else {
+            density = 1.097 - (0.00046971 * S) + (0.00000056 * S * S) - (0.00012828 * age);
+          }
+          pct = siriFormula(density);
+        }
+      } else if (formula === 'dw') {
+        const bi = g(prefix + '-dw-bi'), tri = g(prefix + '-dw-tri'), sub = g(prefix + '-dw-sub'), supra = g(prefix + '-dw-supra');
+        if ([bi,tri,sub,supra].some(isNaN) || !sex || !age) { missing = true; }
+        else {
+          const logS = Math.log10(bi + tri + sub + supra);
+          let density;
+          if (sex === 'M') {
+            if (age < 17) { density = 1.1533 - (0.0643 * logS); }
+            else if (age < 20) { density = 1.1620 - (0.0630 * logS); }
+            else if (age < 30) { density = 1.1631 - (0.0632 * logS); }
+            else if (age < 40) { density = 1.1422 - (0.0544 * logS); }
+            else if (age < 50) { density = 1.1620 - (0.0700 * logS); }
+            else { density = 1.1715 - (0.0779 * logS); }
+          } else {
+            if (age < 17) { density = 1.1369 - (0.0598 * logS); }
+            else if (age < 20) { density = 1.1549 - (0.0678 * logS); }
+            else if (age < 30) { density = 1.1599 - (0.0717 * logS); }
+            else if (age < 40) { density = 1.1423 - (0.0632 * logS); }
+            else if (age < 50) { density = 1.1333 - (0.0612 * logS); }
+            else { density = 1.1339 - (0.0645 * logS); }
+          }
+          pct = siriFormula(density);
+        }
+      } else if (formula === 'faulkner') {
+        const tri = g(prefix + '-fk-tri'), sub = g(prefix + '-fk-sub'), supra = g(prefix + '-fk-supra'), abd = g(prefix + '-fk-abd');
+        if ([tri,sub,supra,abd].some(isNaN)) { missing = true; }
+        else {
+          pct = 5.783 + (0.153 * (tri + sub + supra + abd));
+        }
+      } else if (formula === 'navy') {
+        const height = g(prefix + '-nv-height'), neck = g(prefix + '-nv-neck'), waist = g(prefix + '-nv-waist');
+        if (!sex) { missing = true; }
+        else if (sex === 'F') {
+          const hip = g(prefix + '-nv-hip');
+          if ([height,neck,waist,hip].some(isNaN) || height <= 0) { missing = true; }
+          else {
+            pct = 163.205 * Math.log10(waist + hip - neck) - 97.684 * Math.log10(height) - 78.387;
+          }
+        } else {
+          if ([height,neck,waist].some(isNaN) || height <= 0) { missing = true; }
+          else {
+            pct = 86.010 * Math.log10(waist - neck) - 70.041 * Math.log10(height) + 36.76;
+          }
+        }
+      }
+
+      return { pct, missing };
+    }
+
+    window.fatFormulaChange = function(prefix) {
+      const formula = document.getElementById(prefix + '-fat-formula').value;
+      const allGroups = ['jp3','jp7','dw','faulkner','navy'];
+      allGroups.forEach(f => {
+        const el = document.getElementById(prefix + '-fat-' + f);
+        if (el) el.classList.toggle('hidden', f !== (formula || 'manual'));
+      });
+
+      // Formula descriptions
+      const FAT_FORMULA_DESCS = {
+        jp3: 'Usa 3 dobras cutâneas (Peitoral, Abdômen e Coxa). Ideal para homens. Rápida e amplamente validada em academias.',
+        jp7: 'Usa 7 dobras cutâneas para maior precisão. Indicada para avaliações detalhadas em ambos os sexos.',
+        dw: 'Baseada em 4 dobras (Bíceps, Tríceps, Subescapular e Suprailíaca). Boa opção para populações gerais e idosos.',
+        faulkner: 'Usa 4 dobras (Tríceps, Subescapular, Suprailíaca e Abdominal). Recomendada para atletas e nadadores.',
+        navy: 'Estima a gordura por medidas de circunferência (pescoço, cintura e quadril). Usa a altura informada nos dados físicos. Não requer adipômetro.'
+      };
+      const descEl = document.getElementById(prefix + '-fat-formula-desc');
+      if (descEl) {
+        if (formula && FAT_FORMULA_DESCS[formula]) {
+          descEl.textContent = FAT_FORMULA_DESCS[formula];
+          descEl.classList.remove('hidden');
+        } else {
+          descEl.classList.add('hidden');
+        }
+      }
+
+      // Navy: show/hide hip for female
+      // Sync main height → locked nv-height mirror
+      const nvHeight = document.getElementById(prefix + '-nv-height');
+      const mainHeight = document.getElementById(prefix + '-student-height');
+      if (nvHeight && mainHeight) nvHeight.value = mainHeight.value;
+      const sex = fatGetSex(prefix);
+      const hipGrp = document.getElementById(prefix + '-nv-hip-group');
+      if (hipGrp) hipGrp.style.display = (formula === 'navy' && sex === 'F') ? '' : 'none';
+      // Also update when sex changes
+      const sexEl = document.getElementById(prefix === 'new' ? 'new-student-sex' : 'edit-student-sex');
+      if (sexEl && !sexEl._fatListener) {
+        sexEl._fatListener = true;
+        sexEl.addEventListener('change', () => {
+          fatFormulaChange(prefix);
+          fatCalc(prefix);
+        });
+      }
+      fatCalc(prefix);
+    };
+
+    window.fatCalc = function(prefix) {
+      const formula = document.getElementById(prefix + '-fat-formula').value;
+      if (!formula) return; // manual mode handled separately
+      const { pct, missing } = fatCalcValue(prefix);
+      const resultBox = document.getElementById(prefix + '-fat-result');
+      const missingMsg = document.getElementById(prefix + '-fat-missing');
+      const sex = fatGetSex(prefix);
+
+      if (missing || pct === null) {
+        if (resultBox) resultBox.classList.add('hidden');
+        if (missingMsg) missingMsg.classList.remove('hidden');
+        document.getElementById(prefix + '-student-fat').value = '';
+        document.getElementById(prefix + '-student-fat-formula').value = '';
+        document.getElementById(prefix + '-student-fat-class').value = '';
+        return;
+      }
+
+      const rounded = Math.max(0, Math.min(70, pct));
+      const classification = fatClassify(rounded, sex);
+
+      if (missingMsg) missingMsg.classList.add('hidden');
+      if (resultBox) {
+        resultBox.classList.remove('hidden');
+        // Remove old class colors
+        resultBox.classList.remove('fat-class-essential','fat-class-athlete','fat-class-fitness','fat-class-average','fat-class-above','fat-class-obese');
+        resultBox.classList.add(classification.cls);
+        document.getElementById(prefix + '-fat-result-pct').textContent = rounded.toFixed(1) + '%';
+        document.getElementById(prefix + '-fat-result-class').textContent = classification.label;
+        document.getElementById(prefix + '-fat-result-formula').textContent = FAT_FORMULA_LABELS[formula] || formula;
+      }
+
+      // Populate hidden fields for save logic
+      document.getElementById(prefix + '-student-fat').value = rounded.toFixed(1);
+      document.getElementById(prefix + '-student-fat-formula').value = formula;
+      document.getElementById(prefix + '-student-fat-class').value = classification.label;
+    };
+
+    window.fatManualInput = function(prefix) {
+      const val = parseFloat(document.getElementById(prefix + '-fat-manual-val').value);
+      const sex = fatGetSex(prefix);
+      const resultBox = document.getElementById(prefix + '-fat-result');
+      const missingMsg = document.getElementById(prefix + '-fat-missing');
+
+      if (isNaN(val) || val < 0 || val > 70) {
+        if (resultBox) resultBox.classList.add('hidden');
+        if (missingMsg) missingMsg.classList.add('hidden');
+        document.getElementById(prefix + '-student-fat').value = '';
+        return;
+      }
+      const classification = fatClassify(val, sex);
+      if (missingMsg) missingMsg.classList.add('hidden');
+      if (resultBox) {
+        resultBox.classList.remove('hidden');
+        resultBox.classList.remove('fat-class-essential','fat-class-athlete','fat-class-fitness','fat-class-average','fat-class-above','fat-class-obese');
+        resultBox.classList.add(classification.cls);
+        document.getElementById(prefix + '-fat-result-pct').textContent = val.toFixed(1) + '%';
+        document.getElementById(prefix + '-fat-result-class').textContent = classification.label;
+        document.getElementById(prefix + '-fat-result-formula').textContent = 'Manual';
+      }
+      document.getElementById(prefix + '-student-fat').value = val.toFixed(1);
+      document.getElementById(prefix + '-student-fat-formula').value = '';
+      document.getElementById(prefix + '-student-fat-class').value = classification.label;
+    };
+
+    window.fatClearAll = function(prefix) {
+      // Reset formula
+      const formulaSel = document.getElementById(prefix + '-fat-formula');
+      if (formulaSel) { formulaSel.value = ''; fatFormulaChange(prefix); }
+      // Clear all inputs
+      document.querySelectorAll('#' + prefix + '-fat-calc .fat-input').forEach(el => el.value = '');
+      // Hide result
+      const rb = document.getElementById(prefix + '-fat-result');
+      if (rb) rb.classList.add('hidden');
+      const mm = document.getElementById(prefix + '-fat-missing');
+      if (mm) mm.classList.add('hidden');
+      // Clear hidden fields
+      document.getElementById(prefix + '-student-fat').value = '';
+      document.getElementById(prefix + '-student-fat-formula').value = '';
+      document.getElementById(prefix + '-student-fat-class').value = '';
+    };
+
+
     // ── Add Student Steps ──
     window._addStudentStep = 1;
     window.openAddStudentModal = () => {
@@ -8794,6 +9333,8 @@
       document.getElementById('new-student-sex').value = '';
       document.getElementById('new-student-imc-box').style.display = 'none';
       document.getElementById('new-student-age-preview').style.display = 'none';
+      // Reset fat calculator
+      setTimeout(() => fatClearAll('new'), 50);
       ['new-chk-injuries', 'new-chk-conditions', 'new-chk-meds'].forEach(id => {
         var el = document.getElementById(id); if (el) el.checked = false;
       });
@@ -8847,6 +9388,8 @@
         const weight = parseFloat(document.getElementById('new-student-weight').value) || null;
         const height = parseFloat(document.getElementById('new-student-height').value) || null;
         const fat = parseFloat(document.getElementById('new-student-fat').value) || null;
+        const fatFormula = document.getElementById('new-student-fat-formula').value || null;
+        const fatClass = document.getElementById('new-student-fat-class').value || null;
         const imc = (weight && height && height > 50) ? parseFloat((weight / Math.pow(height / 100, 2)).toFixed(1)) : null;
         const measures = readMeasures('new-m-');
         const injuries = document.getElementById('new-chk-injuries').checked ? document.getElementById('new-txt-injuries').value.trim() : '';
@@ -8860,7 +9403,8 @@
         const studentData = {
           name, code, phone, email, dob, sex, obs,
           injuries, conditions, meds,
-          weight: weight || null, height: height || null, imc: imc || null, fat: fat || null,
+          weight: weight || null, height: height || null, imc: imc || null,
+          fat: fat || null, fatFormula: fatFormula || null, fatClass: fatClass || null,
           measures: Object.keys(measures).length ? measures : null,
           managerId: u.username || '',
           managerName: u.displayName || u.username || '',
@@ -8873,7 +9417,7 @@
           await _setDoc(_doc(_db, 'students', studentId, 'assessments', Date.now().toString()), {
             date: fmtLocalYMD(),
             ts: Date.now(),
-            weight, height, imc, fat, measures
+            weight, height, imc, fat, fatFormula, fatClass, measures
           });
         }
         [1, 2, 3].forEach(s => { var p = document.getElementById('add-student-step-' + s); if (p) p.style.display = 'none'; });
@@ -8902,7 +9446,14 @@
       document.getElementById('edit-student-obs').value = s.obs || '';
       document.getElementById('edit-student-weight').value = s.weight || '';
       document.getElementById('edit-student-height').value = s.height || '';
-      document.getElementById('edit-student-fat').value = s.fat || '';
+      // Fat calculator: reset then pre-fill
+      fatClearAll('edit');
+      if (s.fat && s.fatFormula) {
+        setTimeout(() => {
+          document.getElementById('edit-fat-formula').value = s.fatFormula;
+          fatFormulaChange('edit');
+        }, 60);
+      }
       fillMeasures('edit-m-', s.measures || {});
       // health
       var hMap = [
@@ -8948,6 +9499,8 @@
         const weight = parseFloat(document.getElementById('edit-student-weight').value) || null;
         const height = parseFloat(document.getElementById('edit-student-height').value) || null;
         const fat = parseFloat(document.getElementById('edit-student-fat').value) || null;
+        const fatFormula = document.getElementById('edit-student-fat-formula').value || null;
+        const fatClass = document.getElementById('edit-student-fat-class').value || null;
         const imc = (weight && height && height > 50) ? parseFloat((weight / Math.pow(height / 100, 2)).toFixed(1)) : null;
         const measures = readMeasures('edit-m-');
         const injuries = document.getElementById('edit-chk-injuries').checked ? document.getElementById('edit-txt-injuries').value.trim() : '';
@@ -8956,7 +9509,8 @@
         const hasPhysical = weight || height || fat || Object.keys(measures).length > 0;
         await _updateDoc(_doc(_db, 'students', sid), {
           name, phone, email, dob, sex, obs, injuries, conditions, meds,
-          weight: weight || null, height: height || null, imc: imc || null, fat: fat || null,
+          weight: weight || null, height: height || null, imc: imc || null,
+          fat: fat || null, fatFormula: fatFormula || null, fatClass: fatClass || null,
           measures: Object.keys(measures).length ? measures : null
         });
         // Save assessment if physical data filled
@@ -8964,7 +9518,7 @@
           await _setDoc(_doc(_db, 'students', sid, 'assessments', Date.now().toString()), {
             date: fmtLocalYMD(),
             ts: Date.now(),
-            weight, height, imc, fat, measures
+            weight, height, imc, fat, fatFormula, fatClass, measures
           });
         }
         closeModal('modal-edit-student');
@@ -9171,12 +9725,12 @@
         ${s.weight ? `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Peso atual</div><div style="font-weight:700;font-size:.9rem;">${s.weight} kg</div></div>` : ''}
         ${s.height ? `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Altura</div><div style="font-weight:700;font-size:.9rem;">${s.height} cm</div></div>` : ''}
         ${s.imc ? `<div style="background:var(--accent-dim);border:1.5px solid var(--accent-soft);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:#8a6200;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">IMC</div><div style="font-weight:800;font-size:1.1rem;">${s.imc}</div></div>` : ''}
-        ${s.fat ? `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">% Gordura</div><div style="font-weight:700;font-size:.9rem;">${s.fat}%</div></div>` : ''}
+        ${s.fat ? `<div style="background:var(--green-dim);border:1.5px solid var(--green-soft);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">% Gordura</div><div style="font-weight:800;font-size:1.1rem;color:var(--green);">${s.fat}%</div>${s.fatClass ? `<div style="font-size:.72rem;font-weight:600;color:var(--text2);margin-top:2px;">${s.fatClass}${s.fatFormula ? ' · ' + {jp3:'JP 3 dobras',jp7:'JP 7 dobras',dw:'Durnin-Womersley',faulkner:'Faulkner',navy:'US Navy'}[s.fatFormula] || '' : ''}</div>` : ''}</div>` : ''}
       </div>
       ${s.measures && Object.keys(s.measures).length ? `
         <div class="evol-section-title">Medidas corporais</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px;">
-          ${Object.entries({ chest: 'Peito', waist: 'Cintura', hip: 'Quadril', 'arm-r': 'Braço D', 'arm-l': 'Braço E', shoulder: 'Ombro', 'thigh-r': 'Coxa D', 'thigh-l': 'Coxa E', 'calf-r': 'Panturrilha D', 'calf-l': 'Panturrilha E', 'thigh-prox': 'Coxa Proximal', 'thigh-dist': 'Coxa Distal' }).filter(([k]) => s.measures[k]).map(([k, label]) => `
+          ${Object.entries({ chest: 'Peitoral', waist: 'Cintura', hip: 'Quadril', 'arm-r': 'Braço D', 'arm-l': 'Braço E', shoulder: 'Ombro', 'thigh-r': 'Coxa D', 'thigh-l': 'Coxa E', 'calf-r': 'Panturrilha D', 'calf-l': 'Panturrilha E', 'thigh-prox': 'Coxa Proximal', 'thigh-dist': 'Coxa Distal' }).filter(([k]) => s.measures[k]).map(([k, label]) => `
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;">
               <div style="font-size:.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">${label}</div>
               <div style="font-weight:700;font-size:.92rem;">${s.measures[k]} cm</div>
@@ -9238,7 +9792,7 @@
         }
         const latest = assessments[0];
         const prev = assessments[1] || null;
-        const LABELS = { weight: 'Peso (kg)', fat: '% Gordura', chest: 'Peito', waist: 'Cintura', hip: 'Quadril', 'arm-r': 'Braço D', 'arm-l': 'Braço E', shoulder: 'Ombro', 'thigh-r': 'Coxa D', 'thigh-l': 'Coxa E', 'calf-r': 'Panturrilha D', 'calf-l': 'Panturrilha E', 'thigh-prox': 'Coxa Proximal', 'thigh-dist': 'Coxa Distal' };
+        const LABELS = { weight: 'Peso (kg)', fat: '% Gordura', chest: 'Peitoral', waist: 'Cintura', hip: 'Quadril', 'arm-r': 'Braço D', 'arm-l': 'Braço E', shoulder: 'Ombro', 'thigh-r': 'Coxa D', 'thigh-l': 'Coxa E', 'calf-r': 'Panturrilha D', 'calf-l': 'Panturrilha E', 'thigh-prox': 'Coxa Proximal', 'thigh-dist': 'Coxa Distal' };
         const fmtDate = ts => { try { var d = new Date(ts); return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }); } catch (e) { return ts; } };
         const diffRow = (label, currVal, prevVal, unit) => {
           if (currVal === null || currVal === undefined) return '';
