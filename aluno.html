@@ -5453,10 +5453,11 @@
 
         const latest = assessments[0];
         const prev = assessments[1] || null;
-        const LABELS = { weight: 'Peso', fat: '% Gordura', chest: 'Peito', waist: 'Cintura', hip: 'Quadril', 'arm-r': 'Braço D', 'arm-l': 'Braço E', shoulder: 'Ombro', 'thigh-r': 'Coxa D', 'thigh-l': 'Coxa E', 'calf-r': 'Panturrilha D', 'calf-l': 'Panturrilha E', 'thigh-prox': 'Coxa Proximal', 'thigh-dist': 'Coxa Distal' };
+        const LABELS = { weight: 'Peso', fat: '% Gordura', chest: 'Peitoral', waist: 'Cintura', hip: 'Quadril', 'arm-r': 'Braço D', 'arm-l': 'Braço E', shoulder: 'Ombro', 'thigh-r': 'Coxa D', 'thigh-l': 'Coxa E', 'calf-r': 'Panturrilha D', 'calf-l': 'Panturrilha E', 'thigh-prox': 'Coxa Proximal', 'thigh-dist': 'Coxa Distal' };
+        const FAT_FORMULA_LABELS = {jp3:'Jackson-Pollock 3 dobras',jp7:'Jackson-Pollock 7 dobras',dw:'Durnin-Womersley',faulkner:'Faulkner',navy:'US Navy'};
         const fmtDate = ts => { try { return new Date(ts).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }); } catch (e) { return ts; } };
 
-        const diffRow = (label, unit, currVal, prevVal) => {
+        const diffRow = (label, unit, currVal, prevVal, extra) => {
           if (currVal === null || currVal === undefined) return '';
           const curr = parseFloat(currVal);
           const p = prevVal !== null && prevVal !== undefined ? parseFloat(prevVal) : null;
@@ -5470,12 +5471,19 @@
           <span class="evo-metric-curr">${curr.toFixed(1)}${unit}</span>
           <span class="evo-metric-diff ${cls}">${diffStr}${unit}</span>
         </div>
+        ${extra ? `<div style="font-size:.68rem;color:var(--text3);font-weight:600;margin-top:2px;grid-column:1/-1;">${extra}</div>` : ''}
       </div>`;
         };
 
         let compareRows = '';
         compareRows += diffRow('Peso', ' kg', latest.weight, prev?.weight);
-        compareRows += diffRow('% Gordura', '%', latest.fat, prev?.fat);
+
+        // Fat row with classification and formula
+        if (latest.fat) {
+          const fatExtra = [latest.fatClass, latest.fatFormula ? FAT_FORMULA_LABELS[latest.fatFormula] : null].filter(Boolean).join(' · ');
+          compareRows += diffRow('% Gordura', '%', latest.fat, prev?.fat, fatExtra || null);
+        }
+
         const m = latest.measures || {}, pm = prev?.measures || {};
         Object.entries(LABELS).forEach(([k, label]) => {
           if (k === 'weight' || k === 'fat') return;
@@ -5483,8 +5491,18 @@
         });
         if (latest.imc) compareRows += `<div class="evo-metric-row"><span class="evo-metric-label">IMC</span><div class="evo-metric-values"><span class="evo-metric-curr">${latest.imc}</span></div></div>`;
 
+        // Fat highlight card (latest only)
+        const fatHighlight = latest.fat ? `
+          <div style="background:var(--green-dim);border:1.5px solid var(--green-soft);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+            <div style="font-family:var(--head,inherit);font-size:2rem;font-weight:800;color:var(--green);white-space:nowrap;">${parseFloat(latest.fat).toFixed(1)}%</div>
+            <div>
+              <div style="font-weight:700;font-size:.88rem;color:var(--text);">${latest.fatClass || '% Gordura corporal'}</div>
+              <div style="font-size:.72rem;color:var(--text3);font-weight:600;margin-top:2px;">${latest.fatFormula ? (FAT_FORMULA_LABELS[latest.fatFormula] || latest.fatFormula) : 'Valor manual'}</div>
+            </div>
+          </div>` : '';
+
         const historyHTML = assessments.map((a, i) => {
-          const parts = [a.weight ? a.weight + 'kg' : null, a.fat ? a.fat + '% gordura' : null, a.measures?.waist ? 'cintura ' + a.measures.waist + 'cm' : null].filter(Boolean);
+          const parts = [a.weight ? a.weight + 'kg' : null, a.fat ? a.fat + '% gordura' + (a.fatClass ? ' (' + a.fatClass + ')' : '') : null, a.measures?.waist ? 'cintura ' + a.measures.waist + 'cm' : null].filter(Boolean);
           const summary = parts.join(' · ') || 'Sem resumo';
           return `<div class="evo-history-item">
         <div class="evo-history-date">
@@ -5498,6 +5516,7 @@
         container.innerHTML = `<div class="evol-page-wrap">
       <div class="evol-page-title">Minha Evolução</div>
       <div class="evol-page-sub">Acompanhe seu progresso físico ao longo do tempo.</div>
+      ${fatHighlight}
       ${compareRows ? `
         <div class="evo-compare-card">
           <div class="evo-compare-header">
