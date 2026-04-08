@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#111110" />
+  <title>Trainly — Painel do Nutricionista</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Trainly Nutri" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f7f5;
+      --bg2: #ffffff;
+      --surface: #ffffff;
+      --surface2: #f0f0ed;
+      --surface3: #e8e8e4;
+      --border: #e4e4e0;
+      --border2: #d0d0cb;
+      --accent: #f5c800;
+      --accent2: #e0b400;
+      --accent-dim: rgba(245,200,0,.10);
+      --accent-soft: rgba(245,200,0,.25);
+      --red: #e03e3e;
+      --red-dim: rgba(224,62,62,.08);
+      --green: #2e7d52;
+      --green-dim: rgba(46,125,82,.08);
+      --green-soft: rgba(46,125,82,.15);
+      --nutri: #2e7d52;
+      --nutri-dim: rgba(46,125,82,.08);
+      --nutri-soft: rgba(46,125,82,.2);
+      --text: #111110;
+      --text2: #555550;
+      --text3: #999990;
+      --head: 'Nunito', sans-serif;
+      --body: 'Plus Jakarta Sans', sans-serif;
+      --r: 12px;
+      --r2: 16px;
+      --shadow: 0 2px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+      --shadow-md: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
+    }
+
+    html { scroll-behavior: smooth; overflow: hidden; height: 100%; overscroll-behavior: none; }
+    body { font-family: var(--body); background: #000000; color: var(--text); height: 100%; overflow: hidden; overscroll-behavior: none; }
+
+    button, a, label, [onclick] { touch-action: manipulation; cursor: pointer; }
+    button { border: none; font-family: inherit; }
+    input, select, textarea { font-family: inherit; touch-action: manipulation; }
+    .hidden { display: none !important; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.35); backdrop-filter: blur(6px);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 16px; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain;
+    }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      width: 100%; max-width: 760px; max-height: calc(100dvh - 32px);
+      display: flex; flex-direction: column; box-shadow: var(--shadow-md);
+      overscroll-behavior: contain; margin: auto 0;
+    }
+    .modal-sm { max-width: 480px; }
+    .modal-header {
+      flex-shrink: 0; display: flex; align-items: center;
+      justify-content: space-between; padding: 20px 24px;
+      border-bottom: 1px solid var(--border); background: #000000;
+      z-index: 1; border-radius: 20px 20px 0 0;
+    }
+    .modal-header h3 { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: #ffffff; }
+    .modal-header p, .modal-header span { color: rgba(255,255,255,0.6) !important; }
+    .modal-body { flex: 1; overflow-y: auto; padding: 24px; touch-action: pan-y; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+    .modal-footer {
+      flex-shrink: 0; padding: 16px 24px; border-top: 1px solid var(--border);
+      display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;
+    }
+    .close-btn {
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+      width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #ffffff; font-size: .95rem; transition: all .15s;
+    }
+    .close-btn:hover { background: rgba(255,255,255,.22); }
+
+    /* ── FORMS ── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: .75rem; font-weight: 700;
+      color: var(--text2); margin-bottom: 7px;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .form-control {
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+      border-radius: var(--r); font-size: .88rem; transition: all .15s;
+      background: var(--bg); color: var(--text);
+    }
+    .form-control:focus { outline: none; border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(245,200,0,.15); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media(max-width:520px) { .form-row { grid-template-columns: 1fr; } .form-row-3 { grid-template-columns: 1fr 1fr; } }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: var(--r); font-size: .85rem;
+      font-weight: 700; transition: all .15s; cursor: pointer; border: none; font-family: var(--body);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg,#3d3830 0%,#28231a 50%,#1a1610 100%);
+      color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      font-weight: 800; letter-spacing: .02em; border: 1px solid rgba(245,200,0,.18);
+    }
+    .btn-primary:hover { transform: translateY(-1px); background: linear-gradient(135deg,#4d4838 0%,#332d20 50%,#221d14 100%); box-shadow: 0 4px 14px rgba(0,0,0,.22); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-ghost { background: var(--surface2); color: var(--text2); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--surface3); }
+    .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.25); }
+    .btn-danger:hover { background: rgba(224,62,62,.15); }
+    .btn-nutri { background: var(--nutri-dim); color: var(--nutri); border: 1px solid var(--nutri-soft); font-weight: 700; }
+    .btn-nutri:hover { background: var(--green-soft); }
+    .btn-sm { padding: 6px 13px; font-size: .78rem; }
+    .btn-loading { opacity: .5; pointer-events: none; }
+
+    /* ── BADGES ── */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: .72rem; font-weight: 700; }
+    .badge-active { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,125,82,.2); }
+    .badge-inactive { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2); }
+    .badge-new { background: var(--accent-dim); color: #8a6c00; border: 1px solid var(--accent-soft); }
+
+    /* ── LOGIN SCREEN (oculto — acesso via app.html) ── */
+    #screen-login { display: none !important; }
+
+    /* ── DASHBOARD (app) ── */
+    #screen-dashboard { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: #000000; border-bottom: 1px solid #2e2e2a;
+      padding: env(safe-area-inset-top,0px) 24px 0 24px;
+      height: calc(62px + env(safe-area-inset-top,0px));
+      display: flex; align-items: flex-end; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.3);
+    }
+    .topbar-brand, .topbar-right { height: 62px; display: flex; align-items: center; }
+    .topbar-brand {
+      font-family: var(--head); font-size: 1.2rem; font-weight: 800;
+      color: #ffffff; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px;
+    }
+    .topbar-brand .dot { width: 8px; height: 8px; border-radius: 50%; background: #5cb87c; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .user-pill {
+      background: rgba(46,125,82,.15); border: 1px solid rgba(46,125,82,.35);
+      border-radius: 8px; padding: 5px 14px; font-size: .78rem; font-weight: 700; color: #5cb87c;
+    }
+    .nutri-pill {
+      background: rgba(46,125,82,.1); border: 1px solid rgba(46,125,82,.2);
+      border-radius: 8px; padding: 4px 10px; font-size: .68rem; font-weight: 700; color: var(--nutri);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .logout-btn {
+      background: none; color: #555550; font-size: .78rem;
+      padding: 6px 10px; border-radius: 8px; font-weight: 600;
+      transition: all .15s; white-space: nowrap; flex-shrink: 0;
+    }
+    .logout-btn:hover { color: var(--red); background: var(--red-dim); }
+
+    /* ── LAYOUT ── */
+    .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); min-height: 0; }
+    .sidebar {
+      width: 220px; background: var(--surface); border-right: 1px solid var(--border);
+      padding: 20px 10px; display: flex; flex-direction: column;
+      gap: 2px; flex-shrink: 0; overflow-y: auto;
+      -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;
+    }
+    .sidebar-section {
+      font-size: .68rem; font-weight: 700; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .12em; padding: 14px 12px 8px;
+    }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      border-radius: var(--r); font-size: .88rem; font-weight: 600;
+      color: var(--text2); cursor: pointer; transition: all .15s; position: relative;
+    }
+    .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+    .sidebar-item.active { background: var(--nutri-dim); color: #111110; font-weight: 700; }
+    .sidebar-item.active::before {
+      content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      width: 3px; height: 60%; background: var(--nutri); border-radius: 0 3px 3px 0;
+    }
+    .sidebar-chat-badge {
+      margin-left: auto; background: var(--accent); color: #111110; border-radius: 99px;
+      min-width: 20px; height: 20px; padding: 0 5px; font-size: .65rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .main-content {
+      flex: 1; overflow-y: auto; padding: 28px; background: var(--bg);
+      display: flex; flex-direction: column;
+      -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;
+    }
+
+    /* ── TABS ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; flex: 1; }
+    #tab-chat.active { display: flex; flex-direction: column; flex: 1; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+    }
+    .page-title { font-family: var(--head); font-size: 1.5rem; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
+    .search-wrap { position: relative; }
+    .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .4; pointer-events: none; }
+    .search-input {
+      padding: 9px 14px 9px 38px; border: 1.5px solid var(--border); border-radius: var(--r);
+      font-size: .84rem; width: 230px; background: var(--surface); color: var(--text);
+      font-weight: 500; transition: border-color .15s;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,200,0,.12); }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fill,minmax(160px,1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+      padding: 18px 20px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+      transition: box-shadow .2s, transform .15s;
+    }
+    .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .stat-card-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .stat-card-icon.green { background: var(--green-dim); }
+    .stat-card-icon.yellow { background: var(--accent-dim); }
+    .stat-card-icon.red { background: var(--red-dim); }
+    .stat-card-icon.blue { background: rgba(59,130,246,.1); }
+    .stat-card-icon.purple { background: rgba(139,92,246,.1); }
+    .stat-num { font-family: var(--head); font-size: 2.2rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-num.green { color: var(--green); }
+    .stat-num.yellow { color: #8a6c00; }
+    .stat-num.red { color: var(--red); }
+    .stat-lbl { font-size: .73rem; color: var(--text3); margin-top: 5px; font-weight: 600; }
+    .stat-sub { font-size: .68rem; color: var(--text3); margin-top: 8px; font-weight: 500; display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--border); padding-top: 8px; }
+    .stat-sub span { color: var(--text2); font-weight: 700; }
+
+    /* ── SECTION TITLE ── */
+    .dash-section-title {
+      font-size: .7rem; font-weight: 800; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .dash-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── RECENT CARD ── */
+    .dash-recent-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+      padding: 0; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px;
+    }
+    .dash-recent-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+    }
+    .dash-recent-title {
+      font-family: var(--head); font-size: .9rem; font-weight: 800; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .dash-recent-list { display: flex; flex-direction: column; }
+    .dash-recent-item {
+      display: flex; align-items: center; gap: 12px; padding: 11px 18px;
+      border-bottom: 1px solid var(--border); transition: background .12s; cursor: pointer;
+    }
+    .dash-recent-item:last-child { border-bottom: none; }
+    .dash-recent-item:hover { background: var(--surface2); }
+    .dash-recent-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--nutri-dim); border: 1.5px solid var(--nutri-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--head); font-size: .82rem; font-weight: 800; color: var(--nutri); flex-shrink: 0;
+    }
+    .dash-recent-info { flex: 1; min-width: 0; }
+    .dash-recent-name { font-size: .85rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dash-recent-date { font-size: .7rem; color: var(--text3); font-weight: 500; margin-top: 1px; }
+    .dash-recent-badge { font-size: .63rem; font-weight: 800; padding: 3px 8px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+    .dash-recent-badge.new { background: var(--accent-dim); color: #8a6c00; border: 1px solid var(--accent-soft); }
+    .dash-recent-badge.active { background: var(--green-dim); color: var(--green); }
+    .dash-empty-state { padding: 28px; text-align: center; font-size: .82rem; color: var(--text3); font-weight: 500; }
+
+    /* ── NUTRI DASH CARDS ── */
+    .nutri-quick-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;
+    }
+    .nutri-quick-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+      padding: 18px; box-shadow: var(--shadow);
+    }
+    .nutri-quick-card-label {
+      font-size: .68rem; font-weight: 800; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .nutri-quick-card-val {
+      font-family: var(--head); font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1;
+    }
+    .nutri-quick-card-sub { font-size: .72rem; color: var(--text3); margin-top: 4px; font-weight: 500; }
+
+    /* Macro ring */
+    .macro-ring-row {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px;
+    }
+    .macro-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+      padding: 14px 16px; box-shadow: var(--shadow); text-align: center;
+    }
+    .macro-card-label { font-size: .65rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+    .macro-card-val { font-family: var(--head); font-size: 1.4rem; font-weight: 800; color: var(--text); }
+    .macro-card-unit { font-size: .7rem; color: var(--text3); font-weight: 600; }
+    .macro-prot { color: #2563eb; }
+    .macro-carb { color: #d97706; }
+    .macro-fat  { color: #9333ea; }
+
+    /* ── CLIENTS (alunos) ── */
+    .clients-grid {
+      display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 14px;
+    }
+    .client-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+      padding: 0; box-shadow: var(--shadow); overflow: hidden;
+      transition: box-shadow .2s, transform .15s; cursor: pointer;
+    }
+    .client-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .client-card-head {
+      background: linear-gradient(135deg, rgba(46,125,82,.08) 0%, rgba(46,125,82,.03) 100%);
+      border-bottom: 1px solid var(--border); padding: 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .client-avatar {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--nutri-dim); border: 2px solid var(--nutri-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--head); font-size: 1rem; font-weight: 800;
+      color: var(--nutri); flex-shrink: 0;
+    }
+    .client-info { flex: 1; min-width: 0; }
+    .client-name { font-family: var(--head); font-size: .95rem; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .client-meta { font-size: .74rem; color: var(--text3); font-weight: 500; margin-top: 2px; }
+    .client-card-body { padding: 14px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .client-stat { text-align: center; }
+    .client-stat-val { font-family: var(--head); font-size: 1rem; font-weight: 800; color: var(--text); }
+    .client-stat-lbl { font-size: .6rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-top: 1px; }
+    .client-card-foot {
+      padding: 10px 16px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .client-goal-tag {
+      font-size: .7rem; font-weight: 700; padding: 3px 10px; border-radius: 99px;
+      background: var(--nutri-dim); color: var(--nutri); border: 1px solid var(--nutri-soft);
+    }
+    .client-last-seen { font-size: .68rem; color: var(--text3); font-weight: 500; }
+
+    /* ── DETAIL PANEL ── */
+    .detail-header {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .detail-avatar {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: var(--nutri-dim); border: 2px solid var(--nutri-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--head); font-size: 1.5rem; font-weight: 800;
+      color: var(--nutri); flex-shrink: 0;
+    }
+    .detail-info { flex: 1; min-width: 0; }
+    .detail-info h2 { font-family: var(--head); font-size: 1.4rem; font-weight: 800; color: var(--text); }
+    .detail-info p { font-size: .8rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
+    .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* Assessment tabs */
+    .assess-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+    .assess-tab {
+      padding: 10px 18px; font-size: .83rem; font-weight: 700; color: var(--text3);
+      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+      transition: all .15s; background: none; border-top: none; border-left: none; border-right: none;
+      font-family: var(--body);
+    }
+    .assess-tab.active { color: var(--text); border-bottom-color: var(--nutri); }
+    .assess-panel { display: none; }
+    .assess-panel.active { display: block; }
+
+    /* Section label */
+    .section-label {
+      font-size: .7rem; font-weight: 800; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* Info grid */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .info-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media(max-width:520px) { .info-grid { grid-template-columns: 1fr; } .info-grid-3 { grid-template-columns: 1fr 1fr; } }
+    .info-item {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 12px 14px;
+    }
+    .info-item-label { font-size: .65rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+    .info-item-val { font-family: var(--head); font-size: 1rem; font-weight: 800; color: var(--text); }
+    .info-item-val.nutri-color { color: var(--nutri); }
+
+    /* Diet plan card */
+    .diet-plan-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+      padding: 16px 18px; box-shadow: var(--shadow); margin-bottom: 14px;
+    }
+    .diet-plan-head {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+    }
+    .diet-plan-name { font-family: var(--head); font-size: .95rem; font-weight: 800; color: var(--text); }
+    .diet-meal {
+      border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px;
+      margin-bottom: 8px; background: var(--surface2);
+    }
+    .diet-meal-name { font-size: .8rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .diet-meal-desc { font-size: .76rem; color: var(--text2); line-height: 1.5; }
+    .diet-meal-macros { display: flex; gap: 10px; margin-top: 6px; }
+    .diet-macro-pill {
+      font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+    }
+    .diet-macro-pill.p { background: rgba(37,99,235,.1); color: #2563eb; }
+    .diet-macro-pill.c { background: rgba(217,119,6,.1); color: #d97706; }
+    .diet-macro-pill.g { background: rgba(147,51,234,.1); color: #9333ea; }
+
+    /* Health conditions */
+    .health-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2);
+      border-radius: 99px; padding: 3px 10px; font-size: .72rem; font-weight: 700;
+      margin: 3px 3px 3px 0;
+    }
+    .allergy-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(245,158,11,.1); color: #d97706;
+      border: 1px solid rgba(245,158,11,.25);
+      border-radius: 99px; padding: 3px 10px; font-size: .72rem; font-weight: 700;
+      margin: 3px 3px 3px 0;
+    }
+
+    /* ── CHAT (mesmo sistema do personal) ── */
+    .chat-list { display: flex; flex-direction: column; gap: 10px; }
+    .chat-list-item {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+      cursor: pointer; transition: all .2s; box-shadow: var(--shadow); overflow: hidden;
+    }
+    .chat-list-item:hover { border-color: var(--accent-soft); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .chat-list-item.active-chat { border-color: var(--nutri); }
+    .chat-list-item-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+    .chat-list-avatar {
+      width: 40px; height: 40px; border-radius: 11px;
+      background: var(--nutri-dim); border: 1px solid var(--nutri-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--head); font-weight: 800; font-size: .9rem; color: var(--nutri); flex-shrink: 0;
+    }
+    .chat-list-name { font-weight: 600; font-size: .9rem; color: var(--text); }
+    .chat-list-preview { font-size: .76rem; color: var(--text3); margin-top: 2px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .chat-list-time { font-size: .7rem; color: var(--text3); font-weight: 500; margin-left: auto; flex-shrink: 0; }
+    .chat-list-item.has-unread { border-color: rgba(46,125,82,.3); background: rgba(46,125,82,.03); }
+    .chat-list-item.has-unread .chat-list-name { font-weight: 800; color: #111110; }
+    .chat-list-item.has-unread .chat-list-preview { color: var(--text2); font-weight: 600; }
+    .chat-unread-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--nutri); flex-shrink: 0; margin-left: 6px; }
+    .chat-delete-btn {
+      background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,62,62,.2);
+      border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; font-size: .85rem; transition: all .15s; flex-shrink: 0;
+    }
+    .chat-delete-btn:hover { background: rgba(224,62,62,.18); }
+    #tab-chat { display: none; flex-direction: column; height: 100%; }
+    #tab-chat.active { display: flex; }
+    #tab-chat .page-header { flex-shrink: 0; }
+    #chat-list-nutri { flex-shrink: 0; }
+    #chat-detail-panel {
+      display: none; flex-direction: column; flex: 1; min-height: 0;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+      overflow: hidden; box-shadow: var(--shadow); margin-top: 16px;
+    }
+    #chat-detail-panel.visible { display: flex; }
+    .chat-detail-head {
+      display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface);
+    }
+    .chat-detail-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 8px; background: var(--bg);
+    }
+    .chat-msg { display: flex; flex-direction: column; max-width: 75%; }
+    .chat-msg.mine { align-self: flex-end; align-items: flex-end; }
+    .chat-msg.theirs { align-self: flex-start; align-items: flex-start; }
+    .chat-bubble { padding: 9px 13px; border-radius: 14px; font-size: .84rem; line-height: 1.45; font-weight: 500; }
+    .chat-msg.mine .chat-bubble { background: linear-gradient(135deg,#1e4d35 0%,#0f2a1d 100%); color: #fff; border-bottom-right-radius: 4px; }
+    .chat-msg.theirs .chat-bubble { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+    .chat-time-label { font-size: .65rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
+    .chat-detail-input-wrap {
+      display: flex; align-items: flex-end; gap: 8px; padding: 12px 14px;
+      border-top: 1px solid var(--border); flex-shrink: 0;
+    }
+    .chat-nutri-input {
+      flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 20px;
+      font-size: .88rem; resize: none; max-height: 100px;
+      background: var(--bg); color: var(--text); transition: border-color .15s;
+      font-family: var(--body); line-height: 1.4;
+    }
+    .chat-nutri-input:focus { outline: none; border-color: var(--nutri); }
+    .chat-send-btn-n {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg,#1e4d35 0%,#0f2a1d 100%);
+      color: white; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s; border: 1px solid rgba(46,125,82,.3);
+    }
+    .chat-send-btn-n:hover { transform: scale(1.07); }
+    .chat-empty-state { text-align: center; color: var(--text3); font-size: .85rem; padding: 60px 20px; font-weight: 600; }
+
+    /* ── FEEDBACK ── */
+    .feedback-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+      padding: 16px 18px; box-shadow: var(--shadow); margin-bottom: 12px;
+      transition: box-shadow .15s;
+    }
+    .feedback-card:hover { box-shadow: var(--shadow-md); }
+    .feedback-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .feedback-avatar {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--nutri-dim); border: 1px solid var(--nutri-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--head); font-size: .85rem; font-weight: 800; color: var(--nutri); flex-shrink: 0;
+    }
+    .feedback-name { font-weight: 700; font-size: .9rem; color: var(--text); }
+    .feedback-date { font-size: .7rem; color: var(--text3); font-weight: 500; margin-top: 1px; }
+    .feedback-text {
+      font-size: .85rem; color: var(--text2); line-height: 1.6; font-weight: 500;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 12px 14px; margin-bottom: 10px;
+    }
+    .feedback-stars { display: flex; gap: 3px; margin-bottom: 8px; }
+    .feedback-star { font-size: 1rem; }
+    .feedback-rating-label { font-size: .72rem; font-weight: 700; color: var(--text3); margin-left: 6px; }
+    .feedback-reply {
+      border-left: 3px solid var(--nutri); padding: 10px 14px; margin-top: 8px;
+      background: var(--nutri-dim); border-radius: 0 var(--r) var(--r) 0;
+      font-size: .82rem; color: var(--text2); font-weight: 500;
+    }
+    .feedback-reply strong { color: var(--nutri); font-weight: 700; display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+    .feedback-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .feedback-empty { text-align: center; padding: 60px 20px; color: var(--text3); font-size: .85rem; font-weight: 500; }
+
+    /* Reply textarea */
+    .reply-area {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--r);
+      font-size: .85rem; resize: vertical; min-height: 72px; background: var(--bg);
+      color: var(--text); font-family: var(--body); transition: border-color .15s;
+    }
+    .reply-area:focus { outline: none; border-color: var(--nutri); box-shadow: 0 0 0 3px rgba(46,125,82,.12); }
+
+    /* ── MOBILE NAV ── */
+    .mobile-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 6px 0 max(env(safe-area-inset-bottom),8px); z-index: 100;
+      box-shadow: 0 -2px 16px rgba(0,0,0,.07);
+    }
+    .mobile-nav-items { display: flex; justify-content: space-around; align-items: stretch; }
+    .mobile-nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; font-size: .6rem; font-weight: 700; color: var(--text3); cursor: pointer;
+      padding: 6px 4px; border-radius: 8px; transition: color .15s; position: relative; min-width: 0;
+    }
+    .mobile-nav-item.active { color: var(--nutri); }
+    .mobile-nav-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .mobile-nav-chat-badge {
+      position: absolute; top: 2px; right: 8px; background: var(--nutri); color: #fff;
+      border-radius: 99px; min-width: 16px; height: 16px; padding: 0 4px; font-size: .58rem;
+      font-weight: 900; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── SPINNER ── */
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--nutri); border-radius: 50%; animation: spin .7s linear infinite; margin: 60px auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: #111110; color: #fff; padding: 10px 20px; border-radius: var(--r);
+      font-size: .83rem; font-weight: 700; z-index: 9999; opacity: 0;
+      transition: opacity .25s; pointer-events: none; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px) {
+      .topbar { padding: env(safe-area-inset-top,0px) 16px 0 16px; }
+      .sidebar { display: none; }
+      .main-content { padding: 14px; padding-bottom: calc(80px + max(env(safe-area-inset-bottom),8px)); }
+      .mobile-nav { display: block; }
+      .clients-grid { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .page-header > div { width: 100%; }
+      .search-wrap { width: 100%; }
+      .search-input { width: 100%; }
+      #chat-detail-panel { flex: none; height: calc(100dvh - 180px); }
+      .nutri-quick-row { grid-template-columns: 1fr 1fr; }
+      .macro-ring-row { grid-template-columns: 1fr 1fr 1fr; }
+      .modal-body { padding: 16px; }
+      .modal-footer { padding: 12px 16px; gap: 6px; }
+      .modal-footer .btn { flex: 1; min-width: 0; justify-content: center; font-size: .8rem; padding: 9px 10px; }
+      .detail-header { gap: 12px; }
+      .detail-avatar { width: 50px; height: 50px; font-size: 1.2rem; border-radius: 12px; }
+      .detail-info h2 { font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<!-- Tela de login removida — acesso via app.html -->
+
+<!-- ══════════════════════════════════════════════
+     DASHBOARD SCREEN
+══════════════════════════════════════════════ -->
+<div id="screen-dashboard">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly" style="height:22px;" />
+      <span style="color:#5cb87c;">Nutrição</span>
+      <div class="dot"></div>
+    </div>
+    <div class="topbar-right">
+      <div class="nutri-pill">🥗 Nutricionista</div>
+      <div class="user-pill" id="topbar-user">—</div>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">Menu</div>
+      <div class="sidebar-item active" id="sb-dashboard" onclick="switchTab('dashboard')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="sidebar-item" id="sb-clients" onclick="switchTab('clients')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Clientes
+      </div>
+      <div class="sidebar-item" id="sb-chat" onclick="switchTab('chat')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chat
+        <span class="sidebar-chat-badge hidden" id="sb-chat-badge">0</span>
+      </div>
+      <div class="sidebar-item" id="sb-feedback" onclick="switchTab('feedback')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Feedbacks
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+      <!-- ── DASHBOARD TAB ── -->
+      <div class="tab-panel active" id="tab-dashboard">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Dashboard</div>
+            <div style="font-size:.8rem;color:var(--text3);margin-top:3px;font-weight:500;" id="dash-greeting">Bem-vindo de volta!</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddClient()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo cliente
+          </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="dash-stats">
+          <div class="stat-card">
+            <div class="stat-card-icon green">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+            <div class="stat-num green" id="stat-total-clients">—</div>
+            <div class="stat-lbl">Clientes ativos</div>
+            <div class="stat-sub"><span id="stat-new-this-month">0</span> novos este mês</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon yellow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a6c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="stat-num yellow" id="stat-with-diet">—</div>
+            <div class="stat-lbl">Com plano alimentar</div>
+            <div class="stat-sub"><span id="stat-diet-pct">0%</span> do total</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon blue">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="stat-num" style="color:#2563eb;" id="stat-avg-imc">—</div>
+            <div class="stat-lbl">IMC médio dos clientes</div>
+            <div class="stat-sub">Últimas avaliações</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon purple">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="stat-num" style="color:#9333ea;" id="stat-unread-chat">—</div>
+            <div class="stat-lbl">Mensagens não lidas</div>
+            <div class="stat-sub">No chat</div>
+          </div>
+        </div>
+
+        <!-- Macro médio dos clientes -->
+        <div class="dash-section-title">Distribuição macros (média dos planos)</div>
+        <div class="macro-ring-row">
+          <div class="macro-card">
+            <div class="macro-card-label" style="color:#2563eb;">Proteína</div>
+            <div class="macro-card-val macro-prot" id="avg-prot">—</div>
+            <div class="macro-card-unit">g/dia (média)</div>
+          </div>
+          <div class="macro-card">
+            <div class="macro-card-label" style="color:#d97706;">Carboidrato</div>
+            <div class="macro-card-val macro-carb" id="avg-carb">—</div>
+            <div class="macro-card-unit">g/dia (média)</div>
+          </div>
+          <div class="macro-card">
+            <div class="macro-card-label" style="color:#9333ea;">Gordura</div>
+            <div class="macro-card-val macro-fat" id="avg-fat">—</div>
+            <div class="macro-card-unit">g/dia (média)</div>
+          </div>
+        </div>
+
+        <!-- Distribuição de objetivos -->
+        <div class="nutri-quick-row">
+          <div class="nutri-quick-card">
+            <div class="nutri-quick-card-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+              Objetivo mais comum
+            </div>
+            <div class="nutri-quick-card-val" id="most-common-goal" style="font-size:1.1rem;">—</div>
+            <div class="nutri-quick-card-sub" id="most-common-goal-pct">— dos clientes</div>
+          </div>
+          <div class="nutri-quick-card">
+            <div class="nutri-quick-card-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+              Feedbacks hoje
+            </div>
+            <div class="nutri-quick-card-val" id="feedbacks-today">0</div>
+            <div class="nutri-quick-card-sub">Avaliações recebidas</div>
+          </div>
+        </div>
+
+        <!-- Últimos clientes -->
+        <div class="dash-section-title">Últimos clientes cadastrados</div>
+        <div class="dash-recent-card">
+          <div class="dash-recent-head">
+            <div class="dash-recent-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              Clientes recentes
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="switchTab('clients')">Ver todos →</button>
+          </div>
+          <div class="dash-recent-list" id="dash-recent-clients">
+            <div class="dash-empty-state">Carregando clientes...</div>
+          </div>
+        </div>
+
+        <!-- Alertas / lembretes -->
+        <div class="dash-section-title">Alertas nutricionais</div>
+        <div class="dash-recent-card">
+          <div class="dash-recent-head">
+            <div class="dash-recent-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Clientes sem plano alimentar
+            </div>
+          </div>
+          <div class="dash-recent-list" id="dash-no-diet-list">
+            <div class="dash-empty-state">Verificando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CLIENTES TAB ── -->
+      <div class="tab-panel" id="tab-clients">
+        <div id="clients-list-view">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Clientes</div>
+              <div style="font-size:.8rem;color:var(--text3);margin-top:3px;font-weight:500;" id="clients-count-label">— clientes</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <div class="search-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input class="search-input" type="text" placeholder="Buscar cliente..." id="client-search" oninput="filterClients()" />
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddClient()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Novo cliente
+              </button>
+            </div>
+          </div>
+          <div class="clients-grid" id="clients-grid">
+            <div class="dash-empty-state" style="grid-column:1/-1;">Carregando clientes...</div>
+          </div>
+        </div>
+
+        <!-- DETAIL VIEW -->
+        <div id="client-detail-view" style="display:none;">
+          <div style="margin-bottom:20px;">
+            <button class="btn btn-ghost btn-sm" onclick="closeClientDetail()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              Voltar
+            </button>
+          </div>
+          <div class="detail-header">
+            <div class="detail-avatar" id="detail-avatar">?</div>
+            <div class="detail-info">
+              <h2 id="detail-name">—</h2>
+              <p id="detail-meta">—</p>
+            </div>
+            <div class="detail-actions">
+              <button class="btn btn-nutri btn-sm" onclick="openEditClient()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="confirmDeleteClient()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                Excluir
+              </button>
+            </div>
+          </div>
+
+          <div class="assess-tabs">
+            <button class="assess-tab active" onclick="switchAssess('info',this)">Informações</button>
+            <button class="assess-tab" onclick="switchAssess('diet',this)">Plano Alimentar</button>
+            <button class="assess-tab" onclick="switchAssess('evolucao',this)">Evolução</button>
+          </div>
+
+          <!-- Info Panel -->
+          <div class="assess-panel active" id="assess-info">
+            <div class="section-label">Dados pessoais</div>
+            <div class="info-grid">
+              <div class="info-item"><div class="info-item-label">Idade</div><div class="info-item-val" id="info-age">—</div></div>
+              <div class="info-item"><div class="info-item-label">Sexo</div><div class="info-item-val" id="info-sex">—</div></div>
+              <div class="info-item"><div class="info-item-label">Peso atual</div><div class="info-item-val" id="info-weight">—</div></div>
+              <div class="info-item"><div class="info-item-label">Altura</div><div class="info-item-val" id="info-height">—</div></div>
+            </div>
+            <div class="info-grid-3" style="margin-bottom:20px;">
+              <div class="info-item"><div class="info-item-label">IMC</div><div class="info-item-val nutri-color" id="info-imc">—</div></div>
+              <div class="info-item"><div class="info-item-label">Objetivo</div><div class="info-item-val" id="info-goal">—</div></div>
+              <div class="info-item"><div class="info-item-label">Atividade física</div><div class="info-item-val" id="info-activity">—</div></div>
+            </div>
+            <div class="section-label">Condições de saúde</div>
+            <div id="info-conditions" style="margin-bottom:16px;"></div>
+            <div class="section-label">Alergias / intolerâncias</div>
+            <div id="info-allergies" style="margin-bottom:16px;"></div>
+            <div class="section-label">Observações</div>
+            <div id="info-obs" style="font-size:.87rem;color:var(--text2);line-height:1.65;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"></div>
+          </div>
+
+          <!-- Diet Panel -->
+          <div class="assess-panel" id="assess-diet">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <div class="section-label" style="margin-bottom:0;">Plano alimentar</div>
+              <button class="btn btn-nutri btn-sm" onclick="openDietModal()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Adicionar plano
+              </button>
+            </div>
+            <div id="diet-plans-list">
+              <div class="dash-empty-state">Nenhum plano alimentar cadastrado.</div>
+            </div>
+          </div>
+
+          <!-- Evolução Panel -->
+          <div class="assess-panel" id="assess-evolucao">
+            <div class="section-label">Histórico de peso</div>
+            <div id="weight-history-list">
+              <div class="dash-empty-state">Nenhum registro de evolução ainda.</div>
+            </div>
+            <button class="btn btn-nutri btn-sm" style="margin-top:12px;" onclick="openWeightModal()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Registrar peso
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CHAT TAB ── -->
+      <div class="tab-panel" id="tab-chat">
+        <div class="page-header">
+          <div class="page-title">Chat</div>
+        </div>
+        <div class="chat-list" id="chat-list-nutri">
+          <div class="chat-empty-state">Nenhuma conversa ainda.</div>
+        </div>
+        <div id="chat-detail-panel">
+          <div class="chat-detail-head">
+            <div class="chat-list-avatar" id="chat-detail-avatar" style="width:34px;height:34px;font-size:.8rem;">?</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:.9rem;color:var(--text);" id="chat-detail-name">—</div>
+              <div style="font-size:.72rem;color:var(--text3);">Cliente</div>
+            </div>
+            <button onclick="closeChatDetail()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:1rem;padding:4px 8px;">✕</button>
+          </div>
+          <div class="chat-detail-messages" id="chat-detail-messages"></div>
+          <div class="chat-detail-input-wrap">
+            <textarea class="chat-nutri-input" id="chat-input-msg" placeholder="Digite sua mensagem..." rows="1"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}"></textarea>
+            <button class="chat-send-btn-n" onclick="sendChatMsg()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FEEDBACKS TAB ── -->
+      <div class="tab-panel" id="tab-feedback">
+        <div class="page-header">
+          <div class="page-title">Feedbacks</div>
+          <div style="font-size:.8rem;color:var(--text3);font-weight:500;" id="feedback-count-label">— avaliações</div>
+        </div>
+        <div id="feedbacks-list">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /app-layout -->
+
+  <!-- MOBILE NAV -->
+  <div class="mobile-nav">
+    <div class="mobile-nav-items">
+      <div class="mobile-nav-item active" id="mn-dashboard" onclick="switchTab('dashboard')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span class="mobile-nav-label">Dashboard</span>
+      </div>
+      <div class="mobile-nav-item" id="mn-clients" onclick="switchTab('clients')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="mobile-nav-label">Clientes</span>
+      </div>
+      <div class="mobile-nav-item" id="mn-chat" onclick="switchTab('chat')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="mobile-nav-label">Chat</span>
+        <span class="mobile-nav-chat-badge hidden" id="mn-chat-badge">0</span>
+      </div>
+      <div class="mobile-nav-item" id="mn-feedback" onclick="switchTab('feedback')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span class="mobile-nav-label">Feedbacks</span>
+      </div>
+    </div>
+  </div>
+</div><!-- /screen-dashboard -->
+
+
+<!-- ══════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════ -->
+
+<!-- ADD / EDIT CLIENT MODAL -->
+<div id="modal-client" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-client-title">Novo cliente</h3>
+        <span id="modal-client-sub" style="font-size:.78rem;margin-top:2px;display:block;">Preencha os dados do cliente</span>
+      </div>
+      <button class="close-btn" onclick="closeModal('modal-client')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-client-error" style="color:var(--red);font-size:.82rem;font-weight:700;min-height:18px;margin-bottom:10px;"></div>
+
+      <div class="section-label">Dados pessoais</div>
+      <div class="form-group">
+        <label>Nome completo *</label>
+        <input id="cl-name" class="form-control" type="text" placeholder="Nome do cliente" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data de nascimento</label>
+          <input id="cl-birth" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Sexo</label>
+          <select id="cl-sex" class="form-control">
+            <option value="">Selecione</option>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Peso atual (kg)</label>
+          <input id="cl-weight" class="form-control" type="number" step="0.1" placeholder="Ex: 70.5" />
+        </div>
+        <div class="form-group">
+          <label>Altura (cm)</label>
+          <input id="cl-height" class="form-control" type="number" step="1" placeholder="Ex: 170" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefone / WhatsApp</label>
+          <input id="cl-phone" class="form-control" type="tel" placeholder="(11) 99999-9999" />
+        </div>
+        <div class="form-group">
+          <label>E-mail</label>
+          <input id="cl-email" class="form-control" type="email" placeholder="cliente@email.com" />
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:4px;">Objetivos e estilo de vida</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Objetivo principal</label>
+          <select id="cl-goal" class="form-control">
+            <option value="">Selecione</option>
+            <option value="Perda de peso">Perda de peso</option>
+            <option value="Ganho de massa">Ganho de massa muscular</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Saúde geral">Saúde geral</option>
+            <option value="Desempenho esportivo">Desempenho esportivo</option>
+            <option value="Gestação/amamentação">Gestação / amamentação</option>
+            <option value="Controle de doenças">Controle de doenças</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nível de atividade física</label>
+          <select id="cl-activity" class="form-control">
+            <option value="">Selecione</option>
+            <option value="Sedentário">Sedentário (sem exercícios)</option>
+            <option value="Leve">Leve (1-2x/sem)</option>
+            <option value="Moderado">Moderado (3-4x/sem)</option>
+            <option value="Intenso">Intenso (5-6x/sem)</option>
+            <option value="Muito intenso">Muito intenso (2x/dia)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:4px;">Saúde e restrições</div>
+      <div class="form-group">
+        <label>Condições de saúde / doenças</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;" id="conditions-tags"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="cl-condition-input" class="form-control" type="text" placeholder="Ex: diabetes, hipertensão..." style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag('condition');}" />
+          <button class="btn btn-ghost btn-sm" onclick="addTag('condition')">+ Adicionar</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Alergias / intolerâncias alimentares</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;" id="allergies-tags"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="cl-allergy-input" class="form-control" type="text" placeholder="Ex: lactose, glúten, amendoim..." style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag('allergy');}" />
+          <button class="btn btn-ghost btn-sm" onclick="addTag('allergy')">+ Adicionar</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Observações / anamnese</label>
+        <textarea id="cl-obs" class="form-control" rows="3" placeholder="Histórico alimentar, preferências, restrições adicionais..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-client')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-client" onclick="saveClient()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Salvar cliente
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DIET PLAN MODAL -->
+<div id="modal-diet" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Plano alimentar</h3>
+      <button class="close-btn" onclick="closeModal('modal-diet')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nome do plano</label>
+        <input id="diet-name" class="form-control" type="text" placeholder="Ex: Plano cutting, Dieta base..." />
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Kcal/dia</label>
+          <input id="diet-kcal" class="form-control" type="number" placeholder="Ex: 2000" />
+        </div>
+        <div class="form-group">
+          <label>Proteína (g)</label>
+          <input id="diet-prot" class="form-control" type="number" placeholder="Ex: 150" />
+        </div>
+        <div class="form-group">
+          <label>Carboidrato (g)</label>
+          <input id="diet-carb" class="form-control" type="number" placeholder="Ex: 250" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Gordura (g)</label>
+        <input id="diet-fat" class="form-control" type="number" placeholder="Ex: 60" />
+      </div>
+      <div class="section-label" style="margin-top:4px;">Refeições</div>
+      <div id="diet-meals-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addMealField()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Adicionar refeição
+      </button>
+      <div class="form-group" style="margin-top:14px;">
+        <label>Observações do plano</label>
+        <textarea id="diet-obs" class="form-control" rows="2" placeholder="Instruções gerais, hidratação..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-diet')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveDietPlan()">Salvar plano</button>
+    </div>
+  </div>
+</div>
+
+<!-- WEIGHT MODAL -->
+<div id="modal-weight" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Registrar peso</h3>
+      <button class="close-btn" onclick="closeModal('modal-weight')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data</label>
+          <input id="wt-date" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Peso (kg)</label>
+          <input id="wt-val" class="form-control" type="number" step="0.1" placeholder="Ex: 70.5" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Observação</label>
+        <input id="wt-obs" class="form-control" type="text" placeholder="Opcional..." />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-weight')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveWeight()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="modal-confirm-delete" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Confirmar exclusão</h3>
+      <button class="close-btn" onclick="closeModal('modal-confirm-delete')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.9rem;color:var(--text2);line-height:1.6;">Tem certeza que deseja excluir o cliente <strong id="delete-client-name" style="color:var(--text);"></strong>? Esta ação não pode ser desfeita e todos os dados serão removidos.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm-delete')">Cancelar</button>
+      <button class="btn btn-danger" onclick="deleteClient()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Excluir cliente
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════════ -->
+<script>
+// ── FIREBASE ──
+const _fbConfig = {
+  apiKey: "AIzaSyBVhMJfE1Zj9sVHztDXHUtsC_Y2WIikrkU",
+  authDomain: "fichasacademia-8717d.firebaseapp.com",
+  projectId: "fichasacademia-8717d",
+  storageBucket: "fichasacademia-8717d.firebasestorage.app",
+  messagingSenderId: "501312058117",
+  appId: "1:501312058117:web:1b9ea06882050deeb33d6c"
+};
+if (!firebase.apps.length) firebase.initializeApp(_fbConfig);
+const _db = firebase.firestore();
+const _auth = firebase.auth();
+
+// ── STATE ──
+let _currentNutri = null;
+let _clients = [];
+let _clientsRaw = [];
+let _currentClientId = null;
+let _editingClientId = null;
+let _conditionTags = [];
+let _allergyTags = [];
+let _chatUnsub = null;
+let _chatDetailUnsub = null;
+let _currentChatClientId = null;
+let _activeTab = 'dashboard';
+let _mealCount = 0;
+
+// ── UTILS ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function initials(name) {
+  if (!name) return '?';
+  return name.trim().split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+}
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  const d = new Date(typeof ts === 'number' ? ts : ts.toMillis ? ts.toMillis() : ts);
+  return d.toLocaleDateString('pt-BR');
+}
+
+function fmtAge(birth) {
+  if (!birth) return '—';
+  const now = new Date(), b = new Date(birth);
+  let age = now.getFullYear() - b.getFullYear();
+  const m = now.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
+  return age + ' anos';
+}
+
+function calcIMC(weight, height) {
+  if (!weight || !height) return null;
+  const h = height / 100;
+  return (weight / (h * h)).toFixed(1);
+}
+
+function imcLabel(imc) {
+  if (!imc) return '';
+  const v = parseFloat(imc);
+  if (v < 18.5) return 'Abaixo do peso';
+  if (v < 25) return 'Normal';
+  if (v < 30) return 'Sobrepeso';
+  return 'Obesidade';
+}
+
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ── SESSION (lida do localStorage gravado pelo app.html) ──
+const LS_NUTRI = 'trainly_nutri_session';
+
+function _getNutriSession() {
+  try {
+    const v = localStorage.getItem(LS_NUTRI);
+    if (!v) return null;
+    const s = JSON.parse(v);
+    if (s && s.profType === 'nutri') return s;
+    return null;
+  } catch(e) { return null; }
+}
+
+function _clearNutriSession() {
+  try { localStorage.removeItem(LS_NUTRI); } catch(e) {}
+}
+
+// ── INIT: verifica sessão ao carregar ──
+(function initNutri() {
+  const sess = _getNutriSession();
+  if (!sess) {
+    // Sem sessão válida de nutricionista → volta pro app
+    window.location.replace('https://trainly.online/index');
+    return;
+  }
+  _currentNutri = sess;
+  enterDashboard();
+})();
+
+function enterDashboard() {
+  document.getElementById('screen-dashboard').style.display = 'flex';
+  document.getElementById('screen-dashboard').style.flexDirection = 'column';
+  document.getElementById('topbar-user').textContent = _currentNutri.name || _currentNutri.username;
+  // Saudação
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  const el = document.getElementById('dash-greeting');
+  if (el) el.textContent = greet + ', ' + (_currentNutri.name || _currentNutri.username).split(' ')[0] + '! 🥗';
+  loadClients();
+  loadDashboard();
+  listenChat();
+}
+
+function doLogout() {
+  _clearNutriSession();
+  _auth.signOut().catch(()=>{});
+  window.location.replace('https://trainly.online/index');
+}
+
+// ── NAVIGATION ──
+function switchTab(tab) {
+  _activeTab = tab;
+  ['dashboard','clients','chat','feedback'].forEach(function(t) {
+    const panel = document.getElementById('tab-' + t);
+    const sb = document.getElementById('sb-' + t);
+    const mn = document.getElementById('mn-' + t);
+    if (panel) panel.classList.toggle('active', t === tab);
+    if (sb) sb.classList.toggle('active', t === tab);
+    if (mn) mn.classList.toggle('active', t === tab);
+  });
+  if (tab === 'feedback') loadFeedbacks();
+  if (tab === 'chat') { /* already listening */ }
+}
+
+function switchAssess(panel, btn) {
+  document.querySelectorAll('.assess-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.assess-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById('assess-' + panel);
+  if (el) el.classList.add('active');
+  if (panel === 'diet') loadDietPlans(_currentClientId);
+  if (panel === 'evolucao') loadWeightHistory(_currentClientId);
+}
+
+// ── CLIENTS ──
+async function loadClients() {
+  try {
+    const snap = await _db.collection('nutri_clients')
+      .where('nutriId','==',_currentNutri.id)
+      .orderBy('createdAt','desc').get();
+    _clientsRaw = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _clients = [..._clientsRaw];
+    renderClients();
+    renderDashboardClients();
+    renderDashStats();
+  } catch(e) {
+    console.error('loadClients', e);
+  }
+}
+
+function renderClients() {
+  const grid = document.getElementById('clients-grid');
+  const lbl = document.getElementById('clients-count-label');
+  if (!grid) return;
+  if (lbl) lbl.textContent = _clients.length + ' cliente' + (_clients.length !== 1 ? 's' : '');
+  if (!_clients.length) {
+    grid.innerHTML = '<div class="dash-empty-state" style="grid-column:1/-1;">Nenhum cliente cadastrado ainda.<br><button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="openAddClient()">+ Adicionar primeiro cliente</button></div>';
+    return;
+  }
+  grid.innerHTML = _clients.map(function(c) {
+    const imc = calcIMC(c.weight, c.height);
+    const age = fmtAge(c.birth);
+    const sexLabel = c.sex === 'M' ? 'Masculino' : c.sex === 'F' ? 'Feminino' : (c.sex || '—');
+    return `<div class="client-card" onclick="openClientDetail('${c.id}')">
+      <div class="client-card-head">
+        <div class="client-avatar">${initials(c.name)}</div>
+        <div class="client-info">
+          <div class="client-name">${c.name || '—'}</div>
+          <div class="client-meta">${age} · ${sexLabel}</div>
+        </div>
+        <span class="badge badge-active" style="font-size:.62rem;">Ativo</span>
+      </div>
+      <div class="client-card-body">
+        <div class="client-stat"><div class="client-stat-val">${c.weight ? c.weight+'kg' : '—'}</div><div class="client-stat-lbl">Peso</div></div>
+        <div class="client-stat"><div class="client-stat-val">${c.height ? c.height+'cm' : '—'}</div><div class="client-stat-lbl">Altura</div></div>
+        <div class="client-stat"><div class="client-stat-val" style="color:var(--nutri);">${imc || '—'}</div><div class="client-stat-lbl">IMC</div></div>
+      </div>
+      <div class="client-card-foot">
+        <span class="client-goal-tag">${c.goal || 'Sem objetivo'}</span>
+        <span class="client-last-seen">Desde ${fmtDate(c.createdAt)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterClients() {
+  const q = (document.getElementById('client-search').value || '').toLowerCase();
+  _clients = q ? _clientsRaw.filter(c => (c.name||'').toLowerCase().includes(q)) : [..._clientsRaw];
+  renderClients();
+}
+
+function openClientDetail(id) {
+  _currentClientId = id;
+  const c = _clientsRaw.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('clients-list-view').style.display = 'none';
+  document.getElementById('client-detail-view').style.display = 'block';
+  // Reset tabs
+  document.querySelectorAll('.assess-tab').forEach((b,i) => b.classList.toggle('active', i===0));
+  document.querySelectorAll('.assess-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+
+  const imc = calcIMC(c.weight, c.height);
+  document.getElementById('detail-avatar').textContent = initials(c.name);
+  document.getElementById('detail-name').textContent = c.name || '—';
+  document.getElementById('detail-meta').textContent = [fmtAge(c.birth), c.sex==='M'?'Masculino':c.sex==='F'?'Feminino':(c.sex||''), c.phone].filter(Boolean).join(' · ');
+  document.getElementById('info-age').textContent = fmtAge(c.birth);
+  document.getElementById('info-sex').textContent = c.sex==='M'?'Masculino':c.sex==='F'?'Feminino':(c.sex||'—');
+  document.getElementById('info-weight').textContent = c.weight ? c.weight+'kg' : '—';
+  document.getElementById('info-height').textContent = c.height ? c.height+'cm' : '—';
+  document.getElementById('info-imc').textContent = imc ? imc+' ('+imcLabel(imc)+')' : '—';
+  document.getElementById('info-goal').textContent = c.goal || '—';
+  document.getElementById('info-activity').textContent = c.activity || '—';
+  document.getElementById('info-obs').textContent = c.obs || 'Nenhuma observação registrada.';
+  // Conditions
+  const cEl = document.getElementById('info-conditions');
+  cEl.innerHTML = (c.conditions||[]).length ? (c.conditions||[]).map(x=>`<span class="health-tag">${x}</span>`).join('') : '<span style="font-size:.82rem;color:var(--text3);">Nenhuma condição registrada.</span>';
+  // Allergies
+  const aEl = document.getElementById('info-allergies');
+  aEl.innerHTML = (c.allergies||[]).length ? (c.allergies||[]).map(x=>`<span class="allergy-tag">${x}</span>`).join('') : '<span style="font-size:.82rem;color:var(--text3);">Nenhuma alergia registrada.</span>';
+}
+
+function closeClientDetail() {
+  _currentClientId = null;
+  document.getElementById('clients-list-view').style.display = 'block';
+  document.getElementById('client-detail-view').style.display = 'none';
+}
+
+// ── ADD / EDIT CLIENT ──
+function openAddClient() {
+  _editingClientId = null;
+  _conditionTags = []; _allergyTags = [];
+  document.getElementById('modal-client-title').textContent = 'Novo cliente';
+  document.getElementById('modal-client-sub').textContent = 'Preencha os dados do cliente';
+  document.getElementById('modal-client-error').textContent = '';
+  ['cl-name','cl-phone','cl-email','cl-obs'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
+  ['cl-birth','cl-sex','cl-goal','cl-activity'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
+  ['cl-weight','cl-height'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
+  renderTagsList('condition'); renderTagsList('allergy');
+  openModal('modal-client');
+}
+
+function openEditClient() {
+  if (!_currentClientId) return;
+  const c = _clientsRaw.find(x => x.id === _currentClientId);
+  if (!c) return;
+  _editingClientId = _currentClientId;
+  _conditionTags = [...(c.conditions||[])];
+  _allergyTags = [...(c.allergies||[])];
+  document.getElementById('modal-client-title').textContent = 'Editar cliente';
+  document.getElementById('modal-client-sub').textContent = c.name;
+  document.getElementById('modal-client-error').textContent = '';
+  document.getElementById('cl-name').value = c.name||'';
+  document.getElementById('cl-birth').value = c.birth||'';
+  document.getElementById('cl-sex').value = c.sex||'';
+  document.getElementById('cl-weight').value = c.weight||'';
+  document.getElementById('cl-height').value = c.height||'';
+  document.getElementById('cl-phone').value = c.phone||'';
+  document.getElementById('cl-email').value = c.email||'';
+  document.getElementById('cl-goal').value = c.goal||'';
+  document.getElementById('cl-activity').value = c.activity||'';
+  document.getElementById('cl-obs').value = c.obs||'';
+  renderTagsList('condition'); renderTagsList('allergy');
+  openModal('modal-client');
+}
+
+function addTag(type) {
+  const input = document.getElementById('cl-' + (type==='condition'?'condition':'allergy') + '-input');
+  const val = (input.value||'').trim();
+  if (!val) return;
+  if (type === 'condition') _conditionTags.push(val);
+  else _allergyTags.push(val);
+  input.value = '';
+  renderTagsList(type);
+}
+
+function removeTag(type, idx) {
+  if (type === 'condition') _conditionTags.splice(idx, 1);
+  else _allergyTags.splice(idx, 1);
+  renderTagsList(type);
+}
+
+function renderTagsList(type) {
+  const tags = type === 'condition' ? _conditionTags : _allergyTags;
+  const el = document.getElementById(type === 'condition' ? 'conditions-tags' : 'allergies-tags');
+  if (!el) return;
+  el.innerHTML = tags.map((t,i) => `<span class="${type==='condition'?'health-tag':'allergy-tag'}" style="cursor:pointer;" onclick="removeTag('${type}',${i})">${t} ✕</span>`).join('');
+}
+
+async function saveClient() {
+  const errEl = document.getElementById('modal-client-error');
+  errEl.textContent = '';
+  const name = (document.getElementById('cl-name').value||'').trim();
+  if (!name) { errEl.textContent = 'Nome é obrigatório.'; return; }
+  const btn = document.getElementById('btn-save-client');
+  btn.classList.add('btn-loading');
+  const data = {
+    nutriId: _currentNutri.id,
+    name,
+    birth: document.getElementById('cl-birth').value || '',
+    sex: document.getElementById('cl-sex').value || '',
+    weight: parseFloat(document.getElementById('cl-weight').value)||null,
+    height: parseFloat(document.getElementById('cl-height').value)||null,
+    phone: document.getElementById('cl-phone').value||'',
+    email: document.getElementById('cl-email').value||'',
+    goal: document.getElementById('cl-goal').value||'',
+    activity: document.getElementById('cl-activity').value||'',
+    obs: document.getElementById('cl-obs').value||'',
+    conditions: [..._conditionTags],
+    allergies: [..._allergyTags],
+    updatedAt: Date.now()
+  };
+  try {
+    if (_editingClientId) {
+      await _db.collection('nutri_clients').doc(_editingClientId).update(data);
+      showToast('Cliente atualizado!');
+    } else {
+      data.createdAt = Date.now();
+      await _db.collection('nutri_clients').add(data);
+      showToast('Cliente cadastrado!');
+    }
+    closeModal('modal-client');
+    await loadClients();
+    if (_editingClientId) openClientDetail(_editingClientId);
+  } catch(e) {
+    errEl.textContent = 'Erro: ' + e.message;
+  }
+  btn.classList.remove('btn-loading');
+}
+
+function confirmDeleteClient() {
+  const c = _clientsRaw.find(x => x.id === _currentClientId);
+  if (!c) return;
+  document.getElementById('delete-client-name').textContent = c.name;
+  openModal('modal-confirm-delete');
+}
+
+async function deleteClient() {
+  if (!_currentClientId) return;
+  try {
+    await _db.collection('nutri_clients').doc(_currentClientId).delete();
+    closeModal('modal-confirm-delete');
+    closeClientDetail();
+    await loadClients();
+    showToast('Cliente removido.');
+  } catch(e) { showToast('Erro ao remover: ' + e.message); }
+}
+
+// ── DIET PLANS ──
+function openDietModal() {
+  _mealCount = 0;
+  document.getElementById('diet-name').value = '';
+  document.getElementById('diet-kcal').value = '';
+  document.getElementById('diet-prot').value = '';
+  document.getElementById('diet-carb').value = '';
+  document.getElementById('diet-fat').value = '';
+  document.getElementById('diet-obs').value = '';
+  document.getElementById('diet-meals-list').innerHTML = '';
+  addMealField(); addMealField(); addMealField(); // 3 meals default
+  openModal('modal-diet');
+}
+
+function addMealField() {
+  _mealCount++;
+  const id = 'meal-' + _mealCount;
+  const div = document.createElement('div');
+  div.id = id;
+  div.className = 'diet-meal';
+  div.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <span style="font-size:.72rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;">Refeição ${_mealCount}</span>
+    <button onclick="document.getElementById('${id}').remove()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:.8rem;">✕</button>
+  </div>
+  <input class="form-control" style="margin-bottom:6px;" placeholder="Nome (Ex: Café da manhã)" data-meal-name />
+  <textarea class="form-control" rows="2" placeholder="Alimentos e quantidades..." data-meal-desc></textarea>`;
+  document.getElementById('diet-meals-list').appendChild(div);
+}
+
+async function saveDietPlan() {
+  if (!_currentClientId) return;
+  const meals = [];
+  document.querySelectorAll('#diet-meals-list .diet-meal').forEach(function(div) {
+    const n = div.querySelector('[data-meal-name]');
+    const d = div.querySelector('[data-meal-desc]');
+    if (n && d && (n.value||d.value)) meals.push({ name: n.value||'', desc: d.value||'' });
+  });
+  const data = {
+    clientId: _currentClientId,
+    nutriId: _currentNutri.id,
+    name: document.getElementById('diet-name').value||'Plano alimentar',
+    kcal: parseFloat(document.getElementById('diet-kcal').value)||null,
+    prot: parseFloat(document.getElementById('diet-prot').value)||null,
+    carb: parseFloat(document.getElementById('diet-carb').value)||null,
+    fat: parseFloat(document.getElementById('diet-fat').value)||null,
+    obs: document.getElementById('diet-obs').value||'',
+    meals, createdAt: Date.now()
+  };
+  try {
+    await _db.collection('nutri_diet_plans').add(data);
+    closeModal('modal-diet');
+    showToast('Plano salvo!');
+    loadDietPlans(_currentClientId);
+  } catch(e) { showToast('Erro: ' + e.message); }
+}
+
+async function loadDietPlans(clientId) {
+  if (!clientId) return;
+  const el = document.getElementById('diet-plans-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  try {
+    const snap = await _db.collection('nutri_diet_plans')
+      .where('clientId','==',clientId).orderBy('createdAt','desc').get();
+    if (snap.empty) { el.innerHTML = '<div class="dash-empty-state">Nenhum plano alimentar cadastrado.</div>'; return; }
+    el.innerHTML = snap.docs.map(function(d) {
+      const p = d.data();
+      const mealsHtml = (p.meals||[]).map(m => `<div class="diet-meal">
+        <div class="diet-meal-name">${m.name||'Refeição'}</div>
+        <div class="diet-meal-desc">${m.desc||'—'}</div>
+      </div>`).join('');
+      return `<div class="diet-plan-card">
+        <div class="diet-plan-head">
+          <div class="diet-plan-name">🥗 ${p.name}</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:.7rem;color:var(--text3);">${fmtDate(p.createdAt)}</span>
+            <button onclick="deleteDietPlan('${d.id}')" class="btn btn-danger btn-sm" style="padding:4px 8px;font-size:.7rem;">✕</button>
+          </div>
+        </div>
+        ${p.kcal?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          <span class="diet-macro-pill p">P: ${p.prot||'?'}g</span>
+          <span class="diet-macro-pill c">C: ${p.carb||'?'}g</span>
+          <span class="diet-macro-pill g">G: ${p.fat||'?'}g</span>
+          <span style="font-size:.7rem;font-weight:700;color:var(--text3);">${p.kcal} kcal/dia</span>
+        </div>`:''}
+        ${mealsHtml}
+        ${p.obs?`<div style="font-size:.78rem;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px;">${p.obs}</div>`:''}
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="dash-empty-state">Erro ao carregar planos.</div>'; }
+}
+
+async function deleteDietPlan(id) {
+  if (!confirm('Remover este plano alimentar?')) return;
+  await _db.collection('nutri_diet_plans').doc(id).delete();
+  loadDietPlans(_currentClientId);
+  showToast('Plano removido.');
+}
+
+// ── WEIGHT HISTORY ──
+function openWeightModal() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('wt-date').value = today;
+  document.getElementById('wt-val').value = '';
+  document.getElementById('wt-obs').value = '';
+  openModal('modal-weight');
+}
+
+async function saveWeight() {
+  if (!_currentClientId) return;
+  const val = parseFloat(document.getElementById('wt-val').value);
+  const date = document.getElementById('wt-date').value;
+  if (!val || !date) { showToast('Preencha peso e data.'); return; }
+  await _db.collection('nutri_weight_history').add({
+    clientId: _currentClientId, nutriId: _currentNutri.id,
+    weight: val, date, obs: document.getElementById('wt-obs').value||'',
+    createdAt: Date.now()
+  });
+  // Update client weight
+  await _db.collection('nutri_clients').doc(_currentClientId).update({ weight: val, updatedAt: Date.now() });
+  closeModal('modal-weight');
+  showToast('Peso registrado!');
+  loadWeightHistory(_currentClientId);
+  loadClients();
+}
+
+async function loadWeightHistory(clientId) {
+  if (!clientId) return;
+  const el = document.getElementById('weight-history-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  try {
+    const snap = await _db.collection('nutri_weight_history')
+      .where('clientId','==',clientId).orderBy('date','desc').get();
+    if (snap.empty) { el.innerHTML = '<div class="dash-empty-state">Nenhum registro ainda.</div>'; return; }
+    const rows = snap.docs.map(function(d) {
+      const w = d.data();
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);margin-bottom:8px;">
+        <div style="font-family:var(--head);font-size:1.1rem;font-weight:800;color:var(--nutri);">${w.weight}kg</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.8rem;font-weight:700;color:var(--text);">${w.date||fmtDate(w.createdAt)}</div>
+          ${w.obs?`<div style="font-size:.72rem;color:var(--text3);">${w.obs}</div>`:''}
+        </div>
+        <button onclick="deleteWeightEntry('${d.id}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:.8rem;">✕</button>
+      </div>`;
+    }).join('');
+    el.innerHTML = rows;
+  } catch(e) { el.innerHTML = '<div class="dash-empty-state">Erro ao carregar.</div>'; }
+}
+
+async function deleteWeightEntry(id) {
+  await _db.collection('nutri_weight_history').doc(id).delete();
+  loadWeightHistory(_currentClientId);
+  showToast('Registro removido.');
+}
+
+// ── DASHBOARD ──
+function renderDashStats() {
+  const total = _clientsRaw.length;
+  document.getElementById('stat-total-clients').textContent = total;
+  // New this month
+  const now = new Date();
+  const newCount = _clientsRaw.filter(c => {
+    const d = new Date(c.createdAt);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+  document.getElementById('stat-new-this-month').textContent = newCount;
+  // IMC média
+  const imcs = _clientsRaw.map(c => parseFloat(calcIMC(c.weight,c.height))).filter(v => !isNaN(v));
+  const avgImc = imcs.length ? (imcs.reduce((a,b)=>a+b,0)/imcs.length).toFixed(1) : '—';
+  document.getElementById('stat-avg-imc').textContent = avgImc;
+  // Objetivo mais comum
+  const goals = {};
+  _clientsRaw.forEach(c => { if (c.goal) goals[c.goal] = (goals[c.goal]||0)+1; });
+  let maxGoal = '—', maxCnt = 0;
+  Object.entries(goals).forEach(([g,n]) => { if (n>maxCnt) { maxGoal=g; maxCnt=n; } });
+  document.getElementById('most-common-goal').textContent = maxGoal;
+  document.getElementById('most-common-goal-pct').textContent = total ? Math.round(maxCnt/total*100)+'% dos clientes' : '—';
+  // Macro avg (from diet plans — simplified with inline zeros)
+  document.getElementById('avg-prot').textContent = '—';
+  document.getElementById('avg-carb').textContent = '—';
+  document.getElementById('avg-fat').textContent = '—';
+  loadAvgMacros();
+}
+
+async function loadAvgMacros() {
+  try {
+    const snap = await _db.collection('nutri_diet_plans').where('nutriId','==',_currentNutri.id).get();
+    const plans = snap.docs.map(d=>d.data());
+    if (!plans.length) return;
+    const prots = plans.map(p=>p.prot).filter(v=>v);
+    const carbs = plans.map(p=>p.carb).filter(v=>v);
+    const fats  = plans.map(p=>p.fat).filter(v=>v);
+    const avg = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : '—';
+    document.getElementById('avg-prot').textContent = avg(prots);
+    document.getElementById('avg-carb').textContent = avg(carbs);
+    document.getElementById('avg-fat').textContent  = avg(fats);
+    // With diet
+    const clientsWithDiet = new Set(snap.docs.map(d=>d.data().clientId)).size;
+    document.getElementById('stat-with-diet').textContent = clientsWithDiet;
+    const pct = _clientsRaw.length ? Math.round(clientsWithDiet/_clientsRaw.length*100)+'%' : '0%';
+    document.getElementById('stat-diet-pct').textContent = pct;
+  } catch(e) {}
+}
+
+function renderDashboardClients() {
+  const el = document.getElementById('dash-recent-clients');
+  if (!el) return;
+  const recent = _clientsRaw.slice(0,5);
+  if (!recent.length) { el.innerHTML = '<div class="dash-empty-state">Nenhum cliente ainda.</div>'; return; }
+  el.innerHTML = recent.map(function(c) {
+    return `<div class="dash-recent-item" onclick="switchTab('clients');openClientDetail('${c.id}')">
+      <div class="dash-recent-avatar">${initials(c.name)}</div>
+      <div class="dash-recent-info">
+        <div class="dash-recent-name">${c.name}</div>
+        <div class="dash-recent-date">${c.goal||'Sem objetivo'} · ${fmtDate(c.createdAt)}</div>
+      </div>
+      <span class="dash-recent-badge new">Novo</span>
+    </div>`;
+  }).join('');
+
+  // Clients without diet plan
+  const noDietEl = document.getElementById('dash-no-diet-list');
+  if (!noDietEl) return;
+  _db.collection('nutri_diet_plans').where('nutriId','==',_currentNutri.id).get().then(function(snap) {
+    const withDiet = new Set(snap.docs.map(d=>d.data().clientId));
+    const noDiet = _clientsRaw.filter(c => !withDiet.has(c.id));
+    if (!noDiet.length) { noDietEl.innerHTML = '<div class="dash-empty-state" style="padding:20px;">✅ Todos os clientes têm plano alimentar!</div>'; return; }
+    noDietEl.innerHTML = noDiet.slice(0,5).map(function(c) {
+      return `<div class="dash-recent-item" onclick="switchTab('clients');openClientDetail('${c.id}');setTimeout(()=>document.querySelector('[onclick*=\\'diet\\']')&&document.querySelector('[onclick*=\\'diet\\']').click(),400);">
+        <div class="dash-recent-avatar" style="background:var(--red-dim);border-color:rgba(224,62,62,.2);color:var(--red);">${initials(c.name)}</div>
+        <div class="dash-recent-info">
+          <div class="dash-recent-name">${c.name}</div>
+          <div class="dash-recent-date">Sem plano alimentar cadastrado</div>
+        </div>
+        <span class="dash-recent-badge" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(224,62,62,.2);">Sem plano</span>
+      </div>`;
+    }).join('');
+  }).catch(function() {
+    noDietEl.innerHTML = '<div class="dash-empty-state">Erro ao verificar.</div>';
+  });
+}
+
+async function loadDashboard() {
+  // feedbacks today
+  const today = new Date(); today.setHours(0,0,0,0);
+  try {
+    const snap = await _db.collection('nutri_feedbacks')
+      .where('nutriId','==',_currentNutri.id)
+      .where('timestamp','>',today.getTime()).get();
+    document.getElementById('feedbacks-today').textContent = snap.size;
+  } catch(e) {}
+}
+
+// ── CHAT ──
+function listenChat() {
+  if (_chatUnsub) _chatUnsub();
+  _chatUnsub = _db.collection('nutri_chats')
+    .where('nutriId','==',_currentNutri.id)
+    .orderBy('lastMessageAt','desc')
+    .onSnapshot(function(snap) {
+      renderChatList(snap.docs.map(d=>({id:d.id,...d.data()})));
+    });
+}
+
+function renderChatList(chats) {
+  const el = document.getElementById('chat-list-nutri');
+  if (!el) return;
+  const unread = chats.filter(c=>c.unreadNutri>0).length;
+  const sbBadge = document.getElementById('sb-chat-badge');
+  const mnBadge = document.getElementById('mn-chat-badge');
+  document.getElementById('stat-unread-chat').textContent = unread || '0';
+  if (sbBadge) { sbBadge.textContent=unread; sbBadge.classList.toggle('hidden',!unread); }
+  if (mnBadge) { mnBadge.textContent=unread; mnBadge.classList.toggle('hidden',!unread); }
+  if (!chats.length) { el.innerHTML = '<div class="chat-empty-state">Nenhuma conversa ainda.<br><small>As mensagens dos clientes aparecerão aqui.</small></div>'; return; }
+  el.innerHTML = chats.map(function(ch) {
+    const hasUnread = ch.unreadNutri > 0;
+    const preview = ch.lastMessage || 'Sem mensagens';
+    const timeStr = ch.lastMessageAt ? fmtDate(ch.lastMessageAt) : '';
+    return `<div class="chat-list-item ${hasUnread?'has-unread':''} ${_currentChatClientId===ch.clientId?'active-chat':''}" onclick="openChatDetail('${ch.id}','${ch.clientId}','${(ch.clientName||'Cliente').replace(/'/g,"\\'")}')">
+      <div class="chat-list-item-header">
+        <div class="chat-list-avatar">${initials(ch.clientName)}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div class="chat-list-name">${ch.clientName||'Cliente'}</div>
+            ${hasUnread?`<div class="chat-unread-dot"></div>`:''}
+          </div>
+          <div class="chat-list-preview">${preview}</div>
+        </div>
+        <div class="chat-list-time">${timeStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openChatDetail(chatId, clientId, clientName) {
+  _currentChatClientId = clientId;
+  document.getElementById('chat-detail-panel').classList.add('visible');
+  document.getElementById('chat-detail-avatar').textContent = initials(clientName);
+  document.getElementById('chat-detail-name').textContent = clientName;
+  // Mark as read
+  _db.collection('nutri_chats').doc(chatId).update({ unreadNutri: 0 }).catch(()=>{});
+  // Listen messages
+  if (_chatDetailUnsub) _chatDetailUnsub();
+  _chatDetailUnsub = _db.collection('nutri_chats').doc(chatId)
+    .collection('messages').orderBy('timestamp','asc')
+    .onSnapshot(function(snap) {
+      renderChatMessages(snap.docs.map(d=>({id:d.id,...d.data()})), chatId);
+    });
+}
+
+function renderChatMessages(msgs, chatId) {
+  const el = document.getElementById('chat-detail-messages');
+  if (!el) return;
+  if (!msgs.length) { el.innerHTML = '<div class="chat-empty-state">Sem mensagens ainda.</div>'; return; }
+  el.innerHTML = msgs.map(function(m) {
+    const mine = m.from === 'nutri';
+    return `<div class="chat-msg ${mine?'mine':'theirs'}">
+      <div class="chat-bubble">${m.text||''}</div>
+      <div class="chat-time-label">${fmtDate(m.timestamp)}</div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendChatMsg() {
+  if (!_currentChatClientId) return;
+  const input = document.getElementById('chat-input-msg');
+  const text = (input.value||'').trim();
+  if (!text) return;
+  input.value = '';
+  // Find chat doc
+  const snap = await _db.collection('nutri_chats')
+    .where('nutriId','==',_currentNutri.id)
+    .where('clientId','==',_currentChatClientId).get();
+  let chatRef;
+  if (snap.empty) {
+    chatRef = _db.collection('nutri_chats').doc();
+    await chatRef.set({ nutriId:_currentNutri.id, clientId:_currentChatClientId, clientName:'Cliente', lastMessage:text, lastMessageAt:Date.now(), unreadNutri:0, unreadClient:1 });
+  } else {
+    chatRef = snap.docs[0].ref;
+    await chatRef.update({ lastMessage:text, lastMessageAt:Date.now(), unreadClient: firebase.firestore.FieldValue.increment(1) });
+  }
+  await chatRef.collection('messages').add({ text, from:'nutri', timestamp:Date.now() });
+}
+
+function closeChatDetail() {
+  if (_chatDetailUnsub) { _chatDetailUnsub(); _chatDetailUnsub = null; }
+  _currentChatClientId = null;
+  document.getElementById('chat-detail-panel').classList.remove('visible');
+}
+
+// ── FEEDBACKS ──
+async function loadFeedbacks() {
+  const el = document.getElementById('feedbacks-list');
+  const lbl = document.getElementById('feedback-count-label');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  try {
+    const snap = await _db.collection('nutri_feedbacks')
+      .where('nutriId','==',_currentNutri.id)
+      .orderBy('timestamp','desc').get();
+    if (lbl) lbl.textContent = snap.size + ' avaliação' + (snap.size!==1?'ões':'');
+    if (!snap.empty) {
+      document.getElementById('feedbacks-today') && (document.getElementById('feedbacks-today').textContent = snap.docs.filter(d=>Date.now()-d.data().timestamp<86400000).length);
+    }
+    if (snap.empty) { el.innerHTML = '<div class="feedback-empty">Nenhum feedback recebido ainda.<br><small>Quando seus clientes enviarem avaliações, elas aparecerão aqui.</small></div>'; return; }
+    el.innerHTML = snap.docs.map(function(d) {
+      const f = d.data();
+      const stars = f.rating ? '⭐'.repeat(Math.min(5,Math.round(f.rating))) : '';
+      const starsEmpty = f.rating ? '☆'.repeat(Math.max(0,5-Math.round(f.rating))) : '';
+      return `<div class="feedback-card" id="fb-${d.id}">
+        <div class="feedback-head">
+          <div class="feedback-avatar">${initials(f.clientName)}</div>
+          <div style="flex:1;">
+            <div class="feedback-name">${f.clientName||'Cliente'}</div>
+            <div class="feedback-date">${fmtDate(f.timestamp)}</div>
+          </div>
+          ${f.rating?`<div class="feedback-stars"><span class="feedback-star">${stars}${starsEmpty}</span><span class="feedback-rating-label">${f.rating}/5</span></div>`:''}
+        </div>
+        ${f.text?`<div class="feedback-text">"${f.text}"</div>`:''}
+        ${f.reply?`<div class="feedback-reply"><strong>Sua resposta</strong>${f.reply}</div>`:''}
+        <div class="feedback-actions">
+          <button class="btn btn-nutri btn-sm" onclick="toggleReply('${d.id}')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+            ${f.reply ? 'Editar resposta' : 'Responder'}
+          </button>
+        </div>
+        <div id="reply-form-${d.id}" style="display:none;margin-top:10px;">
+          <textarea class="reply-area" id="reply-text-${d.id}" rows="2" placeholder="Escreva sua resposta...">${f.reply||''}</textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn btn-primary btn-sm" onclick="saveReply('${d.id}')">Enviar resposta</button>
+            <button class="btn btn-ghost btn-sm" onclick="toggleReply('${d.id}')">Cancelar</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="feedback-empty">Erro ao carregar feedbacks.</div>';
+  }
+}
+
+function toggleReply(id) {
+  const el = document.getElementById('reply-form-' + id);
+  if (el) el.style.display = el.style.display==='none'?'block':'none';
+}
+
+async function saveReply(id) {
+  const text = (document.getElementById('reply-text-'+id).value||'').trim();
+  if (!text) { showToast('Escreva uma resposta.'); return; }
+  await _db.collection('nutri_feedbacks').doc(id).update({ reply: text, repliedAt: Date.now() });
+  showToast('Resposta enviada!');
+  loadFeedbacks();
+}
+
+// ── INIT ──
+// (A inicialização principal já ocorreu via initNutri() acima, que é chamado
+//  no final do body quando o DOM já está pronto. Aqui apenas setups extras.)
+(function domSetup() {
+  const today = new Date().toISOString().split('T')[0];
+  const wdate = document.getElementById('wt-date');
+  if (wdate) wdate.value = today;
+  document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) overlay.classList.add('hidden');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
