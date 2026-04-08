@@ -149,12 +149,12 @@
     /* ── SPLASH PÓS-LOGIN ── */
     #login-splash {
       position: fixed; inset: 0; background: #000000; z-index: 99999;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .4s ease;
+      display: none; align-items: center; justify-content: center;
+      opacity: 1; pointer-events: none; transition: opacity .4s ease;
     }
-    #login-splash.splash-in { opacity: 1; visibility: visible; pointer-events: all; }
+    #login-splash.splash-in { display: flex; pointer-events: all; }
     #login-splash.splash-out { opacity: 0; }
-    #login-splash video { width: min(260px, 55vw); height: auto; display: block; object-fit: contain; }
+    #login-splash video { width: min(260px, 55vw); height: auto; max-height: 55vh; display: block; object-fit: contain; }
 
     /* ── TOPBAR ── */
     .topbar {
@@ -1419,16 +1419,15 @@ function _clearNutriSession() {
 }
 
 // ── INIT: verifica sessão ao carregar ──
-(function initNutri() {
+document.addEventListener('DOMContentLoaded', function() {
   const sess = _getNutriSession();
   if (!sess) {
-    // Sem sessão válida de nutricionista → volta pro app
     window.location.replace('https://trainly.online/index');
     return;
   }
   _currentNutri = sess;
   enterDashboard();
-})();
+});
 
 function enterDashboard() {
   var splash = document.getElementById('login-splash');
