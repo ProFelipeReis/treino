@@ -6231,8 +6231,12 @@
 
         <div class="reg-step-indicator">
           <div class="reg-step-dot active" id="reg-dot-1"></div>
-          <div style="flex:1;height:2px;background:var(--border);border-radius:2px;"></div>
+          <div style="flex:1;height:2px;background:var(--border);border-radius:2px;" id="reg-line-1-2"></div>
+          <div class="reg-step-dot" id="reg-dot-1b"></div>
+          <div style="flex:1;height:2px;background:var(--border);border-radius:2px;" id="reg-line-1b-2"></div>
           <div class="reg-step-dot" id="reg-dot-2"></div>
+          <div style="flex:1;height:2px;background:var(--border);border-radius:2px;" id="reg-line-2-3"></div>
+          <div class="reg-step-dot" id="reg-dot-3"></div>
         </div>
 
         <div id="reg-error"
@@ -6320,11 +6324,46 @@
           </div>
         </div>
 
+        <!-- STEP 1b — Escolha de profissão -->
+        <div id="reg-step1b" style="display:none;">
+          <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;">
+            Etapa 2 de 4 — Área de atuação</div>
+          <div style="font-family:var(--head);font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px;">Você é qual profissional?</div>
+          <div style="font-size:.83rem;color:var(--text2);margin-bottom:22px;line-height:1.5;">Selecione sua área para que possamos validar seu registro profissional corretamente.</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+            <div id="reg-prof-personal" onclick="selectProfType('personal')"
+              style="display:flex;align-items:center;gap:14px;padding:16px;border:2px solid var(--border);border-radius:var(--r2);cursor:pointer;transition:all .2s;background:var(--surface);">
+              <div style="width:44px;height:44px;border-radius:12px;background:var(--accent-dim);border:1.5px solid var(--accent-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;">🏋️</div>
+              <div>
+                <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:var(--text);">Personal Trainer</div>
+                <div style="font-size:.78rem;color:var(--text2);margin-top:2px;font-weight:500;">Profissional de Educação Física · CREF</div>
+              </div>
+              <div style="margin-left:auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;" id="reg-prof-personal-check"></div>
+            </div>
+            <div id="reg-prof-nutri" onclick="selectProfType('nutri')"
+              style="display:flex;align-items:center;gap:14px;padding:16px;border:2px solid var(--border);border-radius:var(--r2);cursor:pointer;transition:all .2s;background:var(--surface);">
+              <div style="width:44px;height:44px;border-radius:12px;background:rgba(46,125,82,.08);border:1.5px solid rgba(46,125,82,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;">🥗</div>
+              <div>
+                <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:var(--text);">Nutricionista</div>
+                <div style="font-size:.78rem;color:var(--text2);margin-top:2px;font-weight:500;">Profissional de Nutrição · CRN</div>
+              </div>
+              <div style="margin-left:auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;" id="reg-prof-nutri-check"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button class="btn btn-ghost" onclick="regStepBack(1)" style="flex:0 0 auto;">← Voltar</button>
+            <button class="btn btn-primary" onclick="regStep1bNext()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Continuar →</button>
+          </div>
+        </div>
+
 
         <div id="reg-step2" style="display:none;">
           <div
             style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">
-            Etapa 2 de 2 — Dados profissionais</div>
+            Etapa 3 de 4 — Dados profissionais</div>
+          <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+            <span>🏋️</span> Registro no CREF</div>
+          <div style="font-size:.8rem;color:var(--text2);margin-bottom:16px;">Informe seu número de registro como Profissional de Educação Física.</div>
           <div class="form-group">
             <label
               style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Número
@@ -6339,8 +6378,35 @@
               física com registro ativo no CREF, sendo responsável pelas orientações fornecidas.</span>
           </label>
           <div style="display:flex;gap:10px;margin-top:16px;">
-            <button class="btn btn-ghost" onclick="regStepBack(1)" style="flex:0 0 auto;">← Voltar</button>
+            <button class="btn btn-ghost" onclick="regStepBack('1b')" style="flex:0 0 auto;">← Voltar</button>
             <button class="btn btn-primary" onclick="regStep2Next()"
+              style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Criar conta →</button>
+          </div>
+        </div>
+
+        <!-- STEP 2b — CRN (Nutricionista) -->
+        <div id="reg-step2b" style="display:none;">
+          <div
+            style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">
+            Etapa 3 de 4 — Dados profissionais</div>
+          <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+            <span>🥗</span> Registro no CRN</div>
+          <div style="font-size:.8rem;color:var(--text2);margin-bottom:16px;">Informe seu número de registro como Nutricionista.</div>
+          <div class="form-group">
+            <label
+              style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Número
+              de registro CRN</label>
+            <input id="reg-crn" class="form-control" type="text" placeholder="Ex: 12345/SP" />
+          </div>
+          <label
+            style="display:flex;align-items:flex-start;gap:10px;margin-top:14px;margin-bottom:4px;cursor:pointer;user-select:none;">
+            <input type="checkbox" id="reg-crn-decl"
+              style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
+            <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">Declaro que sou nutricionista com registro ativo no CRN, sendo responsável pelas orientações nutricionais fornecidas.</span>
+          </label>
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="btn btn-ghost" onclick="regStepBack('1b')" style="flex:0 0 auto;">← Voltar</button>
+            <button class="btn btn-primary" onclick="regStep2bNext()"
               style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Criar conta →</button>
           </div>
         </div>
@@ -6349,7 +6415,7 @@
         <div id="reg-step3" style="display:none;">
           <div
             style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">
-            Etapa 3 de 3 — Assine o Trainly</div>
+            Etapa 4 de 4 — Assine o Trainly</div>
           <div class="sub-plans" id="reg-plans-grid" style="margin-bottom:16px;">
             <div class="sub-plan selected" id="reg-plan-monthly" onclick="regSelectPlan('monthly')">
               <div class="sub-plan-label">Mensal</div>
@@ -6419,7 +6485,7 @@
             </select>
           </div>
           <div style="display:flex;gap:10px;margin-top:4px;">
-            <button class="btn btn-ghost" onclick="regStepBack(2)" style="flex:0 0 auto;">← Voltar</button>
+            <button class="btn btn-ghost" onclick="regStep3Back()" style="flex:0 0 auto;">← Voltar</button>
             <button class="btn btn-primary" id="reg-pay-btn" onclick="regSubmitPayment()"
               style="flex:1;justify-content:center;padding:13px;font-size:.95rem;"><svg width="14" height="14"
                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -13703,6 +13769,16 @@
       }
 
       regShowStep(1);
+      window._selectedProfType = null;
+      // Reset visual das opções de profissão
+      ['reg-prof-personal','reg-prof-nutri'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el){ el.style.border='2px solid var(--border)'; el.style.background='var(--surface)'; }
+      });
+      ['reg-prof-personal-check','reg-prof-nutri-check'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el){ el.style.background=''; el.style.border='2px solid var(--border2)'; }
+      });
       document.getElementById('screen-login').style.display = 'none';
       document.getElementById('screen-register').classList.add('on');
     };
@@ -13718,16 +13794,29 @@
     };
 
     function regShowStep(n) {
-      [1, 2, 3].forEach(function (i) {
-        var s = document.getElementById('reg-step' + i);
-        if (s) s.style.display = i === n ? 'block' : 'none';
-        var dot = document.getElementById('reg-dot-' + i);
-        if (dot) {
-          dot.classList.remove('active', 'done');
-          if (i < n) dot.classList.add('done');
-          if (i === n) dot.classList.add('active');
-        }
+      // All possible step ids
+      var allSteps = ['reg-step1','reg-step1b','reg-step2','reg-step2b','reg-step3'];
+      allSteps.forEach(function(id){
+        var s = document.getElementById(id);
+        if(s) s.style.display = 'none';
       });
+      var target = n === '1b' ? 'reg-step1b' : n === '2b' ? 'reg-step2b' : 'reg-step' + n;
+      var targetEl = document.getElementById(target);
+      if(targetEl) targetEl.style.display = 'block';
+
+      // Dot states: 1=dados, 1b=profissão, 2/2b=credencial, 3=pagamento
+      var dotMap = { 1: 1, '1b': 2, 2: 3, '2b': 3, 3: 4 };
+      var currentPos = dotMap[n] || 1;
+      var dotIds = ['reg-dot-1','reg-dot-1b','reg-dot-2','reg-dot-3'];
+      dotIds.forEach(function(id, idx){
+        var pos = idx + 1;
+        var dot = document.getElementById(id);
+        if(!dot) return;
+        dot.classList.remove('active','done');
+        if(pos < currentPos) dot.classList.add('done');
+        if(pos === currentPos) dot.classList.add('active');
+      });
+
       document.getElementById('reg-processing').style.display = 'none';
       document.getElementById('reg-success').style.display = 'none';
     }
@@ -13796,12 +13885,61 @@
         }
       }
 
-      regShowStep(2);
+      regShowStep('1b');
     };
 
     window.regStepBack = function (to) {
       document.getElementById('reg-error').textContent = '';
       regShowStep(to);
+    };
+
+    // Choose professional type
+    window._selectedProfType = null;
+    window.selectProfType = function(type) {
+      window._selectedProfType = type;
+      var personal = document.getElementById('reg-prof-personal');
+      var nutri = document.getElementById('reg-prof-nutri');
+      var pCheck = document.getElementById('reg-prof-personal-check');
+      var nCheck = document.getElementById('reg-prof-nutri-check');
+      if(type === 'personal') {
+        personal.style.border = '2px solid var(--accent)';
+        personal.style.background = 'var(--accent-dim)';
+        nutri.style.border = '2px solid var(--border)';
+        nutri.style.background = 'var(--surface)';
+        pCheck.style.background = 'var(--accent)';
+        pCheck.style.border = '2px solid var(--accent)';
+        nCheck.style.background = '';
+        nCheck.style.border = '2px solid var(--border2)';
+      } else {
+        nutri.style.border = '2px solid var(--green)';
+        nutri.style.background = 'rgba(46,125,82,.06)';
+        personal.style.border = '2px solid var(--border)';
+        personal.style.background = 'var(--surface)';
+        nCheck.style.background = 'var(--green)';
+        nCheck.style.border = '2px solid var(--green)';
+        pCheck.style.background = '';
+        pCheck.style.border = '2px solid var(--border2)';
+      }
+    };
+
+    window.regStep1bNext = function() {
+      var errEl = document.getElementById('reg-error');
+      if(!window._selectedProfType) {
+        errEl.textContent = 'Selecione seu tipo de profissional para continuar.'; return;
+      }
+      errEl.textContent = '';
+      if(window._selectedProfType === 'personal') {
+        regShowStep(2);
+      } else {
+        regShowStep('2b');
+      }
+    };
+
+    // Back from step3 → goes to the correct credential step
+    window.regStep3Back = function() {
+      document.getElementById('reg-error').textContent = '';
+      if(window._selectedProfType === 'nutri') regShowStep('2b');
+      else regShowStep(2);
     };
 
     window.regCardNumberInput = function (input) {
@@ -14293,6 +14431,22 @@
           return;
         }
 
+        // ── Roteamento por tipo de profissional ──
+        if (mgr.profType === 'nutri') {
+          // Nutricionista → salva sessão e redireciona para nutri.html
+          var nutriSession = {
+            id: docSnap.id,
+            username: user,
+            name: mgr.name || user,
+            profType: 'nutri',
+            role: mgr.role || 'comum',
+            blocked: false,
+          };
+          try { localStorage.setItem('trainly_nutri_session', JSON.stringify(nutriSession)); } catch(e) {}
+          window.location.href = 'https://trainly.online/nutricionista';
+          return;
+        }
+
         var role = mgr.role || (mgr.isMaster ? 'master' : 'comum');
         var subStatus = (role !== 'ceo') ? _checkSubscription(mgr) : null;
 
@@ -14342,8 +14496,8 @@
         errEl.textContent = 'Você precisa marcar a declaração profissional.'; return;
       }
 
-      [1, 2, 3].forEach(function (i) {
-        var el = document.getElementById('reg-step' + i); if (el) el.style.display = 'none';
+      ['reg-step1','reg-step1b','reg-step2','reg-step2b','reg-step3'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) el.style.display = 'none';
       });
       document.getElementById('reg-processing').style.display = 'block';
       var _rpt = document.getElementById('reg-processing-title'); if (_rpt) _rpt.textContent = 'Criando sua conta...';
@@ -14353,13 +14507,11 @@
         document.getElementById('reg-processing').style.display = 'none';
         errEl.textContent = msg;
         regShowStep(2);
-        // Garante que o erro seja visível no topo do card
         var card = document.querySelector('.reg-card');
         if (card) card.scrollTop = 0;
       }
 
       try {
-        // Aguarda Firebase estar pronto
         var attempts = 0;
         while ((!window.firebase || !window.firebase.firestore || !_auth) && attempts < 40) {
           await new Promise(function (r) { setTimeout(r, 100); }); attempts++;
@@ -14376,13 +14528,11 @@
         if (!user) { showErr('Nome de usuário obrigatório.'); return; }
         if (!password) { showErr('Senha obrigatória.'); return; }
 
-        // Verifica username duplicado no Firestore
         var existing = await _db.collection('managers').where('username', '==', user).get();
         if (!existing.empty) {
-          showErr('Este usuário já está em uso. Escolha outro.');
+          showErr('Este usuário já está em uso. Escolha outro.'); return;
         }
 
-        // Cria no Firebase Auth — ANTES do Firestore
         var authEmail = _authEmail(user);
         var uid = null;
         try {
@@ -14398,15 +14548,14 @@
           || (document.getElementById('reg-ref-code') ? document.getElementById('reg-ref-code').value.trim() : '')
           || '';
 
-        // Calcula dias de trial: 7 base + 7 se veio com código de indicação; DEBUGMODE = 2 meses
         var isDebugMode = refCode.toUpperCase() === 'DEBUGMODE';
         var trialDays = isDebugMode ? 60 : (refCode ? 14 : 7);
         var trialEndsAt = Date.now() + trialDays * 24 * 60 * 60 * 1000;
 
-        // Salva no Firestore
         try {
           await _db.collection('managers').doc(_regNewId).set({
             username: user, passwordHash: hash, name, cref, crefDeclared: true,
+            profType: 'personal',
             email: email || authEmail,
             authUid: uid,
             role: 'comum', isMaster: false,
@@ -14415,20 +14564,121 @@
             referredBy: isDebugMode ? '' : refCode
           });
         } catch (fsErr) {
-          // Firestore falhou — deleta a conta do Auth para não deixar "fantasma"
-          try {
-            var authUser = _auth.currentUser;
-            if (authUser) await authUser.delete();
-          } catch (e2) { }
+          try { var authUser = _auth.currentUser; if (authUser) await authUser.delete(); } catch (e2) { }
           showErr('Erro ao salvar conta: ' + fsErr.message); return;
         }
 
-        // Aplica bônus de indicação (não aplica para DEBUGMODE)
         if (refCode && !isDebugMode) {
           try { await _applyReferralBonus(refCode); } catch (e) { }
         }
 
-        // Desloga do Auth para não disparar auto-login antes da tela de sucesso
+        try { await _auth.signOut(); } catch (e) { }
+
+        document.getElementById('reg-processing').style.display = 'none';
+        document.querySelector('.reg-step-indicator').style.display = 'none';
+        var foot = document.getElementById('reg-foot'); if (foot) foot.style.display = 'none';
+        document.getElementById('reg-success').style.display = 'block';
+        document.getElementById('reg-success-msg').textContent = 'Redirecionando para o login...';
+
+        setTimeout(function () {
+          history.replaceState({}, '', window.location.pathname);
+          document.getElementById('screen-register').classList.remove('on');
+          document.getElementById('screen-register').style.display = '';
+          document.getElementById('screen-login').style.display = 'flex';
+        }, 2800);
+
+      } catch (e) {
+        showErr('Erro: ' + e.message);
+      }
+    };
+
+    // ════════════════════════════════════════════════════════
+    // CADASTRO NUTRICIONISTA — regStep2bNext
+    // ════════════════════════════════════════════════════════
+    window.regStep2bNext = async function () {
+      var errEl = document.getElementById('reg-error');
+      errEl.textContent = '';
+      var crn = (document.getElementById('reg-crn').value || '').trim();
+      if (!crn) { errEl.textContent = 'Informe seu número de registro no CRN.'; return; }
+      if (!document.getElementById('reg-crn-decl').checked) {
+        errEl.textContent = 'Você precisa marcar a declaração profissional.'; return;
+      }
+
+      ['reg-step1','reg-step1b','reg-step2','reg-step2b','reg-step3'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) el.style.display = 'none';
+      });
+      document.getElementById('reg-processing').style.display = 'block';
+      var _rpt = document.getElementById('reg-processing-title'); if (_rpt) _rpt.textContent = 'Criando sua conta...';
+
+      function showErr(msg) {
+        document.getElementById('reg-processing').style.display = 'none';
+        errEl.textContent = msg;
+        regShowStep('2b');
+        var card = document.querySelector('.reg-card');
+        if (card) card.scrollTop = 0;
+      }
+
+      try {
+        var attempts = 0;
+        while ((!window.firebase || !window.firebase.firestore || !_auth) && attempts < 40) {
+          await new Promise(function (r) { setTimeout(r, 100); }); attempts++;
+        }
+        if (!window.firebase || !window.firebase.firestore || !_auth) {
+          showErr('Erro de conexão. Tente novamente.'); return;
+        }
+
+        var user = (document.getElementById('reg-user').value || '').trim().toLowerCase();
+        var name = (document.getElementById('reg-name').value || '').trim();
+        var email = (document.getElementById('reg-email-step1').value || '').trim().toLowerCase();
+        var password = document.getElementById('reg-pass').value;
+
+        if (!user) { showErr('Nome de usuário obrigatório.'); return; }
+        if (!password) { showErr('Senha obrigatória.'); return; }
+
+        var existing = await _db.collection('managers').where('username', '==', user).get();
+        if (!existing.empty) {
+          showErr('Este usuário já está em uso. Escolha outro.'); return;
+        }
+
+        var authEmail = _authEmail(user);
+        var uid = null;
+        try {
+          uid = await _ensureAuthAccount(authEmail, password);
+        } catch (authErr) {
+          showErr('Erro ao criar conta: ' + authErr.message); return;
+        }
+
+        var hash = await _sha256(password);
+        _regNewId = 'mgr_' + Date.now();
+
+        var refCode = window._pendingRefCode
+          || (document.getElementById('reg-ref-code') ? document.getElementById('reg-ref-code').value.trim() : '')
+          || '';
+
+        var isDebugMode = refCode.toUpperCase() === 'DEBUGMODE';
+        var trialDays = isDebugMode ? 60 : (refCode ? 14 : 7);
+        var trialEndsAt = Date.now() + trialDays * 24 * 60 * 60 * 1000;
+
+        try {
+          await _db.collection('managers').doc(_regNewId).set({
+            username: user, passwordHash: hash, name, crn, crnDeclared: true,
+            profType: 'nutri',
+            email: email || authEmail,
+            authUid: uid,
+            role: 'comum', isMaster: false,
+            trialEndsAt: trialEndsAt, subEndsAt: null,
+            blocked: false, createdAt: Date.now(),
+            referredBy: isDebugMode ? '' : refCode
+          });
+        } catch (fsErr) {
+          try { var authUser = _auth.currentUser; if (authUser) await authUser.delete(); } catch (e2) { }
+          showErr('Erro ao salvar conta: ' + fsErr.message); return;
+        }
+
+        if (refCode && !isDebugMode) {
+          try { await _applyReferralBonus(refCode); } catch (e) { }
+        }
+
         try { await _auth.signOut(); } catch (e) { }
 
         document.getElementById('reg-processing').style.display = 'none';
