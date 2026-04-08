@@ -1374,15 +1374,16 @@ function switchAssess(panel, btn) {
 async function loadClients() {
   try {
     const snap = await _db.collection('nutri_clients')
-      .where('nutriId','==',_currentNutri.id)
-      .orderBy('createdAt','desc').get();
-    _clientsRaw = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      .where('nutriId','==',_currentNutri.id).get();
+    _clientsRaw = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     _clients = [..._clientsRaw];
     renderClients();
     renderDashboardClients();
     renderDashStats();
   } catch(e) {
-    console.error('loadClients', e);
+    console.error('loadClients error:', e.message, e.code);
+    showToast('Erro ao carregar clientes: ' + e.message);
   }
 }
 
@@ -1646,9 +1647,10 @@ async function loadDietPlans(clientId) {
   el.innerHTML = '<div class="spinner"></div>';
   try {
     const snap = await _db.collection('nutri_diet_plans')
-      .where('clientId','==',clientId).orderBy('createdAt','desc').get();
+      .where('clientId','==',clientId).get();
     if (snap.empty) { el.innerHTML = '<div class="dash-empty-state">Nenhum plano alimentar cadastrado.</div>'; return; }
-    el.innerHTML = snap.docs.map(function(d) {
+    const sortedDietDocs = snap.docs.slice().sort((a,b) => (b.data().createdAt||0) - (a.data().createdAt||0));
+    el.innerHTML = sortedDietDocs.map(function(d) {
       const p = d.data();
       const mealsHtml = (p.meals||[]).map(m => `<div class="diet-meal">
         <div class="diet-meal-name">${m.name||'Refeição'}</div>
@@ -1716,9 +1718,10 @@ async function loadWeightHistory(clientId) {
   el.innerHTML = '<div class="spinner"></div>';
   try {
     const snap = await _db.collection('nutri_weight_history')
-      .where('clientId','==',clientId).orderBy('date','desc').get();
+      .where('clientId','==',clientId).get();
     if (snap.empty) { el.innerHTML = '<div class="dash-empty-state">Nenhum registro ainda.</div>'; return; }
-    const rows = snap.docs.map(function(d) {
+    const sortedWtDocs = snap.docs.slice().sort((a,b) => (b.data().date||'').localeCompare(a.data().date||''));
+    const rows = sortedWtDocs.map(function(d) {
       const w = d.data();
       return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);margin-bottom:8px;">
         <div style="font-family:var(--head);font-size:1.1rem;font-weight:800;color:var(--nutri);">${w.weight}kg</div>
@@ -1831,9 +1834,10 @@ async function loadDashboard() {
   const today = new Date(); today.setHours(0,0,0,0);
   try {
     const snap = await _db.collection('nutri_feedbacks')
-      .where('nutriId','==',_currentNutri.id)
-      .where('timestamp','>',today.getTime()).get();
-    document.getElementById('feedbacks-today').textContent = snap.size;
+      .where('nutriId','==',_currentNutri.id).get();
+    const todayTs = today.getTime();
+    const todayCount = snap.docs.filter(d => (d.data().timestamp||0) > todayTs).length;
+    document.getElementById('feedbacks-today').textContent = todayCount;
   } catch(e) {}
 }
 
@@ -1842,9 +1846,10 @@ function listenChat() {
   if (_chatUnsub) _chatUnsub();
   _chatUnsub = _db.collection('nutri_chats')
     .where('nutriId','==',_currentNutri.id)
-    .orderBy('lastMessageAt','desc')
     .onSnapshot(function(snap) {
-      renderChatList(snap.docs.map(d=>({id:d.id,...d.data()})));
+      const chats = snap.docs.map(d=>({id:d.id,...d.data()}))
+        .sort((a,b)=>(b.lastMessageAt||0)-(a.lastMessageAt||0));
+      renderChatList(chats);
     });
 }
 
@@ -1943,14 +1948,14 @@ async function loadFeedbacks() {
   el.innerHTML = '<div class="spinner"></div>';
   try {
     const snap = await _db.collection('nutri_feedbacks')
-      .where('nutriId','==',_currentNutri.id)
-      .orderBy('timestamp','desc').get();
+      .where('nutriId','==',_currentNutri.id).get();
+    const sortedFbDocs = snap.docs.slice().sort((a,b) => (b.data().timestamp||0) - (a.data().timestamp||0));
     if (lbl) lbl.textContent = snap.size + ' avaliação' + (snap.size!==1?'ões':'');
     if (!snap.empty) {
       document.getElementById('feedbacks-today') && (document.getElementById('feedbacks-today').textContent = snap.docs.filter(d=>Date.now()-d.data().timestamp<86400000).length);
     }
     if (snap.empty) { el.innerHTML = '<div class="feedback-empty">Nenhum feedback recebido ainda.<br><small>Quando seus clientes enviarem avaliações, elas aparecerão aqui.</small></div>'; return; }
-    el.innerHTML = snap.docs.map(function(d) {
+    el.innerHTML = sortedFbDocs.map(function(d) {
       const f = d.data();
       const stars = f.rating ? '⭐'.repeat(Math.min(5,Math.round(f.rating))) : '';
       const starsEmpty = f.rating ? '☆'.repeat(Math.max(0,5-Math.round(f.rating))) : '';
