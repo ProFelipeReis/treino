@@ -62,7 +62,7 @@
 
     html { scroll-behavior: smooth; overflow: hidden; height: 100%; overscroll-behavior: none; }
 
-    body { font-family: var(--body); background: #000000; color: var(--text); height: 100%; overflow: hidden; overscroll-behavior: none; }
+    body { font-family: var(--body); background: #000000; color: var(--text); height: 100%; overflow: hidden; overscroll-behavior: none; touch-action: pan-y; }
 
     button,
     a,
@@ -1358,7 +1358,7 @@
       transform: rotate(45deg);
     }
 
-    .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); min-height: 0; }
+    .app-layout { display: flex; flex: 1; height: calc(100vh - 62px); height: calc(100dvh - 62px); min-height: 0; overflow: hidden; }
 
     .sidebar {
       width: 220px;
@@ -1423,12 +1423,15 @@
     .main-content {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 28px;
       background: var(--bg);
       display: flex;
       flex-direction: column;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
+      touch-action: pan-y;
+      min-height: 0;
     }
 
     .tab-panel {
@@ -1438,6 +1441,7 @@
     .tab-panel.active {
       display: block;
       flex: 1;
+      min-height: 0;
     }
 
     /* O tab de chat precisa de flex para distribuir altura */
