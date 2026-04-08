@@ -6645,7 +6645,7 @@
                   stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
                   <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                   <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-                </svg> Análise de documentos CREF
+                </svg> Análise de Documentos
                 <span class="cref-stat-badge" id="cref-pending-count" style="display:none;">0</span>
               </div>
               <button class="btn btn-ghost btn-sm" onclick="loadCrefPending()">↺ Atualizar</button>
@@ -11571,7 +11571,7 @@
         var snap = await _db.collection('managers').get();
         var pending = snap.docs
           .map(function (d) { return Object.assign({ id: d.id }, d.data()); })
-          .filter(function (m) { return m.role !== 'ceo' && m.cref && (!m.crefStatus || m.crefStatus === 'pending'); });
+          .filter(function (m) { return m.role !== 'ceo' && (m.cref || m.crn) && (!m.crefStatus || m.crefStatus === 'pending'); });
 
         if (badge) {
           badge.style.display = pending.length > 0 ? 'inline-flex' : 'none';
@@ -11587,7 +11587,7 @@
             + '<div class="cref-item-info">'
             + '<div class="cref-item-name">' + escHtml(m.name || m.username) + '</div>'
             + '<div class="cref-item-user">@' + escHtml(m.username) + '</div>'
-            + '<div class="cref-item-number"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="7" y1="15" x2="10" y2="15"/><line x1="13" y1="15" x2="17" y2="15"/></svg> CREF: ' + escHtml(m.cref || 'Não informado') + '</div>'
+            + '<div class="cref-item-number"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="7" y1="15" x2="10" y2="15"/><line x1="13" y1="15" x2="17" y2="15"/></svg> ' + (m.profType === 'nutri' ? 'CRN' : 'CREF') + ': ' + escHtml(m.profType === 'nutri' ? (m.crn || 'Não informado') : (m.cref || 'Não informado')) + '</div>'
             + '</div>'
             + '<div class="cref-item-actions">'
             + '<button class="btn-approve" onclick="crefApprove(this)" data-id="' + m.id + '">✓ Aprovar</button>'
@@ -12216,7 +12216,9 @@
         var safeJson = JSON.stringify(m).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
 
         return '<tr>'
-          + '<td><div style="font-weight:700;font-size:.88rem;">' + escHtml(m.name || m.username) + '</div>'
+          + '<td>'
+          + (m.profType === 'nutri' ? '<span style="display:inline-block;margin-bottom:4px;padding:2px 8px;border-radius:6px;background:rgba(46,125,82,.12);border:1px solid rgba(46,125,82,.3);font-size:.65rem;font-weight:800;color:#2e7d52;letter-spacing:.04em;">🥗 Nutricionista</span><br>' : '')
+          + '<div style="font-weight:700;font-size:.88rem;">' + escHtml(m.name || m.username) + '</div>'
           + '<div style="font-size:.72rem;color:var(--text3);">@' + escHtml(m.username) + '</div></td>'
           + '<td>' + roleBadge + '</td>'
           + '<td>' + subBadge + '</td>'
