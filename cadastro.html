@@ -48,7 +48,7 @@
 
     body {
       font-family: var(--body);
-      background: #000;
+      background: #111110;
       color: var(--text);
       min-height: 100%;
       display: flex;
@@ -57,6 +57,16 @@
       padding: calc(24px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px));
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+
+    #reg-bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
     }
 
     button, a, label, [onclick] { touch-action: manipulation; cursor: pointer; }
@@ -75,9 +85,10 @@
       width: 100%;
       max-width: 420px;
       overflow: visible;
-      box-shadow: 0 8px 40px rgba(0,0,0,.1);
+      box-shadow: 0 8px 40px rgba(0,0,0,.25);
       position: relative;
       margin: auto 0;
+      z-index: 2;
     }
 
     .reg-head {
@@ -351,9 +362,10 @@
       width: 100%;
       max-width: 400px;
       overflow: hidden;
-      box-shadow: 0 8px 40px rgba(0,0,0,.1);
+      box-shadow: 0 8px 40px rgba(0,0,0,.25);
       position: relative;
       min-height: 280px;
+      z-index: 2;
     }
 
     .inv-head {
@@ -385,7 +397,7 @@
 
     #page-loading {
       position: fixed; inset: 0;
-      background: #000;
+      background: #111110;
       display: flex; align-items: center; justify-content: center;
       z-index: 9999;
       transition: opacity .3s;
@@ -395,6 +407,101 @@
   </style>
 </head>
 <body>
+
+  <!-- Background canvas (mesmo padrão do login) -->
+  <canvas id="reg-bg-canvas"></canvas>
+  <script>
+    (function(){
+      const canvas = document.getElementById('reg-bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, squares;
+
+      const bgImg = new Image();
+      bgImg.crossOrigin = 'anonymous';
+      bgImg.src = 'https://i.imgur.com/Fjj25UX.jpeg';
+      let bgLoaded = false;
+      bgImg.onload = function(){ bgLoaded = true; };
+
+      function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+
+      function mkSquare(){
+        const size = 28 + Math.random() * 68;
+        return {
+          x: Math.random() * W, y: Math.random() * H, size,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.007,
+          alpha: 0.05 + Math.random() * 0.12,
+          dx: (Math.random() - 0.5) * 0.35,
+          dy: -(0.25 + Math.random() * 0.45),
+        };
+      }
+
+      function init(){ resize(); squares = Array.from({length: 40}, mkSquare); }
+
+      function getDividerY(px){
+        const leftY = H * 1.05, rightY = H * 0.82;
+        return leftY + (px / W) * (rightY - leftY);
+      }
+
+      function isAbove(px, py){ return py < getDividerY(px); }
+
+      function drawBg(){
+        const leftY = getDividerY(0), rightY = getDividerY(W);
+        ctx.beginPath();
+        ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,rightY); ctx.lineTo(0,leftY);
+        ctx.closePath();
+        ctx.fillStyle = '#111110'; ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(0,leftY); ctx.lineTo(W,rightY); ctx.lineTo(W,H); ctx.lineTo(0,H);
+        ctx.closePath();
+        ctx.fillStyle = '#f0f0ef'; ctx.fill();
+
+        if(bgLoaded){
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,rightY); ctx.lineTo(0,leftY);
+          ctx.closePath(); ctx.clip();
+          const iw = bgImg.naturalWidth, ih = bgImg.naturalHeight;
+          const scale = Math.max(W/iw, Math.max(leftY,rightY)/ih);
+          const dw = iw*scale, dh = ih*scale;
+          const dx = (W-dw)/2, dy = -dh*0.05;
+          ctx.globalAlpha = 0.22;
+          ctx.drawImage(bgImg, dx, dy, dw, dh);
+          ctx.globalAlpha = 1; ctx.restore();
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(0,leftY); ctx.lineTo(W,rightY);
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+
+      function drawSquare(s){
+        const above = isAbove(s.x, s.y);
+        ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot); ctx.globalAlpha = s.alpha;
+        ctx.strokeStyle = above ? 'rgba(255,255,255,0.18)' : 'rgba(17,17,16,0.22)';
+        ctx.fillStyle   = above ? 'rgba(46,46,42,0.30)'   : 'rgba(46,46,42,0.08)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.rect(-s.size/2, -s.size/2, s.size, s.size);
+        ctx.fill(); ctx.stroke(); ctx.restore();
+      }
+
+      function step(){
+        ctx.clearRect(0,0,W,H); drawBg();
+        squares.forEach(s => {
+          s.x += s.dx; s.y += s.dy; s.rot += s.rotSpeed;
+          if(s.y + s.size < 0){ s.y = H + s.size; s.x = Math.random() * W; }
+          if(s.x - s.size > W) s.x = -s.size;
+          if(s.x + s.size < 0) s.x = W + s.size;
+          drawSquare(s);
+        });
+        requestAnimationFrame(step);
+      }
+
+      init(); step();
+      window.addEventListener('resize', resize);
+    })();
+  </script>
 
   <!-- Loading -->
   <div id="page-loading">
@@ -1186,7 +1293,7 @@
 
 
   <!-- ══ INVITE CARD (shown only when ?invite= is present) ══ -->
-  <div id="invite-card-wrap" style="display:none;width:100%;">
+  <div id="invite-card-wrap" style="display:none;width:100%;position:relative;z-index:2;">
     <div class="inv-card">
       <div class="inv-head">
         <img src="https://i.imgur.com/RY1tiDe.png" alt="Trainly" />
