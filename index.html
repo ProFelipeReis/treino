@@ -251,7 +251,17 @@
     try {
       if (new URLSearchParams(window.location.search).get('choose') === '1') return;
       var role = localStorage.getItem('trainly_role');
-      if (role === 'trainer') { window.location.replace('https://trainly.online/app'); }
+      if (role === 'trainer') {
+        // Só redireciona direto se tiver sessão ativa
+        try {
+          var sess = localStorage.getItem('forge_gestor_session');
+          if (sess && JSON.parse(sess) && JSON.parse(sess).username) {
+            window.location.replace('https://trainly.online/app');
+          } else {
+            window.location.replace('https://trainly.online/login');
+          }
+        } catch(e) { window.location.replace('https://trainly.online/login'); }
+      }
       else if (role === 'aluno') { window.location.replace('https://trainly.online/aluno'); }
     } catch(e) {}
   })();
@@ -274,7 +284,16 @@
     <div class="cards">
 
       <!-- Personal Trainer -->
-      <a href="https://trainly.online/app" class="choice-card personal" onclick="try{localStorage.setItem('trainly_role','trainer')}catch(e){}">
+      <a href="https://trainly.online/login" class="choice-card personal" onclick="
+        try { localStorage.setItem('trainly_role','trainer'); } catch(e) {}
+        try {
+          var sess = localStorage.getItem('forge_gestor_session');
+          if (sess && JSON.parse(sess) && JSON.parse(sess).username) {
+            window.location.href = 'https://trainly.online/app';
+            return false;
+          }
+        } catch(e) {}
+      ">
         <div class="card-shine"></div>
         <div class="card-text">
           <div class="card-title">Personal Trainer</div>
