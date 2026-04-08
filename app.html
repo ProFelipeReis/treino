@@ -1267,112 +1267,6 @@
       color: var(--text3);
     }
 
-    #screen-login { display: flex; align-items: flex-start; justify-content: center; height: 100%; padding: 80px 24px 24px; background: #000000; position: relative; overflow: hidden; overscroll-behavior: none; }
-
-    #login-bg-canvas {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .login-card {
-      position: relative;
-      z-index: 2;
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 340px;
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: 24px;
-      padding: 36px 32px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.30), 0 1.5px 0 rgba(255, 255, 255, 0.18) inset;
-      overflow: hidden;
-    }
-
-    /* Camada embaçada com imagem de fundo */
-    .login-card::before {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      background:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.50) 0%, rgba(0, 0, 0, 0.25) 60%),
-        url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed;
-      filter: blur(14px);
-      z-index: 0;
-    }
-
-    /* Overlay escuro moderado */
-    .login-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(10, 10, 8, 0.28);
-      z-index: 1;
-    }
-
-    .login-card>* {
-      position: relative;
-      z-index: 3;
-    }
-
-    #screen-login .form-group label {
-      color: rgba(255, 255, 255, 0.80);
-      font-weight: 700;
-    }
-
-    #screen-login .form-control {
-      background: rgba(255, 255, 255, 0.14);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1.5px solid rgba(255, 255, 255, 0.28);
-      color: #ffffff;
-    }
-
-    #screen-login .form-control::placeholder {
-      color: rgba(255, 255, 255, 0.38);
-    }
-
-    #screen-login .form-control:focus {
-      border-color: rgba(255, 255, 255, 0.55);
-      background: rgba(255, 255, 255, 0.22);
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.10);
-      color: #ffffff;
-      outline: none;
-    }
-
-    #screen-dashboard { display: none; flex-direction: column; height: 100%; overflow: hidden; }
-
-    /* ── SPLASH PÓS-LOGIN ── */
-    #login-splash {
-      position: fixed;
-      inset: 0;
-      background: #000000;
-      z-index: 99999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity .4s ease;
-    }
-    #login-splash.splash-in {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: all;
-    }
-    #login-splash.splash-out {
-      opacity: 0;
-    }
-    #login-splash video {
-      width: min(260px, 55vw);
-      height: auto;
-      display: block;
-      object-fit: contain;
-    }
 
     .topbar {
       background: #000000;
@@ -5563,9 +5457,6 @@
       box-shadow: 0 4px 14px rgba(245, 200, 0, .4);
     }
 
-    .has-invite #screen-login {
-      display: none !important;
-    }
 
     /* ── Desativa seleção de texto apenas em dispositivos touch/mobile ── */
     @media (hover: none) and (pointer: coarse) {
@@ -5586,392 +5477,6 @@
   <script>if (new URLSearchParams(window.location.search).get('invite')) { document.documentElement.classList.add('has-invite'); }</script>
 
   <!-- LOGIN -->
-  <div id="screen-login">
-    <a href="https://trainly.online?choose=1" onclick="try{localStorage.removeItem('trainly_role')}catch(e){}"
-      style="position:absolute;bottom:28px;left:24px;z-index:10;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:50px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);color:rgba(255,255,255,0.80);font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 20px rgba(0,0,0,0.25);transition:all .2s cubic-bezier(.22,1,.36,1);"
-      onmouseover="this.style.background='rgba(255,255,255,0.20)';this.style.color='#fff';this.style.transform='translateY(-2px)'"
-      onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.80)';this.style.transform='translateY(0)'">
-      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
-        stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5M12 5l-7 7 7 7" />
-      </svg>
-      Trocar perfil
-    </a>
-    <canvas id="login-bg-canvas"></canvas>
-    <script>
-      (function () {
-        const canvas = document.getElementById('login-bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let W, H, squares, animId;
-
-        // Preload background photo
-        const bgImg = new Image();
-        bgImg.crossOrigin = 'anonymous';
-        bgImg.src = 'https://i.imgur.com/Fjj25UX.jpeg';
-        let bgLoaded = false;
-        bgImg.onload = function () { bgLoaded = true; };
-
-        function resize() {
-          W = canvas.width = window.innerWidth;
-          H = canvas.height = window.innerHeight;
-        }
-
-        function mkSquare() {
-          const size = 28 + Math.random() * 68;
-          return {
-            x: Math.random() * W,
-            y: Math.random() * H,
-            size,
-            rot: Math.random() * Math.PI * 2,
-            rotSpeed: (Math.random() - 0.5) * 0.007,
-            alpha: 0.05 + Math.random() * 0.12,
-            dx: (Math.random() - 0.5) * 0.35,
-            dy: -(0.25 + Math.random() * 0.45),
-          };
-        }
-
-        function init() {
-          resize();
-          squares = Array.from({ length: 40 }, mkSquare);
-        }
-
-        // Diagonal divider: single straight line, off-center, lower on screen
-        function getDividerY(px) {
-          const leftY = H * 1.05;   // left edge — below viewport (matches entrada)
-          const rightY = H * 0.82;   // right edge — rises toward the right
-          return leftY + (px / W) * (rightY - leftY);
-        }
-
-        function isAboveTriangle(px, py) {
-          return py < getDividerY(px);
-        }
-
-        function drawBg() {
-          const leftY = getDividerY(0);
-          const rightY = getDividerY(W);
-
-          // 1. Fill dark area (above the diagonal line)
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(W, 0);
-          ctx.lineTo(W, rightY);
-          ctx.lineTo(0, leftY);
-          ctx.closePath();
-          ctx.fillStyle = '#111110';
-          ctx.fill();
-
-          // 2. Fill light area below diagonal
-          ctx.beginPath();
-          ctx.moveTo(0, leftY);
-          ctx.lineTo(W, rightY);
-          ctx.lineTo(W, H);
-          ctx.lineTo(0, H);
-          ctx.closePath();
-          ctx.fillStyle = '#f0f0ef';
-          ctx.fill();
-
-          // 2b. Draw photo clipped to the dark area
-          if (bgLoaded) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(W, 0);
-            ctx.lineTo(W, rightY);
-            ctx.lineTo(0, leftY);
-            ctx.closePath();
-            ctx.clip();
-            const iw = bgImg.naturalWidth, ih = bgImg.naturalHeight;
-            const scale = Math.max(W / iw, Math.max(leftY, rightY) / ih);
-            const dw = iw * scale, dh = ih * scale;
-            const dx = (W - dw) / 2, dy = -dh * 0.05;
-            ctx.globalAlpha = 0.22;
-            ctx.drawImage(bgImg, dx, dy, dw, dh);
-            ctx.globalAlpha = 1;
-            ctx.restore();
-          }
-
-          // 3. Single straight edge line (subtle glow)
-          ctx.beginPath();
-          ctx.moveTo(0, leftY);
-          ctx.lineTo(W, rightY);
-          ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        }
-
-        function drawSquare(s) {
-          const above = isAboveTriangle(s.x, s.y);
-          ctx.save();
-          ctx.translate(s.x, s.y);
-          ctx.rotate(s.rot);
-          ctx.globalAlpha = s.alpha;
-          if (above) {
-            ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-            ctx.fillStyle = 'rgba(46,46,42,0.30)';
-          } else {
-            ctx.strokeStyle = 'rgba(17,17,16,0.22)';
-            ctx.fillStyle = 'rgba(46,46,42,0.08)';
-          }
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.rect(-s.size / 2, -s.size / 2, s.size, s.size);
-          ctx.fill();
-          ctx.stroke();
-          ctx.restore();
-        }
-
-        function step() {
-          ctx.clearRect(0, 0, W, H);
-          drawBg();
-          squares.forEach(s => {
-            s.x += s.dx; s.y += s.dy; s.rot += s.rotSpeed;
-            if (s.y + s.size < 0) { s.y = H + s.size; s.x = Math.random() * W; }
-            if (s.x - s.size > W) s.x = -s.size;
-            if (s.x + s.size < 0) s.x = W + s.size;
-            drawSquare(s);
-          });
-          animId = requestAnimationFrame(step);
-        }
-
-        init();
-        step();
-        window.addEventListener('resize', () => { resize(); });
-
-        const loginEl = document.getElementById('screen-login');
-        if (loginEl) {
-          const obs = new MutationObserver(() => {
-            if (loginEl.style.display === 'none') cancelAnimationFrame(animId);
-          });
-          obs.observe(loginEl, { attributes: true, attributeFilter: ['style'] });
-        }
-      })();
-    </script>
-    <div
-      style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px;position:relative;z-index:2;margin-top:0px;">
-      <img src="https://i.imgur.com/orva0oM.png" alt="Trainly"
-        style="height:160px;width:auto;max-width:100%;object-fit:contain;margin-bottom:44px;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.5));" />
-      <div class="login-card" style="width:100%;">
-        <div
-          style="position:absolute;inset:0;z-index:2;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.13) 0%,transparent 55%);pointer-events:none;">
-        </div>
-        <form id="login-form" onsubmit="return false;">
-          <div class="form-group"><label>Usuário</label><input id="login-user" class="form-control" type="text"
-              placeholder="Usuário" required autocomplete="username" /></div>
-          <div class="form-group"><label>Senha</label><input id="login-pass" class="form-control" type="password"
-              placeholder="••••••••" required autocomplete="current-password" /></div>
-          <button type="button" onclick="doLogin()" class="btn btn-primary"
-            style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">Acessar painel
-            →</button>
-        </form>
-      </div>
-      <div style="margin-top:18px;text-align:center;">
-        <button onclick="openRegisterScreen()"
-          style="background:none;border:none;cursor:pointer;font-family:var(--body);font-size:.84rem;color:rgba(255,255,255,0.65);transition:color .15s;">
-          Novo aqui? <span style="color:#ffffff;font-weight:700;text-decoration:underline;">Criar conta</span>
-        </button>
-      </div>
-    </div>
-  </div>
-  <script>
-    // ══════════════════════════════════════════════════════
-    // LOGIN — 100% Firestore, sem credenciais no código
-    // Roles: ceo > master > comum
-    // ══════════════════════════════════════════════════════
-    function logoutFromBlocked() {
-      var s = document.getElementById('screen-blocked');
-      if (s) { s.classList.remove('on'); s.style.display = 'none'; }
-      try { localStorage.removeItem('forge_gestor_session'); } catch (e) { }
-      window.CURRENT_USER = null;
-      document.getElementById('screen-login').style.display = 'flex';
-    }
-
-    function showBlockedScreen(reasons) {
-      document.getElementById('screen-login').style.display = 'none';
-      var screen = document.getElementById('screen-blocked');
-      if (!screen) return;
-      screen.style.display = '';
-      screen.classList.add('on');
-      var list = document.getElementById('blocked-reasons-list');
-      if (!list) return;
-      var isCrefFake = reasons.some(function (r) { return r && r.indexOf('CREF') !== -1; });
-      if (reasons && reasons.length) {
-        list.innerHTML = '<div class="blocked-reasons-title">Motivos registrados</div>'
-          + reasons.map(function (r) { return '<div class="blocked-reason-item">' + r + '</div>'; }).join('')
-          + (isCrefFake
-            ? '<div style="margin-top:12px;padding:12px 14px;background:#fff8e1;border-radius:8px;border:1px solid #ffc107;">'
-            + '<div style="font-size:.68rem;font-weight:800;color:#7d5a00;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>️ Aviso Legal</div>'
-            + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;margin-bottom:6px;"><strong>Exercício Ilegal da Profissão:</strong> O exercício de atividade profissional sem preencher as condições legais é contravenção penal prevista no <strong>Art. 47 da Lei das Contravenções Penais</strong>.</p>'
-            + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;"><strong>Uso de Documento Falso:</strong> A utilização de carteira do CREF, diploma ou qualquer identificação profissional falsa configura crime de uso de documento falso, conforme o <strong>Art. 304 do Código Penal</strong>.</p>'
-            + '</div>'
-            : '');
-      } else {
-        list.innerHTML = '<div class="blocked-reasons-title">Motivo</div><div class="blocked-reason-item">Violação dos Termos de Uso</div>';
-      }
-    }
-
-    // _doLoginLegacy — substituída pelo sistema de Auth abaixo (firebase-auth)
-    // Mantida aqui apenas como referência histórica. Não é chamada.
-    async function _doLoginLegacy() {
-      var user = document.getElementById('login-user').value.trim().toLowerCase();
-      var pass = document.getElementById('login-pass').value;
-      if (!user || !pass) { showLoginError('Preencha usuário e senha.'); return; }
-
-      var btn = document.querySelector('#login-form button[type=button]');
-      if (btn) { btn.textContent = 'Verificando...'; btn.disabled = true; }
-
-      try {
-        var attempts = 0;
-        while ((!window.firebase || !window.firebase.firestore) && attempts < 40) {
-          await new Promise(r => setTimeout(r, 100)); attempts++;
-        }
-        if (!window.firebase || !window.firebase.firestore) {
-          showLoginError('Erro de conexão. Tente novamente.'); return;
-        }
-
-        var db = firebase.firestore();
-        var snap = await db.collection('managers').where('username', '==', user).get();
-        if (snap.empty) { showLoginError('Credenciais inválidas.'); return; }
-
-        var docSnap = snap.docs[0];
-        var mgr = docSnap.data();
-
-        // Verifica senha: suporta SHA-256 hash ou plain (legado)
-        var passOk = await _checkPassword(pass, mgr.password, mgr.passwordHash);
-        if (!passOk) { showLoginError('Credenciais inválidas.'); return; }
-
-        // Conta bloqueada pelo CEO?
-        if (mgr.blocked) {
-          var reasons = mgr.blockReasons && mgr.blockReasons.length ? mgr.blockReasons : [];
-          showBlockedScreen(reasons);
-          return;
-        }
-
-        var role = mgr.role || (mgr.isMaster ? 'master' : 'comum');
-        var subStatus = (role !== 'ceo') ? _checkSubscription(mgr) : null;
-
-        // Garante que o gestor tem um referralCode permanente — gera uma única vez se não tiver
-        var referralCode = mgr.referralCode || '';
-        if (!referralCode) {
-          var arr = new Uint8Array(5); crypto.getRandomValues(arr);
-          referralCode = Array.from(arr).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); // 10 chars hex
-          try { await db.collection('managers').doc(docSnap.id).update({ referralCode: referralCode }); } catch (e) { }
-        }
-
-        _loginSuccess({
-          id: docSnap.id,
-          username: user,
-          role: role,
-          isMaster: role === 'master' || role === 'ceo',
-          isCeo: role === 'ceo',
-          isTester: _isTesterActive(mgr),
-          displayName: mgr.name || user,
-          phone: mgr.phone || '',
-          subStatus: subStatus,
-          trialEndsAt: mgr.trialEndsAt || null,
-          subEndsAt: mgr.subEndsAt || null,
-          referralCode: referralCode,
-        });
-
-      } catch (e) {
-        showLoginError('Erro: ' + e.message);
-      } finally {
-        if (btn) { btn.textContent = 'Acessar painel →'; btn.disabled = false; }
-      }
-    }
-
-    async function _checkPassword(input, plain, hash) {
-      if (plain && plain === input) return true;
-      if (hash) { var h = await _sha256(input); return h === hash; }
-      return false;
-    }
-
-    async function _sha256(str) {
-      var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    // Normaliza Timestamp do Firestore (objeto {seconds,nanoseconds}) ou número em ms
-    function _tsToMs(v) {
-      if (!v) return null;
-      if (typeof v === 'number') return v;
-      if (typeof v.toMillis === 'function') return v.toMillis();
-      if (typeof v.seconds === 'number') return v.seconds * 1000;
-      return Number(v) || null;
-    }
-
-    function _isTesterActive(mgr) {
-      if (!mgr.isTester) return false;
-      var ends = _tsToMs(mgr.testerEndsAt);
-      if (!ends) return true;
-      return ends > Date.now();
-    }
-
-    function _checkSubscription(mgr) {
-      var now = Date.now();
-      var trialMs = _tsToMs(mgr.trialEndsAt);
-      var subMs = _tsToMs(mgr.subEndsAt);
-      if (trialMs && now < trialMs) {
-        return { ok: true, type: 'trial', daysLeft: Math.ceil((trialMs - now) / 86400000) };
-      }
-      if (subMs && now < subMs) {
-        return { ok: true, type: 'active', daysLeft: Math.ceil((subMs - now) / 86400000) };
-      }
-      return { ok: false, type: 'expired' };
-    }
-
-    function showLoginError(msg) {
-      var t = document.createElement('div'); t.className = 'toast error'; t.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ' + msg;
-      document.getElementById('toast-container').appendChild(t); setTimeout(function () { t.remove(); }, 3500);
-    }
-
-    function _loginSuccess(userData) {
-      try { localStorage.setItem('forge_gestor_session', JSON.stringify(userData)); } catch (e) { }
-      window.CURRENT_USER = userData;
-      location.reload();
-      return;
-
-      if (userData.role === 'ceo') {
-        (function waitCeo() { if (window.showCeoPanel) { showCeoPanel(); } else { setTimeout(waitCeo, 100); } })();
-        return;
-      }
-      if (userData.subStatus && !userData.subStatus.ok) {
-        (function waitWall() { if (window.showSubscriptionWall) { showSubscriptionWall(); } else { setTimeout(waitWall, 100); } })();
-        return;
-      }
-      (function waitDash() { if (window.showDashboardAfterLogin) { showDashboardAfterLogin(userData); } else { setTimeout(waitDash, 100); } })();
-    }
-
-    function _applyUserUI() {
-      if (window._applyUserUI) { window._applyUserUI(); return; }
-      // fallback — executa direto se window._applyUserUI ainda não foi definido
-      var u = window.CURRENT_USER || {};
-      var pill = document.getElementById('topbar-user-pill');
-      if (pill) pill.textContent = u.displayName || u.username || 'gestor';
-      var greetingEl = document.getElementById('dashboard-greeting');
-      if (greetingEl) {
-        var _h = new Date().getHours();
-        var _p = _h < 12 ? 'Bom dia' : _h < 18 ? 'Boa tarde' : 'Boa noite';
-        var _fn = ((u.displayName || u.username || '').split(' ')[0]) || 'você';
-        greetingEl.textContent = _p + ', ' + _fn + ' 👋';
-      }
-      document.querySelectorAll('.sidebar-item-gestores,.mobile-nav-item-gestores').forEach(function (el) {
-        el.classList.toggle('hidden', !(u.role === 'master' || u.role === 'ceo' || !!u.isMaster));
-      });
-      document.querySelectorAll('.sidebar-item-report,.mobile-nav-item-report').forEach(function (el) {
-        el.classList.toggle('hidden', !u.isTester);
-      });
-      document.querySelectorAll('.sidebar-item-ceo').forEach(function (el) {
-        el.classList.toggle('hidden', u.role !== 'ceo');
-      });
-    }
-    window._applyUserUIEarly = _applyUserUI;
-
-    document.addEventListener('DOMContentLoaded', function () {
-      document.getElementById('login-form').addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') doLogin();
-      });
-    });
-  </script>
 
   <!-- ══ SUBSCRIPTION WALL ══ -->
   <div id="screen-sub-wall">
@@ -8813,7 +8318,7 @@
       // ── Splash pós-login ──
       var splash = document.getElementById('login-splash');
       var vid = document.getElementById('login-splash-video');
-      document.getElementById('screen-login').style.display = 'none';
+      // login screen is now a separate page
       document.getElementById('screen-sub-wall').style.display = 'none';
       if (splash && vid) {
         splash.classList.add('splash-in');
@@ -8928,7 +8433,7 @@
         if (el) { el.style.display = 'none'; el.classList.remove('on', 'visible'); }
       });
       toast('Sessão encerrada.');
-      setTimeout(function () { location.reload(); }, 800);
+      setTimeout(function () { window.location.replace('https://trainly.online/login'); }, 800);
     };
     window.switchTab = (tabId, el) => {
       // Protege abas restritas
@@ -11767,7 +11272,10 @@
           }
         } else {
           clearSession();
+          window.location.replace('https://trainly.online/login');
         }
+      } else {
+        window.location.replace('https://trainly.online/login');
       }
     })();
 
@@ -12206,7 +11714,7 @@
 
     // ── Exibe subscription wall e carrega preços ──────────────────────────────────
     window.showSubscriptionWall = async function () {
-      document.getElementById('screen-login').style.display = 'none';
+      // login screen is now a separate page
       document.getElementById('screen-dashboard').style.display = 'none';
       document.getElementById('screen-sub-wall').style.display = 'flex';
       subShowStep('plan');
@@ -13662,7 +13170,7 @@
         setTimeout(function () {
           history.replaceState({}, '', window.location.pathname);
           document.getElementById('screen-invite').classList.remove('on');
-          document.getElementById('screen-login').style.display = 'flex';
+          window.location.replace('https://trainly.online/login');
           document.documentElement.classList.remove('has-invite');
         }, 2500);
       } catch (e) { errEl.textContent = 'Erro: ' + e.message; }
@@ -13675,18 +13183,18 @@
       var token = new URLSearchParams(window.location.search).get('invite');
       if (!token) return;
       // Esconde login imediatamente enquanto valida
-      document.getElementById('screen-login').style.display = 'none';
+      // login screen is now a separate page
       // Aguarda page load + openRegisterScreen estar definida
       window.addEventListener('load', function () {
         function tryOpen() {
           if (typeof openRegisterScreen !== 'function') { setTimeout(tryOpen, 100); return; }
           _db.collection('invites').where('token', '==', token).get().then(function (snap) {
-            if (snap.empty) { document.getElementById('screen-login').style.display = 'flex'; return; }
+            if (snap.empty) { window.location.replace('https://trainly.online/login'); return; }
             var d = snap.docs[0]; var inv = d.data();
-            if (inv.used || (inv.expiresAt && Date.now() > inv.expiresAt)) { document.getElementById('screen-login').style.display = 'flex'; return; }
+            if (inv.used || (inv.expiresAt && Date.now() > inv.expiresAt)) { window.location.replace('https://trainly.online/login'); return; }
             window._invDocId = d.id; window._invBy = inv.createdBy || '';
             openRegisterScreen();
-          }).catch(function () { document.getElementById('screen-login').style.display = 'flex'; });
+          }).catch(function () { window.location.replace('https://trainly.online/login'); });
         }
         setTimeout(tryOpen, 300);
       });
@@ -13779,14 +13287,14 @@
         var el = document.getElementById(id);
         if(el){ el.style.background=''; el.style.border='2px solid var(--border2)'; }
       });
-      document.getElementById('screen-login').style.display = 'none';
+      // login screen is now a separate page
       document.getElementById('screen-register').classList.add('on');
     };
 
     window.closeRegisterScreen = function () {
       document.getElementById('screen-register').classList.remove('on');
       document.getElementById('screen-register').style.display = '';
-      document.getElementById('screen-login').style.display = 'flex';
+      window.location.replace('https://trainly.online/login');
       if (_regNewId) {
         // Já criou conta — faz login automático
         _regNewId = null;
@@ -14381,7 +13889,7 @@
       var pass = document.getElementById('login-pass').value;
       if (!user || !pass) { showLoginError('Preencha usuário e senha.'); return; }
 
-      var btn = document.querySelector('#login-form button[type=button]');
+      var btn = null; // login-form is now on login.html
       if (btn) { btn.textContent = 'Verificando...'; btn.disabled = true; }
 
       try {
@@ -14443,7 +13951,7 @@
             blocked: false,
           };
           try { localStorage.setItem('trainly_nutri_session', JSON.stringify(nutriSession)); } catch(e) {}
-          window.location.href = 'https://trainly.online/nutricionista';
+          window.location.href = 'nutri.html';
           return;
         }
 
@@ -14584,7 +14092,7 @@
           history.replaceState({}, '', window.location.pathname);
           document.getElementById('screen-register').classList.remove('on');
           document.getElementById('screen-register').style.display = '';
-          document.getElementById('screen-login').style.display = 'flex';
+          window.location.replace('https://trainly.online/login');
         }, 2800);
 
       } catch (e) {
@@ -14691,7 +14199,7 @@
           history.replaceState({}, '', window.location.pathname);
           document.getElementById('screen-register').classList.remove('on');
           document.getElementById('screen-register').style.display = '';
-          document.getElementById('screen-login').style.display = 'flex';
+          window.location.replace('https://trainly.online/login');
         }, 2800);
 
       } catch (e) {
@@ -14770,7 +14278,7 @@
         setTimeout(function () {
           history.replaceState({}, '', window.location.pathname);
           document.getElementById('screen-invite').classList.remove('on');
-          document.getElementById('screen-login').style.display = 'flex';
+          window.location.replace('https://trainly.online/login');
           document.documentElement.classList.remove('has-invite');
         }, 2500);
 
@@ -14790,15 +14298,10 @@
       } catch (e) { }
       try { localStorage.removeItem('forge_gestor_session'); } catch (e) { }
       try { localStorage.removeItem('trainly_role'); } catch (e) { }
-      location.reload();
+      window.location.replace('https://trainly.online/login');
     };
 
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('[onclick*="doLogout"], .logout-btn').forEach(function (el) {
-        if (el.getAttribute('onclick') && el.getAttribute('onclick').includes('doLogout')) return;
-        el.onclick = function () { window.doLogout(); };
-      });
-    });
+    // logout buttons handled by doLogout()
 
   </script>
 
