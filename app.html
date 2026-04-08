@@ -12902,7 +12902,7 @@
         return;
       }
 
-      var link = window.location.origin + window.location.pathname + '?ref=' + refCode;
+      var link = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'cadastro.html?ref=' + refCode;
       var codeEl = document.getElementById('referral-code-display');
       if (codeEl) codeEl.textContent = refCode;
       document.getElementById('referral-link-input').value = link;
@@ -12962,7 +12962,7 @@
           token, createdBy: u.username || '', createdAt: Date.now(),
           expiresAt: Date.now() + 48 * 60 * 60 * 1000, used: false, usedBy: null, usedAt: null
         });
-        var link = window.location.origin + window.location.pathname + '?invite=' + token;
+        var link = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'cadastro.html?invite=' + token;
         document.getElementById('inv-link-box').style.display = 'block';
         document.getElementById('inv-link-input').value = link;
         toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link gerado!');
@@ -13185,42 +13185,21 @@
       finally { btn.classList.remove('btn-loading'); btn.textContent = 'Criar conta →'; }
     };
 
-    // Valida token de convite — chamado logo abaixo
+    // Redireciona ?invite= e ?ref= para cadastro.html
     window._invDocId = null; window._invBy = '';
-    (function checkInviteUrl() {
-      var token = new URLSearchParams(window.location.search).get('invite');
-      if (!token) return;
-      // Esconde login imediatamente enquanto valida
-      // login screen is now a separate page
-      // Aguarda page load + openRegisterScreen estar definida
-      window.addEventListener('load', function () {
-        function tryOpen() {
-          if (typeof openRegisterScreen !== 'function') { setTimeout(tryOpen, 100); return; }
-          _db.collection('invites').where('token', '==', token).get().then(function (snap) {
-            if (snap.empty) { window.location.replace('https://trainly.online/login'); return; }
-            var d = snap.docs[0]; var inv = d.data();
-            if (inv.used || (inv.expiresAt && Date.now() > inv.expiresAt)) { window.location.replace('https://trainly.online/login'); return; }
-            window._invDocId = d.id; window._invBy = inv.createdBy || '';
-            openRegisterScreen();
-          }).catch(function () { window.location.replace('https://trainly.online/login'); });
-        }
-        setTimeout(tryOpen, 300);
-      });
-    })();
-
-    // Detecta ?ref= e abre tela de cadastro direto (validação do código ocorre no regStep2Next)
     window._pendingRefCode = '';
-    (function checkRefUrl() {
-      var ref = new URLSearchParams(window.location.search).get('ref');
-      if (!ref) return;
-      window._pendingRefCode = ref;
-      window.addEventListener('load', function () {
-        function tryOpen() {
-          if (typeof openRegisterScreen !== 'function') { setTimeout(tryOpen, 100); return; }
-          openRegisterScreen();
-        }
-        setTimeout(tryOpen, 300);
-      });
+    (function checkRegistrationUrls() {
+      var params = new URLSearchParams(window.location.search);
+      var invite = params.get('invite');
+      var ref    = params.get('ref');
+      if (invite) {
+        window.location.replace('cadastro.html?invite=' + encodeURIComponent(invite));
+        return;
+      }
+      if (ref) {
+        window.location.replace('cadastro.html?ref=' + encodeURIComponent(ref));
+        return;
+      }
     })();
 
   </script>
