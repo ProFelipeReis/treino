@@ -146,6 +146,16 @@
     /* ── DASHBOARD (app) ── */
     #screen-dashboard { display: none; flex-direction: column; height: 100%; overflow: hidden; }
 
+    /* ── SPLASH PÓS-LOGIN ── */
+    #login-splash {
+      position: fixed; inset: 0; background: #000000; z-index: 99999;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .4s ease;
+    }
+    #login-splash.splash-in { opacity: 1; visibility: visible; pointer-events: all; }
+    #login-splash.splash-out { opacity: 0; }
+    #login-splash video { width: min(260px, 55vw); height: auto; display: block; object-fit: contain; }
+
     /* ── TOPBAR ── */
     .topbar {
       background: #000000; border-bottom: 1px solid #2e2e2a;
@@ -1295,8 +1305,29 @@ function _clearNutriSession() {
 })();
 
 function enterDashboard() {
-  document.getElementById('screen-dashboard').style.display = 'flex';
-  document.getElementById('screen-dashboard').style.flexDirection = 'column';
+  var splash = document.getElementById('login-splash');
+  var vid = document.getElementById('login-splash-video');
+  function _showDashboard() {
+    document.getElementById('screen-dashboard').style.display = 'flex';
+    document.getElementById('screen-dashboard').style.flexDirection = 'column';
+  }
+  if (splash && vid) {
+    splash.classList.add('splash-in');
+    vid.currentTime = 0;
+    vid.play().catch(function(){});
+    function _afterSplash() {
+      splash.classList.add('splash-out');
+      setTimeout(function() {
+        splash.classList.remove('splash-in', 'splash-out');
+        vid.pause();
+      }, 420);
+      _showDashboard();
+    }
+    var _splashTimeout = setTimeout(_afterSplash, 5000);
+    vid.onended = function() { clearTimeout(_splashTimeout); _afterSplash(); };
+  } else {
+    _showDashboard();
+  }
   document.getElementById('topbar-user').textContent = _currentNutri.name || _currentNutri.username;
   // Saudação
   const h = new Date().getHours();
@@ -1981,6 +2012,14 @@ async function saveReply(id) {
   });
 })();
 </script>
+
+  <div id="login-splash">
+    <video id="login-splash-video"
+      src="https://felipereiscruz.github.io/videos/imput.webm"
+      muted playsinline webkit-playsinline
+      disablePictureInPicture preload="auto">
+    </video>
+  </div>
 
 </body>
 </html>
