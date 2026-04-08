@@ -14585,17 +14585,15 @@
       inset: 0;
       background: #000000;
       z-index: 99999;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      visibility: hidden;
+      opacity: 1;
       pointer-events: none;
       transition: opacity .4s ease;
     }
     #login-splash.splash-in {
-      opacity: 1;
-      visibility: visible;
+      display: flex;
       pointer-events: all;
     }
     #login-splash.splash-out {
