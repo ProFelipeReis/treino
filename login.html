@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta name="theme-color" content="#111110"/>
+  <title>Trainly — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://i.imgur.com/9DDa1Th.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/9DDa1Th.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Trainly">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #f5c800;
+      --accent-soft: rgba(245,200,0,.25);
+      --red: #e03e3e;
+      --green: #2e7d52;
+      --text: #111110;
+      --text2: #555550;
+      --text3: #999990;
+      --surface: #ffffff;
+      --bg: #f7f7f5;
+      --border: #e4e4e0;
+      --border2: #d0d0cb;
+      --r: 12px;
+      --shadow-md: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
+      --head: 'Nunito', sans-serif;
+      --body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--body);
+      overflow: hidden;
+      background: #111110;
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+      }
+      input, textarea {
+        -webkit-user-select: text !important;
+        user-select: text !important;
+      }
+    }
+
+    /* ── TELA PRINCIPAL ── */
+    #screen-login {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      height: 100vh;
+      height: 100dvh;
+      padding: 80px 24px 24px;
+      background: #000000;
+      position: relative;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    #login-bg-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── CARD DE LOGIN ── */
+    .login-card {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 340px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 24px;
+      padding: 36px 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.30), 0 1.5px 0 rgba(255,255,255,0.18) inset;
+      overflow: hidden;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.50) 0%, rgba(0,0,0,0.25) 60%),
+        url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed;
+      filter: blur(14px);
+      z-index: 0;
+    }
+
+    .login-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(10,10,8,0.28);
+      z-index: 1;
+    }
+
+    .login-card > * {
+      position: relative;
+      z-index: 3;
+    }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 16px; }
+
+    .form-group label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.80);
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid rgba(255,255,255,0.28);
+      border-radius: var(--r);
+      font-size: .88rem;
+      transition: all .15s;
+      background: rgba(255,255,255,0.14);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #ffffff;
+      font-family: var(--body);
+    }
+
+    .form-control::placeholder { color: rgba(255,255,255,0.38); }
+
+    .form-control:focus {
+      outline: none;
+      border-color: rgba(255,255,255,0.55);
+      background: rgba(255,255,255,0.22);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.10);
+      color: #ffffff;
+    }
+
+    /* ── BTN ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      border-radius: var(--r);
+      font-size: .85rem;
+      font-weight: 700;
+      transition: all .15s;
+      cursor: pointer;
+      border: none;
+      font-family: var(--body);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3d3830 0%, #28231a 50%, #1a1610 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      font-weight: 800;
+      letter-spacing: .02em;
+      border: 1px solid rgba(245,200,0,.18);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(135deg, #4d4838 0%, #332d20 50%, #221d14 100%);
+      box-shadow: 0 4px 14px rgba(0,0,0,.22);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+
+    .btn-loading { opacity: .5; pointer-events: none; }
+
+    /* ── TOAST ── */
+    #toast-container {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: var(--surface);
+      color: var(--text);
+      padding: 13px 18px;
+      border-radius: var(--r);
+      font-size: .82rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      min-width: 240px;
+      position: relative;
+      animation: toastIn .25s cubic-bezier(.22,1,.36,1);
+      box-shadow: var(--shadow-md);
+    }
+
+    .toast.error::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0;
+      width: 3px; height: 100%;
+      background: var(--red);
+      border-radius: 3px 0 0 3px;
+    }
+
+    @keyframes toastIn {
+      from { transform: translateX(24px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    /* ── TELA BLOQUEADO ── */
+    #screen-blocked {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: rgba(0,0,0,.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    #screen-blocked.on { display: flex; }
+
+    .blocked-card {
+      background: #1a1814;
+      border: 1.5px solid rgba(224,62,62,.35);
+      border-radius: 20px;
+      padding: 32px 28px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .blocked-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: rgba(224,62,62,.12);
+      border: 1.5px solid rgba(224,62,62,.3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+      color: #e03e3e;
+    }
+
+    .blocked-title {
+      font-family: var(--head);
+      font-size: 1.1rem; font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .blocked-sub {
+      font-size: .82rem; color: rgba(255,255,255,.55);
+      margin-bottom: 20px; line-height: 1.55;
+    }
+
+    .blocked-reasons-title {
+      font-size: .68rem; font-weight: 800;
+      color: rgba(255,255,255,.4);
+      text-transform: uppercase; letter-spacing: .08em;
+      margin-bottom: 10px; text-align: left;
+    }
+
+    .blocked-reason-item {
+      background: rgba(224,62,62,.08);
+      border: 1px solid rgba(224,62,62,.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: .82rem;
+      color: rgba(255,255,255,.75);
+      text-align: left; margin-bottom: 8px;
+    }
+
+    .blocked-logout-btn {
+      margin-top: 18px;
+      background: none;
+      border: 1.5px solid rgba(255,255,255,.2);
+      border-radius: var(--r);
+      color: rgba(255,255,255,.6);
+      font-family: var(--body);
+      font-size: .85rem; font-weight: 700;
+      padding: 11px 24px;
+      cursor: pointer;
+      width: 100%;
+      transition: all .15s;
+    }
+
+    .blocked-logout-btn:hover {
+      border-color: rgba(255,255,255,.4);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<div id="screen-login">
+  <!-- Botão "Trocar perfil" -->
+  <a href="https://trainly.online/?choose=1"
+    onclick="try{localStorage.removeItem('trainly_role')}catch(e){}"
+    style="position:absolute;bottom:28px;left:24px;z-index:10;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:50px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);color:rgba(255,255,255,0.80);font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 20px rgba(0,0,0,0.25);transition:all .2s cubic-bezier(.22,1,.36,1);"
+    onmouseover="this.style.background='rgba(255,255,255,0.20)';this.style.color='#fff';this.style.transform='translateY(-2px)'"
+    onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.80)';this.style.transform='translateY(0)'">
+    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Trocar perfil
+  </a>
+
+  <canvas id="login-bg-canvas"></canvas>
+
+  <script>
+    (function(){
+      const canvas = document.getElementById('login-bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, squares, animId;
+
+      const bgImg = new Image();
+      bgImg.crossOrigin = 'anonymous';
+      bgImg.src = 'https://i.imgur.com/Fjj25UX.jpeg';
+      let bgLoaded = false;
+      bgImg.onload = function(){ bgLoaded = true; };
+
+      function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+
+      function mkSquare(){
+        const size = 28 + Math.random() * 68;
+        return {
+          x: Math.random() * W, y: Math.random() * H, size,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.007,
+          alpha: 0.05 + Math.random() * 0.12,
+          dx: (Math.random() - 0.5) * 0.35,
+          dy: -(0.25 + Math.random() * 0.45),
+        };
+      }
+
+      function init(){ resize(); squares = Array.from({length: 40}, mkSquare); }
+
+      function getDividerY(px){
+        const leftY = H * 1.05, rightY = H * 0.82;
+        return leftY + (px / W) * (rightY - leftY);
+      }
+
+      function isAbove(px, py){ return py < getDividerY(px); }
+
+      function drawBg(){
+        const leftY = getDividerY(0), rightY = getDividerY(W);
+        ctx.beginPath();
+        ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,rightY); ctx.lineTo(0,leftY);
+        ctx.closePath();
+        ctx.fillStyle = '#111110'; ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(0,leftY); ctx.lineTo(W,rightY); ctx.lineTo(W,H); ctx.lineTo(0,H);
+        ctx.closePath();
+        ctx.fillStyle = '#f0f0ef'; ctx.fill();
+
+        if(bgLoaded){
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,rightY); ctx.lineTo(0,leftY);
+          ctx.closePath(); ctx.clip();
+          const iw = bgImg.naturalWidth, ih = bgImg.naturalHeight;
+          const scale = Math.max(W/iw, Math.max(leftY,rightY)/ih);
+          const dw = iw*scale, dh = ih*scale;
+          const dx = (W-dw)/2, dy = -dh*0.05;
+          ctx.globalAlpha = 0.22;
+          ctx.drawImage(bgImg, dx, dy, dw, dh);
+          ctx.globalAlpha = 1; ctx.restore();
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(0,leftY); ctx.lineTo(W,rightY);
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+
+      function drawSquare(s){
+        const above = isAbove(s.x, s.y);
+        ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot); ctx.globalAlpha = s.alpha;
+        ctx.strokeStyle = above ? 'rgba(255,255,255,0.18)' : 'rgba(17,17,16,0.22)';
+        ctx.fillStyle   = above ? 'rgba(46,46,42,0.30)'   : 'rgba(46,46,42,0.08)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.rect(-s.size/2, -s.size/2, s.size, s.size);
+        ctx.fill(); ctx.stroke(); ctx.restore();
+      }
+
+      function step(){
+        ctx.clearRect(0,0,W,H); drawBg();
+        squares.forEach(s => {
+          s.x += s.dx; s.y += s.dy; s.rot += s.rotSpeed;
+          if(s.y + s.size < 0){ s.y = H + s.size; s.x = Math.random() * W; }
+          if(s.x - s.size > W) s.x = -s.size;
+          if(s.x + s.size < 0) s.x = W + s.size;
+          drawSquare(s);
+        });
+        animId = requestAnimationFrame(step);
+      }
+
+      init(); step();
+      window.addEventListener('resize', resize);
+    })();
+  </script>
+
+  <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px;position:relative;z-index:2;margin-top:0px;">
+    <img src="https://i.imgur.com/orva0oM.png" alt="Trainly"
+      style="height:160px;width:auto;max-width:100%;object-fit:contain;margin-bottom:44px;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.5));"/>
+
+    <div class="login-card" style="width:100%;">
+      <div style="position:absolute;inset:0;z-index:2;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.13) 0%,transparent 55%);pointer-events:none;"></div>
+      <form id="login-form" onsubmit="return false;">
+        <div class="form-group">
+          <label>Usuário</label>
+          <input id="login-user" class="form-control" type="text" placeholder="Usuário" required autocomplete="username"/>
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input id="login-pass" class="form-control" type="password" placeholder="••••••••" required autocomplete="current-password"/>
+        </div>
+        <button type="button" id="login-btn" onclick="doLogin()" class="btn btn-primary"
+          style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">
+          Acessar painel →
+        </button>
+      </form>
+    </div>
+
+    <div style="margin-top:18px;text-align:center;">
+      <button onclick="openRegisterScreen()"
+        style="background:none;border:none;cursor:pointer;font-family:var(--body);font-size:.84rem;color:rgba(255,255,255,0.65);transition:color .15s;">
+        Novo aqui? <span style="color:#ffffff;font-weight:700;text-decoration:underline;">Criar conta</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TELA BLOQUEADO ── -->
+<div id="screen-blocked">
+  <div class="blocked-card">
+    <div class="blocked-icon">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <div class="blocked-title">Conta Suspensa</div>
+    <div class="blocked-sub">Sua conta foi suspensa pelo administrador. Entre em contato com o suporte.</div>
+    <div id="blocked-reasons-list"></div>
+    <button class="blocked-logout-btn" onclick="logoutFromBlocked()">← Voltar ao login</button>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast-container"></div>
+
+<script>
+  // ══════════════════════════════════════════════
+  // FIREBASE CONFIG
+  // ══════════════════════════════════════════════
+  (function initFirebase(){
+    var cfg = {
+      apiKey: "AIzaSyC6JFpFrMDDFhKUxm2L-bOhOBbVEJdQlUg",
+      authDomain: "fichasacademia-8717d.firebaseapp.com",
+      projectId: "fichasacademia-8717d",
+      storageBucket: "fichasacademia-8717d.appspot.com",
+      messagingSenderId: "1037295461326",
+      appId: "1:1037295461326:web:9e2c4ee00d67bef6f2a82b"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+  })();
+
+  // ── Auth init ──
+  var _auth = null;
+  (function initAuth(){
+    function tryInit(){
+      if(window.firebase && window.firebase.auth){
+        _auth = firebase.auth();
+        _auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      } else { setTimeout(tryInit, 100); }
+    }
+    tryInit();
+  })();
+
+  // ══════════════════════════════════════════════
+  // HELPERS
+  // ══════════════════════════════════════════════
+  function showError(msg){
+    var t = document.createElement('div');
+    t.className = 'toast error';
+    t.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ' + msg;
+    document.getElementById('toast-container').appendChild(t);
+    setTimeout(function(){ t.remove(); }, 3500);
+  }
+
+  function _authEmail(username){
+    return username.toLowerCase().replace(/[^a-z0-9]/g,'') + '@trainly-app.internal';
+  }
+
+  function _tsToMs(v){
+    if(!v) return null;
+    if(typeof v === 'number') return v;
+    if(typeof v.toMillis === 'function') return v.toMillis();
+    if(typeof v.seconds === 'number') return v.seconds * 1000;
+    return Number(v) || null;
+  }
+
+  function _isTesterActive(mgr){
+    if(!mgr.isTester) return false;
+    var ends = _tsToMs(mgr.testerEndsAt);
+    if(!ends) return true;
+    return ends > Date.now();
+  }
+
+  function _checkSubscription(mgr){
+    var now = Date.now();
+    var trialMs = _tsToMs(mgr.trialEndsAt);
+    var subMs   = _tsToMs(mgr.subEndsAt);
+    if(trialMs && now < trialMs) return { ok:true,  type:'trial',   daysLeft: Math.ceil((trialMs-now)/86400000) };
+    if(subMs   && now < subMs)   return { ok:true,  type:'active',  daysLeft: Math.ceil((subMs-now)/86400000)   };
+    return { ok:false, type:'expired' };
+  }
+
+  function logoutFromBlocked(){
+    document.getElementById('screen-blocked').classList.remove('on');
+    try { localStorage.removeItem('forge_gestor_session'); } catch(e){}
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+  }
+
+  function showBlockedScreen(reasons){
+    var screen = document.getElementById('screen-blocked');
+    screen.classList.add('on');
+    var list = document.getElementById('blocked-reasons-list');
+    var isCrefFake = reasons.some(function(r){ return r && r.indexOf('CREF') !== -1; });
+    if(reasons && reasons.length){
+      list.innerHTML = '<div class="blocked-reasons-title">Motivos registrados</div>'
+        + reasons.map(function(r){ return '<div class="blocked-reason-item">'+r+'</div>'; }).join('')
+        + (isCrefFake
+          ? '<div style="margin-top:12px;padding:12px 14px;background:#fff8e1;border-radius:8px;border:1px solid #ffc107;">'
+          + '<div style="font-size:.68rem;font-weight:800;color:#7d5a00;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">⚠️ Aviso Legal</div>'
+          + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;margin-bottom:6px;"><strong>Exercício Ilegal da Profissão:</strong> O exercício de atividade profissional sem preencher as condições legais é contravenção penal prevista no <strong>Art. 47 da Lei das Contravenções Penais</strong>.</p>'
+          + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;"><strong>Uso de Documento Falso:</strong> A utilização de carteira do CREF, diploma ou qualquer identificação profissional falsa configura crime de uso de documento falso, conforme o <strong>Art. 304 do Código Penal</strong>.</p>'
+          + '</div>'
+          : '');
+    } else {
+      list.innerHTML = '<div class="blocked-reasons-title">Motivo</div><div class="blocked-reason-item">Violação dos Termos de Uso</div>';
+    }
+  }
+
+  // ══════════════════════════════════════════════
+  // REDIRECT SE JÁ TIVER SESSÃO
+  // ══════════════════════════════════════════════
+  (function checkExistingSession(){
+    try {
+      var v = localStorage.getItem('forge_gestor_session');
+      if(v){
+        var s = JSON.parse(v);
+        if(s && s.username){
+          // Sessão válida — redireciona direto para o app
+          window.location.replace('https://trainly.online/app');
+          return;
+        }
+      }
+    } catch(e){}
+  })();
+
+  // ══════════════════════════════════════════════
+  // LOGIN PRINCIPAL
+  // ══════════════════════════════════════════════
+  async function doLogin(){
+    var user = document.getElementById('login-user').value.trim().toLowerCase();
+    var pass = document.getElementById('login-pass').value;
+    if(!user || !pass){ showError('Preencha usuário e senha.'); return; }
+
+    var btn = document.getElementById('login-btn');
+    if(btn){ btn.textContent = 'Verificando...'; btn.classList.add('btn-loading'); }
+
+    try {
+      // Aguarda Firebase
+      var attempts = 0;
+      while((!window.firebase || !window.firebase.firestore || !_auth) && attempts < 40){
+        await new Promise(r => setTimeout(r, 100)); attempts++;
+      }
+      if(!window.firebase || !window.firebase.firestore || !_auth){
+        showError('Erro de conexão. Tente novamente.'); return;
+      }
+
+      // Passo 1 — autentica no Auth
+      var authEmail = _authEmail(user);
+      try {
+        await _auth.signInWithEmailAndPassword(authEmail, pass);
+      } catch(authErr){
+        if(
+          authErr.code === 'auth/wrong-password' ||
+          authErr.code === 'auth/invalid-credential' ||
+          authErr.code === 'auth/user-not-found'
+        ){
+          showError('Usuário ou senha incorretos.');
+        } else {
+          showError('Erro ao autenticar: ' + authErr.message);
+        }
+        return;
+      }
+
+      // Passo 2 — lê manager no Firestore
+      var db = firebase.firestore();
+      var snap = await db.collection('managers').where('username','==',user).get();
+      if(snap.empty){
+        await _auth.signOut();
+        showError('Usuário ou senha incorretos.');
+        return;
+      }
+
+      var docSnap = snap.docs[0];
+      var mgr = docSnap.data();
+
+      // Conta bloqueada?
+      if(mgr.blocked){
+        await _auth.signOut();
+        var reasons = mgr.blockReasons && mgr.blockReasons.length ? mgr.blockReasons : [];
+        showBlockedScreen(reasons);
+        return;
+      }
+
+      // Roteamento por tipo de profissional
+      if(mgr.profType === 'nutri'){
+        var nutriSession = {
+          id: docSnap.id,
+          username: user,
+          name: mgr.name || user,
+          profType: 'nutri',
+          role: mgr.role || 'comum',
+          blocked: false,
+        };
+        try { localStorage.setItem('trainly_nutri_session', JSON.stringify(nutriSession)); } catch(e){}
+        window.location.href = 'https://trainly.online/nutricionista';
+        return;
+      }
+
+      var role = mgr.role || (mgr.isMaster ? 'master' : 'comum');
+      var subStatus = (role !== 'ceo') ? _checkSubscription(mgr) : null;
+
+      // Garante referralCode
+      var referralCode = mgr.referralCode || '';
+      if(!referralCode){
+        var arr = new Uint8Array(5); crypto.getRandomValues(arr);
+        referralCode = Array.from(arr).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+        try { await db.collection('managers').doc(docSnap.id).update({ referralCode: referralCode }); } catch(e){}
+      }
+
+      var userData = {
+        id: docSnap.id,
+        username: user,
+        role: role,
+        isMaster: role === 'master' || role === 'ceo',
+        isCeo: role === 'ceo',
+        isTester: _isTesterActive(mgr),
+        displayName: mgr.name || user,
+        phone: mgr.phone || '',
+        subStatus: subStatus,
+        trialEndsAt: mgr.trialEndsAt || null,
+        subEndsAt: mgr.subEndsAt || null,
+        referralCode: referralCode,
+      };
+
+      // Salva sessão e redireciona
+      try { localStorage.setItem('forge_gestor_session', JSON.stringify(userData)); } catch(e){}
+      try { localStorage.setItem('trainly_role', 'trainer'); } catch(e){}
+      window.location.replace('https://trainly.online/app');
+
+    } catch(e){
+      showError('Erro: ' + e.message);
+    } finally {
+      if(btn){ btn.textContent = 'Acessar painel →'; btn.classList.remove('btn-loading'); }
+    }
+  }
+
+  // ── Registro (placeholder — mantém compatibilidade) ──
+  function openRegisterScreen(){
+    window.location.href = 'https://trainly.online/app?register=1';
+  }
+
+  // ── Enter no form ──
+  document.addEventListener('DOMContentLoaded', function(){
+    document.getElementById('login-form').addEventListener('keydown', function(e){
+      if(e.key === 'Enter') doLogin();
+    });
+  });
+</script>
+
+</body>
+</html>
