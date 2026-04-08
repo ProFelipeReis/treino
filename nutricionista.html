@@ -175,7 +175,7 @@
       background: rgba(46,125,82,.15); border: 1px solid rgba(46,125,82,.35);
       border-radius: 8px; padding: 5px 14px; font-size: .78rem; font-weight: 700; color: #5cb87c;
     }
-    .nutri-pill {
+    .nutri-pill-REMOVED {
       background: rgba(46,125,82,.1); border: 1px solid rgba(46,125,82,.2);
       border-radius: 8px; padding: 4px 10px; font-size: .68rem; font-weight: 700; color: var(--nutri);
       display: flex; align-items: center; gap: 5px;
@@ -636,7 +636,100 @@
       .detail-avatar { width: 50px; height: 50px; font-size: 1.2rem; border-radius: 12px; }
       .detail-info h2 { font-size: 1.15rem; }
     }
-  </style>
+  
+    .gear-btn {
+      background: none;
+      color: #888880;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      transition: all .2s;
+      line-height: 1;
+      border: none;
+      cursor: pointer;
+    }
+    .gear-btn:hover {
+      color: var(--accent);
+      background: rgba(245,200,0,.1);
+      transform: rotate(45deg);
+    }
+    .notif-badge {
+      position: absolute;
+      top: 2px; right: 2px;
+      width: 16px; height: 16px;
+      background: #e03e3e;
+      border-radius: 50%;
+      font-size: .6rem; font-weight: 800;
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #111110;
+    }
+    .notif-wrap-rel { position: relative; }
+    .notif-panel {
+      position: absolute;
+      right: 0; top: calc(100% + 10px);
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
+      z-index: 600;
+      width: 300px; max-height: 380px;
+      overflow-y: auto;
+    }
+    .notif-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: .82rem; font-weight: 700; color: var(--text);
+    }
+    .notif-panel-empty {
+      padding: 32px 16px; text-align: center;
+      color: var(--text3); font-size: .82rem;
+    }
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item.unread { background: rgba(245,200,0,.05); }
+    .notif-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: rgba(245,200,0,.10); border: 1px solid rgba(245,200,0,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .notif-text { flex: 1; }
+    .notif-title { font-size: .82rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+    .notif-sub { font-size: .74rem; color: var(--text3); margin-top: 2px; font-weight: 500; }
+    /* sidebar footer com usuário */
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+    .sidebar-user-avatar {
+      width: 32px; height: 32px; border-radius: 9px;
+      background: rgba(92,184,124,.15);
+      border: 1px solid rgba(92,184,124,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .78rem; font-weight: 800; color: #5cb87c;
+      flex-shrink: 0;
+    }
+    .sidebar-user-info { flex: 1; min-width: 0; }
+    .sidebar-user-name {
+      font-size: .8rem; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sidebar-user-role {
+      font-size: .68rem; color: var(--text3); font-weight: 500;
+    }
+</style>
 </head>
 <body>
 
@@ -654,13 +747,34 @@
   <div class="topbar">
     <div class="topbar-brand">
       <img src="https://i.imgur.com/tQZtOnB.png" alt="Trainly" style="height:22px;" />
-      <span style="color:#5cb87c;">Nutrição</span>
       <div class="dot"></div>
     </div>
     <div class="topbar-right">
-      <div class="nutri-pill">🥗 Nutricionista</div>
-      <div class="user-pill" id="topbar-user">—</div>
-      <button class="logout-btn" onclick="doLogout()">Sair</button>
+      <div class="notif-wrap-rel">
+        <button class="gear-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notificações" style="color:#888880;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span class="notif-badge hidden" id="notif-badge">0</span>
+        </button>
+        <div class="notif-panel hidden" id="notif-panel">
+          <div class="notif-panel-header">
+            <span>Notificações</span>
+            <button class="btn btn-ghost btn-sm" onclick="clearAllNotifs()">Limpar</button>
+          </div>
+          <div id="notif-list">
+            <div class="notif-panel-empty">Nenhuma notificação</div>
+          </div>
+        </div>
+      </div>
+      <button class="gear-btn" onclick="openSettings()" title="Configurações">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <button class="logout-btn" onclick="doLogout()" style="flex-shrink:0;white-space:nowrap;">Sair</button>
     </div>
   </div>
 
@@ -677,13 +791,25 @@
         Clientes
       </div>
       <div class="sidebar-item" id="sb-chat" onclick="switchTab('chat')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
         Chat
         <span class="sidebar-chat-badge hidden" id="sb-chat-badge">0</span>
       </div>
       <div class="sidebar-item" id="sb-feedback" onclick="switchTab('feedback')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         Feedbacks
+      </div>
+      <!-- sidebar footer com usuário -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="sidebar-user-avatar">N</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebar-user-name">—</div>
+            <div class="sidebar-user-role">Nutricionista</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1328,7 +1454,17 @@ function enterDashboard() {
   } else {
     _showDashboard();
   }
-  document.getElementById('topbar-user').textContent = _currentNutri.name || _currentNutri.username;
+  // Preenche o usuário no footer da sidebar
+  var _uName = _currentNutri.name || _currentNutri.username || '—';
+  var nameEl = document.getElementById('sidebar-user-name');
+  if (nameEl) nameEl.textContent = _uName;
+  var avatarEl = document.getElementById('sidebar-user-avatar');
+  if (avatarEl) {
+    var parts = _uName.trim().split(' ');
+    avatarEl.textContent = parts.length >= 2
+      ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase()
+      : _uName.slice(0,2).toUpperCase();
+  }
   // Saudação
   const h = new Date().getHours();
   const greet = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -1337,6 +1473,32 @@ function enterDashboard() {
   loadClients();
   loadDashboard();
   listenChat();
+}
+
+
+// ── Notificações (painel simples) ──
+window._notifPanelOpen = false;
+function toggleNotifPanel() {
+  var panel = document.getElementById('notif-panel');
+  window._notifPanelOpen = !window._notifPanelOpen;
+  panel.classList.toggle('hidden', !window._notifPanelOpen);
+  if (window._notifPanelOpen) {
+    document.addEventListener('click', _closeNotifOnOutside, { once: true });
+  }
+}
+function _closeNotifOnOutside(e) {
+  var wrap = document.querySelector('.notif-wrap-rel');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('notif-panel').classList.add('hidden');
+    window._notifPanelOpen = false;
+  }
+}
+function clearAllNotifs() {
+  document.getElementById('notif-list').innerHTML = '<div class="notif-panel-empty">Nenhuma notificação</div>';
+  document.getElementById('notif-badge').classList.add('hidden');
+}
+function openSettings() {
+  // placeholder — pode ligar a um modal de configurações futuramente
 }
 
 function doLogout() {
