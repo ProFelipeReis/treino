@@ -14579,6 +14579,37 @@
   </div>
 
   <!-- ── SPLASH PÓS-LOGIN ── -->
+  <style>
+    #login-splash {
+      position: fixed;
+      inset: 0;
+      background: #000000;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .4s ease;
+    }
+    #login-splash.splash-in {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+    }
+    #login-splash.splash-out {
+      opacity: 0;
+    }
+    #login-splash video {
+      width: min(260px, 55vw);
+      height: auto;
+      max-height: 55vh;
+      display: block;
+      object-fit: contain;
+    }
+  </style>
+
   <div id="login-splash">
     <video id="login-splash-video"
       src="https://felipereiscruz.github.io/videos/imput.webm"
