@@ -8760,6 +8760,20 @@
       }, 5 * 60 * 1000);
       // Verifica notificação pendente de revogação de bônus de indicação
       setTimeout(function () { if (window._checkPendingReferralRevokeNotice) _checkPendingReferralRevokeNotice(); }, 1500);
+      // ── Popup global/individual: tenta após 3s, com retry em 8s se falhar ──
+      (function _schedulePopup() {
+        var _u = window.CURRENT_USER || {};
+        if (_u.role === 'ceo') return;
+        function _tryPopup() {
+          if (window.checkAndShowGlobalPopup) {
+            window.checkAndShowGlobalPopup().catch(function(e) {
+              console.warn('[popup] retry em 5s:', e);
+              setTimeout(function() { if (window.checkAndShowGlobalPopup) window.checkAndShowGlobalPopup(); }, 5000);
+            });
+          }
+        }
+        setTimeout(_tryPopup, 3000);
+      })();
       // Atualiza dados do Firestore
       _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username))).then(function (snap) {
         if (!snap.empty) {
@@ -11665,9 +11679,6 @@
             (function w() { if (window.showSubscriptionWall) { showSubscriptionWall(); } else { setTimeout(w, 100); } })();
           } else {
             window.showDashboard();
-            setTimeout(function() {
-              if (window.checkAndShowGlobalPopup) window.checkAndShowGlobalPopup();
-            }, 2500);
           }
         } else {
           clearSession();
@@ -13530,19 +13541,10 @@
         var displayModal = document.getElementById('modal-global-popup-display');
         displayModal.dataset.previewMode = '';
         displayModal.classList.add('on');
-      } catch(e) { console.warn('checkAndShowGlobalPopup:', e); }
+      } catch(e) { console.warn('checkAndShowGlobalPopup:', e); throw e; }
     };
 
-    // ── Integra com o fluxo de login (dispara 2s após entrar no painel) ──
-    (function _patchDashboardForPopup() {
-      var _origShow = window.showDashboardAfterLogin;
-      window.showDashboardAfterLogin = window.showDashboard = function (userData) {
-        if (_origShow) _origShow.call(this, userData);
-        setTimeout(function () {
-          if (window.checkAndShowGlobalPopup) checkAndShowGlobalPopup();
-        }, 2000);
-      };
-    })();
+    // Popup já integrado diretamente em showDashboardAfterLogin com retry automático.
 
     // ══════════════════════════════════════════════════════════
     // SISTEMA DE CONVITE — tudo aqui, _db já está disponível
