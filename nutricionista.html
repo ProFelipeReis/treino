@@ -2304,21 +2304,64 @@ async function deleteEvolucaoNutri(id) {
 function openNovaAvaliacao() {
   if (!_currentClientId) return;
   const c = _clientsRaw.find(x => x.id === _currentClientId) || {};
+
+  // subtítulo
   document.getElementById('modal-nova-aval-sub').textContent = c.name || 'Cliente';
-  // Reset fields
-  ['na-weight','na-obs'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
+
+  // data de hoje
   document.getElementById('na-date').value = new Date().toISOString().split('T')[0];
-  // Reset measures
-  ['na-m-waist','na-m-hip','na-m-chest','na-m-arm-r','na-m-arm-l','na-m-thigh-r'].forEach(id => {
-    const e = document.getElementById(id); if(e) e.value='';
+
+  // preencher dados pessoais do cliente
+  ['na-p-name','na-p-phone','na-p-email','na-p-birth','na-height'].forEach(id => {
+    const e = document.getElementById(id); if (e) e.value = '';
   });
-  // Reset fat
-  naFatClearAll();
-  // Sync height for navy
+  const naSex = document.getElementById('na-p-sex'); if (naSex) naSex.value = '';
+  if (c.name)   { const e = document.getElementById('na-p-name');  if(e) e.value = c.name; }
+  if (c.phone)  { const e = document.getElementById('na-p-phone'); if(e) e.value = c.phone; }
+  if (c.email)  { const e = document.getElementById('na-p-email'); if(e) e.value = c.email; }
+  if (c.birth)  { const e = document.getElementById('na-p-birth'); if(e) e.value = c.birth; }
+  if (c.sex)    { const e = document.getElementById('na-p-sex');   if(e) e.value = c.sex; }
+  if (c.height) { const e = document.getElementById('na-height');  if(e) e.value = c.height; }
   const nvh = document.getElementById('na-nv-height');
   if (nvh && c.height) nvh.value = c.height;
+
+  // preview de idade
+  naCalcAgePreview();
+  // IMC
+  const imcBox = document.getElementById('na-imc-box'); if (imcBox) imcBox.style.display = 'none';
+  naCalcImc();
+
+  // reset peso e obs
+  ['na-weight','na-obs'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
+
+  // reset medidas
+  ['na-m-waist','na-m-hip','na-m-chest','na-m-arm-r','na-m-arm-l','na-m-thigh-r',
+   'na-m-shoulder','na-m-thigh-l','na-m-calf-r','na-m-calf-l'].forEach(id => {
+    const e = document.getElementById(id); if(e) e.value='';
+  });
+
+  // reset fat
+  naFatClearAll();
+
+  // reset saúde
+  ['na-chk-injuries','na-chk-conditions','na-chk-meds'].forEach(id => {
+    const e = document.getElementById(id); if(e) e.checked = false;
+  });
+  ['na-det-injuries','na-det-conditions','na-det-meds'].forEach(id => {
+    const e = document.getElementById(id); if(e) e.classList.remove('visible');
+  });
+  document.querySelectorAll('#modal-nova-avaliacao .health-check-item').forEach(i => i.classList.remove('checked'));
+  ['na-txt-injuries','na-txt-conditions','na-txt-meds'].forEach(id => {
+    const e = document.getElementById(id); if(e) e.value = '';
+  });
+
+  // reset abas → Dados Pessoais
+  const firstTab = document.querySelector('#modal-nova-avaliacao .assessment-tab');
+  switchAvalTab('aval-tab-dados', firstTab);
+
   openModal('modal-nova-avaliacao');
 }
+
 
 function naFatFormulaChange() {
   const formula = document.getElementById('na-fat-formula-sel').value;
@@ -2642,8 +2685,18 @@ function openAddClient() {
   ['cl-birth','cl-sex','cl-goal','cl-activity'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
   ['cl-weight','cl-height'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
   renderTagsList('condition'); renderTagsList('allergy');
+  // reset abas + limpar campos físicos/saúde
+  const firstTab = document.querySelector('#modal-client .assessment-tab');
+  switchClientTab('cl-tab-dados', firstTab);
+  const imcBox = document.getElementById('cl-imc-box'); if(imcBox) imcBox.style.display='none';
+  const ageEl = document.getElementById('cl-age-preview'); if(ageEl) ageEl.style.display='none';
+  ['cl-chk-injuries','cl-chk-conditions','cl-chk-meds'].forEach(id => { const e=document.getElementById(id); if(e) e.checked=false; });
+  ['cl-det-injuries','cl-det-conditions','cl-det-meds'].forEach(id => { const e=document.getElementById(id); if(e) e.classList.remove('visible'); });
+  document.querySelectorAll('#modal-client .health-check-item').forEach(i => i.classList.remove('checked'));
+  ['cl-txt-injuries','cl-txt-conditions','cl-txt-meds'].forEach(id => { const e=document.getElementById(id); if(e) e.value=''; });
   openModal('modal-client');
 }
+
 
 function openEditClient() {
   if (!_currentClientId) return;
@@ -2666,8 +2719,14 @@ function openEditClient() {
   document.getElementById('cl-activity').value = c.activity||'';
   document.getElementById('cl-obs').value = c.obs||'';
   renderTagsList('condition'); renderTagsList('allergy');
+  // reset abas + IMC
+  const firstTab = document.querySelector('#modal-client .assessment-tab');
+  switchClientTab('cl-tab-dados', firstTab);
+  clCalcImc();
+  clCalcAgePreview();
   openModal('modal-client');
 }
+
 
 function addTag(type) {
   const input = document.getElementById('cl-' + (type==='condition'?'condition':'allergy') + '-input');
@@ -3498,70 +3557,13 @@ function naOnSexChange() {
 
 // ══ RESET ABAS ao abrir modal ══
 // Patch do openNovaAvaliacao para resetar abas e campos novos
-const _origOpenNovaAval = typeof openNovaAvaliacao !== 'undefined' ? openNovaAvaliacao : null;
-function openNovaAvaliacao() {
-  if (_origOpenNovaAval) _origOpenNovaAval();
-  // reset abas
-  switchAvalTab('aval-tab-dados', document.querySelector('#modal-nova-avaliacao .assessment-tab'));
-  // reset campos novos
-  ['na-p-name','na-p-phone','na-p-email','na-p-birth','na-height'].forEach(id => {
-    const e = document.getElementById(id); if (e) e.value = '';
-  });
-  ['na-p-sex'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
-  const ageEl = document.getElementById('na-age-preview');
-  if (ageEl) ageEl.style.display = 'none';
-  // preencher nome/dados do cliente atual
-  const c = (_clientsRaw||[]).find(x => x.id === _currentClientId);
-  if (c) {
-    const nameEl = document.getElementById('na-p-name'); if (nameEl) nameEl.value = c.name || '';
-    const phoneEl = document.getElementById('na-p-phone'); if (phoneEl) phoneEl.value = c.phone || '';
-    const emailEl = document.getElementById('na-p-email'); if (emailEl) emailEl.value = c.email || '';
-    const birthEl = document.getElementById('na-p-birth'); if (birthEl) birthEl.value = c.birth || '';
-    const sexEl = document.getElementById('na-p-sex'); if (sexEl) sexEl.value = c.sex || '';
-    // altura para navy
-    const nvh = document.getElementById('na-nv-height'); if (nvh && c.height) nvh.value = c.height;
-    const hEl = document.getElementById('na-height'); if (hEl && c.height) hEl.value = c.height;
-    naCalcImc();
-    naCalcAgePreview();
-  }
-  // reset saúde
-  ['na-chk-injuries','na-chk-conditions','na-chk-meds'].forEach(id => { const e = document.getElementById(id); if (e) e.checked = false; });
-  ['na-det-injuries','na-det-conditions','na-det-meds'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('visible'); });
-  document.querySelectorAll('#modal-nova-avaliacao .health-check-item').forEach(i => i.classList.remove('checked'));
-  ['na-txt-injuries','na-txt-conditions','na-txt-meds'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
-  // resetar IMC box
-  const imcBox = document.getElementById('na-imc-box'); if (imcBox) imcBox.style.display = 'none';
-}
+
 
 // Patch openEditClient para resetar abas
-const _origOpenEditClient = typeof openEditClient !== 'undefined' ? openEditClient : null;
-function openEditClient() {
-  if (_origOpenEditClient) _origOpenEditClient();
-  // reset abas para primeira
-  setTimeout(() => {
-    switchClientTab('cl-tab-dados', document.querySelector('#modal-client .assessment-tab'));
-    clCalcImc();
-    clCalcAgePreview();
-  }, 50);
-}
+
 
 // Patch openAddClient para resetar abas e limpar campos físicos/saúde
-const _origOpenAddClient = typeof openAddClient !== 'undefined' ? openAddClient : null;
-function openAddClient() {
-  if (_origOpenAddClient) _origOpenAddClient();
-  setTimeout(() => {
-    switchClientTab('cl-tab-dados', document.querySelector('#modal-client .assessment-tab'));
-    // limpar campos físicos
-    ['cl-weight','cl-height'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
-    const imcBox = document.getElementById('cl-imc-box'); if (imcBox) imcBox.style.display = 'none';
-    // limpar saúde
-    ['cl-chk-injuries','cl-chk-conditions','cl-chk-meds'].forEach(id => { const e = document.getElementById(id); if (e) e.checked = false; });
-    ['cl-det-injuries','cl-det-conditions','cl-det-meds'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('visible'); });
-    document.querySelectorAll('#modal-client .health-check-item').forEach(i => i.classList.remove('checked'));
-    ['cl-txt-injuries','cl-txt-conditions','cl-txt-meds'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
-    const ageEl = document.getElementById('cl-age-preview'); if (ageEl) ageEl.style.display = 'none';
-  }, 50);
-}
+
 
 </script>
 
