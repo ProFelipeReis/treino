@@ -887,6 +887,42 @@
 
     /* ── Modal nova avaliação ── */
     #modal-nova-avaliacao .modal { max-width: 600px; }
+
+/* === ASSESSMENT TABS (modal editar cliente) === */
+.assessment-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:20px; }
+.assessment-tab { padding:10px 18px; font-size:.83rem; font-weight:700; color:var(--text3); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all .15s; background:none; border-top:none; border-left:none; border-right:none; font-family:var(--body); }
+.assessment-tab.active { color:var(--text); border-bottom-color:#5cb87c; }
+.assessment-tab-panel { display:none; }
+.assessment-tab-panel.active { display:block; }
+
+/* IMC display */
+.imc-display { background:var(--accent-dim,rgba(245,200,0,.10)); border:1.5px solid var(--accent-soft,rgba(245,200,0,.25)); border-radius:var(--r); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+.imc-display-label { font-size:.72rem; font-weight:800; color:#8a6200; text-transform:uppercase; letter-spacing:.08em; }
+.imc-display-value { font-family:var(--head); font-size:1.3rem; font-weight:800; color:var(--text); }
+.imc-display-cat { font-size:.72rem; color:var(--text2); font-weight:600; margin-top:2px; }
+
+/* evol-section-title */
+.evol-section-title { font-size:.72rem; font-weight:800; color:var(--text3); text-transform:uppercase; letter-spacing:.1em; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.evol-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* health-check */
+.health-check-group { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.health-check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--surface2); border:1.5px solid var(--border); border-radius:var(--r); cursor:pointer; transition:all .15s; }
+.health-check-item:hover { border-color:var(--border2); }
+.health-check-item.checked { background:rgba(245,200,0,.10); border-color:rgba(245,200,0,.25); }
+.health-check-item input[type=checkbox] { width:16px; height:16px; accent-color:#5cb87c; flex-shrink:0; }
+.health-check-item label { font-size:.86rem; font-weight:600; color:var(--text); cursor:pointer; flex:1; }
+.health-detail-field { margin-top:8px; display:none; }
+.health-detail-field.visible { display:block; }
+
+/* medidas colapsáveis */
+.medidas-collapsible-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; padding:10px 14px; background:var(--surface2); border:1.5px solid var(--border); border-radius:var(--r); font-weight:700; font-size:.85rem; color:var(--text2); margin-top:16px; }
+.medidas-arrow { transition:transform .2s; flex-shrink:0; }
+.medidas-collapsible-body { display:none; margin-top:8px; }
+.evol-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.evol-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+@media(max-width:520px){ .evol-grid{grid-template-columns:1fr;} .evol-grid-3{grid-template-columns:1fr 1fr;} }
+
 </style>
 </head>
 <body>
@@ -1241,112 +1277,238 @@
 ══════════════════════════════════════════════ -->
 
 <!-- ADD / EDIT CLIENT MODAL -->
+<!-- ADD/EDIT CLIENT MODAL COMPLETO -->
 <div id="modal-client" class="modal-overlay hidden">
-  <div class="modal">
+  <div class="modal" style="max-width:640px">
     <div class="modal-header">
       <div>
         <h3 id="modal-client-title">Novo cliente</h3>
-        <span id="modal-client-sub" style="font-size:.78rem;margin-top:2px;display:block;">Preencha os dados do cliente</span>
+        <span id="modal-client-sub" style="font-size:.78rem;margin-top:2px;display:block;color:rgba(255,255,255,.55)">Preencha os dados do cliente</span>
       </div>
-      <button class="close-btn" onclick="closeModal('modal-client')">✕</button>
+      <button class="close-btn" onclick="closeModal('modal-client')">&#x2715;</button>
     </div>
     <div class="modal-body">
-      <div id="modal-client-error" style="color:var(--red);font-size:.82rem;font-weight:700;min-height:18px;margin-bottom:10px;"></div>
+      <div id="modal-client-error" style="color:var(--red);font-size:.82rem;font-weight:700;min-height:18px;margin-bottom:10px"></div>
 
-      <div class="section-label">Dados pessoais</div>
-      <div class="form-group">
-        <label>Nome completo *</label>
-        <input id="cl-name" class="form-control" type="text" placeholder="Nome do cliente" />
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Data de nascimento</label>
-          <input id="cl-birth" class="form-control" type="date" />
-        </div>
-        <div class="form-group">
-          <label>Sexo</label>
-          <select id="cl-sex" class="form-control">
-            <option value="">Selecione</option>
-            <option value="M">Masculino</option>
-            <option value="F">Feminino</option>
-            <option value="Outro">Outro</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Peso atual (kg)</label>
-          <input id="cl-weight" class="form-control" type="number" step="0.1" placeholder="Ex: 70.5" />
-        </div>
-        <div class="form-group">
-          <label>Altura (cm)</label>
-          <input id="cl-height" class="form-control" type="number" step="1" placeholder="Ex: 170" />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Telefone / WhatsApp</label>
-          <input id="cl-phone" class="form-control" type="tel" placeholder="(11) 99999-9999" />
-        </div>
-        <div class="form-group">
-          <label>E-mail</label>
-          <input id="cl-email" class="form-control" type="email" placeholder="cliente@email.com" />
-        </div>
+      <!-- ABAS -->
+      <div class="assessment-tabs">
+        <button class="assessment-tab active" onclick="switchEditClientTab('ect-dados',this)">Dados pessoais</button>
+        <button class="assessment-tab" onclick="switchEditClientTab('ect-fisico',this)">Dados físicos</button>
+        <button class="assessment-tab" onclick="switchEditClientTab('ect-saude',this)">Saúde</button>
       </div>
 
-      <div class="section-label" style="margin-top:4px;">Objetivos e estilo de vida</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Objetivo principal</label>
-          <select id="cl-goal" class="form-control">
-            <option value="">Selecione</option>
-            <option value="Perda de peso">Perda de peso</option>
-            <option value="Ganho de massa">Ganho de massa muscular</option>
-            <option value="Manutenção">Manutenção</option>
-            <option value="Saúde geral">Saúde geral</option>
-            <option value="Desempenho esportivo">Desempenho esportivo</option>
-            <option value="Gestação/amamentação">Gestação / amamentação</option>
-            <option value="Controle de doenças">Controle de doenças</option>
-          </select>
+      <!-- TAB: DADOS PESSOAIS -->
+      <div class="assessment-tab-panel active" id="ect-dados">
+        <div class="evol-section-title">Dados essenciais</div>
+        <div class="form-group"><label>Nome completo</label>
+          <input id="cl-name" class="form-control" type="text" placeholder="Nome do cliente">
         </div>
-        <div class="form-group">
-          <label>Nível de atividade física</label>
-          <select id="cl-activity" class="form-control">
-            <option value="">Selecione</option>
-            <option value="Sedentário">Sedentário (sem exercícios)</option>
-            <option value="Leve">Leve (1-2x/sem)</option>
-            <option value="Moderado">Moderado (3-4x/sem)</option>
-            <option value="Intenso">Intenso (5-6x/sem)</option>
-            <option value="Muito intenso">Muito intenso (2x/dia)</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group"><label>Telefone / WhatsApp</label>
+            <input id="cl-phone" class="form-control" type="tel" placeholder="11 99999-9999">
+          </div>
+          <div class="form-group"><label>E-mail</label>
+            <input id="cl-email" class="form-control" type="email" placeholder="cliente@email.com">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Data de nascimento</label>
+            <input id="cl-birth" class="form-control" type="date" onchange="calcClientAgePreview()">
+          </div>
+          <div class="form-group"><label>Sexo</label>
+            <select id="cl-sex" class="form-control" onchange="onClientSexChange()">
+              <option value="">Selecione</option>
+              <option value="M">Masculino</option>
+              <option value="F">Feminino</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+        </div>
+        <div id="cl-age-preview" style="font-size:.78rem;color:var(--text3);font-weight:600;margin-top:-10px;margin-bottom:12px;display:none"></div>
+      </div>
+
+      <!-- TAB: DADOS FÍSICOS -->
+      <div class="assessment-tab-panel" id="ect-fisico">
+        <div style="background:rgba(245,200,0,.10);border:1.5px solid rgba(245,200,0,.25);border-radius:var(--r);padding:10px 14px;margin-bottom:16px;font-size:.8rem;color:#8a6200;font-weight:600">
+          &#9432; Ao salvar, estes dados serão registrados como uma nova avaliação com a data de hoje. O histórico anterior é preservado.
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Peso (kg)</label>
+            <input id="cl-weight" class="form-control" type="number" step="0.1" placeholder="Ex: 70.5"
+              oninput="calcImcClientPreview(); if(document.getElementById('cl-fat-formula')?.value==='navy'){const nv=document.getElementById('cl-nv-height');if(nv)nv.value=document.getElementById('cl-height').value;}">
+          </div>
+          <div class="form-group"><label>Altura (cm)</label>
+            <input id="cl-height" class="form-control" type="number" step="1" placeholder="Ex: 170"
+              oninput="calcImcClientPreview(); if(document.getElementById('cl-fat-formula')?.value==='navy'){const nv=document.getElementById('cl-nv-height');if(nv)nv.value=this.value;}">
+          </div>
+        </div>
+        <!-- IMC calculado -->
+        <div id="cl-imc-box" style="display:none" class="imc-display">
+          <div>
+            <div class="imc-display-label">IMC calculado</div>
+            <div class="imc-display-cat" id="cl-imc-cat"></div>
+          </div>
+          <div class="imc-display-value" id="cl-imc-val"></div>
+        </div>
+
+        <!-- CALCULADORA DE GORDURA -->
+        <div class="fat-calc-block" id="cl-fat-calc" style="margin-top:16px">
+          <div class="fat-calc-header">
+            <span class="evol-section-title" style="margin:0">Gordura Corporal</span>
+            <button type="button" class="fat-clear-btn" onclick="fatClearAll('cl')">Limpar</button>
+          </div>
+          <div class="form-group" style="margin-top:10px">
+            <label>Fórmula</label>
+            <select id="cl-fat-formula" class="form-control" onchange="fatFormulaChange('cl')">
+              <option value="">Selecione uma fórmula</option>
+              <option value="jp3">Jackson-Pollock 3 dobras</option>
+              <option value="jp7">Jackson-Pollock 7 dobras</option>
+              <option value="dw">Durnin-Womersley</option>
+              <option value="faulkner">Faulkner</option>
+              <option value="navy">US Navy</option>
+            </select>
+          </div>
+          <div id="cl-fat-formula-desc" class="fat-formula-desc hidden"></div>
+
+          <!-- JP3 -->
+          <div id="cl-fat-jp3" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Peitoral</label><input id="cl-jp3-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Abdômen</label><input id="cl-jp3-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Coxa</label><input id="cl-jp3-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+            </div>
+          </div>
+          <!-- JP7 -->
+          <div id="cl-fat-jp7" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Peitoral</label><input id="cl-jp7-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Abdômen</label><input id="cl-jp7-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Coxa</label><input id="cl-jp7-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Tríceps</label><input id="cl-jp7-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Subescapular</label><input id="cl-jp7-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Supra-ilíaca</label><input id="cl-jp7-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Axilar média</label><input id="cl-jp7-axil" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+            </div>
+          </div>
+          <!-- DW -->
+          <div id="cl-fat-dw" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Bíceps</label><input id="cl-dw-bi" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Tríceps</label><input id="cl-dw-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Subescapular</label><input id="cl-dw-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Supra-ilíaca</label><input id="cl-dw-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+            </div>
+          </div>
+          <!-- Faulkner -->
+          <div id="cl-fat-faulkner" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Tríceps</label><input id="cl-fk-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Subescapular</label><input id="cl-fk-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Supra-ilíaca</label><input id="cl-fk-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Abdômen</label><input id="cl-fk-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="fatCalc('cl')"></div>
+            </div>
+          </div>
+          <!-- Navy -->
+          <div id="cl-fat-navy" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Circunferências (cm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Altura (cm)</label><input id="cl-nv-height" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" readonly tabindex="-1" style="background:var(--surface2);color:var(--text3);cursor:not-allowed;border-style:dashed"></div>
+              <div class="form-group"><label>Pescoço (cm)</label><input id="cl-nv-neck" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="fatCalc('cl')"></div>
+              <div class="form-group"><label>Cintura (cm)</label><input id="cl-nv-waist" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="fatCalc('cl')"></div>
+              <div class="form-group" id="cl-nv-hip-group" style="display:none"><label>Quadril (cm) <span style="font-size:.7rem;color:var(--text3)">(feminino)</span></label><input id="cl-nv-hip" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="fatCalc('cl')"></div>
+            </div>
+          </div>
+          <!-- campos hidden + resultado -->
+          <input type="hidden" id="cl-student-fat">
+          <input type="hidden" id="cl-student-fat-formula">
+          <input type="hidden" id="cl-student-fat-class">
+          <div id="cl-fat-result" class="fat-result-box hidden">
+            <div class="fat-result-pct" id="cl-fat-result-pct"></div>
+            <div class="fat-result-info">
+              <div class="fat-result-class" id="cl-fat-result-class"></div>
+              <div class="fat-result-formula" id="cl-fat-result-formula"></div>
+            </div>
+          </div>
+          <div id="cl-fat-missing" class="fat-missing-msg hidden">Preencha todos os campos obrigatórios para calcular.</div>
+        </div>
+
+        <!-- MEDIDAS CORPORAIS colapsável -->
+        <div class="medidas-collapsible-header" onclick="toggleMedidasSection(this)">
+          <span>Medidas corporais (cm)</span>
+          <svg class="medidas-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(-90deg)"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="medidas-collapsible-body">
+          <div class="evol-grid-3">
+            <div class="form-group"><label>Peitoral</label><input id="cl-m-chest" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+            <div class="form-group"><label>Cintura</label><input id="cl-m-waist" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+            <div class="form-group"><label>Quadril</label><input id="cl-m-hip" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+            <div class="form-group"><label>Braço D</label><input id="cl-m-arm-r" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+            <div class="form-group"><label>Braço E</label><input id="cl-m-arm-l" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+            <div class="form-group"><label>Ombro</label><input id="cl-m-shoulder" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+            <div class="form-group"><label>Coxa D</label><input id="cl-m-thigh-r" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+            <div class="form-group"><label>Coxa E</label><input id="cl-m-thigh-l" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+            <div class="form-group"><label>Panturrilha D</label><input id="cl-m-calf-r" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+            <div class="form-group"><label>Panturrilha E</label><input id="cl-m-calf-l" class="form-control" type="number" step="0.1" placeholder="cm"></div>
+          </div>
         </div>
       </div>
 
-      <div class="section-label" style="margin-top:4px;">Saúde e restrições</div>
-      <div class="form-group">
-        <label>Condições de saúde / doenças</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;" id="conditions-tags"></div>
-        <div style="display:flex;gap:8px;">
-          <input id="cl-condition-input" class="form-control" type="text" placeholder="Ex: diabetes, hipertensão..." style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag('condition');}" />
-          <button class="btn btn-ghost btn-sm" onclick="addTag('condition')">+ Adicionar</button>
+      <!-- TAB: SAÚDE -->
+      <div class="assessment-tab-panel" id="ect-saude">
+        <div class="evol-section-title">Saúde</div>
+        <div class="health-check-group">
+          <div class="health-check-item" onclick="toggleHealthCheck(this,'cl-health-injuries-detail')">
+            <input type="checkbox" id="cl-chk-injuries" onclick="event.stopPropagation();toggleHealthCheck(this.closest('.health-check-item'),'cl-health-injuries-detail')">
+            <label for="cl-chk-injuries">Lesões ou limitações físicas</label>
+          </div>
+          <div class="health-detail-field" id="cl-health-injuries-detail">
+            <textarea id="cl-txt-injuries" class="form-control" rows="2" placeholder="Descreva as lesões ou limitações..."></textarea>
+          </div>
+
+          <div class="health-check-item" onclick="toggleHealthCheck(this,'cl-health-conditions-detail')">
+            <input type="checkbox" id="cl-chk-conditions" onclick="event.stopPropagation();toggleHealthCheck(this.closest('.health-check-item'),'cl-health-conditions-detail')">
+            <label for="cl-chk-conditions">Problemas de saúde</label>
+          </div>
+          <div class="health-detail-field" id="cl-health-conditions-detail">
+            <textarea id="cl-txt-conditions" class="form-control" rows="2" placeholder="Descreva os problemas de saúde..."></textarea>
+          </div>
+
+          <div class="health-check-item" onclick="toggleHealthCheck(this,'cl-health-meds-detail')">
+            <input type="checkbox" id="cl-chk-meds" onclick="event.stopPropagation();toggleHealthCheck(this.closest('.health-check-item'),'cl-health-meds-detail')">
+            <label for="cl-chk-meds">Uso de medicamentos</label>
+          </div>
+          <div class="health-detail-field" id="cl-health-meds-detail">
+            <textarea id="cl-txt-meds" class="form-control" rows="2" placeholder="Liste os medicamentos em uso..."></textarea>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label>Alergias / intolerâncias alimentares</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;" id="allergies-tags"></div>
-        <div style="display:flex;gap:8px;">
-          <input id="cl-allergy-input" class="form-control" type="text" placeholder="Ex: lactose, glúten, amendoim..." style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag('allergy');}" />
-          <button class="btn btn-ghost btn-sm" onclick="addTag('allergy')">+ Adicionar</button>
+
+        <!-- Condições de saúde (tags existentes) -->
+        <div class="form-group"><label>Condições de saúde / doenças</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px" id="conditions-tags"></div>
+          <div style="display:flex;gap:8px">
+            <input id="cl-condition-input" class="form-control" type="text" placeholder="Ex: diabetes, hipertensão..." style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag('condition')}">
+            <button class="btn btn-ghost btn-sm" onclick="addTag('condition')">Adicionar</button>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label>Observações / anamnese</label>
-        <textarea id="cl-obs" class="form-control" rows="3" placeholder="Histórico alimentar, preferências, restrições adicionais..."></textarea>
+        <div class="form-group"><label>Alergias / intolerâncias alimentares</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px" id="allergies-tags"></div>
+          <div style="display:flex;gap:8px">
+            <input id="cl-allergy-input" class="form-control" type="text" placeholder="Ex: lactose, glúten, amendoim..." style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag('allergy')}">
+            <button class="btn btn-ghost btn-sm" onclick="addTag('allergy')">Adicionar</button>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:8px"><label>Observações gerais (opcional)</label>
+          <textarea id="cl-obs" class="form-control" rows="3" placeholder="Histórico alimentar, preferências, restrições adicionais..."></textarea>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-client')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-save-client" onclick="saveClient()">
+      <button class="btn btn-primary" id="btn-save-client" onclick="saveClient">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Salvar cliente
       </button>
@@ -3182,6 +3344,252 @@ async function saveReply(id) {
     });
   });
 })();
+
+
+// patch reset abas modal-client
+const _origOpenAddClient = window.openAddClient;
+window.openAddClient = function() {
+  if (_origOpenAddClient) _origOpenAddClient();
+  // reset abas
+  document.querySelectorAll('#modal-client .assessment-tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
+  document.querySelectorAll('#modal-client .assessment-tab').forEach((b,i)=>b.classList.toggle('active',i===0));
+  // reset campos físicos/saúde
+  ['cl-weight','cl-height','cl-m-chest','cl-m-waist','cl-m-hip','cl-m-arm-r','cl-m-arm-l','cl-m-shoulder','cl-m-thigh-r','cl-m-thigh-l','cl-m-calf-r','cl-m-calf-l'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['cl-txt-injuries','cl-txt-conditions','cl-txt-meds'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['cl-chk-injuries','cl-chk-conditions','cl-chk-meds'].forEach(id=>{const e=document.getElementById(id);if(e)e.checked=false;});
+  ['cl-health-injuries-detail','cl-health-conditions-detail','cl-health-meds-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('visible');});
+  document.querySelectorAll('#modal-client .health-check-item').forEach(i=>i.classList.remove('checked'));
+  if(document.getElementById('cl-imc-box'))document.getElementById('cl-imc-box').style.display='none';
+  if(document.getElementById('cl-age-preview'))document.getElementById('cl-age-preview').style.display='none';
+  fatClearAll('cl');
+};
+const _origOpenEditClient = window.openEditClient;
+window.openEditClient = function() {
+  if (_origOpenEditClient) _origOpenEditClient();
+  document.querySelectorAll('#modal-client .assessment-tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
+  document.querySelectorAll('#modal-client .assessment-tab').forEach((b,i)=>b.classList.toggle('active',i===0));
+  calcImcClientPreview();
+  calcClientAgePreview();
+};
+
+
+
+/* === FUNÇÕES DO NOVO MODAL COMPLETO (cliente) === */
+window.switchEditClientTab = function(tabId, btn) {
+  document.querySelectorAll('#modal-client .assessment-tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#modal-client .assessment-tab').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById(tabId);
+  if (el) el.classList.add('active');
+  if (btn) btn.classList.add('active');
+};
+
+window.calcClientAgePreview = function() {
+  const dob = document.getElementById('cl-birth')?.value;
+  const el = document.getElementById('cl-age-preview');
+  if (!dob || !el) return;
+  const age = Math.floor((Date.now() - new Date(dob + 'T12:00').getTime()) / (365.25 * 86400000));
+  if (age > 0 && age < 120) { el.textContent = age + ' anos'; el.style.display = 'block'; }
+  else el.style.display = 'none';
+};
+
+window.calcImcClientPreview = function() {
+  const w = parseFloat(document.getElementById('cl-weight')?.value);
+  const h = parseFloat(document.getElementById('cl-height')?.value);
+  const box = document.getElementById('cl-imc-box');
+  if (!box) return;
+  if (!w || !h) { box.style.display = 'none'; return; }
+  const imc = w / ((h / 100) ** 2);
+  let cat = '';
+  if (imc < 18.5) cat = 'Abaixo do peso';
+  else if (imc < 25) cat = 'Peso normal';
+  else if (imc < 30) cat = 'Sobrepeso';
+  else if (imc < 35) cat = 'Obesidade grau I';
+  else if (imc < 40) cat = 'Obesidade grau II';
+  else cat = 'Obesidade grau III';
+  document.getElementById('cl-imc-val').textContent = imc.toFixed(1);
+  document.getElementById('cl-imc-cat').textContent = cat;
+  box.style.display = 'flex';
+};
+
+window.onClientSexChange = function() {
+  if (document.getElementById('cl-fat-formula')?.value === 'navy') fatFormulaChange('cl');
+};
+
+window.toggleMedidasSection = function(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.medidas-arrow');
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? 'rotate(-90deg)' : 'rotate(0deg)';
+};
+
+window.toggleHealthCheck = function(item, detailId) {
+  const chk = item.querySelector('input[type=checkbox]');
+  const detail = document.getElementById(detailId);
+  if (!chk || !detail) return;
+  const checked = !chk.checked;
+  chk.checked = checked;
+  item.classList.toggle('checked', checked);
+  detail.classList.toggle('visible', checked);
+};
+
+/* fat calc para prefixo 'cl' — reutiliza a função genérica fatGetSex/fatGetAge */
+window.fatGetSex = window.fatGetSex || function(prefix) {
+  if (prefix === 'cl') return document.getElementById('cl-sex')?.value || '';
+  if (prefix === 'nutri') { const c = (window.clientsRaw||[]).find(x=>x.id===window.currentClientId); return c ? c.sex : ''; }
+  return '';
+};
+window.fatGetAge = window.fatGetAge || function(prefix) {
+  let dob;
+  if (prefix === 'cl') dob = document.getElementById('cl-birth')?.value;
+  else if (prefix === 'nutri') { const c = (window.clientsRaw||[]).find(x=>x.id===window.currentClientId); dob = c?.birth; }
+  if (!dob) return null;
+  const age = Math.floor((Date.now() - new Date(dob + 'T12:00').getTime()) / (365.25 * 86400000));
+  return age > 0 ? age : null;
+};
+
+window.fatFormulaChange = function(prefix) {
+  const formula = document.getElementById(prefix + '-fat-formula')?.value;
+  ['jp3','jp7','dw','faulkner','navy'].forEach(f => {
+    const el = document.getElementById(prefix + '-fat-' + f);
+    if (el) el.classList.toggle('hidden', f !== formula);
+  });
+  const DESCS = {
+    jp3:'Usa 3 dobras cutâneas: Peitoral, Abdômen e Coxa. Ideal para homens.',
+    jp7:'Usa 7 dobras cutâneas para maior precisão. Indicada para avaliações detalhadas.',
+    dw:'Baseada em 4 dobras. Boa opção para populações gerais e idosos.',
+    faulkner:'Usa 4 dobras. Recomendada para atletas e nadadores.',
+    navy:'Estima a gordura por medidas de circunferência. Não requer adipômetro.'
+  };
+  const descEl = document.getElementById(prefix + '-fat-formula-desc');
+  if (descEl) { if (formula && DESCS[formula]) { descEl.textContent = DESCS[formula]; descEl.classList.remove('hidden'); } else descEl.classList.add('hidden'); }
+  if (formula === 'navy') {
+    const nvh = document.getElementById(prefix + '-nv-height');
+    const sex = fatGetSex(prefix);
+    const hField = prefix === 'cl' ? document.getElementById('cl-height') : null;
+    if (nvh && hField && hField.value) nvh.value = hField.value;
+    const hipGrp = document.getElementById(prefix + '-nv-hip-group');
+    if (hipGrp) hipGrp.style.display = (sex === 'F') ? '' : 'none';
+  }
+  fatCalc(prefix);
+};
+
+window.fatCalc = function(prefix) {
+  const formula = document.getElementById(prefix + '-fat-formula')?.value;
+  const sex = fatGetSex(prefix);
+  const age = fatGetAge(prefix);
+  const res = document.getElementById(prefix + '-fat-result');
+  const miss = document.getElementById(prefix + '-fat-missing');
+  const pctEl = document.getElementById(prefix + '-fat-result-pct');
+  const clsEl = document.getElementById(prefix + '-fat-result-class');
+  const frmEl = document.getElementById(prefix + '-fat-result-formula');
+  const hidFat = document.getElementById(prefix + '-student-fat');
+  const hidForm = document.getElementById(prefix + '-student-fat-formula');
+  const hidCls = document.getElementById(prefix + '-student-fat-class');
+  if (!formula || !res) return;
+  const g = id => { const el = document.getElementById(prefix + '-' + id); return el ? parseFloat(el.value) : NaN; };
+  let pct = null, missing = false;
+  const FNAMES = {jp3:'JP 3 dobras',jp7:'JP 7 dobras',dw:'Durnin-Womersley',faulkner:'Faulkner',navy:'US Navy'};
+
+  if (formula === 'jp3') {
+    const chest=g('jp3-chest'), abd=g('jp3-abd'), thigh=g('jp3-thigh');
+    if ([chest,abd,thigh].some(isNaN) || !sex || !age) { missing = true; }
+    else {
+      const S = chest + abd + thigh;
+      if (sex === 'M') { const D = 1.10938 - (0.0008267*S) + (0.0000016*S*S) - (0.0002574*age); pct = (495/D) - 450; }
+      else { const D = 1.0994921 - (0.0009929*S) + (0.0000023*S*S) - (0.0001392*age); pct = (495/D) - 450; }
+    }
+  } else if (formula === 'jp7') {
+    const chest=g('jp7-chest'), abd=g('jp7-abd'), thigh=g('jp7-thigh'), tri=g('jp7-tri'), sub=g('jp7-sub'), supra=g('jp7-supra'), axil=g('jp7-axil');
+    if ([chest,abd,thigh,tri,sub,supra,axil].some(isNaN) || !sex || !age) { missing = true; }
+    else {
+      const S = chest+abd+thigh+tri+sub+supra+axil;
+      if (sex === 'M') { const D = 1.112 - (0.00043499*S) + (0.00000055*S*S) - (0.00028826*age); pct = (495/D) - 450; }
+      else { const D = 1.097 - (0.00046971*S) + (0.00000056*S*S) - (0.00012828*age); pct = (495/D) - 450; }
+    }
+  } else if (formula === 'dw') {
+    const bi=g('dw-bi'), tri=g('dw-tri'), sub=g('dw-sub'), supra=g('dw-supra');
+    if ([bi,tri,sub,supra].some(isNaN) || !sex || !age) { missing = true; }
+    else {
+      const S = bi+tri+sub+supra;
+      const logS = Math.log10(S);
+      let D;
+      if (sex === 'M') {
+        if (age < 17) D = 1.1533 - (0.0643*logS);
+        else if (age < 20) D = 1.1620 - (0.0630*logS);
+        else if (age < 30) D = 1.1631 - (0.0632*logS);
+        else if (age < 40) D = 1.1422 - (0.0544*logS);
+        else if (age < 50) D = 1.1620 - (0.0700*logS);
+        else D = 1.1715 - (0.0779*logS);
+      } else {
+        if (age < 17) D = 1.1369 - (0.0598*logS);
+        else if (age < 20) D = 1.1549 - (0.0678*logS);
+        else if (age < 30) D = 1.1599 - (0.0717*logS);
+        else if (age < 40) D = 1.1423 - (0.0632*logS);
+        else if (age < 50) D = 1.1333 - (0.0612*logS);
+        else D = 1.1339 - (0.0645*logS);
+      }
+      pct = (495/D) - 450;
+    }
+  } else if (formula === 'faulkner') {
+    const tri=g('fk-tri'), sub=g('fk-sub'), supra=g('fk-supra'), abd=g('fk-abd');
+    if ([tri,sub,supra,abd].some(isNaN)) { missing = true; }
+    else { pct = (tri+sub+supra+abd) * 0.153 + 5.783; }
+  } else if (formula === 'navy') {
+    const height = parseFloat(document.getElementById(prefix+'-nv-height')?.value);
+    const neck = g('nv-neck'), waist = g('nv-waist');
+    const hip = sex === 'F' ? g('nv-hip') : null;
+    if (isNaN(height)||isNaN(neck)||isNaN(waist)||(sex==='F'&&isNaN(hip))) { missing = true; }
+    else {
+      if (sex === 'M') pct = 495 / (1.0324 - 0.19077*Math.log10(waist-neck) + 0.15456*Math.log10(height)) - 450;
+      else pct = 495 / (1.29579 - 0.35004*Math.log10(waist+hip-neck) + 0.22100*Math.log10(height)) - 450;
+    }
+  }
+
+  if (missing || pct === null) {
+    if (res) res.classList.add('hidden');
+    if (miss) miss.classList.remove('hidden');
+    if (hidFat) hidFat.value = '';
+    return;
+  }
+  if (miss) miss.classList.add('hidden');
+
+  pct = Math.max(0, Math.min(pct, 60));
+  const FAT_CLASS = (sex, pct) => {
+    const tbl = sex==='M'
+      ? [{max:5,lbl:'Essencial'},{max:13,lbl:'Atleta'},{max:18,lbl:'Fitness'},{max:24,lbl:'Média'},{max:30,lbl:'Acima da média'},{max:999,lbl:'Obeso'}]
+      : [{max:13,lbl:'Essencial'},{max:20,lbl:'Atleta'},{max:24,lbl:'Fitness'},{max:31,lbl:'Média'},{max:39,lbl:'Acima da média'},{max:999,lbl:'Obeso'}];
+    const CSS = ['essential','athlete','fitness','average','above','obese'];
+    const idx = tbl.findIndex(t => pct <= t.max);
+    return {label: idx>=0?tbl[idx].lbl:'—', css: idx>=0?'fat-class-'+CSS[idx]:''};
+  };
+  const fc = FAT_CLASS(sex, pct);
+
+  if (res) {
+    res.classList.remove('hidden','fat-class-essential','fat-class-athlete','fat-class-fitness','fat-class-average','fat-class-above','fat-class-obese');
+    if (fc.css) res.classList.add(fc.css);
+  }
+  if (pctEl) pctEl.textContent = pct.toFixed(1) + '%';
+  if (clsEl) clsEl.textContent = fc.label;
+  if (frmEl) frmEl.textContent = 'Fórmula: ' + (FNAMES[formula]||formula);
+  if (hidFat) hidFat.value = pct.toFixed(1);
+  if (hidForm) hidForm.value = formula;
+  if (hidCls) hidCls.value = fc.label;
+};
+
+window.fatClearAll = function(prefix) {
+  const formulaSel = document.getElementById(prefix + '-fat-formula');
+  if (formulaSel) { formulaSel.value = ''; fatFormulaChange(prefix); }
+  document.querySelectorAll('#' + prefix + '-fat-calc .fat-input').forEach(el => el.value = '');
+  const rb = document.getElementById(prefix + '-fat-result');
+  if (rb) rb.classList.add('hidden');
+  const mm = document.getElementById(prefix + '-fat-missing');
+  if (mm) mm.classList.add('hidden');
+  ['cl-student-fat','cl-student-fat-formula','cl-student-fat-class'].forEach(id => {
+    const e = document.getElementById(id); if (e) e.value = '';
+  });
+};
+
 </script>
 
   <div id="login-splash">
