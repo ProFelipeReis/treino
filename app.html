@@ -5823,6 +5823,54 @@
   </div>
 
 
+  <!-- ══ MODAL: RESPONDER TICKET (CEO → usuário) ══ -->
+  <div id="modal-resolve-ticket" class="modal-overlay hidden">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <div>
+          <h3>Responder e Resolver Ticket</h3>
+          <span id="rrt-protocol-badge" style="font-size:.72rem;color:rgba(255,255,255,.5);font-weight:600;"></span>
+        </div>
+        <button class="close-btn" onclick="closeResolveTicketModal()">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Aviso de envio -->
+        <div style="background:var(--accent-dim);border:1.5px solid var(--accent-soft);border-radius:var(--r);padding:11px 14px;margin-bottom:18px;display:flex;align-items:flex-start;gap:10px;">
+          <span style="font-size:1rem;flex-shrink:0;margin-top:1px;">💬</span>
+          <span style="font-size:.8rem;color:var(--text2);line-height:1.5;font-weight:500;">
+            O usuário <strong id="rrt-username-label" style="color:var(--text);"></strong> verá esta mensagem como pop-up na próxima vez que entrar no app.
+          </span>
+        </div>
+
+        <!-- Título -->
+        <div class="form-group">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Título da mensagem</label>
+          <input id="rrt-title" class="form-control" type="text" maxlength="80" value="Ticket em Análise" />
+        </div>
+
+        <!-- Descrição -->
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Sua resposta</label>
+          <textarea id="rrt-desc" class="form-control" rows="5" placeholder="Escreva sua resposta para o usuário..." style="resize:vertical;min-height:110px;"></textarea>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="flex-wrap:wrap;gap:8px;">
+        <button class="btn btn-ghost" onclick="rrtFillDefault()" style="margin-right:auto;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+          Resposta padrão
+        </button>
+        <button class="btn btn-ghost" onclick="closeResolveTicketModal()">Cancelar</button>
+        <button class="btn btn-primary" id="rrt-btn-send" onclick="confirmResolveTicket()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>
+          Resolver e Enviar
+        </button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- ══ TERMS MODAL ══ -->
   <div id="modal-terms">
     <div class="terms-card">
@@ -12981,22 +13029,111 @@
       }
     };
 
-    // ── CEO: marcar como resolvido ──
+    // ── CEO: abre modal de resposta antes de marcar resolvido ──
+    window._rrtPendingDocId = null;
+    window._rrtPendingData  = null;
+
     window.resolveOneReport = async function(docId, btn) {
-      if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Resolvendo...'; }
+      // Busca os dados do ticket para montar o modal
+      if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Carregando...'; }
       try {
-        var docRef = _doc(_db, 'reports', docId);
         var snap = await _getDocs(_query(_col(_db, 'reports')));
         var found = snap.docs.find(function(d){ return d.id === docId; });
-        if (found) {
-          var data = found.data();
-          data.resolvedAt = Date.now();
-          await _db.collection('reports_resolved').doc(docId).set(data);
-          await _deleteDoc(docRef);
+        if (!found) { toast('Ticket não encontrado.', 'error'); if(btn){btn.disabled=false;btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Marcar resolvido';} return; }
+        var r = found.data();
+        var protocol = 'RPT-' + String(r.sentAt).slice(-6).toUpperCase();
+
+        // Guarda para uso posterior
+        window._rrtPendingDocId = docId;
+        window._rrtPendingData  = r;
+        window._rrtPendingBtn   = btn;
+        window._rrtProtocol     = protocol;
+
+        // Preenche modal
+        document.getElementById('rrt-protocol-badge').textContent = protocol;
+        document.getElementById('rrt-username-label').textContent = r.displayName || r.username || '?';
+        document.getElementById('rrt-title').value = 'Ticket em Análise';
+        document.getElementById('rrt-desc').value  = '';
+        document.getElementById('rrt-btn-send').disabled = false;
+        document.getElementById('rrt-btn-send').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> Resolver e Enviar';
+
+        openModal('modal-resolve-ticket');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Marcar resolvido'; }
+      } catch(e) {
+        toast('Erro: ' + e.message, 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Marcar resolvido'; }
+      }
+    };
+
+    window.closeResolveTicketModal = function() {
+      closeModal('modal-resolve-ticket');
+    };
+
+    // Preenche com resposta padrão
+    window.rrtFillDefault = function() {
+      var protocol = window._rrtProtocol || '—';
+      var r = window._rrtPendingData || {};
+      var name = r.displayName || r.username || 'usuário';
+      document.getElementById('rrt-title').value = 'Ticket em Análise';
+      document.getElementById('rrt-desc').value =
+        'Olá, ' + name + '! 👋\n\n' +
+        'O seu ticket ' + protocol + ' foi visualizado, aprovado e está sendo analisado pela nossa equipe. ' +
+        'Trabalharemos para resolver o problema o mais rápido possível.\n\n' +
+        'Agradecemos imensamente por nos ajudar a melhorar o Trainly! Seu feedback é essencial para nós. 🙏';
+    };
+
+    // Confirma: salva popup direcionado + marca ticket resolvido
+    window.confirmResolveTicket = async function() {
+      var title = (document.getElementById('rrt-title').value || '').trim();
+      var desc  = (document.getElementById('rrt-desc').value  || '').trim();
+      var docId = window._rrtPendingDocId;
+      var r     = window._rrtPendingData;
+
+      if (!title) { toast('Informe um título para a mensagem.', 'error'); return; }
+      if (!desc)  { toast('Escreva uma resposta antes de enviar.', 'error'); return; }
+      if (!docId || !r) { toast('Nenhum ticket selecionado.', 'error'); return; }
+
+      var btn = document.getElementById('rrt-btn-send');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Enviando...';
+
+      try {
+        var protocol  = window._rrtProtocol || '';
+        var userId    = r.userId || r.username || null;
+        var popupId   = 'rpt_' + docId + '_' + Date.now();
+
+        // Salva popup direcionado ao usuário do ticket no Firestore
+        // Usa a coleção user_popups/{userId} para exibição individual
+        if (userId) {
+          await _db.collection('user_popups').doc(userId).set({
+            active:    true,
+            type:      'update',
+            title:     title,
+            desc:      desc.replace(/\n/g, '<br>'),
+            protocol:  protocol,
+            popupId:   popupId,
+            createdAt: Date.now(),
+            createdBy: (window.CURRENT_USER || {}).username || 'ceo',
+          });
         }
-        toast('✅ Ticket marcado como resolvido!', 'success');
+
+        // Marca o ticket como resolvido
+        var docRef = _doc(_db, 'reports', docId);
+        var data = Object.assign({}, r);
+        data.resolvedAt  = Date.now();
+        data.repliedTitle = title;
+        data.repliedDesc  = desc;
+        await _db.collection('reports_resolved').doc(docId).set(data);
+        await _deleteDoc(docRef);
+
+        closeModal('modal-resolve-ticket');
+        toast('✅ Ticket resolvido e resposta enviada ao usuário!', 'success');
         loadCeoReports();
-      } catch(e) { toast('Erro: ' + e.message, 'error'); if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Marcar resolvido'; } }
+      } catch(e) {
+        toast('Erro: ' + e.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> Resolver e Enviar';
+      }
     };
 
     // ── CEO: reabrir ticket resolvido ──
@@ -13243,10 +13380,16 @@
         // Reabre o builder para o CEO continuar editando
         document.getElementById('modal-global-popup-builder').classList.add('on');
       } else {
-        // Usuário comum: marca como visto no localStorage
+        // Marca como visto no localStorage
         try {
           var snap = window._lastGlobalPopupSnap;
-          if (snap) localStorage.setItem('trainly_popup_seen_' + snap.id, '1');
+          if (snap) {
+            localStorage.setItem('trainly_popup_seen_' + snap.id, '1');
+            // Se for popup individual de ticket, desativa no Firestore também
+            if (snap.isUserPopup && snap.userId) {
+              _db.collection('user_popups').doc(snap.userId).update({ active: false }).catch(function(){});
+            }
+          }
         } catch(e) {}
       }
     };
@@ -13320,15 +13463,36 @@
 
     // ── Verifica e exibe o pop-up para usuários comuns ao logar ──
     window.checkAndShowGlobalPopup = async function () {
+      var user = window.CURRENT_USER || {};
+      if (user.role === 'ceo') return; // CEO não vê popups de usuário
+
       try {
+        // 1) Verifica popup direcionado individualmente (resposta de ticket)
+        var userId = user.username || null;
+        if (userId) {
+          var userPopSnap = await _db.collection('user_popups').doc(userId).get();
+          if (userPopSnap.exists) {
+            var up = userPopSnap.data();
+            if (up.active) {
+              var seenKeyU = 'trainly_popup_seen_' + (up.popupId || userId);
+              if (!localStorage.getItem(seenKeyU)) {
+                window._lastGlobalPopupSnap = { id: up.popupId || userId, isUserPopup: true, userId: userId };
+                _gpbRenderDisplay({ type: up.type || 'update', title: up.title, desc: up.desc });
+                var dm = document.getElementById('modal-global-popup-display');
+                dm.dataset.previewMode = '';
+                dm.classList.add('on');
+                return; // mostra individual primeiro; global será visto depois
+              }
+            }
+          }
+        }
+
+        // 2) Verifica popup global (para todos)
         var snap = await _db.collection('settings').doc('global_popup').get();
         if (!snap.exists || !snap.data().active) return;
         var d = snap.data();
-        // Verifica se este usuário já viu este popup
         var seenKey = 'trainly_popup_seen_' + (d.popupId || snap.id);
         if (localStorage.getItem(seenKey)) return;
-        // CEO não vê o popup dos outros — só usa o builder
-        if ((window.CURRENT_USER || {}).role === 'ceo') return;
 
         window._lastGlobalPopupSnap = { id: d.popupId || snap.id };
         _gpbRenderDisplay({ type: d.type, title: d.title, desc: d.desc });
