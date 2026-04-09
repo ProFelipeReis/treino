@@ -1433,7 +1433,7 @@
       display: flex;
       flex-direction: column;
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
+      overscroll-behavior: none;
     }
 
     .tab-panel {
@@ -3495,15 +3495,9 @@
 
       .main-content {
         padding: 14px;
-        padding-bottom: calc(88px + max(env(safe-area-inset-bottom), 12px));
-        overscroll-behavior-y: contain;
+        padding-bottom: calc(72px + max(env(safe-area-inset-bottom, 0px), 20px));
+        overscroll-behavior: none;
         -webkit-overflow-scrolling: touch;
-      }
-
-      /* Garante que nenhum conteúdo fique sob a mobile-nav */
-      .tab-panel.active > *:last-child,
-      #tab-chat {
-        padding-bottom: 0; /* já herdado do main-content */
       }
 
       .mobile-nav {
@@ -8638,27 +8632,53 @@
       e.preventDefault();
     }
 
-    // ── Anti-bounce iOS: impede o efeito elástico sem matar o scroll interno ──
+    // ── Anti-bounce iOS: bloqueia efeito elástico completamente ──
     (function () {
-      var startY = 0;
-      document.addEventListener('touchstart', function (e) {
-        startY = e.touches[0].clientY;
-      }, { passive: true });
-      document.addEventListener('touchmove', function (e) {
-        var el = e.target;
-        while (el && el !== document.body) {
-          var style = window.getComputedStyle(el);
-          var ov = style.overflowY;
-          if ((ov === 'auto' || ov === 'scroll') && el.scrollHeight > el.clientHeight) {
-            var dy = e.touches[0].clientY - startY;
-            var atTop = el.scrollTop <= 0 && dy > 0;
-            var atBot = el.scrollTop + el.clientHeight >= el.scrollHeight - 1 && dy < 0;
-            if (!atTop && !atBot) return;
-            break;
-          }
+      // Encontra o ancestral scrollável mais próximo do elemento tocado
+      function findScrollable(el) {
+        while (el && el !== document.documentElement) {
+          var ov = window.getComputedStyle(el).overflowY;
+          if ((ov === 'auto' || ov === 'scroll') && el.scrollHeight > el.clientHeight) return el;
           el = el.parentElement;
         }
-        e.preventDefault();
+        return null;
+      }
+
+      var _startY = 0;
+      var _startX = 0;
+
+      document.addEventListener('touchstart', function (e) {
+        if (e.touches.length === 1) {
+          _startY = e.touches[0].clientY;
+          _startX = e.touches[0].clientX;
+        }
+      }, { passive: true });
+
+      document.addEventListener('touchmove', function (e) {
+        if (e.touches.length !== 1) { e.preventDefault(); return; }
+
+        var dy = e.touches[0].clientY - _startY;
+        var dx = e.touches[0].clientX - _startX;
+
+        // Se gesto é predominantemente horizontal, deixa passar
+        if (Math.abs(dx) > Math.abs(dy)) return;
+
+        var scroller = findScrollable(e.target);
+
+        if (!scroller) {
+          // Nenhum container com scroll — bloqueia sempre
+          e.preventDefault();
+          return;
+        }
+
+        var atTop = scroller.scrollTop <= 0;
+        var atBot = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
+
+        if ((atTop && dy > 0) || (atBot && dy < 0)) {
+          // Está no limite — bloqueia o bounce
+          e.preventDefault();
+        }
+        // Se não está no limite, deixa o scroll acontecer normalmente
       }, { passive: false });
     })();
 
