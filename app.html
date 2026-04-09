@@ -3505,7 +3505,7 @@
 
       .main-content {
         padding: 14px;
-        padding-bottom: 80px;
+        padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
       }
 
       .mobile-nav {
@@ -11665,6 +11665,9 @@
             (function w() { if (window.showSubscriptionWall) { showSubscriptionWall(); } else { setTimeout(w, 100); } })();
           } else {
             window.showDashboard();
+            setTimeout(function() {
+              if (window.checkAndShowGlobalPopup) window.checkAndShowGlobalPopup();
+            }, 2500);
           }
         } else {
           clearSession();
