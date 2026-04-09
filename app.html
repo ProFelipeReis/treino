@@ -4171,6 +4171,104 @@
       font-size: .9rem;
     }
 
+    /* ══ CEO POPUP LAUNCHER ══ */
+    .ceo-popup-launcher-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .ceo-popup-launcher-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ceo-popup-status-empty {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 20px;
+      color: var(--text3);
+      font-size: .82rem;
+      font-weight: 600;
+    }
+    .ceo-popup-active-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      flex-wrap: wrap;
+    }
+    .ceo-popup-active-badge {
+      font-size: .68rem;
+      font-weight: 900;
+      color: #2e7d52;
+      background: rgba(46,125,82,.10);
+      border: 1px solid rgba(46,125,82,.25);
+      border-radius: 99px;
+      padding: 3px 10px;
+      letter-spacing: .06em;
+      flex-shrink: 0;
+    }
+    .ceo-popup-active-details { flex: 1; min-width: 0; }
+    .ceo-popup-active-type { font-size: .7rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 2px; }
+    .ceo-popup-active-title { font-size: .9rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ceo-popup-active-date { font-size: .74rem; color: var(--text3); margin-top: 2px; }
+
+    /* ── Modal Builder ── */
+    #modal-global-popup-builder { display: none; position: fixed; inset: 0; z-index: 8500; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 16px; }
+    #modal-global-popup-builder.on { display: flex; }
+    .gpb-card { background: var(--surface); border-radius: 20px; width: 100%; max-width: 560px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 24px 64px rgba(0,0,0,.22); overflow: hidden; }
+    .gpb-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .gpb-header h3 { font-family: var(--head); font-size: 1rem; font-weight: 800; color: var(--text); }
+    .gpb-body { padding: 22px 24px; overflow-y: auto; flex: 1; }
+    .gpb-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+    .gpb-type-btn { border: 2px solid var(--border); border-radius: var(--r2); padding: 14px 10px; text-align: center; cursor: pointer; transition: all .18s; background: var(--surface); }
+    .gpb-type-btn:hover { border-color: var(--accent); background: var(--accent-dim); }
+    .gpb-type-btn.selected { border-color: var(--accent); background: var(--accent-dim); }
+    .gpb-type-icon { font-size: 1.6rem; margin-bottom: 6px; transition: transform .18s; display: block; }
+    .gpb-type-btn.selected .gpb-type-icon { transform: scale(1.12); }
+    .gpb-type-label { font-size: .72rem; font-weight: 800; color: var(--text); text-transform: uppercase; letter-spacing: .05em; display: block; }
+    .gpb-type-desc { font-size: .67rem; color: var(--text3); margin-top: 3px; display: block; line-height: 1.4; }
+    .gpb-fields { display: none; }
+    .gpb-fields.visible { display: block; }
+    .gpb-label { display: block; font-size: .72rem; font-weight: 700; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
+    .gpb-editor-wrap { border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; transition: border-color .15s; }
+    .gpb-editor-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,200,0,.15); }
+    .gpb-toolbar { display: flex; gap: 2px; padding: 7px 9px; background: var(--bg); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .gpb-toolbar-btn { width: 28px; height: 28px; border: none; background: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .82rem; font-weight: 700; color: var(--text2); transition: all .12s; }
+    .gpb-toolbar-btn:hover { background: var(--border); color: var(--text); }
+    .gpb-toolbar-sep { width: 1px; height: 20px; background: var(--border); margin: 4px 3px; align-self: center; }
+    .gpb-editor { min-height: 130px; padding: 12px 14px; outline: none; font-family: var(--body); font-size: .88rem; color: var(--text); line-height: 1.6; }
+    .gpb-editor:empty::before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
+    .gpb-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; }
+
+    /* ── Pop-up exibido ao usuário ── */
+    #modal-global-popup-display { display: none; position: fixed; inset: 0; z-index: 9200; background: rgba(0,0,0,.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 16px; }
+    #modal-global-popup-display.on { display: flex; }
+    .gpd-card { background: var(--surface); border-radius: 22px; width: 100%; max-width: 420px; box-shadow: 0 24px 64px rgba(0,0,0,.24); overflow: hidden; animation: gpd-in .35s cubic-bezier(.22,1,.36,1); }
+    @keyframes gpd-in { from { transform: scale(.88) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+    .gpd-head { padding: 28px 28px 0; text-align: center; }
+    .gpd-icon-wrap { width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 1.8rem; }
+    .gpd-type-tag { display: inline-block; font-size: .65rem; font-weight: 900; text-transform: uppercase; letter-spacing: .09em; border-radius: 99px; padding: 3px 11px; margin-bottom: 12px; }
+    .gpd-title { font-family: var(--head); font-size: 1.15rem; font-weight: 900; color: var(--text); margin-bottom: 6px; line-height: 1.25; }
+    .gpd-body { padding: 14px 28px 24px; }
+    .gpd-desc { font-size: .87rem; color: var(--text2); line-height: 1.7; text-align: center; }
+    .gpd-desc ul, .gpd-desc ol { text-align: left; padding-left: 18px; margin: 8px 0; }
+    .gpd-desc li { margin-bottom: 4px; }
+    .gpd-desc strong, .gpd-desc b { color: var(--text); font-weight: 700; }
+    .gpd-footer { padding: 0 28px 24px; display: flex; justify-content: center; }
+    .gpd-theme-update  .gpd-icon-wrap { background: rgba(59,130,246,.10); }
+    .gpd-theme-update  .gpd-type-tag  { background: rgba(59,130,246,.12); color: #1d4ed8; }
+    .gpd-theme-warning .gpd-icon-wrap { background: rgba(245,158,11,.10); }
+    .gpd-theme-warning .gpd-type-tag  { background: rgba(245,158,11,.12); color: #b45309; }
+    .gpd-theme-promo   .gpd-icon-wrap { background: rgba(245,200,0,.14); }
+    .gpd-theme-promo   .gpd-type-tag  { background: rgba(245,200,0,.20); color: #7a5f00; }
+    /* ══ END CEO POPUP LAUNCHER ══ */
+
     /* ══ CEO PANEL ══ */
 
     .ceo-topbar {
@@ -6202,6 +6300,147 @@
   </div>
 
 
+
+
+  <!-- ══ MODAL: BUILDER DE POP-UP GLOBAL (CEO) ══ -->
+  <div id="modal-global-popup-builder">
+    <div class="gpb-card">
+      <div class="gpb-header">
+        <h3>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Criar Pop-up Global
+        </h3>
+        <button class="close-btn" onclick="closeGlobalPopupBuilder()">✕</button>
+      </div>
+      <div class="gpb-body">
+
+        <!-- Seleção de tipo -->
+        <label class="gpb-label" style="margin-bottom:10px;">Tipo de comunicado</label>
+        <div class="gpb-type-grid">
+          <div class="gpb-type-btn" id="gpb-type-update" onclick="selectPopupType('update')">
+            <span class="gpb-type-icon">🚀</span>
+            <span class="gpb-type-label">Atualização</span>
+            <span class="gpb-type-desc">Notas de versão e novidades</span>
+          </div>
+          <div class="gpb-type-btn" id="gpb-type-warning" onclick="selectPopupType('warning')">
+            <span class="gpb-type-icon">⚠️</span>
+            <span class="gpb-type-label">Aviso</span>
+            <span class="gpb-type-desc">Alertas e comunicados urgentes</span>
+          </div>
+          <div class="gpb-type-btn" id="gpb-type-promo" onclick="selectPopupType('promo')">
+            <span class="gpb-type-icon">🎁</span>
+            <span class="gpb-type-label">Promoção</span>
+            <span class="gpb-type-desc">Ofertas e descontos especiais</span>
+          </div>
+        </div>
+
+        <!-- Campos (aparecem após escolher tipo) -->
+        <div class="gpb-fields" id="gpb-fields-update">
+          <div class="form-group">
+            <label class="gpb-label">Título da atualização</label>
+            <input id="gpb-title-update" class="form-control" type="text" placeholder="Ex: Versão 2.4 — Novas funcionalidades" maxlength="80" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="gpb-label">O que há de novo</label>
+            <div class="gpb-editor-wrap">
+              <div class="gpb-toolbar">
+                <button class="gpb-toolbar-btn" title="Negrito" onclick="gpbFormat('bold')"><b>B</b></button>
+                <button class="gpb-toolbar-btn" title="Itálico" onclick="gpbFormat('italic')"><i>I</i></button>
+                <div class="gpb-toolbar-sep"></div>
+                <button class="gpb-toolbar-btn" title="Lista de tópicos" onclick="gpbFormat('insertUnorderedList')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
+                </button>
+                <button class="gpb-toolbar-btn" title="Lista numerada" onclick="gpbFormat('insertOrderedList')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                </button>
+              </div>
+              <div class="gpb-editor" id="gpb-desc-update" contenteditable="true" data-placeholder="Descreva as novidades desta versão..."></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gpb-fields" id="gpb-fields-warning">
+          <div class="form-group">
+            <label class="gpb-label">Título do aviso</label>
+            <input id="gpb-title-warning" class="form-control" type="text" placeholder="Ex: Manutenção programada" maxlength="80" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="gpb-label">Descrição</label>
+            <div class="gpb-editor-wrap">
+              <div class="gpb-toolbar">
+                <button class="gpb-toolbar-btn" title="Negrito" onclick="gpbFormat('bold')"><b>B</b></button>
+                <button class="gpb-toolbar-btn" title="Itálico" onclick="gpbFormat('italic')"><i>I</i></button>
+                <div class="gpb-toolbar-sep"></div>
+                <button class="gpb-toolbar-btn" title="Lista de tópicos" onclick="gpbFormat('insertUnorderedList')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
+                </button>
+                <button class="gpb-toolbar-btn" title="Lista numerada" onclick="gpbFormat('insertOrderedList')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                </button>
+              </div>
+              <div class="gpb-editor" id="gpb-desc-warning" contenteditable="true" data-placeholder="Descreva o aviso com detalhes..."></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gpb-fields" id="gpb-fields-promo">
+          <div class="form-group">
+            <label class="gpb-label">Título da promoção</label>
+            <input id="gpb-title-promo" class="form-control" type="text" placeholder="Ex: Black Friday — 50% OFF no plano anual!" maxlength="80" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="gpb-label">Detalhes da oferta</label>
+            <div class="gpb-editor-wrap">
+              <div class="gpb-toolbar">
+                <button class="gpb-toolbar-btn" title="Negrito" onclick="gpbFormat('bold')"><b>B</b></button>
+                <button class="gpb-toolbar-btn" title="Itálico" onclick="gpbFormat('italic')"><i>I</i></button>
+                <div class="gpb-toolbar-sep"></div>
+                <button class="gpb-toolbar-btn" title="Lista de tópicos" onclick="gpbFormat('insertUnorderedList')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
+                </button>
+                <button class="gpb-toolbar-btn" title="Lista numerada" onclick="gpbFormat('insertOrderedList')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                </button>
+              </div>
+              <div class="gpb-editor" id="gpb-desc-promo" contenteditable="true" data-placeholder="Descreva a oferta, condições e prazo..."></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="gpb-footer">
+        <button class="btn btn-ghost" onclick="closeGlobalPopupBuilder()">Cancelar</button>
+        <button class="btn btn-ghost" onclick="previewGlobalPopup()" id="gpb-btn-preview" disabled style="opacity:.4;pointer-events:none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Prévia
+        </button>
+        <button class="btn btn-primary" onclick="sendGlobalPopup()" id="gpb-btn-send" disabled style="opacity:.4;pointer-events:none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar para todos
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: POP-UP EXIBIDO AO USUÁRIO ══ -->
+  <div id="modal-global-popup-display">
+    <div class="gpd-card" id="gpd-card-inner">
+      <div class="gpd-head">
+        <div class="gpd-icon-wrap" id="gpd-icon-wrap"></div>
+        <div class="gpd-type-tag" id="gpd-type-tag"></div>
+        <div class="gpd-title" id="gpd-title"></div>
+      </div>
+      <div class="gpd-body">
+        <div class="gpd-desc" id="gpd-desc"></div>
+      </div>
+      <div class="gpd-footer">
+        <button class="btn btn-primary" onclick="dismissGlobalPopup()" style="min-width:140px;justify-content:center;">
+          Entendido ✓
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="modal-ceo-add" class="modal-overlay hidden">
     <div class="modal modal-sm">
       <div class="modal-header">
@@ -6754,6 +6993,42 @@
                   <polyline points="7 3 7 8 15 8" />
                 </svg> Salvar preços</button>
               <button class="btn btn-ghost" onclick="loadPricing()">↺ Recarregar</button>
+            </div>
+          </div>
+
+          <!-- ══ LANÇADOR DE POP-UP GLOBAL ══ -->
+          <div class="ceo-popup-launcher-card" id="ceo-popup-launcher">
+            <div class="ceo-popup-launcher-head">
+              <div class="ceo-section-title" style="margin:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                Pop-up Global para Usuários
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openGlobalPopupBuilder()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Criar pop-up
+              </button>
+            </div>
+            <div id="ceo-popup-status-wrap">
+              <div class="ceo-popup-status-empty" id="ceo-popup-status-empty">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span>Nenhum pop-up ativo no momento</span>
+              </div>
+              <div class="ceo-popup-active-info" id="ceo-popup-active-info" style="display:none;">
+                <div class="ceo-popup-active-badge">● ATIVO</div>
+                <div class="ceo-popup-active-details">
+                  <div class="ceo-popup-active-type" id="ceo-popup-active-type"></div>
+                  <div class="ceo-popup-active-title" id="ceo-popup-active-title"></div>
+                  <div class="ceo-popup-active-date" id="ceo-popup-active-date"></div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="cancelGlobalPopup()" style="color:var(--red);border-color:rgba(224,62,62,.25);flex-shrink:0;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
 
@@ -12159,6 +12434,7 @@
         if (ceoTab) switchTab('tab-ceo', ceoTab);
         loadCrefPending();
         loadCeoPaymentHistory();
+        if (window.loadGlobalPopupStatus) loadGlobalPopupStatus();
       }, 300);
     };
 
@@ -12818,6 +13094,219 @@
       } catch (e) { toast('Erro: ' + e.message, 'error'); }
     };
 
+    // ══════════════════════════════════════════════════════════
+    // POP-UP GLOBAL — BUILDER (CEO) + EXIBIÇÃO (usuários)
+    // ══════════════════════════════════════════════════════════
+
+    var _gpbSelectedType = null;
+
+    var _gpbTypeConfig = {
+      update:  { icon: '🚀', label: 'Novidades da versão', theme: 'gpd-theme-update',  tag: 'Atualização' },
+      warning: { icon: '⚠️', label: 'Aviso importante',    theme: 'gpd-theme-warning', tag: 'Aviso'       },
+      promo:   { icon: '🎁', label: 'Oferta especial',     theme: 'gpd-theme-promo',   tag: 'Promoção'    },
+    };
+
+    // ── Abre o builder ──
+    window.openGlobalPopupBuilder = function () {
+      _gpbSelectedType = null;
+      // Reseta tudo
+      ['update','warning','promo'].forEach(function(t){
+        document.getElementById('gpb-type-' + t).classList.remove('selected');
+        document.getElementById('gpb-fields-' + t).classList.remove('visible');
+        var titleEl = document.getElementById('gpb-title-' + t);
+        var descEl  = document.getElementById('gpb-desc-'  + t);
+        if (titleEl) titleEl.value = '';
+        if (descEl)  descEl.innerHTML = '';
+      });
+      _gpbSetButtonsState(false);
+      document.getElementById('modal-global-popup-builder').classList.add('on');
+    };
+
+    window.closeGlobalPopupBuilder = function () {
+      document.getElementById('modal-global-popup-builder').classList.remove('on');
+    };
+
+    // ── Seleciona tipo ──
+    window.selectPopupType = function (type) {
+      _gpbSelectedType = type;
+      ['update','warning','promo'].forEach(function(t){
+        document.getElementById('gpb-type-' + t).classList.toggle('selected', t === type);
+        document.getElementById('gpb-fields-' + t).classList.toggle('visible', t === type);
+      });
+      _gpbSetButtonsState(true);
+    };
+
+    function _gpbSetButtonsState(enabled) {
+      ['gpb-btn-preview','gpb-btn-send'].forEach(function(id){
+        var btn = document.getElementById(id);
+        if (!btn) return;
+        btn.disabled = !enabled;
+        btn.style.opacity = enabled ? '1' : '.4';
+        btn.style.pointerEvents = enabled ? '' : 'none';
+      });
+    }
+
+    // ── Executa comando de formatação no editor ativo ──
+    window.gpbFormat = function (cmd) {
+      if (!_gpbSelectedType) return;
+      var editor = document.getElementById('gpb-desc-' + _gpbSelectedType);
+      if (!editor) return;
+      editor.focus();
+      document.execCommand(cmd, false, null);
+    };
+
+    // ── Monta o objeto popup a partir dos campos preenchidos ──
+    function _gpbBuildPayload() {
+      if (!_gpbSelectedType) return null;
+      var titleEl = document.getElementById('gpb-title-' + _gpbSelectedType);
+      var descEl  = document.getElementById('gpb-desc-'  + _gpbSelectedType);
+      var title   = (titleEl ? titleEl.value : '').trim();
+      var desc    = descEl ? descEl.innerHTML.trim() : '';
+      if (!title) { toast('Preencha o título do pop-up.', 'error'); return null; }
+      if (!desc || desc === '<br>') { toast('Preencha a descrição do pop-up.', 'error'); return null; }
+      return { type: _gpbSelectedType, title: title, desc: desc };
+    }
+
+    // ── Renderiza o modal de exibição com os dados ──
+    function _gpbRenderDisplay(payload) {
+      var cfg = _gpbTypeConfig[payload.type];
+      var card = document.getElementById('gpd-card-inner');
+      // Remove temas anteriores
+      card.classList.remove('gpd-theme-update','gpd-theme-warning','gpd-theme-promo');
+      card.classList.add(cfg.theme);
+      document.getElementById('gpd-icon-wrap').textContent = cfg.icon;
+      document.getElementById('gpd-type-tag').textContent  = cfg.tag;
+      document.getElementById('gpd-title').textContent     = payload.title;
+      document.getElementById('gpd-desc').innerHTML        = payload.desc;
+    }
+
+    // ── PRÉVIA (só o CEO vê, sem salvar no Firestore) ──
+    window.previewGlobalPopup = function () {
+      var payload = _gpbBuildPayload();
+      if (!payload) return;
+      _gpbRenderDisplay(payload);
+      // Fecha builder, abre display em modo prévia
+      document.getElementById('modal-global-popup-builder').classList.remove('on');
+      var displayModal = document.getElementById('modal-global-popup-display');
+      displayModal.dataset.previewMode = '1';
+      displayModal.classList.add('on');
+    };
+
+    // ── Fecha o display e, se era prévia, reabre o builder ──
+    window.dismissGlobalPopup = function () {
+      var displayModal = document.getElementById('modal-global-popup-display');
+      var isPreview = displayModal.dataset.previewMode === '1';
+      displayModal.classList.remove('on');
+      displayModal.dataset.previewMode = '';
+      if (isPreview) {
+        // Reabre o builder para o CEO continuar editando
+        document.getElementById('modal-global-popup-builder').classList.add('on');
+      } else {
+        // Usuário comum: marca como visto no localStorage
+        try {
+          var snap = window._lastGlobalPopupSnap;
+          if (snap) localStorage.setItem('trainly_popup_seen_' + snap.id, '1');
+        } catch(e) {}
+      }
+    };
+
+    // ── ENVIAR (salva no Firestore — todos os usuários verão na próxima entrada) ──
+    window.sendGlobalPopup = async function () {
+      var payload = _gpbBuildPayload();
+      if (!payload) return;
+
+      var btnSend = document.getElementById('gpb-btn-send');
+      var origText = btnSend.innerHTML;
+      btnSend.innerHTML = 'Enviando...';
+      btnSend.style.opacity = '.6';
+      btnSend.style.pointerEvents = 'none';
+
+      try {
+        var docRef = _db.collection('settings').doc('global_popup');
+        await docRef.set({
+          active:    true,
+          type:      payload.type,
+          title:     payload.title,
+          desc:      payload.desc,
+          createdAt: Date.now(),
+          createdBy: (window.CURRENT_USER || {}).username || 'ceo',
+          popupId:   'pop_' + Date.now(),
+        });
+
+        closeGlobalPopupBuilder();
+        toast('Pop-up enviado! Todos os gestores verão ao entrar.');
+        // Atualiza status na seção do CEO
+        loadGlobalPopupStatus();
+      } catch(e) {
+        toast('Erro ao enviar: ' + e.message, 'error');
+        btnSend.innerHTML = origText;
+        btnSend.style.opacity = '1';
+        btnSend.style.pointerEvents = '';
+      }
+    };
+
+    // ── CANCELAR pop-up ativo ──
+    window.cancelGlobalPopup = async function () {
+      if (!confirm('Deseja desativar o pop-up? Ele não será mais exibido para novos logins.')) return;
+      try {
+        await _db.collection('settings').doc('global_popup').update({ active: false });
+        toast('Pop-up desativado.');
+        loadGlobalPopupStatus();
+      } catch(e) { toast('Erro: ' + e.message, 'error'); }
+    };
+
+    // ── Carrega e exibe o status do pop-up atual na seção CEO ──
+    window.loadGlobalPopupStatus = async function () {
+      try {
+        var snap = await _db.collection('settings').doc('global_popup').get();
+        var emptyEl  = document.getElementById('ceo-popup-status-empty');
+        var activeEl = document.getElementById('ceo-popup-active-info');
+        if (!snap.exists || !snap.data().active) {
+          emptyEl.style.display  = 'flex';
+          activeEl.style.display = 'none';
+          return;
+        }
+        var d = snap.data();
+        var cfg = _gpbTypeConfig[d.type] || { tag: d.type, icon: '📢' };
+        document.getElementById('ceo-popup-active-type').textContent  = cfg.tag;
+        document.getElementById('ceo-popup-active-title').textContent = d.title;
+        var dt = d.createdAt ? new Date(d.createdAt).toLocaleString('pt-BR') : '—';
+        document.getElementById('ceo-popup-active-date').textContent  = 'Enviado em ' + dt;
+        emptyEl.style.display  = 'none';
+        activeEl.style.display = 'flex';
+      } catch(e) { console.warn('loadGlobalPopupStatus:', e); }
+    };
+
+    // ── Verifica e exibe o pop-up para usuários comuns ao logar ──
+    window.checkAndShowGlobalPopup = async function () {
+      try {
+        var snap = await _db.collection('settings').doc('global_popup').get();
+        if (!snap.exists || !snap.data().active) return;
+        var d = snap.data();
+        // Verifica se este usuário já viu este popup
+        var seenKey = 'trainly_popup_seen_' + (d.popupId || snap.id);
+        if (localStorage.getItem(seenKey)) return;
+        // CEO não vê o popup dos outros — só usa o builder
+        if ((window.CURRENT_USER || {}).role === 'ceo') return;
+
+        window._lastGlobalPopupSnap = { id: d.popupId || snap.id };
+        _gpbRenderDisplay({ type: d.type, title: d.title, desc: d.desc });
+        var displayModal = document.getElementById('modal-global-popup-display');
+        displayModal.dataset.previewMode = '';
+        displayModal.classList.add('on');
+      } catch(e) { console.warn('checkAndShowGlobalPopup:', e); }
+    };
+
+    // ── Integra com o fluxo de login (dispara 2s após entrar no painel) ──
+    (function _patchDashboardForPopup() {
+      var _origShow = window.showDashboardAfterLogin;
+      window.showDashboardAfterLogin = window.showDashboard = function (userData) {
+        if (_origShow) _origShow.call(this, userData);
+        setTimeout(function () {
+          if (window.checkAndShowGlobalPopup) checkAndShowGlobalPopup();
+        }, 2000);
+      };
+    })();
 
     // ══════════════════════════════════════════════════════════
     // SISTEMA DE CONVITE — tudo aqui, _db já está disponível
