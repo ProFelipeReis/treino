@@ -2341,8 +2341,11 @@ function naFatFormulaChange() {
   // Navy: sync height, show/hide hip
   const c = _clientsRaw.find(x => x.id === _currentClientId) || {};
   const nvh = document.getElementById('na-nv-height');
-  if (nvh && c.height) nvh.value = c.height;
-  const sex = c.sex || '';
+  // altura: usar campo na-height do modal ou do Firebase
+  const hModal = document.getElementById('na-height')?.value;
+  if (nvh) nvh.value = hModal || c.height || '';
+  // sexo: usar campo local do modal primeiro
+  const sex = document.getElementById('na-p-sex')?.value || c.sex || '';
   const hipGrp = document.getElementById('na-nv-hip-group');
   if (hipGrp) hipGrp.style.display = (formula === 'navy' && sex === 'F') ? '' : 'none';
   naFatCalc();
@@ -2355,8 +2358,10 @@ function naFatCalc() {
   document.getElementById('na-fat-class').value = '';
   if (!formula) return;
   const c   = _clientsRaw.find(x => x.id === _currentClientId) || {};
-  const sex = c.sex || '';
-  const dob = c.birth ? new Date(c.birth) : null;
+  // usar campos locais do modal primeiro, fallback no Firebase
+  const sex = (document.getElementById('na-p-sex')?.value || c.sex || '').replace('Outro','');
+  const birthRaw = document.getElementById('na-p-birth')?.value || c.birth || '';
+  const dob = birthRaw ? new Date(birthRaw + (birthRaw.includes('T') ? '' : 'T12:00')) : null;
   let age = null;
   if (dob) {
     const now = new Date(); age = now.getFullYear() - dob.getFullYear();
