@@ -886,7 +886,34 @@
     .evo-history-summary { font-size: .74rem; color: var(--text3); font-weight: 500; margin-top: 3px; }
 
     /* ── Modal nova avaliação ── */
-    #modal-nova-avaliacao .modal { max-width: 600px; }
+    #modal-nova-avaliacao .modal { max-width: 640px; }
+    /* ── MODAL AVALIAÇÃO: ABAS ── */
+    .modal-assess-tabs { display:flex; gap:0; border-bottom:1.5px solid var(--border); margin-bottom:20px; flex-wrap:wrap; }
+    .modal-assess-tab { padding:9px 16px; font-size:.82rem; font-weight:700; color:var(--text3); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; background:none; border-top:none; border-left:none; border-right:none; font-family:var(--body); transition:all .15s; white-space:nowrap; }
+    .modal-assess-tab.active { color:var(--text); border-bottom-color:var(--nutri); }
+    .modal-assess-panel { display:none; }
+    .modal-assess-panel.active { display:block; }
+    /* IMC ao vivo */
+    .imc-live-box { background:var(--accent-dim); border:1.5px solid var(--accent-soft); border-radius:var(--r); padding:10px 14px; margin-top:-4px; margin-bottom:14px; display:flex; align-items:center; gap:14px; }
+    .imc-live-val { font-family:var(--head); font-size:1.5rem; font-weight:800; color:#7a5c00; line-height:1; }
+    .imc-live-side { flex:1; }
+    .imc-live-label { font-size:.68rem; font-weight:800; color:#8a6200; text-transform:uppercase; letter-spacing:.07em; }
+    .imc-live-cat { font-size:.78rem; color:#8a6200; font-weight:700; margin-top:2px; }
+    /* Health checks */
+    .health-check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--surface2); border:1px solid var(--border); border-radius:var(--r); cursor:pointer; margin-bottom:6px; transition:background .15s; user-select:none; }
+    .health-check-item:hover { background:var(--surface3); }
+    .health-check-item input[type=checkbox] { width:16px; height:16px; accent-color:var(--nutri); cursor:pointer; flex-shrink:0; }
+    .health-check-item label { font-size:.86rem; font-weight:600; color:var(--text2); cursor:pointer; flex:1; }
+    .health-detail-field { display:none; padding:4px 0 10px 4px; }
+    .health-detail-field.visible { display:block; }
+    /* Medidas colapsáveis */
+    .medidas-toggle-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:10px 14px; background:var(--surface2); border:1.5px solid var(--border); border-radius:var(--r); font-weight:700; font-size:.84rem; color:var(--text2); user-select:none; margin-top:14px; }
+    .medidas-toggle-header:hover { background:var(--surface3); }
+    .medidas-toggle-body { display:none; margin-top:8px; }
+    .medidas-toggle-body.open { display:block; }
+    /* na aba evolução: fat badge */
+    .fat-badge-val-big { font-family:var(--head); font-size:1.1rem; font-weight:800; color:var(--nutri); }
+
 </style>
 </head>
 <body>
@@ -1458,121 +1485,227 @@
 
 <!-- NOVA AVALIAÇÃO MODAL -->
 <div id="modal-nova-avaliacao" class="modal-overlay hidden">
-  <div class="modal" style="max-width:600px;">
+  <div class="modal" style="max-width:640px;">
     <div class="modal-header">
       <div>
-        <h3>Nova Avaliação</h3>
-        <span id="modal-nova-aval-sub" style="font-size:.78rem;margin-top:2px;display:block;color:rgba(255,255,255,.55);">Composição corporal e medidas</span>
+        <h3>📊 Nova Avaliação</h3>
+        <span id="modal-nova-aval-sub" style="font-size:.78rem;margin-top:2px;display:block;color:rgba(255,255,255,.55);"></span>
       </div>
       <button class="close-btn" onclick="closeModal('modal-nova-avaliacao')">✕</button>
     </div>
     <div class="modal-body">
+      <!-- Abas -->
+      <div class="modal-assess-tabs">
+        <button class="modal-assess-tab active" onclick="switchModalAvalTab('mnat-fisico',this)">🏋️ Dados Físicos</button>
+        <button class="modal-assess-tab" onclick="switchModalAvalTab('mnat-saude',this)">🩺 Saúde</button>
+        <button class="modal-assess-tab" onclick="switchModalAvalTab('mnat-obs',this)">📝 Observações</button>
+      </div>
 
-      <!-- Seção: Peso / IMC -->
-      <div class="section-label">Dados gerais</div>
-      <div class="form-row">
+      <!-- ── ABA: DADOS FÍSICOS ── -->
+      <div class="modal-assess-panel active" id="mnat-fisico">
+        <div class="section-label">Composição corporal</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Peso (kg)</label>
+            <input id="na-weight" class="form-control" type="number" step="0.1" placeholder="Ex: 70.5" oninput="naCalcImc()" />
+          </div>
+          <div class="form-group">
+            <label>Altura (cm)</label>
+            <input id="na-height-val" class="form-control" type="number" step="1" placeholder="Ex: 170" oninput="naCalcImc(); var nvh=document.getElementById('na-nv-height'); if(nvh) nvh.value=this.value;" />
+          </div>
+        </div>
+
+        <!-- IMC ao vivo -->
+        <div id="na-imc-live" class="imc-live-box" style="display:none;">
+          <div class="imc-live-val" id="na-imc-live-val"></div>
+          <div class="imc-live-side">
+            <div class="imc-live-label">IMC calculado</div>
+            <div class="imc-live-cat" id="na-imc-live-cat"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data da avaliação</label>
+            <input id="na-date" class="form-control" type="date" />
+          </div>
+        </div>
+
+        <!-- Campos ocultos para gordura -->
+        <input type="hidden" id="na-fat-val" />
+        <input type="hidden" id="na-fat-formula" />
+        <input type="hidden" id="na-fat-class" />
+
+        <!-- Calculadora gordura -->
+        <div class="fat-calc-block" id="na-fat-calc">
+          <div class="fat-calc-header">
+            <span class="section-label" style="margin:0;font-size:.7rem;">% Gordura Corporal</span>
+            <button type="button" class="fat-clear-btn" onclick="naFatClearAll()">Limpar</button>
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>Fórmula</label>
+            <select id="na-fat-formula-sel" class="form-control" onchange="naFatFormulaChange()">
+              <option value="">— Selecione uma fórmula —</option>
+              <option value="jp3">Jackson-Pollock 3 dobras</option>
+              <option value="jp7">Jackson-Pollock 7 dobras</option>
+              <option value="dw">Durnin-Womersley</option>
+              <option value="faulkner">Faulkner</option>
+              <option value="navy">US Navy</option>
+            </select>
+            <div id="na-fat-formula-desc" class="fat-formula-desc hidden"></div>
+          </div>
+          <div id="na-fat-jp3" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Peitoral</label><input id="na-jp3-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Abdômen</label><input id="na-jp3-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Coxa</label><input id="na-jp3-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+            </div>
+          </div>
+          <div id="na-fat-jp7" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Peitoral</label><input id="na-jp7-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Abdômen</label><input id="na-jp7-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Coxa</label><input id="na-jp7-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Tríceps</label><input id="na-jp7-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Subescapular</label><input id="na-jp7-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Supra-ilíaca</label><input id="na-jp7-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Axilar média</label><input id="na-jp7-axil" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+            </div>
+          </div>
+          <div id="na-fat-dw" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Bíceps</label><input id="na-dw-bi" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Tríceps</label><input id="na-dw-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Subescapular</label><input id="na-dw-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Supra-ilíaca</label><input id="na-dw-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+            </div>
+          </div>
+          <div id="na-fat-faulkner" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Dobras cutâneas (mm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Tríceps</label><input id="na-fk-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Subescapular</label><input id="na-fk-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Supra-ilíaca</label><input id="na-fk-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Abdômen</label><input id="na-fk-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
+            </div>
+          </div>
+          <div id="na-fat-navy" class="fat-fields-group hidden">
+            <div class="fat-fields-label">Circunferências (cm)</div>
+            <div class="evol-grid-3">
+              <div class="form-group"><label>Altura (cm)</label><input id="na-nv-height" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" readonly tabindex="-1" style="background:var(--surface2);color:var(--text3);cursor:not-allowed;border-style:dashed;" /></div>
+              <div class="form-group"><label>Pescoço (cm)</label><input id="na-nv-neck" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="naFatCalc()" /></div>
+              <div class="form-group"><label>Cintura (cm)</label><input id="na-nv-waist" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="naFatCalc()" /></div>
+              <div class="form-group" id="na-nv-hip-group" style="display:none;"><label>Quadril (cm) <span style="font-size:.7rem;color:var(--text3);">feminino</span></label><input id="na-nv-hip" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="naFatCalc()" /></div>
+            </div>
+          </div>
+          <div id="na-fat-result" class="fat-result-box hidden">
+            <div class="fat-result-pct" id="na-fat-result-pct">—</div>
+            <div class="fat-result-info">
+              <div class="fat-result-class" id="na-fat-result-class">—</div>
+              <div class="fat-result-formula" id="na-fat-result-formula">—</div>
+            </div>
+          </div>
+          <div id="na-fat-missing" class="fat-missing-msg hidden">Preencha todos os campos obrigatórios para calcular.</div>
+        </div>
+
+        <!-- Medidas corporais colapsáveis -->
+        <div class="medidas-toggle-header" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('.med-arrow').style.transform = this.nextElementSibling.classList.contains('open') ? 'rotate(0deg)' : 'rotate(-90deg)';">
+          <span>📏 Medidas corporais (cm) — opcional</span>
+          <svg class="med-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;transform:rotate(-90deg);"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="medidas-toggle-body">
+          <div class="evol-grid-3" style="margin-top:8px;">
+            <div class="form-group"><label>Cintura</label><input id="na-m-waist" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Quadril</label><input id="na-m-hip" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Peitoral</label><input id="na-m-chest" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Braço D</label><input id="na-m-arm-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Braço E</label><input id="na-m-arm-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Ombro</label><input id="na-m-shoulder" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa D</label><input id="na-m-thigh-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa E</label><input id="na-m-thigh-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Panturrilha D</label><input id="na-m-calf-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Panturrilha E</label><input id="na-m-calf-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa Proximal</label><input id="na-m-thigh-prox" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+            <div class="form-group"><label>Coxa Distal</label><input id="na-m-thigh-dist" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ABA: SAÚDE ── -->
+      <div class="modal-assess-panel" id="mnat-saude">
+        <div class="section-label">Condições de saúde</div>
+        <div class="health-check-item" onclick="naToggleHealth(this,'na-injuries-detail')">
+          <input type="checkbox" id="na-chk-injuries" onclick="event.stopPropagation();naToggleHealth(this.closest('.health-check-item'),'na-injuries-detail')" />
+          <label for="na-chk-injuries">🦴 Lesões ou limitações físicas</label>
+        </div>
+        <div class="health-detail-field" id="na-injuries-detail">
+          <textarea id="na-txt-injuries" class="form-control" rows="2" placeholder="Ex: tendinite no joelho, hérnia de disco..."></textarea>
+        </div>
+
+        <div class="health-check-item" onclick="naToggleHealth(this,'na-conditions-detail')">
+          <input type="checkbox" id="na-chk-conditions" onclick="event.stopPropagation();naToggleHealth(this.closest('.health-check-item'),'na-conditions-detail')" />
+          <label for="na-chk-conditions">🏥 Doenças / problemas de saúde</label>
+        </div>
+        <div class="health-detail-field" id="na-conditions-detail">
+          <textarea id="na-txt-conditions" class="form-control" rows="2" placeholder="Ex: hipertensão, diabetes tipo 2, hipotireoidismo..."></textarea>
+        </div>
+
+        <div class="health-check-item" onclick="naToggleHealth(this,'na-meds-detail')">
+          <input type="checkbox" id="na-chk-meds" onclick="event.stopPropagation();naToggleHealth(this.closest('.health-check-item'),'na-meds-detail')" />
+          <label for="na-chk-meds">💊 Uso de medicamentos</label>
+        </div>
+        <div class="health-detail-field" id="na-meds-detail">
+          <textarea id="na-txt-meds" class="form-control" rows="2" placeholder="Liste os medicamentos em uso..."></textarea>
+        </div>
+
+        <div class="health-check-item" onclick="naToggleHealth(this,'na-alerg-detail')">
+          <input type="checkbox" id="na-chk-alerg" onclick="event.stopPropagation();naToggleHealth(this.closest('.health-check-item'),'na-alerg-detail')" />
+          <label for="na-chk-alerg">🌾 Alergias / intolerâncias alimentares</label>
+        </div>
+        <div class="health-detail-field" id="na-alerg-detail">
+          <textarea id="na-txt-alerg" class="form-control" rows="2" placeholder="Ex: lactose, glúten, amendoim, frutos do mar..."></textarea>
+        </div>
+
+        <div class="section-label" style="margin-top:16px;">Dados pessoais</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Objetivo nutricional</label>
+            <select id="na-goal-aval" class="form-control">
+              <option value="">Selecione...</option>
+              <option value="Emagrecimento">Emagrecimento</option>
+              <option value="Ganho de massa muscular">Ganho de massa muscular</option>
+              <option value="Manutenção de peso">Manutenção de peso</option>
+              <option value="Saúde e qualidade de vida">Saúde e qualidade de vida</option>
+              <option value="Performance esportiva">Performance esportiva</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nível de atividade</label>
+            <select id="na-activity-aval" class="form-control">
+              <option value="">Selecione...</option>
+              <option value="Sedentário">Sedentário</option>
+              <option value="Levemente ativo">Levemente ativo (1-2x/sem)</option>
+              <option value="Moderadamente ativo">Moderadamente ativo (3-4x/sem)</option>
+              <option value="Muito ativo">Muito ativo (5-6x/sem)</option>
+              <option value="Extremamente ativo">Extremamente ativo (atleta)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ABA: OBSERVAÇÕES ── -->
+      <div class="modal-assess-panel" id="mnat-obs">
         <div class="form-group">
-          <label>Peso (kg)</label>
-          <input id="na-weight" class="form-control" type="number" step="0.1" placeholder="Ex: 70.5" />
+          <label>Observações desta avaliação</label>
+          <textarea id="na-obs" class="form-control" rows="4" placeholder="Anotações sobre a avaliação, contexto clínico, queixas do cliente..."></textarea>
         </div>
         <div class="form-group">
-          <label>Data da avaliação</label>
-          <input id="na-date" class="form-control" type="date" />
+          <label>Recomendações / próximos passos</label>
+          <textarea id="na-recomend" class="form-control" rows="4" placeholder="Sugestões, metas, ajustes alimentares recomendados..."></textarea>
         </div>
-      </div>
-
-      <!-- Seção: % Gordura -->
-      <input type="hidden" id="na-fat-val" />
-      <input type="hidden" id="na-fat-formula" />
-      <input type="hidden" id="na-fat-class" />
-      <div class="fat-calc-block" id="na-fat-calc">
-        <div class="fat-calc-header">
-          <span class="section-label" style="margin:0;font-size:.7rem;">% Gordura Corporal</span>
-          <button type="button" class="fat-clear-btn" onclick="naFatClearAll()">Limpar</button>
-        </div>
-        <div class="form-group" style="margin-top:10px;">
-          <label>Fórmula</label>
-          <select id="na-fat-formula-sel" class="form-control" onchange="naFatFormulaChange()">
-            <option value="">— Selecione uma fórmula —</option>
-            <option value="jp3">Jackson-Pollock 3 dobras</option>
-            <option value="jp7">Jackson-Pollock 7 dobras</option>
-            <option value="dw">Durnin-Womersley</option>
-            <option value="faulkner">Faulkner</option>
-            <option value="navy">US Navy</option>
-          </select>
-          <div id="na-fat-formula-desc" class="fat-formula-desc hidden"></div>
-        </div>
-        <div id="na-fat-jp3" class="fat-fields-group hidden">
-          <div class="fat-fields-label">Dobras cutâneas (mm)</div>
-          <div class="evol-grid-3">
-            <div class="form-group"><label>Peitoral</label><input id="na-jp3-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Abdômen</label><input id="na-jp3-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Coxa</label><input id="na-jp3-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-          </div>
-        </div>
-        <div id="na-fat-jp7" class="fat-fields-group hidden">
-          <div class="fat-fields-label">Dobras cutâneas (mm)</div>
-          <div class="evol-grid-3">
-            <div class="form-group"><label>Peitoral</label><input id="na-jp7-chest" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Abdômen</label><input id="na-jp7-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Coxa</label><input id="na-jp7-thigh" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Tríceps</label><input id="na-jp7-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Subescapular</label><input id="na-jp7-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Supra-ilíaca</label><input id="na-jp7-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Axilar média</label><input id="na-jp7-axil" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-          </div>
-        </div>
-        <div id="na-fat-dw" class="fat-fields-group hidden">
-          <div class="fat-fields-label">Dobras cutâneas (mm)</div>
-          <div class="evol-grid-3">
-            <div class="form-group"><label>Bíceps</label><input id="na-dw-bi" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Tríceps</label><input id="na-dw-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Subescapular</label><input id="na-dw-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Supra-ilíaca</label><input id="na-dw-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-          </div>
-        </div>
-        <div id="na-fat-faulkner" class="fat-fields-group hidden">
-          <div class="fat-fields-label">Dobras cutâneas (mm)</div>
-          <div class="evol-grid-3">
-            <div class="form-group"><label>Tríceps</label><input id="na-fk-tri" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Subescapular</label><input id="na-fk-sub" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Supra-ilíaca</label><input id="na-fk-supra" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Abdômen</label><input id="na-fk-abd" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="mm" oninput="naFatCalc()" /></div>
-          </div>
-        </div>
-        <div id="na-fat-navy" class="fat-fields-group hidden">
-          <div class="fat-fields-label">Circunferências (cm)</div>
-          <div class="evol-grid-3">
-            <div class="form-group"><label>Altura (cm)</label><input id="na-nv-height" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" readonly tabindex="-1" style="background:var(--surface2);color:var(--text3);cursor:not-allowed;border-style:dashed;" /></div>
-            <div class="form-group"><label>Pescoço (cm)</label><input id="na-nv-neck" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="naFatCalc()" /></div>
-            <div class="form-group"><label>Cintura (cm)</label><input id="na-nv-waist" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="naFatCalc()" /></div>
-            <div class="form-group" id="na-nv-hip-group" style="display:none;"><label>Quadril (cm) <span style="font-size:.7rem;color:var(--text3);">feminino</span></label><input id="na-nv-hip" class="form-control fat-input" type="number" step="0.1" min="0" placeholder="cm" oninput="naFatCalc()" /></div>
-          </div>
-        </div>
-        <div id="na-fat-result" class="fat-result-box hidden">
-          <div class="fat-result-pct" id="na-fat-result-pct">—</div>
-          <div class="fat-result-info">
-            <div class="fat-result-class" id="na-fat-result-class">—</div>
-            <div class="fat-result-formula" id="na-fat-result-formula">—</div>
-          </div>
-        </div>
-        <div id="na-fat-missing" class="fat-missing-msg hidden">Preencha todos os campos obrigatórios para calcular.</div>
-      </div>
-
-      <!-- Seção: Medidas corporais -->
-      <div class="section-label" style="margin-top:20px;">Medidas corporais (opcional)</div>
-      <div class="evol-grid-3">
-        <div class="form-group"><label>Cintura (cm)</label><input id="na-m-waist" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
-        <div class="form-group"><label>Quadril (cm)</label><input id="na-m-hip" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
-        <div class="form-group"><label>Peitoral (cm)</label><input id="na-m-chest" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
-        <div class="form-group"><label>Braço D (cm)</label><input id="na-m-arm-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
-        <div class="form-group"><label>Braço E (cm)</label><input id="na-m-arm-l" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
-        <div class="form-group"><label>Coxa D (cm)</label><input id="na-m-thigh-r" class="form-control" type="number" step="0.1" placeholder="cm" /></div>
-      </div>
-
-      <div class="form-group">
-        <label>Observações</label>
-        <textarea id="na-obs" class="form-control" rows="2" placeholder="Observações desta avaliação..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
@@ -2000,7 +2133,7 @@ async function loadEvolucaoNutri(clientId) {
       container.innerHTML = `<div style="padding:48px 20px;text-align:center;">
         <div style="font-size:2.5rem;margin-bottom:12px;">📊</div>
         <div style="font-family:var(--head);font-weight:800;font-size:.95rem;color:var(--text2);margin-bottom:6px;">Nenhuma avaliação registrada</div>
-        <div style="font-size:.82rem;color:var(--text3);margin-bottom:18px;">Registre a primeira avaliação do cliente para começar o acompanhamento.</div>
+        <div style="font-size:.82rem;color:var(--text3);margin-bottom:18px;">Registre a primeira avaliação para começar o acompanhamento.</div>
         <button class="new-assessment-btn" onclick="openNovaAvaliacao()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           + Nova Avaliação
@@ -2011,8 +2144,14 @@ async function loadEvolucaoNutri(clientId) {
 
     const latest = assessments[0];
     const prev   = assessments[1] || null;
-    const MEASURE_LABELS = { waist:'Cintura', hip:'Quadril', chest:'Peitoral', 'arm-r':'Braço D', 'arm-l':'Braço E', 'thigh-r':'Coxa D' };
-    const FORMULA_SHORT  = { jp3:'JP 3 dobras', jp7:'JP 7 dobras', dw:'Durnin-Womersley', faulkner:'Faulkner', navy:'US Navy' };
+    const MEASURE_LABELS = {
+      waist:'Cintura', hip:'Quadril', chest:'Peitoral',
+      'arm-r':'Braço D', 'arm-l':'Braço E', shoulder:'Ombro',
+      'thigh-r':'Coxa D', 'thigh-l':'Coxa E',
+      'calf-r':'Panturrilha D', 'calf-l':'Panturrilha E',
+      'thigh-prox':'Coxa Proximal', 'thigh-dist':'Coxa Distal'
+    };
+    const FORMULA_SHORT = { jp3:'JP 3 dobras', jp7:'JP 7 dobras', dw:'Durnin-Womersley', faulkner:'Faulkner', navy:'US Navy' };
 
     const fmtTs = ts => {
       if (!ts) return '—';
@@ -2042,289 +2181,107 @@ async function loadEvolucaoNutri(clientId) {
     };
 
     let compareRows = '';
-    compareRows += diffRow('Peso', latest.weight, prev?.weight, ' kg', false);
+    compareRows += diffRow('Peso', latest.weight, prev?.weight, 'kg', false);
+    compareRows += diffRow('IMC', latest.imc, prev?.imc, '', false);
     compareRows += diffRow('% Gordura', latest.fat, prev?.fat, '%', false);
-    const m  = latest.measures || {};
-    const pm = prev?.measures  || {};
-    Object.entries(MEASURE_LABELS).forEach(([k, label]) => {
-      if (m[k] !== undefined) compareRows += diffRow(label, m[k], pm[k], ' cm', false);
-    });
-    if (latest.imc) compareRows += `<div class="evo-metric-row"><span class="evo-metric-label">IMC</span><div class="evo-metric-values"><span class="evo-metric-curr">${latest.imc}</span></div></div>`;
-    if (latest.fatClass) compareRows += `<div class="evo-metric-row"><span class="evo-metric-label">Classificação</span><div class="evo-metric-values"><span class="evo-metric-curr" style="font-size:.78rem;">${latest.fatClass}</span></div></div>`;
+    if (latest.measures) {
+      Object.entries(MEASURE_LABELS).forEach(([k, label]) => {
+        if (latest.measures[k] != null) {
+          compareRows += diffRow(label, latest.measures[k], prev?.measures?.[k], 'cm', false);
+        }
+      });
+    }
 
-    const historyHTML = assessments.map((a, i) => {
-      const parts = [
-        a.weight ? a.weight + ' kg' : null,
-        a.fat    ? a.fat + '% gordura' : null,
-        a.measures && a.measures.waist ? 'cintura ' + a.measures.waist + 'cm' : null
-      ].filter(Boolean);
-      const summary = parts.join(' · ') || 'Sem resumo';
-      const formulaLabel = a.fatFormula ? (FORMULA_SHORT[a.fatFormula] || a.fatFormula) : null;
-      return `<div class="evo-history-item" id="nutri-aval-item-${a.id}">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-          <div style="flex:1;min-width:0;">
-            <div class="evo-history-date">
-              ${fmtTs(a.ts)}
-              ${i === 0 ? '<span style="background:var(--green-dim);color:var(--green);border-radius:99px;padding:1px 8px;font-size:.65rem;font-weight:800;margin-left:4px;">Atual</span>' : ''}
-            </div>
-            <div class="evo-history-summary">${summary}${formulaLabel ? ' · ' + formulaLabel : ''}</div>
-            ${a.obs ? `<div style="font-size:.72rem;color:var(--text3);margin-top:3px;font-style:italic;">${a.obs}</div>` : ''}
-          </div>
-          <button onclick="deleteEvolucaoNutri('${a.id}')" title="Excluir avaliação"
-            style="flex-shrink:0;background:var(--red-dim);border:1px solid rgba(224,62,62,.2);color:var(--red);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;"
-            onmouseover="this.style.background='rgba(224,62,62,.18)'" onmouseout="this.style.background='var(--red-dim)'">
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
-        </div>
-      </div>`;
-    }).join('');
+    // Card de saúde da última avaliação
+    const healthItems = [];
+    if (latest.injuries) healthItems.push(`<div style="margin-bottom:6px;"><span style="font-size:.68rem;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.07em;">Lesões/Limitações</span><br><span style="font-size:.82rem;">${latest.injuries}</span></div>`);
+    if (latest.conditions) healthItems.push(`<div style="margin-bottom:6px;"><span style="font-size:.68rem;font-weight:800;color:#8a6200;text-transform:uppercase;letter-spacing:.07em;">Condições de saúde</span><br><span style="font-size:.82rem;">${latest.conditions}</span></div>`);
+    if (latest.meds) healthItems.push(`<div style="margin-bottom:6px;"><span style="font-size:.68rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;">Medicamentos</span><br><span style="font-size:.82rem;">${latest.meds}</span></div>`);
+    if (latest.alergias) healthItems.push(`<div style="margin-bottom:6px;"><span style="font-size:.68rem;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:.07em;">Alergias/Intolerâncias</span><br><span style="font-size:.82rem;">${latest.alergias}</span></div>`);
 
     container.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-        <div style="font-family:var(--head);font-size:1rem;font-weight:800;">Acompanhamento de evolução</div>
+        <div class="section-label" style="margin:0;">Acompanhamento — ${assessments.length} avaliação(ões)</div>
         <button class="new-assessment-btn" onclick="openNovaAvaliacao()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           + Nova Avaliação
         </button>
       </div>
-      ${compareRows ? `<div class="evo-compare-card">
+
+      <!-- Última avaliação: cards resumo -->
+      <div class="section-label" style="margin-bottom:10px;">Última avaliação · ${fmtTs(latest.ts)}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:${compareRows ? '0' : '16px'};">
+        ${latest.weight != null ? `<div class="info-item"><div class="info-item-label">Peso</div><div class="info-item-val">${latest.weight} kg</div></div>` : ''}
+        ${latest.height != null ? `<div class="info-item"><div class="info-item-label">Altura</div><div class="info-item-val">${latest.height} cm</div></div>` : ''}
+        ${latest.imc != null ? `<div class="info-item" style="background:var(--accent-dim);border-color:var(--accent-soft);"><div class="info-item-label" style="color:#8a6200;">IMC</div><div class="info-item-val" style="color:#7a5c00;">${latest.imc} <span style="font-size:.68rem;font-weight:600;">${imcLabel(latest.imc)}</span></div></div>` : ''}
+        ${latest.fat != null ? `<div class="info-item" style="background:var(--green-dim);border-color:var(--green-soft);"><div class="info-item-label" style="color:var(--nutri);">% Gordura</div><div class="info-item-val" style="color:var(--nutri);">${latest.fat}% <span style="font-size:.62rem;font-weight:600;">${latest.fatClass||''}</span></div>${latest.fatFormula ? `<div style="font-size:.65rem;color:var(--text3);margin-top:2px;">${FORMULA_SHORT[latest.fatFormula]||latest.fatFormula}</div>` : ''}</div>` : ''}
+        ${latest.goal ? `<div class="info-item"><div class="info-item-label">Objetivo</div><div class="info-item-val" style="font-size:.8rem;">${latest.goal}</div></div>` : ''}
+        ${latest.activity ? `<div class="info-item"><div class="info-item-label">Atividade</div><div class="info-item-val" style="font-size:.75rem;">${latest.activity}</div></div>` : ''}
+      </div>
+
+      <!-- Comparativo com avaliação anterior -->
+      ${compareRows ? `
+      <div class="evo-compare-card" style="margin-top:14px;">
         <div class="evo-compare-header">
-          <span class="evo-compare-title">Comparativo — última avaliação</span>
-          <span class="evo-compare-date">${fmtTs(latest.ts)}${prev ? ` vs ${fmtTs(prev.ts)}` : ' (1ª avaliação)'}</span>
+          <span class="evo-compare-title">📈 Comparativo com avaliação anterior</span>
+          <span class="evo-compare-date">${prev ? fmtTs(prev.ts) : ''} → ${fmtTs(latest.ts)}</span>
         </div>
         <div class="evo-compare-body">${compareRows}</div>
       </div>` : ''}
-      <div class="section-label" style="margin-top:${compareRows ? '8px' : '0'};">Histórico de avaliações (${assessments.length})</div>
-      <div class="evo-history-list">${historyHTML}</div>
+
+      <!-- Medidas corporais da última avaliação -->
+      ${latest.measures && Object.keys(latest.measures).length ? `
+      <div class="section-label" style="margin-top:16px;margin-bottom:10px;">Medidas corporais</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px;">
+        ${Object.entries(MEASURE_LABELS).filter(([k])=>latest.measures[k]!=null).map(([k,label])=>`
+          <div class="info-item">
+            <div class="info-item-label">${label}</div>
+            <div class="info-item-val">${latest.measures[k]} cm
+              ${prev?.measures?.[k] != null ? `<span style="font-size:.65rem;font-weight:600;color:${latest.measures[k]<prev.measures[k]?'var(--nutri)':'var(--red)'};">(${latest.measures[k]<prev.measures[k]?'▼':'▲'}${Math.abs(latest.measures[k]-prev.measures[k]).toFixed(1)})</span>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>` : ''}
+
+      <!-- Saúde da última avaliação -->
+      ${healthItems.length ? `
+      <div class="section-label" style="margin-top:8px;margin-bottom:10px;">Saúde e restrições</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
+        ${healthItems.join('')}
+      </div>` : ''}
+
+      <!-- Obs / Recomendações -->
+      ${latest.obs || latest.recomend ? `
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        ${latest.obs ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Observações</div><div style="font-size:.84rem;line-height:1.6;">${latest.obs}</div></div>` : ''}
+        ${latest.recomend ? `<div style="background:var(--nutri-dim);border:1px solid var(--nutri-soft);border-radius:var(--r);padding:12px 14px;"><div style="font-size:.68rem;font-weight:800;color:var(--nutri);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Recomendações</div><div style="font-size:.84rem;line-height:1.6;">${latest.recomend}</div></div>` : ''}
+      </div>` : ''}
+
+      <!-- Histórico -->
+      <div class="section-label" style="margin-top:8px;">Histórico de avaliações (${assessments.length})</div>
+      <div class="evo-history-list">
+        ${assessments.map((a,i) => {
+          const measCount = a.measures ? Object.keys(a.measures).length : 0;
+          const summaryParts = [];
+          if (a.weight) summaryParts.push(a.weight+'kg');
+          if (a.imc) summaryParts.push('IMC '+a.imc);
+          if (a.fat) summaryParts.push(a.fat+'% gordura');
+          if (measCount) summaryParts.push(measCount+' medidas');
+          return `<div class="evo-history-item">
+            <div class="evo-history-date">
+              ${i===0?'<span style="font-size:.65rem;font-weight:800;background:var(--nutri-dim);color:var(--nutri);border:1px solid var(--nutri-soft);padding:1px 7px;border-radius:99px;margin-right:4px;">Última</span>':''}
+              ${fmtTs(a.ts)}
+            </div>
+            <div class="evo-history-summary">${summaryParts.join(' · ')||'Sem dados físicos'}</div>
+            ${(a.injuries||a.conditions||a.alergias) ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;">${a.injuries?'<span class="health-tag">🦴 Lesão</span>':''}${a.conditions?'<span class="health-tag">🏥 Condição</span>':''}${a.alergias?'<span class="allergy-tag">🌾 Alergia</span>':''}</div>` : ''}
+            ${a.obs ? `<div style="font-size:.76rem;color:var(--text3);margin-top:4px;font-style:italic;">"${a.obs.substring(0,80)}${a.obs.length>80?'...':''}"</div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
     `;
   } catch(e) {
-    container.innerHTML = `<div style="color:var(--text3);padding:20px;font-size:.85rem;">Erro ao carregar avaliações: ${e.message}</div>`;
+    container.innerHTML = `<div style="padding:24px;text-align:center;color:var(--red);font-size:.85rem;">Erro ao carregar avaliações: ${e.message}</div>`;
   }
 }
-
-async function deleteEvolucaoNutri(id) {
-  if (!confirm('Remover esta avaliação?')) return;
-  await _db.collection('nutri_assessments').doc(id).delete();
-  showToast('Avaliação removida.');
-  loadEvolucaoNutri(_currentClientId);
-}
-
-// ── NOVA AVALIAÇÃO MODAL ──
-function openNovaAvaliacao() {
-  if (!_currentClientId) return;
-  const c = _clientsRaw.find(x => x.id === _currentClientId) || {};
-  document.getElementById('modal-nova-aval-sub').textContent = c.name || 'Cliente';
-  // Reset fields
-  ['na-weight','na-obs'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
-  document.getElementById('na-date').value = new Date().toISOString().split('T')[0];
-  // Reset measures
-  ['na-m-waist','na-m-hip','na-m-chest','na-m-arm-r','na-m-arm-l','na-m-thigh-r'].forEach(id => {
-    const e = document.getElementById(id); if(e) e.value='';
-  });
-  // Reset fat
-  naFatClearAll();
-  // Sync height for navy
-  const nvh = document.getElementById('na-nv-height');
-  if (nvh && c.height) nvh.value = c.height;
-  openModal('modal-nova-avaliacao');
-}
-
-function naFatFormulaChange() {
-  const formula = document.getElementById('na-fat-formula-sel').value;
-  ['jp3','jp7','dw','faulkner','navy'].forEach(f => {
-    const el = document.getElementById('na-fat-' + f);
-    if (el) el.classList.toggle('hidden', f !== formula);
-  });
-  const FAT_DESCS = {
-    jp3:'Usa 3 dobras cutâneas (Peitoral, Abdômen e Coxa). Ideal para homens.',
-    jp7:'Usa 7 dobras cutâneas para maior precisão.',
-    dw:'Baseada em 4 dobras. Boa opção para populações gerais.',
-    faulkner:'Usa 4 dobras. Recomendada para atletas.',
-    navy:'Estima a gordura por circunferências. Não requer adipômetro.'
-  };
-  const descEl = document.getElementById('na-fat-formula-desc');
-  if (descEl) {
-    if (formula && FAT_DESCS[formula]) { descEl.textContent = FAT_DESCS[formula]; descEl.classList.remove('hidden'); }
-    else { descEl.classList.add('hidden'); }
-  }
-  // Navy: sync height, show/hide hip
-  const c = _clientsRaw.find(x => x.id === _currentClientId) || {};
-  const nvh = document.getElementById('na-nv-height');
-  if (nvh && c.height) nvh.value = c.height;
-  const sex = c.sex || '';
-  const hipGrp = document.getElementById('na-nv-hip-group');
-  if (hipGrp) hipGrp.style.display = (formula === 'navy' && sex === 'F') ? '' : 'none';
-  naFatCalc();
-}
-
-function naFatCalc() {
-  const formula = document.getElementById('na-fat-formula-sel').value;
-  document.getElementById('na-fat-val').value = '';
-  document.getElementById('na-fat-formula').value = '';
-  document.getElementById('na-fat-class').value = '';
-  if (!formula) return;
-  const c   = _clientsRaw.find(x => x.id === _currentClientId) || {};
-  const sex = c.sex || '';
-  const dob = c.birth ? new Date(c.birth) : null;
-  let age = null;
-  if (dob) {
-    const now = new Date(); age = now.getFullYear() - dob.getFullYear();
-    const m = now.getMonth() - dob.getMonth();
-    if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
-    if (age <= 0) age = null;
-  }
-  const g = id => { const e = document.getElementById(id); return e ? parseFloat(e.value) : NaN; };
-  const siriFormula = d => ((4.95 / d) - 4.50) * 100;
-  let pct = null, missing = false;
-
-  if (formula === 'jp3') {
-    const chest=g('na-jp3-chest'),abd=g('na-jp3-abd'),thigh=g('na-jp3-thigh');
-    if ([chest,abd,thigh].some(isNaN)||!sex||!age) { missing=true; }
-    else {
-      const S = chest+abd+thigh;
-      let density = sex==='M'
-        ? 1.10938-(0.0008267*S)+(0.0000016*S*S)-(0.0002574*age)
-        : 1.0994921-(0.0009929*S)+(0.0000023*S*S)-(0.0001392*age);
-      pct = siriFormula(density);
-    }
-  } else if (formula === 'jp7') {
-    const chest=g('na-jp7-chest'),abd=g('na-jp7-abd'),thigh=g('na-jp7-thigh');
-    const tri=g('na-jp7-tri'),sub=g('na-jp7-sub'),supra=g('na-jp7-supra'),axil=g('na-jp7-axil');
-    if ([chest,abd,thigh,tri,sub,supra,axil].some(isNaN)||!sex||!age) { missing=true; }
-    else {
-      const S = chest+abd+thigh+tri+sub+supra+axil;
-      let density = sex==='M'
-        ? 1.112-(0.00043499*S)+(0.00000055*S*S)-(0.00028826*age)
-        : 1.097-(0.00046971*S)+(0.00000056*S*S)-(0.00012828*age);
-      pct = siriFormula(density);
-    }
-  } else if (formula === 'dw') {
-    const bi=g('na-dw-bi'),tri=g('na-dw-tri'),sub=g('na-dw-sub'),supra=g('na-dw-supra');
-    if ([bi,tri,sub,supra].some(isNaN)||!sex||!age) { missing=true; }
-    else {
-      const logS = Math.log10(bi+tri+sub+supra);
-      let density;
-      if (sex==='M') {
-        if (age<17) density=1.1533-(0.0643*logS); else if (age<20) density=1.1620-(0.0630*logS);
-        else if (age<30) density=1.1631-(0.0632*logS); else if (age<40) density=1.1422-(0.0544*logS);
-        else if (age<50) density=1.1620-(0.0700*logS); else density=1.1715-(0.0779*logS);
-      } else {
-        if (age<17) density=1.1369-(0.0598*logS); else if (age<20) density=1.1549-(0.0678*logS);
-        else if (age<30) density=1.1599-(0.0717*logS); else if (age<40) density=1.1423-(0.0632*logS);
-        else if (age<50) density=1.1333-(0.0612*logS); else density=1.1339-(0.0645*logS);
-      }
-      pct = siriFormula(density);
-    }
-  } else if (formula === 'faulkner') {
-    const tri=g('na-fk-tri'),sub=g('na-fk-sub'),supra=g('na-fk-supra'),abd=g('na-fk-abd');
-    if ([tri,sub,supra,abd].some(isNaN)) { missing=true; }
-    else { pct = 5.783+(0.153*(tri+sub+supra+abd)); }
-  } else if (formula === 'navy') {
-    const height=g('na-nv-height'),neck=g('na-nv-neck'),waist=g('na-nv-waist');
-    if (!sex) { missing=true; }
-    else if (sex==='F') {
-      const hip=g('na-nv-hip');
-      if ([height,neck,waist,hip].some(isNaN)||height<=0) { missing=true; }
-      else { pct = 163.205*Math.log10(waist+hip-neck)-97.684*Math.log10(height)-78.387; }
-    } else {
-      if ([height,neck,waist].some(isNaN)||height<=0) { missing=true; }
-      else { pct = 86.010*Math.log10(waist-neck)-70.041*Math.log10(height)+36.76; }
-    }
-  }
-
-  const resultBox  = document.getElementById('na-fat-result');
-  const missingMsg = document.getElementById('na-fat-missing');
-  if (missing || pct === null) {
-    if (resultBox)  resultBox.classList.add('hidden');
-    if (missingMsg) missingMsg.classList.remove('hidden');
-    return;
-  }
-  const rounded = Math.max(0, Math.min(70, pct));
-  const classification = fatClassify(rounded, sex);
-  if (missingMsg) missingMsg.classList.add('hidden');
-  if (resultBox) {
-    resultBox.classList.remove('hidden');
-    resultBox.classList.remove('fat-class-essential','fat-class-athlete','fat-class-fitness','fat-class-average','fat-class-above','fat-class-obese');
-    resultBox.classList.add(classification.cls);
-    document.getElementById('na-fat-result-pct').textContent    = rounded.toFixed(1) + '%';
-    document.getElementById('na-fat-result-class').textContent  = classification.label;
-    document.getElementById('na-fat-result-formula').textContent = (FAT_FORMULA_LABELS||{})[formula] || formula;
-  }
-  document.getElementById('na-fat-val').value     = rounded.toFixed(1);
-  document.getElementById('na-fat-formula').value = formula;
-  document.getElementById('na-fat-class').value   = classification.label;
-}
-
-function naFatClearAll() {
-  const formulaSel = document.getElementById('na-fat-formula-sel');
-  if (formulaSel) formulaSel.value = '';
-  naFatFormulaChange();
-  document.querySelectorAll('#na-fat-calc .fat-input').forEach(el => el.value = '');
-  const rb = document.getElementById('na-fat-result');
-  if (rb) rb.classList.add('hidden');
-  const mm = document.getElementById('na-fat-missing');
-  if (mm) mm.classList.add('hidden');
-  document.getElementById('na-fat-val').value = '';
-  document.getElementById('na-fat-formula').value = '';
-  document.getElementById('na-fat-class').value = '';
-}
-
-async function saveNovaAvaliacao() {
-  if (!_currentClientId) return;
-  const btn = document.getElementById('btn-save-nova-aval');
-  btn.classList.add('btn-loading');
-
-  const weightVal = parseFloat(document.getElementById('na-weight').value) || null;
-  const dateVal   = document.getElementById('na-date').value;
-  const ts        = dateVal ? new Date(dateVal).getTime() : Date.now();
-  const fat       = parseFloat(document.getElementById('na-fat-val').value) || null;
-  const fatFormula= document.getElementById('na-fat-formula').value || null;
-  const fatClass  = document.getElementById('na-fat-class').value  || null;
-  const obs       = (document.getElementById('na-obs').value||'').trim() || null;
-
-  const measKeys  = ['waist','hip','chest','arm-r','arm-l','thigh-r'];
-  const measIds   = ['na-m-waist','na-m-hip','na-m-chest','na-m-arm-r','na-m-arm-l','na-m-thigh-r'];
-  const measures  = {};
-  measKeys.forEach((k, i) => {
-    const v = parseFloat(document.getElementById(measIds[i]).value);
-    if (!isNaN(v) && v > 0) measures[k] = v;
-  });
-
-  if (!weightVal && !fat && Object.keys(measures).length === 0) {
-    showToast('Preencha ao menos o peso ou % de gordura.');
-    btn.classList.remove('btn-loading');
-    return;
-  }
-
-  const client = _clientsRaw.find(x => x.id === _currentClientId) || {};
-  const imc    = weightVal && client.height ? parseFloat(calcIMC(weightVal, client.height)) : null;
-
-  const data = {
-    clientId:    _currentClientId,
-    nutriId:     _currentNutri.id,
-    ts,
-    weight:      weightVal,
-    fat,
-    fatFormula,
-    fatClass,
-    imc,
-    height:      client.height || null,
-    measures:    Object.keys(measures).length ? measures : null,
-    obs
-  };
-
-  try {
-    await _db.collection('nutri_assessments').add(data);
-    showToast('Avaliação salva!');
-    closeModal('modal-nova-avaliacao');
-    loadEvolucaoNutri(_currentClientId);
-  } catch(e) {
-    showToast('Erro ao salvar: ' + e.message);
-  }
-  btn.classList.remove('btn-loading');
-}
-
-
 
 // ── CLIENTS ──
 async function loadClients() {
