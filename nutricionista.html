@@ -1814,12 +1814,57 @@ function _clearNutriSession() {
 // ── INIT: verifica sessão ao carregar ──
 document.addEventListener('DOMContentLoaded', function() {
   const sess = _getNutriSession();
-  if (!sess) {
-    window.location.replace('https://trainly.online/index');
+  if (sess) {
+    // Sessão local encontrada — entra direto
+    _currentNutri = sess;
+    enterDashboard();
     return;
   }
-  _currentNutri = sess;
-  enterDashboard();
+  // Sem sessão local: aguarda um tick para o Firebase Auth resolver
+  // (evita redirecionamento falso logo após login)
+  var _authResolved = false;
+  var _redirectTimer = setTimeout(function() {
+    if (!_authResolved) {
+      window.location.replace('https://trainly.online/index');
+    }
+  }, 3000);
+
+  _auth.onAuthStateChanged(function(user) {
+    _authResolved = true;
+    clearTimeout(_redirectTimer);
+    if (!user) {
+      window.location.replace('https://trainly.online/index');
+      return;
+    }
+    // Usuário autenticado mas sem sessão local — tenta carregar do Firestore
+    _db.collection('nutricionistas').where('uid', '==', user.uid).limit(1).get()
+      .then(function(snap) {
+        if (snap.empty) {
+          _db.collection('users').where('uid', '==', user.uid).limit(1).get()
+            .then(function(snap2) {
+              if (snap2.empty || snap2.docs[0].data().profType !== 'nutri') {
+                window.location.replace('https://trainly.online/index');
+                return;
+              }
+              var d = snap2.docs[0].data();
+              var rebuilt = { id: snap2.docs[0].id, ...d };
+              localStorage.setItem('trainly_nutri_session', JSON.stringify(rebuilt));
+              _currentNutri = rebuilt;
+              enterDashboard();
+            }).catch(function() {
+              window.location.replace('https://trainly.online/index');
+            });
+        } else {
+          var d = snap.docs[0].data();
+          var rebuilt = { id: snap.docs[0].id, profType: 'nutri', ...d };
+          localStorage.setItem('trainly_nutri_session', JSON.stringify(rebuilt));
+          _currentNutri = rebuilt;
+          enterDashboard();
+        }
+      }).catch(function() {
+        window.location.replace('https://trainly.online/index');
+      });
+  });
 });
 
 function enterDashboard() {
@@ -3124,6 +3169,209 @@ async function saveReply(id) {
   await _db.collection('nutri_feedbacks').doc(id).update({ reply: text, repliedAt: Date.now() });
   showToast('Resposta enviada!');
   loadFeedbacks();
+}
+
+// ── NOVA AVALIAÇÃO ──
+function openNovaAvaliacao() {
+  if (!_currentClientId) { showToast('Selecione um cliente primeiro.'); return; }
+  var c = _clientsRaw.find(function(x) { return x.id === _currentClientId; });
+
+  // Atualiza subtítulo do modal
+  var subEl = document.getElementById('modal-nova-aval-sub');
+  if (subEl && c) subEl.textContent = c.name;
+
+  // Limpa todos os campos de input/textarea
+  document.querySelectorAll('#modal-nova-avaliacao input:not([type=checkbox]):not([type=hidden]), #modal-nova-avaliacao textarea').forEach(function(el) {
+    el.value = '';
+  });
+
+  // Reset select de fórmula
+  var fmSel = document.getElementById('na-fat-formula-sel'); if(fmSel) fmSel.value = '';
+  var goalSel = document.getElementById('na-goal-aval'); if(goalSel) goalSel.value = '';
+  var actSel = document.getElementById('na-activity-aval'); if(actSel) actSel.value = '';
+
+  // Reset checkboxes e panels de saúde
+  ['na-chk-injuries','na-chk-conditions','na-chk-meds','na-chk-alerg'].forEach(function(id) {
+    var el = document.getElementById(id); if(el) el.checked = false;
+  });
+  ['na-injuries-detail','na-conditions-detail','na-meds-detail','na-alerg-detail'].forEach(function(id) {
+    var el = document.getElementById(id); if(el) el.classList.remove('open');
+  });
+
+  // Data de hoje
+  var dateEl = document.getElementById('na-date');
+  if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+
+  // Pré-preenche dados do cliente
+  if (c) {
+    if (c.weight) { var we = document.getElementById('na-weight'); if(we) we.value = c.weight; }
+    if (c.height) {
+      var he = document.getElementById('na-height-val'); if(he) he.value = c.height;
+      var nhe = document.getElementById('na-nv-height'); if(nhe) nhe.value = c.height;
+    }
+    if (c.goal)     { var ge = document.getElementById('na-goal-aval');    if(ge) ge.value = c.goal; }
+    if (c.activity) { var ae = document.getElementById('na-activity-aval'); if(ae) ae.value = c.activity; }
+    naCalcImc();
+    // Quadril feminino no método Navy
+    var hg = document.getElementById('na-nv-hip-group');
+    if (hg) hg.style.display = (c.sex === 'F') ? '' : 'none';
+  }
+
+  // Reset resultado gordura
+  var fatRes = document.getElementById('na-fat-result'); if(fatRes) fatRes.classList.add('hidden');
+  var fatMiss = document.getElementById('na-fat-missing'); if(fatMiss) fatMiss.classList.add('hidden');
+  var imcLive = document.getElementById('na-imc-live'); if(imcLive) imcLive.style.display = 'none';
+
+  // Esconde campos de fórmula
+  naFatFormulaChange();
+
+  // Abre primeira aba do modal
+  document.querySelectorAll('#modal-nova-avaliacao .modal-assess-tab').forEach(function(b,i) { b.classList.toggle('active', i===0); });
+  document.querySelectorAll('#modal-nova-avaliacao .modal-assess-panel').forEach(function(p,i) { p.classList.toggle('active', i===0); });
+
+  openModal('modal-nova-avaliacao');
+}
+
+// switchModalAvalTab — chamado pelos botões de aba do modal de avaliação
+function switchModalAvalTab(panelId, btn) {
+  document.querySelectorAll('#modal-nova-avaliacao .modal-assess-tab').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('#modal-nova-avaliacao .modal-assess-panel').forEach(function(p) { p.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var el = document.getElementById(panelId);
+  if (el) el.classList.add('active');
+}
+
+// naCalcImc — chamado ao mudar peso/altura no modal
+function naCalcImc() {
+  var w = parseFloat((document.getElementById('na-weight')||{}).value);
+  var h = parseFloat((document.getElementById('na-height-val')||{}).value);
+  var liveBox = document.getElementById('na-imc-live');
+  var liveVal = document.getElementById('na-imc-live-val');
+  var liveCat = document.getElementById('na-imc-live-cat');
+  if (w && h) {
+    var imc = parseFloat(calcIMC(w, h));
+    if (liveBox) liveBox.style.display = 'flex';
+    if (liveVal) liveVal.textContent = imc.toFixed(1);
+    if (liveCat) liveCat.textContent = imcLabel(imc.toFixed(1));
+  } else {
+    if (liveBox) liveBox.style.display = 'none';
+  }
+}
+
+// naFatFormulaChange — mostra/oculta campos de dobras conforme fórmula
+function naFatFormulaChange() {
+  var formula = (document.getElementById('na-fat-formula-sel')||{}).value || '';
+  ['na-fat-jp3','na-fat-jp7','na-fat-dw','na-fat-faulkner','na-fat-navy'].forEach(function(id) {
+    var el = document.getElementById(id); if(el) el.classList.add('hidden');
+  });
+  if (formula) {
+    var map = { jp3:'na-fat-jp3', jp7:'na-fat-jp7', dw:'na-fat-dw', faulkner:'na-fat-faulkner', navy:'na-fat-navy' };
+    if (map[formula]) { var el = document.getElementById(map[formula]); if(el) el.classList.remove('hidden'); }
+  }
+  var fatRes = document.getElementById('na-fat-result'); if(fatRes) fatRes.classList.add('hidden');
+  var fatMiss = document.getElementById('na-fat-missing'); if(fatMiss) fatMiss.classList.add('hidden');
+}
+
+// naFatCalc — recalcula % gordura no modal de avaliação
+function naFatCalc() {
+  if (typeof window.fatCalc === 'function') {
+    window.fatCalc('na');
+  }
+}
+
+// naFatClearAll — limpa campos do calculador de gordura no modal
+function naFatClearAll() {
+  document.querySelectorAll('#na-fat-calc .fat-input').forEach(function(el) { el.value = ''; });
+  var fmSel = document.getElementById('na-fat-formula-sel'); if(fmSel) fmSel.value = '';
+  naFatFormulaChange();
+}
+
+// naToggleHealth — toggle para campos de saúde no modal
+function naToggleHealth(itemEl, detailId) {
+  var chk = itemEl.querySelector('input[type=checkbox]');
+  var detail = document.getElementById(detailId);
+  if (!chk || !detail) return;
+  detail.classList.toggle('open', chk.checked);
+}
+
+async function saveNovaAvaliacao() {
+  if (!_currentClientId) { showToast('Nenhum cliente selecionado.'); return; }
+  var btn = document.getElementById('btn-save-nova-aval');
+  if (btn) btn.classList.add('btn-loading');
+
+  var weight = parseFloat((document.getElementById('na-weight')||{}).value) || null;
+  var height = parseFloat((document.getElementById('na-height-val')||{}).value) || null;
+  var imc    = (weight && height) ? parseFloat(calcIMC(weight, height)) : null;
+  var dateVal = (document.getElementById('na-date')||{}).value || null;
+
+  // % gordura — lê dos campos hidden preenchidos pelo fatCalc
+  var fatVal     = parseFloat((document.getElementById('na-fat-val')||{}).value)     || null;
+  var fatFormula = (document.getElementById('na-fat-formula')||{}).value             || null;
+  var fatClass   = (document.getElementById('na-fat-class')||{}).value               || null;
+  // Fallback: lê do display visual se os hidden não tiverem sido preenchidos
+  if (!fatVal) {
+    var fatPctEl = document.getElementById('na-fat-result-pct');
+    if (fatPctEl && fatPctEl.textContent && fatPctEl.textContent !== '—') {
+      fatVal = parseFloat(fatPctEl.textContent);
+    }
+  }
+  if (!fatFormula) {
+    var fmSel = document.getElementById('na-fat-formula-sel');
+    if (fmSel) fatFormula = fmSel.value || null;
+  }
+
+  // Medidas corporais
+  var measureIds = ['waist','hip','chest','arm-r','arm-l','shoulder','thigh-r','thigh-l','calf-r','calf-l','thigh-prox','thigh-dist'];
+  var measures = {};
+  measureIds.forEach(function(k) {
+    var v = parseFloat((document.getElementById('na-m-' + k)||{}).value);
+    if (!isNaN(v) && v > 0) measures[k] = v;
+  });
+
+  var injuries   = (document.getElementById('na-chk-injuries')   && document.getElementById('na-chk-injuries').checked)   ? ((document.getElementById('na-txt-injuries')||{}).value||'')   : '';
+  var conditions = (document.getElementById('na-chk-conditions') && document.getElementById('na-chk-conditions').checked) ? ((document.getElementById('na-txt-conditions')||{}).value||'') : '';
+  var meds       = (document.getElementById('na-chk-meds')       && document.getElementById('na-chk-meds').checked)       ? ((document.getElementById('na-txt-meds')||{}).value||'')       : '';
+  var alergias   = (document.getElementById('na-chk-alerg')      && document.getElementById('na-chk-alerg').checked)      ? ((document.getElementById('na-txt-alerg')||{}).value||'')      : '';
+
+  var goal     = (document.getElementById('na-goal-aval')||{}).value    || '';
+  var activity = (document.getElementById('na-activity-aval')||{}).value || '';
+  var obs      = (document.getElementById('na-obs')||{}).value           || '';
+  var recomend = (document.getElementById('na-recomend')||{}).value      || '';
+
+  var data = {
+    clientId:   _currentClientId,
+    nutriId:    _currentNutri.id,
+    ts:         Date.now(),
+    dateLabel:  dateVal,
+    weight, height, imc,
+    fat:        fatVal,
+    fatClass,
+    fatFormula,
+    measures:   Object.keys(measures).length ? measures : null,
+    injuries, conditions, meds, alergias,
+    goal, activity, obs, recomend
+  };
+
+  // Remove nulos/vazios para manter o Firestore limpo
+  Object.keys(data).forEach(function(k) { if (data[k] === null || data[k] === '' || data[k] === undefined) delete data[k]; });
+
+  try {
+    await _db.collection('nutri_assessments').add(data);
+    // Atualiza dados básicos do cliente
+    var clientUpdate = { updatedAt: Date.now() };
+    if (weight)   clientUpdate.weight   = weight;
+    if (height)   clientUpdate.height   = height;
+    if (goal)     clientUpdate.goal     = goal;
+    if (activity) clientUpdate.activity = activity;
+    await _db.collection('nutri_clients').doc(_currentClientId).update(clientUpdate);
+    closeModal('modal-nova-avaliacao');
+    showToast('Avaliação salva com sucesso! ✅');
+    loadEvolucaoNutri(_currentClientId);
+    loadClients();
+  } catch(e) {
+    showToast('Erro ao salvar: ' + e.message);
+  }
+  if (btn) btn.classList.remove('btn-loading');
 }
 
 // ── INIT ──
