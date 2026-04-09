@@ -445,6 +445,59 @@
     .diet-meal-name { font-size: .8rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
     .diet-meal-desc { font-size: .76rem; color: var(--text2); line-height: 1.5; }
     .diet-meal-macros { display: flex; gap: 10px; margin-top: 6px; }
+
+    /* Food items inside meals */
+    .food-item-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    }
+    .food-item-row .food-name-input {
+      flex: 1; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--r);
+      font-size: .83rem; background: var(--bg); color: var(--text); font-family: var(--body);
+      transition: border-color .15s;
+    }
+    .food-item-row .food-qty-input {
+      width: 90px; padding: 7px 8px; border: 1.5px solid var(--border); border-radius: var(--r);
+      font-size: .83rem; background: var(--bg); color: var(--text); font-family: var(--body);
+      transition: border-color .15s; text-align: center;
+    }
+    .food-item-row .food-name-input:focus,
+    .food-item-row .food-qty-input:focus {
+      outline: none; border-color: var(--nutri); box-shadow: 0 0 0 3px rgba(46,125,82,.1);
+    }
+    .food-item-row .food-remove-btn {
+      background: none; border: none; cursor: pointer; color: var(--text3);
+      font-size: .85rem; padding: 4px 6px; border-radius: 6px; transition: all .12s; flex-shrink: 0;
+    }
+    .food-item-row .food-remove-btn:hover { color: var(--red); background: var(--red-dim); }
+    .food-items-list { display: flex; flex-direction: column; gap: 0; margin: 8px 0 6px; }
+    .food-items-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+      font-size: .65rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .06em;
+    }
+    .food-items-header .fh-name { flex: 1; }
+    .food-items-header .fh-qty { width: 90px; text-align: center; }
+    .food-items-header .fh-del { width: 28px; }
+    .add-food-btn {
+      background: none; border: 1px dashed var(--border2); border-radius: var(--r);
+      color: var(--nutri); font-size: .78rem; font-weight: 700; font-family: var(--body);
+      padding: 5px 10px; cursor: pointer; transition: all .15s; width: 100%; text-align: left;
+      margin-top: 4px;
+    }
+    .add-food-btn:hover { border-color: var(--nutri); background: var(--nutri-dim); }
+
+    /* Diet card action buttons */
+    .diet-plan-actions {
+      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+    }
+
+    /* Food list in card view */
+    .food-list-view { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
+    .food-list-item {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: .78rem; color: var(--text2); padding: 2px 0;
+    }
+    .food-list-item-name { font-weight: 500; }
+    .food-list-item-qty { color: var(--text3); font-size: .72rem; font-weight: 600; }
     .diet-macro-pill {
       font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 99px;
     }
@@ -1019,7 +1072,7 @@
               <div class="section-label" style="margin-bottom:0;">Plano alimentar</div>
               <button class="btn btn-nutri btn-sm" onclick="openDietModal()">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Adicionar plano
+                Novo plano
               </button>
             </div>
             <div id="diet-plans-list">
@@ -1228,9 +1281,12 @@
 
 <!-- DIET PLAN MODAL -->
 <div id="modal-diet" class="modal-overlay hidden">
-  <div class="modal modal-sm">
+  <div class="modal">
     <div class="modal-header">
-      <h3>Plano alimentar</h3>
+      <div>
+        <h3 id="modal-diet-title">Plano alimentar</h3>
+        <span id="modal-diet-sub" style="font-size:.78rem;margin-top:2px;display:block;color:rgba(255,255,255,.55);">Preencha as informações do plano</span>
+      </div>
       <button class="close-btn" onclick="closeModal('modal-diet')">✕</button>
     </div>
     <div class="modal-body">
@@ -1256,8 +1312,8 @@
         <label>Gordura (g)</label>
         <input id="diet-fat" class="form-control" type="number" placeholder="Ex: 60" />
       </div>
-      <div class="section-label" style="margin-top:4px;">Refeições</div>
-      <div id="diet-meals-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+      <div class="section-label" style="margin-top:4px;">Refeições e alimentos</div>
+      <div id="diet-meals-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;"></div>
       <button class="btn btn-ghost btn-sm" onclick="addMealField()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Adicionar refeição
@@ -1269,7 +1325,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-diet')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveDietPlan()">Salvar plano</button>
+      <button class="btn btn-primary" id="btn-save-diet" onclick="saveDietPlan()">Salvar plano</button>
     </div>
   </div>
 </div>
@@ -1746,41 +1802,97 @@ async function deleteClient() {
 }
 
 // ── DIET PLANS ──
-function openDietModal() {
+let _editingDietId = null;
+
+function openDietModal(editId) {
+  _editingDietId = editId || null;
   _mealCount = 0;
-  document.getElementById('diet-name').value = '';
-  document.getElementById('diet-kcal').value = '';
-  document.getElementById('diet-prot').value = '';
-  document.getElementById('diet-carb').value = '';
-  document.getElementById('diet-fat').value = '';
-  document.getElementById('diet-obs').value = '';
-  document.getElementById('diet-meals-list').innerHTML = '';
-  addMealField(); addMealField(); addMealField(); // 3 meals default
-  openModal('modal-diet');
+  if (_editingDietId) {
+    // load existing plan data
+    _db.collection('nutri_diet_plans').doc(_editingDietId).get().then(function(doc) {
+      if (!doc.exists) return;
+      const p = doc.data();
+      document.getElementById('modal-diet-title').textContent = 'Editar plano alimentar';
+      document.getElementById('modal-diet-sub').textContent = p.name || 'Editar plano';
+      document.getElementById('diet-name').value = p.name || '';
+      document.getElementById('diet-kcal').value = p.kcal || '';
+      document.getElementById('diet-prot').value = p.prot || '';
+      document.getElementById('diet-carb').value = p.carb || '';
+      document.getElementById('diet-fat').value  = p.fat  || '';
+      document.getElementById('diet-obs').value  = p.obs  || '';
+      document.getElementById('diet-meals-list').innerHTML = '';
+      (p.meals || []).forEach(function(m) { addMealField(m); });
+      if (!(p.meals||[]).length) addMealField();
+      openModal('modal-diet');
+    });
+  } else {
+    document.getElementById('modal-diet-title').textContent = 'Novo plano alimentar';
+    document.getElementById('modal-diet-sub').textContent = 'Preencha as informações do plano';
+    document.getElementById('diet-name').value = '';
+    document.getElementById('diet-kcal').value = '';
+    document.getElementById('diet-prot').value = '';
+    document.getElementById('diet-carb').value = '';
+    document.getElementById('diet-fat').value  = '';
+    document.getElementById('diet-obs').value  = '';
+    document.getElementById('diet-meals-list').innerHTML = '';
+    addMealField(); addMealField(); addMealField();
+    openModal('modal-diet');
+  }
 }
 
-function addMealField() {
+function addMealField(existingMeal) {
   _mealCount++;
   const id = 'meal-' + _mealCount;
   const div = document.createElement('div');
   div.id = id;
   div.className = 'diet-meal';
-  div.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-    <span style="font-size:.72rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;">Refeição ${_mealCount}</span>
-    <button onclick="document.getElementById('${id}').remove()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:.8rem;">✕</button>
+  div.style.cssText = 'border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;background:var(--surface2);';
+  div.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <input class="form-control" style="flex:1;font-size:.85rem;font-weight:700;background:transparent;border:none;border-bottom:1.5px solid var(--border);border-radius:0;padding:4px 2px;" placeholder="Nome da refeição (Ex: Café da manhã)" data-meal-name value="${existingMeal&&existingMeal.name?existingMeal.name:''}" />
+    <button onclick="document.getElementById('${id}').remove()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:.85rem;padding:4px 8px;margin-left:8px;flex-shrink:0;border-radius:6px;transition:all .12s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">✕</button>
   </div>
-  <input class="form-control" style="margin-bottom:6px;" placeholder="Nome (Ex: Café da manhã)" data-meal-name />
-  <textarea class="form-control" rows="2" placeholder="Alimentos e quantidades..." data-meal-desc></textarea>`;
+  <div class="food-items-header">
+    <span class="fh-name">Alimento</span>
+    <span class="fh-qty">Quantidade</span>
+    <span class="fh-del"></span>
+  </div>
+  <div class="food-items-list" id="${id}-foods"></div>
+  <button class="add-food-btn" onclick="addFoodItem('${id}-foods')">+ Adicionar alimento</button>`;
   document.getElementById('diet-meals-list').appendChild(div);
+  // populate existing foods
+  if (existingMeal && existingMeal.foods && existingMeal.foods.length) {
+    existingMeal.foods.forEach(function(f) { addFoodItem(id+'-foods', f); });
+  } else {
+    addFoodItem(id+'-foods');
+  }
+}
+
+function addFoodItem(containerId, existingFood) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const row = document.createElement('div');
+  row.className = 'food-item-row';
+  row.innerHTML = `<input class="food-name-input" type="text" placeholder="Nome do alimento" data-food-name value="${existingFood&&existingFood.name?existingFood.name:''}" />
+    <input class="food-qty-input" type="text" placeholder="Ex: 100g" data-food-qty value="${existingFood&&existingFood.qty?existingFood.qty:''}" />
+    <button class="food-remove-btn" onclick="this.parentElement.remove()">✕</button>`;
+  container.appendChild(row);
 }
 
 async function saveDietPlan() {
   if (!_currentClientId) return;
   const meals = [];
   document.querySelectorAll('#diet-meals-list .diet-meal').forEach(function(div) {
-    const n = div.querySelector('[data-meal-name]');
-    const d = div.querySelector('[data-meal-desc]');
-    if (n && d && (n.value||d.value)) meals.push({ name: n.value||'', desc: d.value||'' });
+    const nameEl = div.querySelector('[data-meal-name]');
+    const mealName = nameEl ? (nameEl.value||'').trim() : '';
+    const foods = [];
+    div.querySelectorAll('.food-item-row').forEach(function(row) {
+      const fn = row.querySelector('[data-food-name]');
+      const fq = row.querySelector('[data-food-qty]');
+      const foodName = fn ? (fn.value||'').trim() : '';
+      const foodQty  = fq ? (fq.value||'').trim() : '';
+      if (foodName || foodQty) foods.push({ name: foodName, qty: foodQty });
+    });
+    if (mealName || foods.length) meals.push({ name: mealName, foods });
   });
   const data = {
     clientId: _currentClientId,
@@ -1789,16 +1901,26 @@ async function saveDietPlan() {
     kcal: parseFloat(document.getElementById('diet-kcal').value)||null,
     prot: parseFloat(document.getElementById('diet-prot').value)||null,
     carb: parseFloat(document.getElementById('diet-carb').value)||null,
-    fat: parseFloat(document.getElementById('diet-fat').value)||null,
-    obs: document.getElementById('diet-obs').value||'',
-    meals, createdAt: Date.now()
+    fat:  parseFloat(document.getElementById('diet-fat').value)||null,
+    obs:  document.getElementById('diet-obs').value||'',
+    meals,
+    updatedAt: Date.now()
   };
+  const btn = document.getElementById('btn-save-diet');
+  btn.classList.add('btn-loading');
   try {
-    await _db.collection('nutri_diet_plans').add(data);
+    if (_editingDietId) {
+      await _db.collection('nutri_diet_plans').doc(_editingDietId).update(data);
+      showToast('Plano atualizado!');
+    } else {
+      data.createdAt = Date.now();
+      await _db.collection('nutri_diet_plans').add(data);
+      showToast('Plano salvo!');
+    }
     closeModal('modal-diet');
-    showToast('Plano salvo!');
     loadDietPlans(_currentClientId);
   } catch(e) { showToast('Erro: ' + e.message); }
+  btn.classList.remove('btn-loading');
 }
 
 async function loadDietPlans(clientId) {
@@ -1806,26 +1928,51 @@ async function loadDietPlans(clientId) {
   const el = document.getElementById('diet-plans-list');
   if (!el) return;
   el.innerHTML = '<div class="spinner"></div>';
+  // get client phone for WhatsApp
+  const client = _clientsRaw.find(c => c.id === clientId);
+  const phone = client ? (client.phone||'') : '';
   try {
     const snap = await _db.collection('nutri_diet_plans')
       .where('clientId','==',clientId).get();
     if (snap.empty) { el.innerHTML = '<div class="dash-empty-state">Nenhum plano alimentar cadastrado.</div>'; return; }
-    const sortedDietDocs = snap.docs.slice().sort((a,b) => (b.data().createdAt||0) - (a.data().createdAt||0));
-    el.innerHTML = sortedDietDocs.map(function(d) {
+    const sorted = snap.docs.slice().sort((a,b) => (b.data().createdAt||0) - (a.data().createdAt||0));
+    el.innerHTML = sorted.map(function(d) {
       const p = d.data();
-      const mealsHtml = (p.meals||[]).map(m => `<div class="diet-meal">
-        <div class="diet-meal-name">${m.name||'Refeição'}</div>
-        <div class="diet-meal-desc">${m.desc||'—'}</div>
-      </div>`).join('');
-      return `<div class="diet-plan-card">
+      const mealsHtml = (p.meals||[]).map(function(m) {
+        const foodsHtml = (m.foods||[]).length
+          ? `<div class="food-list-view">${(m.foods||[]).map(f=>`<div class="food-list-item"><span class="food-list-item-name">${f.name||'—'}</span><span class="food-list-item-qty">${f.qty||''}</span></div>`).join('')}</div>`
+          : (m.desc ? `<div class="diet-meal-desc">${m.desc}</div>` : '');
+        return `<div class="diet-meal">
+          <div class="diet-meal-name">${m.name||'Refeição'}</div>
+          ${foodsHtml}
+        </div>`;
+      }).join('');
+
+      const waPhone = phone.replace(/\D/g,'');
+      const waText = encodeURIComponent(_buildWhatsAppText(p, client));
+
+      return `<div class="diet-plan-card" id="dpc-${d.id}">
         <div class="diet-plan-head">
           <div class="diet-plan-name">🥗 ${p.name}</div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:.7rem;color:var(--text3);">${fmtDate(p.createdAt)}</span>
-            <button onclick="deleteDietPlan('${d.id}')" class="btn btn-danger btn-sm" style="padding:4px 8px;font-size:.7rem;">✕</button>
+          <div class="diet-plan-actions">
+            <button onclick="openDietModal('${d.id}')" class="btn btn-nutri btn-sm" title="Editar plano">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Editar
+            </button>
+            <button onclick="exportDietPDF('${d.id}')" class="btn btn-ghost btn-sm" title="Exportar PDF">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              PDF
+            </button>
+            ${waPhone ? `<a href="https://wa.me/55${waPhone}?text=${waText}" target="_blank" class="btn btn-sm" style="background:rgba(37,211,102,.1);color:#128c7e;border:1px solid rgba(37,211,102,.3);" title="Enviar no WhatsApp">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+              WhatsApp
+            </a>` : ''}
+            <button onclick="deleteDietPlan('${d.id}')" class="btn btn-danger btn-sm" title="Excluir plano" style="padding:6px 8px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
           </div>
         </div>
-        ${p.kcal?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        ${p.kcal?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
           <span class="diet-macro-pill p">P: ${p.prot||'?'}g</span>
           <span class="diet-macro-pill c">C: ${p.carb||'?'}g</span>
           <span class="diet-macro-pill g">G: ${p.fat||'?'}g</span>
@@ -1843,6 +1990,143 @@ async function deleteDietPlan(id) {
   await _db.collection('nutri_diet_plans').doc(id).delete();
   loadDietPlans(_currentClientId);
   showToast('Plano removido.');
+}
+
+// ── WHATSAPP TEXT BUILDER ──
+function _buildWhatsAppText(plan, client) {
+  const clientName = client ? client.name : 'Cliente';
+  let txt = `🥗 *Plano Alimentar — ${plan.name}*\n`;
+  txt += `*Cliente:* ${clientName}\n`;
+  if (plan.kcal) {
+    txt += `*Calorias:* ${plan.kcal} kcal/dia\n`;
+    txt += `*Macros:* Prot ${plan.prot||'?'}g · Carb ${plan.carb||'?'}g · Gord ${plan.fat||'?'}g\n`;
+  }
+  txt += '\n';
+  (plan.meals||[]).forEach(function(m) {
+    txt += `*${m.name||'Refeição'}*\n`;
+    (m.foods||[]).forEach(function(f) {
+      txt += `  • ${f.name||''}${f.qty?' — '+f.qty:''}\n`;
+    });
+    txt += '\n';
+  });
+  if (plan.obs) txt += `📝 *Obs:* ${plan.obs}\n`;
+  txt += '\n_Enviado via Trainly_';
+  return txt;
+}
+
+// ── PDF EXPORT ──
+async function exportDietPDF(planId) {
+  const snap = await _db.collection('nutri_diet_plans').doc(planId).get();
+  if (!snap.exists) { showToast('Plano não encontrado.'); return; }
+  const plan = snap.data();
+  const client = _clientsRaw.find(c => c.id === _currentClientId) || {};
+
+  const today = new Date().toLocaleDateString('pt-BR');
+  const nutriName = _currentNutri.name || _currentNutri.username || 'Nutricionista';
+
+  const mealsHtml = (plan.meals||[]).map(function(m) {
+    const foodRows = (m.foods||[]).length
+      ? (m.foods||[]).map(f => `<tr>
+          <td style="padding:5px 10px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#333;">${f.name||'—'}</td>
+          <td style="padding:5px 10px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#555;text-align:right;width:120px;">${f.qty||''}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="2" style="padding:5px 10px;font-size:12px;color:#999;font-style:italic;">Nenhum alimento listado</td></tr>`;
+    return `<div style="margin-bottom:16px;break-inside:avoid;">
+      <div style="background:#2e7d52;color:white;padding:7px 12px;border-radius:6px 6px 0 0;font-size:12px;font-weight:700;">
+        ${m.name||'Refeição'}
+      </div>
+      <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e8e8e8;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">
+        <thead><tr>
+          <th style="padding:5px 10px;background:#f8faf9;font-size:11px;color:#666;font-weight:600;text-align:left;border-bottom:1px solid #e8e8e8;">Alimento</th>
+          <th style="padding:5px 10px;background:#f8faf9;font-size:11px;color:#666;font-weight:600;text-align:right;border-bottom:1px solid #e8e8e8;width:120px;">Quantidade</th>
+        </tr></thead>
+        <tbody>${foodRows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: #111; }
+    .page { max-width: 720px; margin: 0 auto; padding: 32px 36px; }
+    .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #2e7d52; padding-bottom: 18px; margin-bottom: 24px; }
+    .brand { font-size: 22px; font-weight: 800; color: #111; letter-spacing: -.02em; }
+    .brand span { color: #2e7d52; }
+    .header-right { text-align: right; font-size: 11px; color: #666; line-height: 1.7; }
+    .plan-title { font-size: 19px; font-weight: 800; color: #111; margin-bottom: 4px; }
+    .plan-sub { font-size: 12px; color: #666; margin-bottom: 20px; }
+    .info-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+    .info-chip { background: #f0f7f3; border: 1px solid #c3dece; border-radius: 8px; padding: 8px 14px; font-size: 12px; }
+    .info-chip strong { display: block; font-size: 10px; color: #2e7d52; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; margin-bottom: 2px; }
+    .macros-bar { display: flex; gap: 12px; margin-bottom: 24px; background: #f8faf9; border: 1px solid #e0ede6; border-radius: 10px; padding: 14px 18px; }
+    .macro-item { text-align: center; flex: 1; }
+    .macro-val { font-size: 20px; font-weight: 800; color: #111; }
+    .macro-lbl { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-top: 2px; }
+    .macro-item.prot .macro-val { color: #2563eb; }
+    .macro-item.carb .macro-val { color: #d97706; }
+    .macro-item.fat .macro-val  { color: #9333ea; }
+    .section-title { font-size: 11px; font-weight: 700; color: #2e7d52; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
+    .obs-box { background: #fffbea; border: 1px solid #f5c800; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #555; margin-top: 24px; line-height: 1.6; }
+    .obs-box strong { display: block; color: #8a6c00; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .footer { margin-top: 32px; border-top: 1px solid #eee; padding-top: 14px; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; }
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  </style></head><body>
+  <div class="page">
+    <div class="header">
+      <div class="brand">Trainly <span>Nutri</span></div>
+      <div class="header-right">
+        <strong>${nutriName}</strong><br/>
+        Plano emitido em ${today}
+      </div>
+    </div>
+
+    <div class="plan-title">🥗 ${plan.name}</div>
+    <div class="plan-sub">Cliente: <strong>${client.name||'—'}</strong>${client.birth?' · '+fmtAge(client.birth):''}${client.goal?' · '+client.goal:''}</div>
+
+    <div class="info-bar">
+      ${client.weight?`<div class="info-chip"><strong>Peso</strong>${client.weight} kg</div>`:''}
+      ${client.height?`<div class="info-chip"><strong>Altura</strong>${client.height} cm</div>`:''}
+      ${client.weight&&client.height?`<div class="info-chip"><strong>IMC</strong>${calcIMC(client.weight,client.height)}</div>`:''}
+      ${client.activity?`<div class="info-chip"><strong>Atividade</strong>${client.activity}</div>`:''}
+    </div>
+
+    ${plan.kcal ? `<div class="macros-bar">
+      <div class="macro-item" style="border-right:1px solid #e0ede6;">
+        <div class="macro-val">${plan.kcal}</div>
+        <div class="macro-lbl">kcal/dia</div>
+      </div>
+      <div class="macro-item prot">
+        <div class="macro-val">${plan.prot||'—'}g</div>
+        <div class="macro-lbl">Proteína</div>
+      </div>
+      <div class="macro-item carb">
+        <div class="macro-val">${plan.carb||'—'}g</div>
+        <div class="macro-lbl">Carboidrato</div>
+      </div>
+      <div class="macro-item fat">
+        <div class="macro-val">${plan.fat||'—'}g</div>
+        <div class="macro-lbl">Gordura</div>
+      </div>
+    </div>` : ''}
+
+    <div class="section-title">Refeições</div>
+    ${mealsHtml}
+
+    ${plan.obs ? `<div class="obs-box"><strong>📝 Observações</strong>${plan.obs}</div>` : ''}
+
+    <div class="footer">
+      <span>Trainly Nutri — ${nutriName}</span>
+      <span>Gerado em ${today}</span>
+    </div>
+  </div>
+  <scr` + `ipt>window.onload=function(){window.print();}<\/scr` + `ipt>
+  </body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+  if (!win) showToast('Permita pop-ups para gerar o PDF.');
 }
 
 // ── WEIGHT HISTORY ──
