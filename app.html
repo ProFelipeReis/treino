@@ -60,9 +60,9 @@
       --shadow-md: 0 8px 32px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .07);
     }
 
-    html { scroll-behavior: smooth; overflow: hidden; height: 100%; overscroll-behavior: none; position: fixed; width: 100%; }
+    html { scroll-behavior: smooth; overflow: hidden; height: 100%; overscroll-behavior: none; }
 
-    body { font-family: var(--body); background: #000000; color: var(--text); height: 100%; overflow: hidden; overscroll-behavior: none; position: fixed; width: 100%; }
+    body { font-family: var(--body); background: #000000; color: var(--text); height: 100%; overflow: hidden; overscroll-behavior: none; }
 
     button,
     a,
@@ -3495,9 +3495,15 @@
 
       .main-content {
         padding: 14px;
-        padding-bottom: calc(96px + max(env(safe-area-inset-bottom), 16px));
+        padding-bottom: calc(88px + max(env(safe-area-inset-bottom), 12px));
         overscroll-behavior-y: contain;
         -webkit-overflow-scrolling: touch;
+      }
+
+      /* Garante que nenhum conteúdo fique sob a mobile-nav */
+      .tab-panel.active > *:last-child,
+      #tab-chat {
+        padding-bottom: 0; /* já herdado do main-content */
       }
 
       .mobile-nav {
@@ -8583,6 +8589,31 @@
       }
       e.preventDefault();
     }
+
+    // ── Anti-bounce iOS: impede o efeito elástico sem matar o scroll interno ──
+    (function () {
+      var startY = 0;
+      document.addEventListener('touchstart', function (e) {
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+      document.addEventListener('touchmove', function (e) {
+        var el = e.target;
+        while (el && el !== document.body) {
+          var style = window.getComputedStyle(el);
+          var ov = style.overflowY;
+          if ((ov === 'auto' || ov === 'scroll') && el.scrollHeight > el.clientHeight) {
+            var dy = e.touches[0].clientY - startY;
+            var atTop = el.scrollTop <= 0 && dy > 0;
+            var atBot = el.scrollTop + el.clientHeight >= el.scrollHeight - 1 && dy < 0;
+            if (!atTop && !atBot) return;
+            break;
+          }
+          el = el.parentElement;
+        }
+        e.preventDefault();
+      }, { passive: false });
+    })();
+
     const genCode = () => { const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return Array.from({ length: 6 }, () => c[Math.floor(Math.random() * c.length)]).join('') };
     const initials = n => { const p = n.trim().split(' '); return p.length >= 2 ? (p[0][0] + p[p.length - 1][0]).toUpperCase() : n.slice(0, 2).toUpperCase() };
     const fmtLocalYMD = (date = new Date()) => { const d = new Date(date); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') };
