@@ -1442,10 +1442,8 @@
       min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 28px;
+      padding: 20px;
       background: var(--bg);
-      display: flex;
-      flex-direction: column;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: none;
     }
@@ -1456,15 +1454,13 @@
 
     .tab-panel.active {
       display: block;
-      flex: 1;
-      min-height: 0;
     }
 
-    /* O tab de chat precisa de flex para distribuir altura */
+    /* O tab de chat mantém flex para distribuir altura interna */
     #tab-chat.active {
       display: flex;
       flex-direction: column;
-      flex: 1;
+      height: 100%;
     }
 
     .page-header {
@@ -3508,7 +3504,8 @@
       }
 
       .main-content {
-        padding-bottom: 72px;
+        padding: 14px;
+        padding-bottom: 80px;
       }
 
       .mobile-nav {
