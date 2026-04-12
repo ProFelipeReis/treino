@@ -11464,8 +11464,13 @@
         var finalPhone = phone || u.phone || '';
 
         if (isMaster) {
-          // Salva nome/telefone do master num doc próprio no Firestore
-          // name saved via managers collection below
+          // Salva nome, telefone e senha do master/CEO na coleção managers
+          var masterSnap = await _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username)));
+          if (!masterSnap.empty) {
+            var masterUpd = { name: finalName, phone: finalPhone };
+            if (pass) { masterUpd.passwordHash = await _sha256(pass); masterUpd.password = null; }
+            await _updateDoc(_doc(_db, 'managers', masterSnap.docs[0].id), masterUpd);
+          }
           // Propaga para todos os alunos do master
           var studSnap = await _getDocs(_query(_col(_db, 'students'), _where('managerId', '==', (window.CURRENT_USER || {}).username || '')));
           for (var sd of studSnap.docs) {
@@ -11486,7 +11491,8 @@
           }
         }
 
-        // Atualiza memória e localStorage
+        // Atualiza memória e localStorage (incluindo senha)
+        if (pass) { window.CURRENT_USER.passwordHash = await _sha256(pass); }
         window.CURRENT_USER.displayName = finalName;
         window.CURRENT_USER.phone = finalPhone;
         try { localStorage.setItem(LS_GESTOR, JSON.stringify(window.CURRENT_USER)); } catch (e) { }
