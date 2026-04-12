@@ -11491,6 +11491,31 @@
           }
         }
 
+        // Atualiza senha no Firebase Auth (autenticação real)
+        if (pass) {
+          var authUser = _auth && _auth.currentUser;
+          if (authUser) {
+            try {
+              await authUser.updatePassword(pass);
+            } catch (authErr) {
+              if (authErr.code === 'auth/requires-recent-login') {
+                // Reautentica automaticamente e tenta novamente
+                var authEmail = _authEmail(u.username);
+                var oldPass = document.getElementById('profile-pass-current') ? document.getElementById('profile-pass-current').value : null;
+                if (oldPass) {
+                  var cred = firebase.auth.EmailAuthProvider.credential(authEmail, oldPass);
+                  await authUser.reauthenticateWithCredential(cred);
+                  await authUser.updatePassword(pass);
+                } else {
+                  throw new Error('Sessão expirada. Faça logout e login novamente antes de alterar a senha.');
+                }
+              } else {
+                throw authErr;
+              }
+            }
+          }
+        }
+
         // Atualiza memória e localStorage (incluindo senha)
         if (pass) { window.CURRENT_USER.passwordHash = await _sha256(pass); }
         window.CURRENT_USER.displayName = finalName;
