@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#111110" />
-  <title>Trainly — Painel do Gestor</title>
+  <title>Trainly — Painel do Treinador</title>
 
 
 
@@ -2690,6 +2690,9 @@
     .ex-dropdown-clear:hover { color: var(--red); }
     .ex-dropdown-list {
       flex: 1; overflow-y: auto; overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
     }
     .ex-search-cat {
       padding: 6px 12px 3px; font-size: .65rem; font-weight: 800;
@@ -10790,7 +10793,20 @@
             renderDropdownList(listEl, q, bi, ei);
           });
 
-          internalInput.addEventListener('keydown', function(e) {
+          // Cancel close timer on any touch/click inside the dropdown (e.g. scrolling)
+          dropdown.addEventListener('pointerdown', (e) => {
+            if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
+          });
+
+          // When internal search loses focus, also check if focus left the whole dropdown
+          internalInput.addEventListener('blur', function() {
+            _closeTimer = setTimeout(() => {
+              if (dropdown.contains(document.activeElement)) return;
+              dropdown.classList.remove('open');
+              _activeDropdown = null;
+            }, 220);
+          });
+
             if (e.key === 'ArrowDown') {
               e.preventDefault();
               const opts = listEl.querySelectorAll('.ex-search-option');
@@ -10903,26 +10919,29 @@
         window.onExNameSelect(bi, ei, '');
       };
 
+      function closeDropdownAndRestore(wrap, input) {
+        const dropdown = wrap.querySelector('.ex-search-dropdown');
+        // Don't close if focus is anywhere inside the dropdown
+        if (dropdown && dropdown.contains(document.activeElement)) return;
+        if (dropdown) dropdown.classList.remove('open');
+        const bi = parseInt(wrap.dataset.bi);
+        const ei = parseInt(wrap.dataset.ei);
+        const ex = window.ST && window.ST.workoutBlocks && window.ST.workoutBlocks[bi] && window.ST.workoutBlocks[bi].exercises[ei];
+        if (ex && ex.name) {
+          input.value = ex.name === '__custom__' ? '✏️ Personalizado' : ex.name;
+        } else {
+          input.value = '';
+        }
+        wrap.classList.toggle('has-value', input.value.length > 0);
+        _activeDropdown = null;
+      }
+
       window.scheduleCloseExSearch = function(input) {
         _closeTimer = setTimeout(() => {
-          // Don't close if focus went to the internal dropdown search bar
           const wrap = input.closest('.ex-search-wrap');
           if (!wrap) return;
-          const dropdown = wrap.querySelector('.ex-search-dropdown');
-          if (dropdown && dropdown.contains(document.activeElement)) return;
-          if (dropdown) dropdown.classList.remove('open');
-          // Restore saved value if user didn't pick
-          const bi = parseInt(wrap.dataset.bi);
-          const ei = parseInt(wrap.dataset.ei);
-          const ex = window.ST && window.ST.workoutBlocks && window.ST.workoutBlocks[bi] && window.ST.workoutBlocks[bi].exercises[ei];
-          if (ex && ex.name) {
-            input.value = ex.name === '__custom__' ? '✏️ Personalizado' : ex.name;
-          } else {
-            input.value = '';
-          }
-          wrap.classList.toggle('has-value', input.value.length > 0);
-          _activeDropdown = null;
-        }, 180);
+          closeDropdownAndRestore(wrap, input);
+        }, 220);
       };
 
       window.navExSearch = function(e, input) {
@@ -10953,8 +10972,14 @@
         }
       };
 
-      // Close dropdown on scroll/resize reposition
-      window.addEventListener('scroll', () => { if (_activeDropdown) _activeDropdown.classList.remove('open'); }, true);
+      // Close dropdown on scroll only when scrolling happens OUTSIDE the dropdown list
+      window.addEventListener('scroll', (e) => {
+        if (!_activeDropdown) return;
+        const list = _activeDropdown.querySelector('.ex-dropdown-list');
+        if (list && (list === e.target || list.contains(e.target))) return;
+        if (_activeDropdown.contains(e.target)) return;
+        _activeDropdown.classList.remove('open');
+      }, true);
       window.addEventListener('resize', () => { if (_activeDropdown) _activeDropdown.classList.remove('open'); });
     })();
     // ────────────────────────────────────────────────────────────────
