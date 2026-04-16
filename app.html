@@ -2627,6 +2627,85 @@
       outline: none;
     }
 
+    /* ── Exercise Search Widget ── */
+    .ex-search-wrap {
+      flex: 1;
+      position: relative;
+      min-width: 0;
+    }
+    .ex-search-input {
+      width: 100%;
+      padding: 5px 28px 5px 8px;
+      font-size: .82rem;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--body);
+      font-weight: 600;
+      cursor: text;
+      min-width: 0;
+      outline: none;
+    }
+    .ex-search-input::placeholder { color: var(--text3); font-weight: 500; }
+    .ex-search-clear {
+      position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--border2); border: none; color: var(--text2);
+      font-size: .7rem; display: none; align-items: center; justify-content: center;
+      cursor: pointer; line-height: 1; padding: 0; font-family: inherit; transition: background .12s;
+    }
+    .ex-search-clear:hover { color: var(--red); }
+    .ex-search-wrap.has-value .ex-search-clear { display: flex; }
+    .ex-search-dropdown {
+      position: fixed; z-index: 99999;
+      background: var(--surface); border: 1.5px solid var(--border2);
+      border-radius: var(--r); box-shadow: var(--shadow-md);
+      max-height: 320px; overflow: hidden;
+      display: none; min-width: 220px;
+      flex-direction: column;
+    }
+    .ex-search-dropdown.open { display: flex; }
+    .ex-dropdown-search-bar {
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 10px;
+      border-bottom: 1.5px solid var(--border);
+      background: var(--surface2);
+      position: sticky; top: 0; z-index: 2;
+    }
+    .ex-dropdown-search-bar svg { flex-shrink: 0; color: var(--text3); }
+    .ex-dropdown-search-input {
+      flex: 1; border: none; background: transparent;
+      font-family: var(--body); font-size: .83rem; font-weight: 600;
+      color: var(--text); outline: none;
+    }
+    .ex-dropdown-search-input::placeholder { color: var(--text3); font-weight: 500; }
+    .ex-dropdown-clear {
+      flex-shrink: 0; background: none; border: none; padding: 0;
+      color: var(--text3); font-size: .85rem; cursor: pointer; line-height: 1;
+      display: none; align-items: center; justify-content: center;
+      width: 16px; height: 16px;
+    }
+    .ex-dropdown-clear.visible { display: flex; }
+    .ex-dropdown-clear:hover { color: var(--red); }
+    .ex-dropdown-list {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+    }
+    .ex-search-cat {
+      padding: 6px 12px 3px; font-size: .65rem; font-weight: 800;
+      color: var(--text3); text-transform: uppercase; letter-spacing: .08em;
+      background: var(--surface2); border-bottom: 1px solid var(--border); position: sticky; top: 0;
+    }
+    .ex-search-option {
+      padding: 9px 12px; font-size: .83rem; font-weight: 600; color: var(--text);
+      cursor: pointer; border-bottom: 1px solid var(--border); transition: background .1s;
+    }
+    .ex-search-option:last-child { border-bottom: none; }
+    .ex-search-option:hover, .ex-search-option.focused { background: var(--accent-dim); }
+    .ex-search-option.special { color: var(--text2); font-style: italic; }
+    .ex-search-option mark { background: var(--accent-soft); color: var(--text); border-radius: 2px; padding: 0 1px; }
+    .ex-search-empty { padding: 14px 12px; font-size: .83rem; color: var(--text3); text-align: center; font-weight: 500; }
+
     .remove-ex-btn {
       margin-left: 2px;
       background: none;
@@ -10176,6 +10255,7 @@
           if (ex.unilateral) tags.push('Unilateral');
           if (ex.isometria) tags.push('Isometria' + (ex.isometriaSegs ? ' ' + ex.isometriaSegs + 's' : ''));
           if (ex.restPause) tags.push('Rest-pause');
+          if (ex.dropSet) tags.push('Drop-set');
           exRows += `<tr>
         <td class="ex-num">${ei + 1}</td>
         <td class="ex-name-cell">
@@ -10551,7 +10631,7 @@
         ${(w.exercises || []).map((ex, ei) => `
           <div class="pv-ex">
             <div class="pv-ex-name">${ei + 1}. ${ex.name}</div>
-            <div class="pv-ex-meta">${ex.series} série(s) × ${ex.repsArr && ex.repsArr.length > 1 ? ex.repsArr.join(', ') : ex.reps} rep${ex.unilateral ? ' · Unilateral' : ''}${ex.isometria ? ' · Isometria' + (ex.isometriaSegs ? ' ' + ex.isometriaSegs + 's' : '') : ''}${ex.restPause ? ' · Rest-pause' : ''}${ex.biset ? ' · Bi-set' : ''}${ex.obs ? `<div style='margin-top:6px;padding:7px 10px;background:var(--surface2);border-radius:7px;border-left:3px solid var(--accent-soft);font-size:.78rem;color:var(--text2);font-style:italic;'>${ex.obs}</div>` : ''}</div>
+            <div class="pv-ex-meta">${ex.series} série(s) × ${ex.repsArr && ex.repsArr.length > 1 ? ex.repsArr.join(', ') : ex.reps} rep${ex.unilateral ? ' · Unilateral' : ''}${ex.isometria ? ' · Isometria' + (ex.isometriaSegs ? ' ' + ex.isometriaSegs + 's' : '') : ''}${ex.restPause ? ' · Rest-pause' : ''}${ex.dropSet ? ' · Drop-set' : ''}${ex.biset ? ' · Bi-set' : ''}${ex.obs ? `<div style='margin-top:6px;padding:7px 10px;background:var(--surface2);border-radius:7px;border-left:3px solid var(--accent-soft);font-size:.78rem;color:var(--text2);font-style:italic;'>${ex.obs}</div>` : ''}</div>
           </div>`).join('')}
       </div>`).join('')}`;
       document.getElementById('pv-footer').innerHTML = `
@@ -10643,7 +10723,243 @@
     };
     window.removeExFromBlock = (bi, ei) => { ST.workoutBlocks[bi].exercises.splice(ei, 1); _rerenderActiveEditor(); };
     window.updateExInBlock = (bi, ei, f, v) => { ST.workoutBlocks[bi].exercises[ei][f] = v };
-    window.onExNameSelect = (bi, ei, val) => {
+    // ── Exercise Search Widget ──────────────────────────────────────
+    (function() {
+      let _activeDropdown = null;
+      let _closeTimer = null;
+
+      function buildAllOptions() {
+        const lib = window.EX_LIB || {};
+        const items = [{ value: '__custom__', label: '✏️ Personalizado', cat: null }];
+        Object.entries(lib).forEach(([cat, list]) => {
+          list.forEach(name => items.push({ value: name, label: name, cat }));
+        });
+        return items;
+      }
+
+      function highlight(text, q) {
+        if (!q) return text;
+        const idx = text.toLowerCase().indexOf(q.toLowerCase());
+        if (idx === -1) return text;
+        return text.slice(0, idx) + '<mark>' + text.slice(idx, idx + q.length) + '</mark>' + text.slice(idx + q.length);
+      }
+
+      function renderDropdownList(listEl, query, bi, ei) {
+        const all = buildAllOptions();
+        const q = (query || '').trim().toLowerCase();
+        const filtered = q
+          ? all.filter(o => o.label.toLowerCase().includes(q) || (o.cat && o.cat.toLowerCase().includes(q)))
+          : all;
+
+        if (filtered.length === 0) {
+          listEl.innerHTML = '<div class="ex-search-empty">Nenhum exercício encontrado</div>';
+          return;
+        }
+
+        let html = '';
+        let lastCat = undefined;
+        filtered.forEach((o) => {
+          if (o.cat !== lastCat) {
+            lastCat = o.cat;
+            if (o.cat) html += `<div class="ex-search-cat">${o.cat}</div>`;
+          }
+          const label = highlight(o.label, q);
+          html += `<div class="ex-search-option${o.value === '__custom__' ? ' special' : ''}" data-value="${o.value}" data-bi="${bi}" data-ei="${ei}" onmousedown="pickExSearch(event,this)">${label}</div>`;
+        });
+        listEl.innerHTML = html;
+      }
+
+      function renderDropdown(dropdown, query, bi, ei) {
+        // Build structure if not yet built
+        if (!dropdown.querySelector('.ex-dropdown-search-bar')) {
+          dropdown.innerHTML = `
+            <div class="ex-dropdown-search-bar">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="ex-dropdown-search-input" type="text" placeholder="Buscar exercício..." autocomplete="off" spellcheck="false">
+              <button class="ex-dropdown-clear" type="button">✕</button>
+            </div>
+            <div class="ex-dropdown-list"></div>`;
+
+          const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
+          const clearBtn = dropdown.querySelector('.ex-dropdown-clear');
+          const listEl = dropdown.querySelector('.ex-dropdown-list');
+
+          internalInput.addEventListener('input', function() {
+            const q = this.value;
+            clearBtn.classList.toggle('visible', q.length > 0);
+            renderDropdownList(listEl, q, bi, ei);
+          });
+
+          internalInput.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              const opts = listEl.querySelectorAll('.ex-search-option');
+              if (opts.length) { opts[0].focus && opts[0].classList.add('focused'); listEl.querySelector('.ex-search-option').scrollIntoView({block:'nearest'}); }
+            }
+            if (e.key === 'Escape') { dropdown.classList.remove('open'); }
+          });
+
+          clearBtn.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            internalInput.value = '';
+            clearBtn.classList.remove('visible');
+            renderDropdownList(listEl, '', bi, ei);
+            internalInput.focus();
+          });
+        }
+
+        const listEl = dropdown.querySelector('.ex-dropdown-list');
+        const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
+        // If there's already text in the main input (user typed), use that as initial filter
+        if (query) {
+          internalInput.value = query;
+          dropdown.querySelector('.ex-dropdown-clear').classList.toggle('visible', query.length > 0);
+        } else {
+          internalInput.value = '';
+          dropdown.querySelector('.ex-dropdown-clear').classList.remove('visible');
+        }
+        renderDropdownList(listEl, query, bi, ei);
+      }
+
+      function positionDropdown(input, dropdown) {
+        const rect = input.closest('.ex-search-wrap').getBoundingClientRect();
+        dropdown.style.top = (rect.bottom + 2) + 'px';
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.width = Math.max(rect.width, 240) + 'px';
+      }
+
+      window.openExSearch = function(input) {
+        if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
+        const wrap = input.closest('.ex-search-wrap');
+        const dropdown = wrap.querySelector('.ex-search-dropdown');
+        const bi = parseInt(wrap.dataset.bi);
+        const ei = parseInt(wrap.dataset.ei);
+        const ex = window.ST && window.ST.workoutBlocks && window.ST.workoutBlocks[bi] && window.ST.workoutBlocks[bi].exercises[ei];
+        const savedName = ex ? ex.name : '';
+        if (savedName && savedName !== '__custom__') {
+          input.select();
+        }
+        renderDropdown(dropdown, '', bi, ei);
+        positionDropdown(input, dropdown);
+        dropdown.classList.add('open');
+        _activeDropdown = dropdown;
+        // Focus the internal search input
+        setTimeout(() => {
+          const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
+          if (internalInput) internalInput.focus();
+        }, 30);
+      };
+
+      window.filterExSearch = function(input) {
+        const wrap = input.closest('.ex-search-wrap');
+        const dropdown = wrap.querySelector('.ex-search-dropdown');
+        const bi = parseInt(wrap.dataset.bi);
+        const ei = parseInt(wrap.dataset.ei);
+        wrap.classList.toggle('has-value', input.value.length > 0);
+        if (!dropdown.classList.contains('open')) {
+          dropdown.classList.add('open');
+          _activeDropdown = dropdown;
+        }
+        renderDropdown(dropdown, input.value, bi, ei);
+        positionDropdown(input, dropdown);
+        // Sync text into internal search bar and focus it
+        setTimeout(() => {
+          const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
+          if (internalInput && document.activeElement !== internalInput) {
+            internalInput.value = input.value;
+            dropdown.querySelector('.ex-dropdown-clear').classList.toggle('visible', input.value.length > 0);
+            internalInput.focus();
+            // Move cursor to end
+            const len = internalInput.value.length;
+            internalInput.setSelectionRange(len, len);
+          }
+        }, 20);
+      };
+
+      window.pickExSearch = function(e, option) {
+        e.preventDefault();
+        const val = option.dataset.value;
+        const bi = parseInt(option.dataset.bi);
+        const ei = parseInt(option.dataset.ei);
+        // Find the input
+        const dropdown = option.closest('.ex-search-dropdown');
+        const wrap = dropdown ? dropdown.closest('.ex-search-wrap') : null;
+        const input = wrap ? wrap.querySelector('.ex-search-input') : null;
+        // Update state
+        window.onExNameSelect(bi, ei, val);
+        // onExNameSelect triggers re-render so no need to update input manually
+        if (dropdown) dropdown.classList.remove('open');
+        _activeDropdown = null;
+      };
+
+      window.clearExSearch = function(e, btn) {
+        e.preventDefault();
+        const wrap = btn.closest('.ex-search-wrap');
+        const input = wrap.querySelector('.ex-search-input');
+        const bi = parseInt(wrap.dataset.bi);
+        const ei = parseInt(wrap.dataset.ei);
+        input.value = '';
+        wrap.classList.remove('has-value');
+        window.onExNameSelect(bi, ei, '');
+      };
+
+      window.scheduleCloseExSearch = function(input) {
+        _closeTimer = setTimeout(() => {
+          // Don't close if focus went to the internal dropdown search bar
+          const wrap = input.closest('.ex-search-wrap');
+          if (!wrap) return;
+          const dropdown = wrap.querySelector('.ex-search-dropdown');
+          if (dropdown && dropdown.contains(document.activeElement)) return;
+          if (dropdown) dropdown.classList.remove('open');
+          // Restore saved value if user didn't pick
+          const bi = parseInt(wrap.dataset.bi);
+          const ei = parseInt(wrap.dataset.ei);
+          const ex = window.ST && window.ST.workoutBlocks && window.ST.workoutBlocks[bi] && window.ST.workoutBlocks[bi].exercises[ei];
+          if (ex && ex.name) {
+            input.value = ex.name === '__custom__' ? '✏️ Personalizado' : ex.name;
+          } else {
+            input.value = '';
+          }
+          wrap.classList.toggle('has-value', input.value.length > 0);
+          _activeDropdown = null;
+        }, 180);
+      };
+
+      window.navExSearch = function(e, input) {
+        const wrap = input.closest('.ex-search-wrap');
+        const dropdown = wrap && wrap.querySelector('.ex-search-dropdown');
+        if (!dropdown || !dropdown.classList.contains('open')) return;
+        const options = Array.from(dropdown.querySelectorAll('.ex-search-option'));
+        const focused = dropdown.querySelector('.ex-search-option.focused');
+        let idx = focused ? options.indexOf(focused) : -1;
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (focused) focused.classList.remove('focused');
+          idx = (idx + 1) % options.length;
+          options[idx].classList.add('focused');
+          options[idx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (focused) focused.classList.remove('focused');
+          idx = (idx - 1 + options.length) % options.length;
+          options[idx].classList.add('focused');
+          options[idx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (focused) focused.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        } else if (e.key === 'Escape') {
+          dropdown.classList.remove('open');
+          input.blur();
+        }
+      };
+
+      // Close dropdown on scroll/resize reposition
+      window.addEventListener('scroll', () => { if (_activeDropdown) _activeDropdown.classList.remove('open'); }, true);
+      window.addEventListener('resize', () => { if (_activeDropdown) _activeDropdown.classList.remove('open'); });
+    })();
+    // ────────────────────────────────────────────────────────────────
+
+        window.onExNameSelect = (bi, ei, val) => {
       ST.workoutBlocks[bi].exercises[ei].name = val;
       if (val !== '__custom__') ST.workoutBlocks[bi].exercises[ei].customName = '';
       // Auto-fill video URL if available
@@ -10693,11 +11009,18 @@
         <div class="ex-row-top">
           <div class="drag-handle" title="Reordenar"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><circle cx="2.5" cy="1.5" r="1.5"/><circle cx="7.5" cy="1.5" r="1.5"/><circle cx="2.5" cy="6" r="1.5"/><circle cx="7.5" cy="6" r="1.5"/><circle cx="2.5" cy="10.5" r="1.5"/><circle cx="7.5" cy="10.5" r="1.5"/></svg></div>
           <span class="ex-num">${ei + 1}</span>
-          <select class="ex-select" onchange="onExNameSelect(${bi},${ei},this.value)">
-            <option value="">— selecione o exercício —</option>
-            <option value="__custom__" ${isCustom ? 'selected' : ''}>✏️ Personalizado</option>
-            ${opts}
-          </select>
+          <div class="ex-search-wrap ${ex.name ? 'has-value' : ''}" data-bi="${bi}" data-ei="${ei}">
+            <input class="ex-search-input" type="text" autocomplete="off" spellcheck="false"
+              placeholder="— pesquise o exercício —"
+              value="${ex.name === '__custom__' ? '✏️ Personalizado' : (ex.name || '')}"
+              onfocus="openExSearch(this)"
+              oninput="filterExSearch(this)"
+              onblur="scheduleCloseExSearch(this)"
+              onkeydown="navExSearch(event,this)"
+            />
+            <button type="button" class="ex-search-clear" onmousedown="clearExSearch(event,this)">✕</button>
+            <div class="ex-search-dropdown"></div>
+          </div>
           <button type="button" class="remove-ex-btn" title="Remover" onclick="removeExFromBlock(${bi},${ei})"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         ${isCustom ? `<div style="padding:6px 10px;border-bottom:1px solid var(--border);"><input type="text" style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:.82rem;font-family:var(--body);background:var(--bg);color:var(--text);" placeholder="Nome personalizado..." value="${(ex.customName || '').replace(/"/g, '&quot;')}" oninput="updateExInBlock(${bi},${ei},'customName',this.value)"/></div>` : ''}
@@ -10721,10 +11044,11 @@
             <label class="tech-pill"><input type="checkbox" ${ex.unilateral ? 'checked' : ''} onchange="updateExInBlock(${bi},${ei},'unilateral',this.checked)"/>Unilateral</label>
             <label class="tech-pill"><input type="checkbox" ${ex.isometria ? 'checked' : ''} onchange="updateIsometria(${bi},${ei},this.checked)"/>Isometria</label>
             <label class="tech-pill"><input type="checkbox" ${ex.restPause ? 'checked' : ''} onchange="updateExInBlock(${bi},${ei},'restPause',this.checked)"/>Rest-pause</label>
+            <label class="tech-pill"><input type="checkbox" ${ex.dropSet ? 'checked' : ''} onchange="updateExInBlock(${bi},${ei},'dropSet',this.checked)"/>Drop-set</label>
             ${isoInline}
           </div>
           <div class="ex-obs-wrap">
-            <textarea placeholder="Observações: cadência, descanso, drop-set..." oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs || ''}</textarea>
+            <textarea placeholder="Observações: cadência, descanso..." oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs || ''}</textarea>
           </div>
         </div>
       </div>`;
@@ -11231,7 +11555,7 @@
       if (!ST.workoutBlocks.length) { document.getElementById('plan-error').textContent = 'Adicione ao menos um treino.'; return; }
       for (const wb of ST.workoutBlocks) { if (!wb.exercises.filter(e => e.name).length) { document.getElementById('plan-error').textContent = `"${wb.title}" precisa de ao menos um exercício.`; return; } }
       const btn = document.getElementById('btn-save-plan'); btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
-      const workouts = ST.workoutBlocks.map(wb => ({ title: wb.title, days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: e.videoUrl || '', unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, obs: e.obs || '' })) }));
+      const workouts = ST.workoutBlocks.map(wb => ({ title: wb.title, days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: e.videoUrl || '', unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) }));
       const data = { title, startDate: document.getElementById('plan-startdate').value || '', expiry: document.getElementById('plan-expiry').value || '', workouts, studentId: ST.planStudentId, createdAt: Date.now() };
       if (ST.editPlanId && window.__gestorPlans && window.__gestorPlans[ST.editPlanId] && window.__gestorPlans[ST.editPlanId].sequential) {
         data.sequential = window.__gestorPlans[ST.editPlanId].sequential;
@@ -11289,11 +11613,18 @@
       <div class="ex-row-top">
         <div class="drag-handle" title="Reordenar"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><circle cx="2.5" cy="1.5" r="1.5"/><circle cx="7.5" cy="1.5" r="1.5"/><circle cx="2.5" cy="6" r="1.5"/><circle cx="7.5" cy="6" r="1.5"/><circle cx="2.5" cy="10.5" r="1.5"/><circle cx="7.5" cy="10.5" r="1.5"/></svg></div>
         <span class="ex-num">${ei + 1}</span>
-        <select class="ex-select" onchange="onExNameSelect(${bi},${ei},this.value)">
-          <option value="">— selecione o exercício —</option>
-          <option value="__custom__" ${isCustom ? 'selected' : ''}>✏️ Personalizado</option>
-          ${opts}
-        </select>
+        <div class="ex-search-wrap ${ex.name ? 'has-value' : ''}" data-bi="${bi}" data-ei="${ei}">
+          <input class="ex-search-input" type="text" autocomplete="off" spellcheck="false"
+            placeholder="— pesquise o exercício —"
+            value="${ex.name === '__custom__' ? '✏️ Personalizado' : (ex.name || '')}"
+            onfocus="openExSearch(this)"
+            oninput="filterExSearch(this)"
+            onblur="scheduleCloseExSearch(this)"
+            onkeydown="navExSearch(event,this)"
+          />
+          <button type="button" class="ex-search-clear" onmousedown="clearExSearch(event,this)">✕</button>
+          <div class="ex-search-dropdown"></div>
+        </div>
         <button type="button" class="remove-ex-btn" title="Remover" onclick="removeExFromBlock(${bi},${ei})"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       ${isCustom ? `<div style="padding:6px 10px;border-bottom:1px solid var(--border);"><input type="text" style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:.82rem;font-family:var(--body);background:var(--bg);color:var(--text);" placeholder="Nome personalizado..." value="${(ex.customName || '').replace(/"/g, '&quot;')}" oninput="updateExInBlock(${bi},${ei},'customName',this.value)"/></div>` : ''}
@@ -11308,10 +11639,11 @@
           <label class="tech-pill"><input type="checkbox" ${ex.unilateral ? 'checked' : ''} onchange="updateExInBlock(${bi},${ei},'unilateral',this.checked)"/>Unilateral</label>
           <label class="tech-pill"><input type="checkbox" ${ex.isometria ? 'checked' : ''} onchange="updateIsometriaModule(${bi},${ei},this.checked)"/>Isometria</label>
           <label class="tech-pill"><input type="checkbox" ${ex.restPause ? 'checked' : ''} onchange="updateExInBlock(${bi},${ei},'restPause',this.checked)"/>Rest-pause</label>
+          <label class="tech-pill"><input type="checkbox" ${ex.dropSet ? 'checked' : ''} onchange="updateExInBlock(${bi},${ei},'dropSet',this.checked)"/>Drop-set</label>
           ${isoInline}
         </div>
         <div class="ex-obs-wrap">
-          <textarea placeholder="Observações: cadência, descanso, drop-set..." oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs || ''}</textarea>
+          <textarea placeholder="Observações: cadência, descanso..." oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs || ''}</textarea>
         </div>
       </div>
     </div>`;
@@ -11382,7 +11714,7 @@
       // Evita duplo clique durante o save
       if (btn.classList.contains('btn-loading')) return;
       btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
-      const moduleData = { title: wb.title || 'Treino', days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: e.videoUrl || '', unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, obs: e.obs || '' })) };
+      const moduleData = { title: wb.title || 'Treino', days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: e.videoUrl || '', unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) };
       // Timeout de segurança: 15s — desbloqueia o botão mesmo se a Promise travar
       const safetyTimer = setTimeout(() => {
         btn.classList.remove('btn-loading'); btn.textContent = 'Salvar módulo';
