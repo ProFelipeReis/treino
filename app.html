@@ -10843,15 +10843,43 @@
 
       function positionDropdown(input, dropdown) {
         const rect = input.closest('.ex-search-wrap').getBoundingClientRect();
+        // Clamp to viewport so it never goes off-screen on mobile
+        const vw = window.innerWidth;
+        const maxH = window.innerHeight - rect.bottom - 8;
+        const w = Math.max(rect.width, 240);
+        const left = Math.min(rect.left, vw - w - 8);
         dropdown.style.top = (rect.bottom + 2) + 'px';
-        dropdown.style.left = rect.left + 'px';
-        dropdown.style.width = Math.max(rect.width, 240) + 'px';
+        dropdown.style.left = Math.max(8, left) + 'px';
+        dropdown.style.width = Math.min(w, vw - 16) + 'px';
+        dropdown.style.maxHeight = Math.max(160, maxH) + 'px';
+      }
+
+      // Portal helpers: move dropdown to/from body to escape backdrop-filter stacking context
+      function portalOpen(wrap, dropdown) {
+        dropdown.dataset.portalWrap = wrap.dataset.bi + '-' + wrap.dataset.ei;
+        wrap.dataset.portalActive = '1';
+        document.body.appendChild(dropdown);
+      }
+
+      function portalClose(dropdown) {
+        if (!dropdown) return;
+        const key = dropdown.dataset.portalWrap;
+        if (key) {
+          const [bi, ei] = key.split('-');
+          const wrap = document.querySelector(`.ex-search-wrap[data-bi="${bi}"][data-ei="${ei}"]`);
+          if (wrap) {
+            wrap.appendChild(dropdown);
+            delete wrap.dataset.portalActive;
+          }
+          delete dropdown.dataset.portalWrap;
+        }
       }
 
       window.openExSearch = function(input) {
         if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
         const wrap = input.closest('.ex-search-wrap');
-        const dropdown = wrap.querySelector('.ex-search-dropdown');
+        const dropdown = wrap.querySelector('.ex-search-dropdown') ||
+                         document.querySelector(`.ex-search-dropdown[data-portal-wrap="${wrap.dataset.bi}-${wrap.dataset.ei}"]`);
         const bi = parseInt(wrap.dataset.bi);
         const ei = parseInt(wrap.dataset.ei);
         const ex = window.ST && window.ST.workoutBlocks && window.ST.workoutBlocks[bi] && window.ST.workoutBlocks[bi].exercises[ei];
@@ -10860,6 +10888,8 @@
           input.select();
         }
         renderDropdown(dropdown, '', bi, ei);
+        // Move to body portal before positioning so fixed coords are vs viewport
+        portalOpen(wrap, dropdown);
         positionDropdown(input, dropdown);
         dropdown.classList.add('open');
         _activeDropdown = dropdown;
@@ -10908,14 +10938,15 @@
         const val = option.dataset.value;
         const bi = parseInt(option.dataset.bi);
         const ei = parseInt(option.dataset.ei);
-        // Find the input
+        // Find the dropdown (may be in body portal)
         const dropdown = option.closest('.ex-search-dropdown');
-        const wrap = dropdown ? dropdown.closest('.ex-search-wrap') : null;
-        const input = wrap ? wrap.querySelector('.ex-search-input') : null;
         // Update state
         window.onExNameSelect(bi, ei, val);
         // onExNameSelect triggers re-render so no need to update input manually
-        if (dropdown) dropdown.classList.remove('open');
+        if (dropdown) {
+          dropdown.classList.remove('open');
+          portalClose(dropdown);
+        }
         _activeDropdown = null;
       };
 
@@ -10931,10 +10962,16 @@
       };
 
       function closeDropdownAndRestore(wrap, input) {
-        const dropdown = wrap.querySelector('.ex-search-dropdown');
+        // Dropdown may be in body portal
+        const key = wrap.dataset.bi + '-' + wrap.dataset.ei;
+        const dropdown = wrap.querySelector('.ex-search-dropdown') ||
+                         document.querySelector(`.ex-search-dropdown[data-portal-wrap="${key}"]`);
         // Don't close if focus is anywhere inside the dropdown
         if (dropdown && dropdown.contains(document.activeElement)) return;
-        if (dropdown) dropdown.classList.remove('open');
+        if (dropdown) {
+          dropdown.classList.remove('open');
+          portalClose(dropdown);
+        }
         const bi = parseInt(wrap.dataset.bi);
         const ei = parseInt(wrap.dataset.ei);
         const ex = window.ST && window.ST.workoutBlocks && window.ST.workoutBlocks[bi] && window.ST.workoutBlocks[bi].exercises[ei];
@@ -10990,15 +11027,22 @@
         const list = _activeDropdown.querySelector('.ex-dropdown-list');
         if (list && (list === e.target || list.contains(e.target))) return;
         // Allow scroll inside the modal body (modal-plan, modal-module, etc.)
-        // so that scrolling the exercise list doesn't close the dropdown
         const modalBody = document.querySelector('#modal-plan .modal-body') ||
                           document.querySelector('#modal-module .modal-body');
         if (modalBody && (modalBody === e.target || modalBody.contains(e.target))) return;
         // Allow scroll inside the dropdown itself
         if (_activeDropdown.contains(e.target)) return;
         _activeDropdown.classList.remove('open');
+        portalClose(_activeDropdown);
+        _activeDropdown = null;
       }, true);
-      window.addEventListener('resize', () => { if (_activeDropdown) _activeDropdown.classList.remove('open'); });
+      window.addEventListener('resize', () => {
+        if (_activeDropdown) {
+          _activeDropdown.classList.remove('open');
+          portalClose(_activeDropdown);
+          _activeDropdown = null;
+        }
+      });
     })();
     // ────────────────────────────────────────────────────────────────
 
