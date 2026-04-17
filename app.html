@@ -712,8 +712,12 @@
       gap: 0;
       border-bottom: 2px solid var(--border);
       margin-bottom: 20px;
-      overflow: visible;
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .student-tabs::-webkit-scrollbar { display: none; }
 
     .student-tab {
       display: inline-flex;
@@ -8711,12 +8715,11 @@
       }
     };
     function _modalTouchMove(e) {
-      var body = e.currentTarget.querySelector('.modal-body');
-      if (!body) { e.preventDefault(); return; }
       var touch = e.touches[0];
       var node = document.elementFromPoint(touch.clientX, touch.clientY);
       while (node && node !== e.currentTarget) {
-        if (node === body) return;
+        var ov = window.getComputedStyle(node).overflowY;
+        if ((ov === 'auto' || ov === 'scroll') && node.scrollHeight > node.clientHeight) return;
         node = node.parentNode;
       }
       e.preventDefault();
