@@ -10863,11 +10863,15 @@
         positionDropdown(input, dropdown);
         dropdown.classList.add('open');
         _activeDropdown = dropdown;
-        // Focus the internal search input
-        setTimeout(() => {
-          const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
-          if (internalInput) internalInput.focus();
-        }, 30);
+        // Focus the internal search input only on non-touch devices (desktop)
+        // On mobile, auto-focus would open the virtual keyboard unexpectedly
+        const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+        if (!isTouchDevice) {
+          setTimeout(() => {
+            const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
+            if (internalInput) internalInput.focus();
+          }, 30);
+        }
       };
 
       window.filterExSearch = function(input) {
@@ -10882,18 +10886,21 @@
         }
         renderDropdown(dropdown, input.value, bi, ei);
         positionDropdown(input, dropdown);
-        // Sync text into internal search bar and focus it
-        setTimeout(() => {
-          const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
-          if (internalInput && document.activeElement !== internalInput) {
-            internalInput.value = input.value;
-            dropdown.querySelector('.ex-dropdown-clear').classList.toggle('visible', input.value.length > 0);
-            internalInput.focus();
-            // Move cursor to end
-            const len = internalInput.value.length;
-            internalInput.setSelectionRange(len, len);
-          }
-        }, 20);
+        // Sync text into internal search bar and focus it only on desktop
+        const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+        if (!isTouchDevice) {
+          setTimeout(() => {
+            const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
+            if (internalInput && document.activeElement !== internalInput) {
+              internalInput.value = input.value;
+              dropdown.querySelector('.ex-dropdown-clear').classList.toggle('visible', input.value.length > 0);
+              internalInput.focus();
+              // Move cursor to end
+              const len = internalInput.value.length;
+              internalInput.setSelectionRange(len, len);
+            }
+          }, 20);
+        }
       };
 
       window.pickExSearch = function(e, option) {
@@ -10979,8 +10986,15 @@
       // Close dropdown on scroll only when scrolling happens OUTSIDE the dropdown list
       window.addEventListener('scroll', (e) => {
         if (!_activeDropdown) return;
+        // Allow scroll inside the dropdown list itself
         const list = _activeDropdown.querySelector('.ex-dropdown-list');
         if (list && (list === e.target || list.contains(e.target))) return;
+        // Allow scroll inside the modal body (modal-plan, modal-module, etc.)
+        // so that scrolling the exercise list doesn't close the dropdown
+        const modalBody = document.querySelector('#modal-plan .modal-body') ||
+                          document.querySelector('#modal-module .modal-body');
+        if (modalBody && (modalBody === e.target || modalBody.contains(e.target))) return;
+        // Allow scroll inside the dropdown itself
         if (_activeDropdown.contains(e.target)) return;
         _activeDropdown.classList.remove('open');
       }, true);
