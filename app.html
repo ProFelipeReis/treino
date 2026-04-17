@@ -10875,33 +10875,39 @@
         }
       }
 
-      window.openExSearch = function(input) {
+      const isTouchDevice = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+      function openDropdown(input) {
         if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
         const wrap = input.closest('.ex-search-wrap');
+        const key = wrap.dataset.bi + '-' + wrap.dataset.ei;
         const dropdown = wrap.querySelector('.ex-search-dropdown') ||
-                         document.querySelector(`.ex-search-dropdown[data-portal-wrap="${wrap.dataset.bi}-${wrap.dataset.ei}"]`);
+                         document.querySelector(`.ex-search-dropdown[data-portal-wrap="${key}"]`);
+        if (dropdown.classList.contains('open')) return;
         const bi = parseInt(wrap.dataset.bi);
         const ei = parseInt(wrap.dataset.ei);
-        const ex = window.ST && window.ST.workoutBlocks && window.ST.workoutBlocks[bi] && window.ST.workoutBlocks[bi].exercises[ei];
-        const savedName = ex ? ex.name : '';
-        if (savedName && savedName !== '__custom__') {
-          input.select();
-        }
         renderDropdown(dropdown, '', bi, ei);
-        // Move to body portal before positioning so fixed coords are vs viewport
         portalOpen(wrap, dropdown);
         positionDropdown(input, dropdown);
         dropdown.classList.add('open');
         _activeDropdown = dropdown;
-        // Focus the internal search input only on non-touch devices (desktop)
-        // On mobile, auto-focus would open the virtual keyboard unexpectedly
-        const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-        if (!isTouchDevice) {
+        if (!isTouchDevice()) {
           setTimeout(() => {
             const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
             if (internalInput) internalInput.focus();
           }, 30);
         }
+      }
+
+      window.openExSearch = function(input) {
+        if (isTouchDevice()) { input.blur(); return; }
+        openDropdown(input);
+      };
+
+      window.tapExSearch = function(e, input) {
+        if (!isTouchDevice()) return;
+        e.preventDefault();
+        openDropdown(input);
       };
 
       window.filterExSearch = function(input) {
@@ -10917,8 +10923,7 @@
         renderDropdown(dropdown, input.value, bi, ei);
         positionDropdown(input, dropdown);
         // Sync text into internal search bar and focus it only on desktop
-        const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-        if (!isTouchDevice) {
+        if (!isTouchDevice()) {
           setTimeout(() => {
             const internalInput = dropdown.querySelector('.ex-dropdown-search-input');
             if (internalInput && document.activeElement !== internalInput) {
@@ -10985,6 +10990,9 @@
       }
 
       window.scheduleCloseExSearch = function(input) {
+        // On mobile, closing is handled by the global pointerdown listener.
+        // onblur fires before pointerdown on the dropdown, so we skip here on touch devices.
+        if (isTouchDevice()) return;
         _closeTimer = setTimeout(() => {
           const wrap = input.closest('.ex-search-wrap');
           if (!wrap) return;
@@ -11019,6 +11027,22 @@
           input.blur();
         }
       };
+
+      // Close dropdown when tapping outside on mobile (pointerdown fires before blur)
+      document.addEventListener('pointerdown', function(e) {
+        if (!_activeDropdown) return;
+        if (_activeDropdown.contains(e.target)) return;
+        // Also allow tap on the ex-search-wrap that owns this dropdown
+        const key = _activeDropdown.dataset.portalWrap;
+        if (key) {
+          const [bi, ei] = key.split('-');
+          const wrap = document.querySelector(`.ex-search-wrap[data-bi="${bi}"][data-ei="${ei}"]`);
+          if (wrap && wrap.contains(e.target)) return;
+        }
+        _activeDropdown.classList.remove('open');
+        portalClose(_activeDropdown);
+        _activeDropdown = null;
+      }, true);
 
       // Close dropdown on scroll only when scrolling happens OUTSIDE the dropdown list
       window.addEventListener('scroll', (e) => {
@@ -11101,6 +11125,7 @@
               placeholder="— pesquise o exercício —"
               value="${ex.name === '__custom__' ? '✏️ Personalizado' : (ex.name || '')}"
               onfocus="openExSearch(this)"
+              onpointerdown="tapExSearch(event,this)"
               oninput="filterExSearch(this)"
               onblur="scheduleCloseExSearch(this)"
               onkeydown="navExSearch(event,this)"
@@ -11705,6 +11730,7 @@
             placeholder="— pesquise o exercício —"
             value="${ex.name === '__custom__' ? '✏️ Personalizado' : (ex.name || '')}"
             onfocus="openExSearch(this)"
+            onpointerdown="tapExSearch(event,this)"
             oninput="filterExSearch(this)"
             onblur="scheduleCloseExSearch(this)"
             onkeydown="navExSearch(event,this)"
