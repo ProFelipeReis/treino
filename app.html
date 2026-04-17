@@ -11047,6 +11047,11 @@
       // Close dropdown on scroll only when scrolling happens OUTSIDE the dropdown list
       window.addEventListener('scroll', (e) => {
         if (!_activeDropdown) return;
+        // On mobile, ignore scroll/resize triggered by the virtual keyboard opening
+        if (isTouchDevice()) {
+          const searchInput = _activeDropdown.querySelector('.ex-dropdown-search-input');
+          if (searchInput && document.activeElement === searchInput) return;
+        }
         // Allow scroll inside the dropdown list itself
         const list = _activeDropdown.querySelector('.ex-dropdown-list');
         if (list && (list === e.target || list.contains(e.target))) return;
@@ -11061,11 +11066,22 @@
         _activeDropdown = null;
       }, true);
       window.addEventListener('resize', () => {
-        if (_activeDropdown) {
-          _activeDropdown.classList.remove('open');
-          portalClose(_activeDropdown);
-          _activeDropdown = null;
+        if (!_activeDropdown) return;
+        // On mobile, keyboard open/close triggers resize — don't close the dropdown
+        if (isTouchDevice()) {
+          // Just reposition the dropdown to adapt to new viewport size
+          const key = _activeDropdown.dataset.portalWrap;
+          if (key) {
+            const [bi, ei] = key.split('-');
+            const wrap = document.querySelector(`.ex-search-wrap[data-bi="${bi}"][data-ei="${ei}"]`);
+            const input = wrap && wrap.querySelector('.ex-search-input');
+            if (wrap && input) positionDropdown(input, _activeDropdown);
+          }
+          return;
         }
+        _activeDropdown.classList.remove('open');
+        portalClose(_activeDropdown);
+        _activeDropdown = null;
       });
     })();
     // ────────────────────────────────────────────────────────────────
