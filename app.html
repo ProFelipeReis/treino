@@ -11199,14 +11199,18 @@
             <label class="tech-pill"><input type="checkbox" ${ex.isometria ? 'checked' : ''} onchange="updateIsometria(${bi},${ei},this.checked)"/>Isometria</label>
             <label class="tech-pill"><input type="checkbox" ${ex.restPause ? 'checked' : ''} onchange="updateExInBlock(${bi},${ei},'restPause',this.checked)"/>Rest-pause</label>
             <label class="tech-pill"><input type="checkbox" ${ex.dropSet ? 'checked' : ''} onchange="updateExInBlock(${bi},${ei},'dropSet',this.checked)"/>Drop-set</label>
-            <label class="tech-pill"><input type="checkbox" ${ex.customVideoEnabled ? 'checked' : ''} onchange="toggleCustomVideo(${bi},${ei},this.checked)"/>Vídeo personalizado</label>
             ${isoInline}
           </div>
-          ${ex.customVideoEnabled ? `<div style="padding:0 2px;"><input type="url" class="form-control" placeholder="URL do YouTube (vídeo personalizado)..." value="${(ex.customVideoUrl || '').replace(/"/g, '&quot;')}" oninput="updateExInBlock(${bi},${ei},'customVideoUrl',this.value)" style="font-size:.82rem;width:100%;"/></div>` : ''}
           <div class="ex-obs-wrap">
             <textarea placeholder="Observações: cadência, descanso..." oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs || ''}</textarea>
           </div>
-          <div class="ex-custom-video-wrap" style="display:none;"></div>
+          <div class="ex-custom-video-wrap">
+            <label class="tech-pill ex-custom-video-toggle" style="cursor:pointer;user-select:none;">
+              <input type="checkbox" ${ex.customVideoEnabled ? 'checked' : ''} onchange="toggleCustomVideo(${bi},${ei},this.checked)"/>
+              Vídeo personalizado
+            </label>
+            ${ex.customVideoEnabled ? `<input type="url" class="form-control ex-custom-video-input" placeholder="URL do YouTube..." value="${(ex.customVideoUrl || '').replace(/"/g, '&quot;')}" oninput="updateExInBlock(${bi},${ei},'customVideoUrl',this.value)" style="margin-top:6px;font-size:.82rem;"/>` : ''}
+          </div>
         </div>
       </div>`;
         }).join('');
