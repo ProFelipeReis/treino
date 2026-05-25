@@ -8115,6 +8115,42 @@
     </div>
   </div>
 
+  <!-- MODAL: CLONAR MÓDULO -->
+  <div id="modal-clone-module" class="modal-overlay hidden">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Clonar módulo de treino</h3>
+        <button class="close-btn" onclick="closeModal('modal-clone-module')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="clone-module-step1">
+          <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px;">
+            <strong>Passo 1 de 2</strong> — Selecione o aluno que irá <strong>receber</strong> o módulo:
+          </p>
+          <input id="clone-module-search" type="text" placeholder="Buscar aluno..." oninput="filterCloneModuleStudents(this.value)"
+            style="width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--r);font-size:.84rem;font-family:var(--body);background:var(--bg);color:var(--text);margin-bottom:10px;"/>
+          <div id="clone-module-student-list" class="clone-student-list"></div>
+        </div>
+        <div id="clone-module-step2" class="hidden">
+          <button onclick="cloneModuleGoStep1()" style="background:none;border:none;color:var(--text3);font-size:.8rem;font-weight:700;cursor:pointer;padding:0;margin-bottom:12px;display:flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Voltar
+          </button>
+          <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px;">
+            <strong>Passo 2 de 2</strong> — Selecione o treino de <strong id="clone-module-target-name"></strong> onde o módulo será adicionado:
+          </p>
+          <div id="clone-module-plan-list" class="clone-student-list"></div>
+          <p id="clone-module-no-plans" class="hidden" style="font-size:.83rem;color:var(--text3);padding:10px 0;">Nenhum plano encontrado para este aluno.</p>
+        </div>
+        <div id="clone-module-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:18px;margin-top:10px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-clone-module')">Cancelar</button>
+        <button id="btn-do-clone-module" class="btn btn-primary hidden" onclick="doCloneModule()">Clonar módulo</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: CLONAR TREINO -->
   <div id="modal-clone" class="modal-overlay hidden">
     <div class="modal modal-sm">
@@ -10523,9 +10559,14 @@
               <div class="workout-excount">${(w.exercises || []).length} exercício(s)</div>
             </div>
           </div>
-          <button class="btn btn-danger btn-sm" style="margin:8px 10px;padding:6px 9px;flex-shrink:0;align-self:center;" title="Remover módulo" onclick="event.stopPropagation();deleteModule('${p.id}','${sid}',${wi})">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          </button>
+          <div style="display:flex;flex-direction:column;gap:4px;margin:8px 10px;flex-shrink:0;align-self:center;">
+            <button class="btn btn-ghost btn-sm" style="padding:6px 9px;" title="Clonar módulo para outro aluno" onclick="event.stopPropagation();openCloneModuleModal('${p.id}','${sid}',${wi})">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+            <button class="btn btn-danger btn-sm" style="padding:6px 9px;" title="Remover módulo" onclick="event.stopPropagation();deleteModule('${p.id}','${sid}',${wi})">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
         </div>`).join('')}
       <div style="padding:8px 14px;border-top:1px dashed var(--border);">
         <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;gap:8px;" onclick="event.stopPropagation();openModuleModal('${p.id}','${sid}',null)">
@@ -11441,6 +11482,141 @@
         document.getElementById('clone-error').textContent = 'Erro: ' + e.message;
       } finally {
         btn.classList.remove('btn-loading'); btn.textContent = 'Clonar plano';
+      }
+    };
+
+    // ── Clone module ──
+    window._cloneModule = { planId: null, sid: null, workoutIndex: null, targetSid: null, targetPlanId: null };
+
+    window.openCloneModuleModal = function (planId, sid, workoutIndex) {
+      const cm = window._cloneModule;
+      cm.planId = planId; cm.sid = sid; cm.workoutIndex = workoutIndex;
+      cm.targetSid = null; cm.targetPlanId = null;
+      document.getElementById('clone-module-error').textContent = '';
+      document.getElementById('clone-module-search').value = '';
+      document.getElementById('btn-do-clone-module').classList.add('hidden');
+      // Show step 1
+      cloneModuleGoStep1();
+      // Render all students except origin
+      const others = ST.students.filter(s => s.id !== sid);
+      renderCloneModuleStudents(others);
+      openModal('modal-clone-module');
+    };
+
+    function renderCloneModuleStudents(list) {
+      const el = document.getElementById('clone-module-student-list');
+      if (!list.length) {
+        el.innerHTML = '<p style="font-size:.83rem;color:var(--text3);padding:12px 0;">Não há outros alunos cadastrados.</p>';
+        return;
+      }
+      el.innerHTML = list.map(s => `
+        <div class="clone-student-item" id="clonemoditem_${s.id}" onclick="selectCloneModuleStudent('${s.id}','${s.name}')">
+          <div class="avatar" style="width:34px;height:34px;font-size:.82rem;">${(s.name || '?').slice(0, 2).toUpperCase()}</div>
+          <div>
+            <div style="font-weight:700;font-size:.88rem;">${s.name}</div>
+            <div style="font-size:.72rem;color:var(--text3);font-weight:600;">${s.code}</div>
+          </div>
+        </div>`).join('');
+    }
+
+    window.filterCloneModuleStudents = function (q) {
+      const sid = window._cloneModule.sid;
+      const filtered = q.trim()
+        ? ST.students.filter(s => s.id !== sid && (s.name.toLowerCase().includes(q.toLowerCase()) || (s.code || '').toLowerCase().includes(q.toLowerCase())))
+        : ST.students.filter(s => s.id !== sid);
+      renderCloneModuleStudents(filtered);
+    };
+
+    window.cloneModuleGoStep1 = function () {
+      document.getElementById('clone-module-step1').classList.remove('hidden');
+      document.getElementById('clone-module-step2').classList.add('hidden');
+      document.getElementById('btn-do-clone-module').classList.add('hidden');
+      window._cloneModule.targetSid = null;
+      window._cloneModule.targetPlanId = null;
+    };
+
+    window.selectCloneModuleStudent = async function (targetSid, targetName) {
+      window._cloneModule.targetSid = targetSid;
+      window._cloneModule.targetPlanId = null;
+      document.getElementById('clone-module-error').textContent = '';
+      document.getElementById('btn-do-clone-module').classList.add('hidden');
+      // Go to step 2
+      document.getElementById('clone-module-step1').classList.add('hidden');
+      document.getElementById('clone-module-step2').classList.remove('hidden');
+      document.getElementById('clone-module-target-name').textContent = targetName;
+      // Load target student's plans
+      const planList = document.getElementById('clone-module-plan-list');
+      const noPlans = document.getElementById('clone-module-no-plans');
+      planList.innerHTML = '<p style="font-size:.83rem;color:var(--text3);padding:8px 0;">Carregando...</p>';
+      noPlans.classList.add('hidden');
+      try {
+        const snap = await _getDocs(_query(_col(_db, 'plans'), _where('studentId', '==', targetSid)));
+        const plans = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.createdAt - a.createdAt);
+        if (!plans.length) {
+          planList.innerHTML = '';
+          noPlans.classList.remove('hidden');
+          return;
+        }
+        planList.innerHTML = plans.map(p => {
+          const status = getPlanStatus(p);
+          const badge = status === 'active' ? 'Ativo' : status === 'upcoming' ? 'Futuro' : 'Vencido';
+          const badgeColor = status === 'active' ? 'var(--green)' : status === 'upcoming' ? '#e0a800' : 'var(--red)';
+          return `
+          <div class="clone-student-item" id="cloneplanitem_${p.id}" onclick="selectCloneModulePlan('${p.id}')">
+            <div class="avatar" style="width:34px;height:34px;font-size:.75rem;background:var(--surface3);">📋</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:.88rem;">${p.title || 'Sem título'}</div>
+              <div style="font-size:.72rem;color:var(--text3);font-weight:600;">${(p.workouts || []).length} módulo(s)</div>
+            </div>
+            <span style="font-size:.68rem;font-weight:800;color:${badgeColor};background:${badgeColor}22;padding:2px 8px;border-radius:99px;">${badge}</span>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        planList.innerHTML = '';
+        document.getElementById('clone-module-error').textContent = 'Erro ao carregar planos: ' + e.message;
+      }
+    };
+
+    window.selectCloneModulePlan = function (planId) {
+      window._cloneModule.targetPlanId = planId;
+      document.querySelectorAll('[id^="cloneplanitem_"]').forEach(el => el.classList.remove('selected'));
+      const el = document.getElementById('cloneplanitem_' + planId);
+      if (el) el.classList.add('selected');
+      document.getElementById('btn-do-clone-module').classList.remove('hidden');
+      document.getElementById('clone-module-error').textContent = '';
+    };
+
+    window.doCloneModule = async function () {
+      const cm = window._cloneModule;
+      if (!cm.targetSid || !cm.targetPlanId) {
+        document.getElementById('clone-module-error').textContent = 'Selecione o aluno e o treino de destino.';
+        return;
+      }
+      const sourcePlan = window.__gestorPlans && window.__gestorPlans[cm.planId];
+      if (!sourcePlan) { document.getElementById('clone-module-error').textContent = 'Plano de origem não encontrado.'; return; }
+      const moduleData = (sourcePlan.workouts || [])[cm.workoutIndex];
+      if (!moduleData) { document.getElementById('clone-module-error').textContent = 'Módulo não encontrado.'; return; }
+      const btn = document.getElementById('btn-do-clone-module');
+      btn.classList.add('btn-loading'); btn.textContent = 'Clonando...';
+      try {
+        const snap = await _getDoc(_doc(_db, 'plans', cm.targetPlanId));
+        if (!snap.exists) throw new Error('Plano de destino não encontrado.');
+        const targetPlan = snap.data();
+        const workouts = [...(targetPlan.workouts || [])];
+        // Deep clone the module
+        const cloned = JSON.parse(JSON.stringify(moduleData));
+        workouts.push(cloned);
+        await _updateDoc(_doc(_db, 'plans', cm.targetPlanId), { workouts });
+        const targetStudent = ST.students.find(s => s.id === cm.targetSid) || {};
+        toast(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Módulo "${moduleData.title || 'Sem título'}" clonado para ${targetStudent.name || 'aluno'}!`);
+        closeModal('modal-clone-module');
+        // Reload target plan cache
+        const updatedSnap = await _getDoc(_doc(_db, 'plans', cm.targetPlanId));
+        if (updatedSnap.exists) { window.__gestorPlans = window.__gestorPlans || {}; window.__gestorPlans[cm.targetPlanId] = { id: cm.targetPlanId, ...updatedSnap.data() }; }
+      } catch (e) {
+        document.getElementById('clone-module-error').textContent = 'Erro: ' + e.message;
+      } finally {
+        btn.classList.remove('btn-loading'); btn.textContent = 'Clonar módulo';
       }
     };
 
