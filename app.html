@@ -2920,6 +2920,26 @@
       color: var(--text3);
     }
 
+    .ex-custom-video-wrap {
+      padding: 8px 10px 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    .ex-custom-video-input {
+      font-size: .82rem !important;
+      padding: 6px 9px !important;
+    }
+
+    .ex-custom-video-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .79rem;
+      font-weight: 600;
+      color: var(--text2);
+      cursor: pointer;
+    }
+
     .ctrl-label {
       font-size: .65rem;
       font-weight: 700;
@@ -8509,7 +8529,7 @@
       "Ombro": ["Elevação Frontal", "Elevação Frontal com Barra", "Elevação Frontal com Anilha", "Elevação Frontal na Polia", "Elevação Frontal Alternada", "Elevação Frontal Inversa com Barra", "Desenvolvimento Máquina", "Desenvolvimento com Halter", "Desenvolvimento com Barra", "Remada Alta na Polia", "Remada Alta na Barra W", "Arnold Press", "Elevação Lateral", "Elevação Lateral no Banco 45°", "Elevação Lateral na Polia", "Crucifixo Invertido na Polia", "Crucifixo Invertido", "Face Pull", "Voador Inverso", "Encolhimento de Ombros no Smith", "Encolhimento de Ombros com Halter", "Encolhimento de Ombros com Barra"],
       "Quadríceps": ["Agachamento Livre", "Agachamento Sumo", "Agachamento no Smith", "Leg Press 90° no Smith", "Leg Press 45°", "Leg Press 45° Unilateral", "Leg Press Horizontal", "Leg Press Horizontal Unilateral", "Cadeira Extensora", "Cadeira Extensora Unilateral", "Avanço com Barra", "Afundo com Halter", "Afundo com Caneleira", "Afundo com Barra", "Afundo no Smith", "Afundo com Salto", "Agachamento Hack", "Agachamento Búlgaro", "Step-up", "Levantamento Terra Sumô"],
       "Posteriores": ["Mesa Flexora", "Mesa Flexora Unilateral", "Cadeira Flexora", "Cadeira Flexora Unilateral", "Stiff", "Stiff no Smith", "Good Morning"],
-      "Glúteos": ["Cadeira Abdutora", "Abdução de Quadril na Polia", "Abdução de Quadril com Caneleira", "Agachamento Livre", "Agachamento no Smith", "Agachamento Búlgaro", "Agachamento Sumo", "Agachamento Taça", "Agachamento Hack", "Levantamento Terra Sumô", "Afundo com Halter", "Stiff", "Elevação Pélvica", "Elevação Pélvica na Bola", "Coice na Polia", "Glúteo 4 Apoios no Smith", "Glúteo 4 Apoios com Caneleira", "Glúteo 4 Apoios Perna Estendida"],
+      "Glúteos": ["Cadeira Abdutora", "Abdução de Quadril na Polia", "Abdução de Quadril com Caneleira", "Agachamento Livre", "Agachamento no Smith", "Agachamento Búlgaro", "Agachamento Sumo", "Agachamento Taça", "Agachamento Hack", "Levantamento Terra Sumô", "Afundo com Halter", "Stiff", "Elevação Pélvica", "Elevação Pélvica na Bola", "Coice na Polia", "Glúteo 4 Apoios no Smith", "Glúteo 4 Apoios com Caneleira", "Glúteo 4 Apoios Perna Estendida", "Flexão de Quadril com Caneleira"],
       "Adutores": ["Cadeira Adutora", "Adução de Quadril na Polia", "Adução de Quadril com Caneleira"],
       "Panturrilha": ["Elevação em Pé", "Panturrilha no Leg Press", "Panturrilha Unilateral"],
       "Abdômen": ["Abdominal Supra", "Abdominal Remador", "Abdominal na Polia", "Abdominal Infra", "Abdominal Oblíquo", "Abdominal Oblíquo na Polia", "Prancha", "Abdominal Infra na Paralela", "Abdominal Bicicleta"],
@@ -8656,6 +8676,7 @@
       "Glúteo 4 Apoios no Smith": "https://www.youtube.com/watch?v=I0M2yvMqAqI",
       "Glúteo 4 Apoios com Caneleira": "https://www.youtube.com/watch?v=8rqYQCNqb8E",
       "Glúteo 4 Apoios Perna Estendida": "https://www.youtube.com/watch?v=phJW24tjOjg",
+      "Flexão de Quadril com Caneleira": "https://www.youtube.com/watch?v=Wj9LPESz5dw",
       // Adutores
       "Cadeira Adutora": "https://www.youtube.com/watch?v=gRrJV6LO7Dk",
       "Adução de Quadril na Polia": "https://www.youtube.com/watch?v=LPhvX2T7IF0",
@@ -11102,6 +11123,11 @@
       if (!checked) ST.workoutBlocks[bi].exercises[ei].isometriaSegs = '';
       _rerenderActiveEditor();
     };
+    window.toggleCustomVideo = (bi, ei, checked) => {
+      ST.workoutBlocks[bi].exercises[ei].customVideoEnabled = checked;
+      if (!checked) ST.workoutBlocks[bi].exercises[ei].customVideoUrl = '';
+      _rerenderActiveEditor();
+    };
 
     window.renderWorkoutsEditor = () => {
       // Salva posição de scroll antes de re-renderizar
@@ -11177,6 +11203,13 @@
           </div>
           <div class="ex-obs-wrap">
             <textarea placeholder="Observações: cadência, descanso..." oninput="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs || ''}</textarea>
+          </div>
+          <div class="ex-custom-video-wrap">
+            <label class="tech-pill ex-custom-video-toggle" style="cursor:pointer;user-select:none;">
+              <input type="checkbox" ${ex.customVideoEnabled ? 'checked' : ''} onchange="toggleCustomVideo(${bi},${ei},this.checked)"/>
+              Vídeo personalizado
+            </label>
+            ${ex.customVideoEnabled ? `<input type="url" class="form-control ex-custom-video-input" placeholder="URL do YouTube..." value="${(ex.customVideoUrl || '').replace(/"/g, '&quot;')}" oninput="updateExInBlock(${bi},${ei},'customVideoUrl',this.value)" style="margin-top:6px;font-size:.82rem;"/>` : ''}
           </div>
         </div>
       </div>`;
@@ -11683,7 +11716,7 @@
       if (!ST.workoutBlocks.length) { document.getElementById('plan-error').textContent = 'Adicione ao menos um treino.'; return; }
       for (const wb of ST.workoutBlocks) { if (!wb.exercises.filter(e => e.name).length) { document.getElementById('plan-error').textContent = `"${wb.title}" precisa de ao menos um exercício.`; return; } }
       const btn = document.getElementById('btn-save-plan'); btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
-      const workouts = ST.workoutBlocks.map(wb => ({ title: wb.title, days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: e.videoUrl || '', unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) }));
+      const workouts = ST.workoutBlocks.map(wb => ({ title: wb.title, days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) }));
       const data = { title, startDate: document.getElementById('plan-startdate').value || '', expiry: document.getElementById('plan-expiry').value || '', workouts, studentId: ST.planStudentId, createdAt: Date.now() };
       if (ST.editPlanId && window.__gestorPlans && window.__gestorPlans[ST.editPlanId] && window.__gestorPlans[ST.editPlanId].sequential) {
         data.sequential = window.__gestorPlans[ST.editPlanId].sequential;
@@ -11843,7 +11876,7 @@
       // Evita duplo clique durante o save
       if (btn.classList.contains('btn-loading')) return;
       btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
-      const moduleData = { title: wb.title || 'Treino', days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: e.videoUrl || '', unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) };
+      const moduleData = { title: wb.title || 'Treino', days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) };
       // Timeout de segurança: 15s — desbloqueia o botão mesmo se a Promise travar
       const safetyTimer = setTimeout(() => {
         btn.classList.remove('btn-loading'); btn.textContent = 'Salvar módulo';
