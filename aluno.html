@@ -2574,12 +2574,85 @@
     }
 
     .ex-pill-rest {
-      background: rgba(37, 99, 235, .08);
-      border-color: rgba(37, 99, 235, .22);
-      color: #1d4ed8;
+      background: rgba(46, 125, 82, .08);
+      border-color: rgba(46, 125, 82, .22);
+      color: var(--green);
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+      padding: 3px 9px 3px 7px;
+      font-weight: 800;
+    }
+
+    .ex-pill-rest svg {
+      flex-shrink: 0;
+      opacity: .85;
+    }
+
+    .rest-inline {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .rest-time-input {
+      width: 84px;
+      min-width: 84px;
+      height: 40px;
+      padding: 0 12px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--body);
+      font-size: .9rem;
+      font-weight: 700;
+      outline: none;
+      transition: all .15s;
+    }
+
+    .rest-time-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(245, 200, 0, .14);
+    }
+
+    .rest-unit-group {
+      display: inline-flex;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface2);
+      flex-shrink: 0;
+    }
+
+    .rest-unit-btn {
+      min-width: 54px;
+      height: 40px;
+      padding: 0 14px;
+      background: transparent;
+      color: var(--text2);
+      border: none;
+      font-family: var(--body);
+      font-size: .84rem;
+      font-weight: 800;
+      transition: all .15s;
+    }
+
+    .rest-unit-btn + .rest-unit-btn {
+      border-left: 1px solid var(--border);
+    }
+
+    .rest-unit-btn:hover {
+      background: rgba(245, 200, 0, .08);
+      color: var(--text);
+    }
+
+    .rest-unit-btn.active {
+      background: linear-gradient(135deg, #3d3830 0%, #28231a 50%, #1a1610 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
     }
 
     .ex-pill-sep {
@@ -5341,7 +5414,7 @@
             <span class="ex-pill">${ex.series} séries</span>
             <span class="ex-pill-sep"></span>
             <span class="ex-pill">${repsDisplay} rep</span>
-            ${ex.restTime ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-rest">${ex.restTime}${ex.restUnit === 'min' ? 'min' : 's'} descanso</span>` : ''}
+            ${ex.restTime ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-rest"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${ex.restTime}${ex.restUnit === 'min' ? 'min' : 's'} descanso</span>` : ''}
             ${ex.unilateral ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Unilateral</span>' : ''}
             ${ex.isometria ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Isometria${ex.isometriaSegs ? ' ' + ex.isometriaSegs + 's' : ''}</span>` : ''}
             ${ex.restPause ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Rest-pause</span>' : ''}
