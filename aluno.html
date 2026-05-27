@@ -2573,6 +2573,15 @@
       color: #8a6c00;
     }
 
+    .ex-pill-rest {
+      background: rgba(37, 99, 235, .08);
+      border-color: rgba(37, 99, 235, .22);
+      color: #1d4ed8;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     .ex-pill-sep {
       width: 3px;
       height: 3px;
@@ -5336,6 +5345,7 @@
             ${ex.isometria ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Isometria${ex.isometriaSegs ? ' ' + ex.isometriaSegs + 's' : ''}</span>` : ''}
             ${ex.restPause ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Rest-pause</span>' : ''}
             ${ex.dropSet ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Drop-set</span>' : ''}
+            ${ex.restTime ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-rest"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${ex.restTime}${ex.restUnit === 'min' ? 'min' : 's'} descanso</span>` : ''}
             ${ex.biset ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Bi-set</span>' : ''}
           </div>
           ${ex.obs ? '<div class="ex-obs">' + ex.obs + '</div>' : ''}
