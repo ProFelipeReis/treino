@@ -10071,7 +10071,7 @@
         ${s.email ? `<div style="font-size:.82rem;color:var(--text2);margin-top:2px;font-weight:500;">✉️ ${s.email}</div>` : ''}
       </div>
       <div class="detail-actions" style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
-        ${s.phone ? `<button class="btn btn-whatsapp btn-sm" onclick="contactWhatsApp('${s.phone}','${s.name}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> WhatsApp</button>` : ''}
+        ${s.phone ? `<button class="btn btn-whatsapp btn-sm" onclick="${active.length ? `sendWhatsAppPlan('${sid}','${active[0].id}')` : `contactWhatsApp('${s.phone}','${s.name}')`}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Enviar via WhatsApp</button>` : ''}
         <button class="btn btn-ghost btn-sm" onclick="openEditStudentModal('${sid}')">✏️ Editar</button>
         <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">Excluir</button>
       </div>
@@ -10815,9 +10815,8 @@
       </div>
       <div class="plan-actions">
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openSequentialModal('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M3 6h18M3 12h18M3 18h18"/></svg> Habilitar Treino Sequencial</button>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewPlan('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Ver</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();exportPlanPDF('${p.id}','${student.name || ''}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Gerar PDF</button>
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPlanEditInfoModal('${sid}','${p.id}')">✏️ Editar</button>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();exportPlanPDF('${p.id}','${student.name || ''}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Exportar PDF</button>
         <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePlan('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Excluir</button>
       </div>
     </div>
