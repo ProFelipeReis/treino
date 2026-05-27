@@ -1828,29 +1828,14 @@
     /* ── Alunos em Treino ── */
     .training-now-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
     .training-now-card {
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 10px;
       background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: var(--r2); padding: 12px 14px;
+      border-radius: var(--r2); padding: 10px 14px;
       transition: border-color .15s, box-shadow .15s;
       animation: trainingCardIn .3s cubic-bezier(.22,1,.36,1);
     }
     @keyframes trainingCardIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
     .training-now-card:hover { border-color: var(--accent-soft); box-shadow: var(--shadow); }
-    .training-now-avatar {
-      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-      background: var(--accent-dim); border: 1.5px solid var(--accent-soft);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--head); font-weight: 800; font-size: .88rem; color: #6a5000;
-    }
-    .training-now-info { flex: 1; min-width: 0; }
-    .training-now-name { font-weight: 700; font-size: .88rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .training-now-workout {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: .72rem; font-weight: 600; color: #6a5000;
-      background: var(--accent-dim); border: 1px solid var(--accent-soft);
-      border-radius: 6px; padding: 2px 8px; margin-top: 3px;
-    }
-    .training-now-elapsed { font-size: .7rem; color: var(--text3); font-weight: 600; margin-top: 2px; }
     .training-now-pulse {
       width: 8px; height: 8px; border-radius: 50%; background: var(--green);
       flex-shrink: 0; box-shadow: 0 0 0 0 rgba(46,125,82,.5);
@@ -1861,12 +1846,22 @@
       60%  { box-shadow: 0 0 0 6px rgba(46,125,82,.0); }
       100% { box-shadow: 0 0 0 0 rgba(46,125,82,.0); }
     }
+    .training-now-info { flex: 1; min-width: 0; }
+    .training-now-name { font-weight: 700; font-size: .88rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .training-now-sub { display: flex; align-items: center; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
+    .training-now-workout {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: .72rem; font-weight: 600; color: #6a5000;
+      background: var(--accent-dim); border: 1px solid var(--accent-soft);
+      border-radius: 6px; padding: 1px 7px;
+    }
+    .training-now-elapsed { font-size: .7rem; color: var(--text3); font-weight: 600; }
     .training-now-empty {
       color: var(--text3); font-size: .82rem; font-weight: 600;
       padding: 18px 0; text-align: center;
     }
     .training-now-chat-btn {
-      flex-shrink: 0; width: 34px; height: 34px; border-radius: 9px;
+      flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px;
       border: 1.5px solid var(--border); background: var(--surface2);
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; transition: all .15s; color: var(--text2);
@@ -9810,23 +9805,22 @@
       el.innerHTML = training.map(function(n) {
         var sid = n.studentId || n.sid || '';
         var name = escHtml(n.studentName || 'Aluno');
-        var initials = (n.studentName || '?').split(' ').map(function(w){ return w[0]; }).slice(0,2).join('').toUpperCase();
         var workout = escHtml(n.workoutTitle || n.planTitle || 'Treino');
-        var ts = n.timestamp || 0;
         var elapsedId = 'tnow-elapsed-' + sid;
         return '<div class="training-now-card">'
-          + '<div class="training-now-avatar">' + initials + '</div>'
+          + '<div class="training-now-pulse"></div>'
           + '<div class="training-now-info">'
           +   '<div class="training-now-name">' + name + '</div>'
-          +   '<div class="training-now-workout">'
-          +     '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
-          +     workout
+          +   '<div class="training-now-sub">'
+          +     '<div class="training-now-workout">'
+          +       '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+          +       workout
+          +     '</div>'
+          +     '<div class="training-now-elapsed" id="' + elapsedId + '">–</div>'
           +   '</div>'
-          +   '<div class="training-now-elapsed" id="' + elapsedId + '">–</div>'
           + '</div>'
-          + '<div class="training-now-pulse"></div>'
           + '<button class="training-now-chat-btn" title="Abrir chat com ' + name + '" onclick=\'window._openChatFromDash(\"' + sid + '\")\'>'
-          +   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+          +   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
           + '</button>'
           + '</div>';
       }).join('');
@@ -11449,6 +11443,16 @@
             <span class="ex-field-label">Bi-set com</span>
             <select onchange="updateExInBlock(${bi},${ei},'biset',this.value)"><option value="">Nenhum</option>${bisets}</select>
           </div>
+          <div class="ex-field">
+            <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
+            <div style="display:flex;gap:5px;align-items:center;">
+              <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" style="width:64px;"/>
+              <select onchange="updateExInBlock(${bi},${ei},'restUnit',this.value)" style="flex:1;">
+                <option value="s" ${(ex.restUnit||'s')==='s'?'selected':''}>seg</option>
+                <option value="min" ${(ex.restUnit||'s')==='min'?'selected':''}>min</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div class="ex-row-bottom">
           <div class="ex-techniques">
@@ -12187,6 +12191,16 @@
         <div class="ex-field"><span class="ex-field-label">Séries</span><input type="number" min="1" max="20" value="${seriesCount}" oninput="updateSeriesCountModule(${bi},${ei},this.value,true)" onblur="updateSeriesCountModule(${bi},${ei},this.value,false)"/></div>
         <div class="ex-field"><span class="ex-field-label">Reps por série</span><div class="ex-reps-chips">${repsChips}</div></div>
         <div class="ex-field"><span class="ex-field-label">Bi-set com</span><select onchange="updateExInBlock(${bi},${ei},'biset',this.value)"><option value="">Nenhum</option>${bisets}</select></div>
+        <div class="ex-field">
+          <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
+          <div style="display:flex;gap:5px;align-items:center;">
+            <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" style="width:64px;"/>
+            <select onchange="updateExInBlock(${bi},${ei},'restUnit',this.value)" style="flex:1;">
+              <option value="s" ${(ex.restUnit||'s')==='s'?'selected':''}>seg</option>
+              <option value="min" ${(ex.restUnit||'s')==='min'?'selected':''}>min</option>
+            </select>
+          </div>
+        </div>
       </div>
       <div class="ex-row-bottom">
         <div class="ex-techniques">
