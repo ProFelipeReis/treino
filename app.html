@@ -2973,6 +2973,34 @@
       padding: 6px 9px !important;
     }
 
+    .rest-toggle-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .rest-chip {
+      appearance: none;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--text2);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: .74rem;
+      font-weight: 700;
+      line-height: 1;
+      transition: all .15s;
+    }
+    .rest-chip:hover { border-color: var(--accent-soft); background: var(--accent-dim); color: #6a5000; }
+    .rest-chip.active { background: var(--accent-dim); border-color: var(--accent-soft); color: #6a5000; }
+    .rest-time-input {
+      width: 64px;
+      padding: 6px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: .8rem;
+      font-family: var(--body);
+      text-align: center;
+    }
+    .rest-time-input:focus { outline: none; border-color: var(--accent-soft); box-shadow: 0 0 0 3px var(--accent-dim); }
+
     .ex-custom-video-toggle {
       display: inline-flex;
       align-items: center;
@@ -11445,12 +11473,10 @@
           </div>
           <div class="ex-field">
             <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
-            <div style="display:flex;gap:5px;align-items:center;">
-              <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" style="width:64px;"/>
-              <select onchange="updateExInBlock(${bi},${ei},'restUnit',this.value)" style="flex:1;">
-                <option value="s" ${(ex.restUnit||'s')==='s'?'selected':''}>seg</option>
-                <option value="min" ${(ex.restUnit||'s')==='min'?'selected':''}>min</option>
-              </select>
+            <div class="rest-toggle-group" data-bi="${bi}" data-ei="${ei}">
+              <button type="button" class="rest-chip ${!ex.restUnit || ex.restUnit === 's' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','s')">seg</button>
+              <button type="button" class="rest-chip ${ex.restUnit === 'min' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','min')">min</button>
+              <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
             </div>
           </div>
         </div>
@@ -12193,12 +12219,10 @@
         <div class="ex-field"><span class="ex-field-label">Bi-set com</span><select onchange="updateExInBlock(${bi},${ei},'biset',this.value)"><option value="">Nenhum</option>${bisets}</select></div>
         <div class="ex-field">
           <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
-          <div style="display:flex;gap:5px;align-items:center;">
-            <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" style="width:64px;"/>
-            <select onchange="updateExInBlock(${bi},${ei},'restUnit',this.value)" style="flex:1;">
-              <option value="s" ${(ex.restUnit||'s')==='s'?'selected':''}>seg</option>
-              <option value="min" ${(ex.restUnit||'s')==='min'?'selected':''}>min</option>
-            </select>
+          <div class="rest-toggle-group" data-bi="${bi}" data-ei="${ei}">
+            <button type="button" class="rest-chip ${!ex.restUnit || ex.restUnit === 's' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','s')">seg</button>
+            <button type="button" class="rest-chip ${ex.restUnit === 'min' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','min')">min</button>
+            <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
           </div>
         </div>
       </div>
