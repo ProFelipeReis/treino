@@ -11001,7 +11001,15 @@
       }
     };
     window.removeExFromBlock = (bi, ei) => { ST.workoutBlocks[bi].exercises.splice(ei, 1); _rerenderActiveEditor(); };
-    window.updateExInBlock = (bi, ei, f, v) => { ST.workoutBlocks[bi].exercises[ei][f] = v };
+    window.updateExInBlock = (bi, ei, f, v) => {
+      if (f === 'restTime') {
+        ST.workoutBlocks[bi].exercises[ei][f] = (v === '' || v === null || v === undefined) ? null : Number(v);
+      } else if (f === 'restUnit') {
+        ST.workoutBlocks[bi].exercises[ei][f] = (v === 'min') ? 'min' : 's';
+      } else {
+        ST.workoutBlocks[bi].exercises[ei][f] = v;
+      }
+    };
     // ── Exercise Search Widget ──────────────────────────────────────
     (function() {
       let _activeDropdown = null;
