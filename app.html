@@ -10835,10 +10835,16 @@
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:4px;margin:8px 10px;flex-shrink:0;align-self:center;">
-            <button class="btn btn-ghost btn-sm" style="padding:6px 9px;" title="Clonar módulo para outro aluno" onclick="event.stopPropagation();openCloneModuleModal('${p.id}','${sid}',${wi})">
+            <button class="btn btn-ghost btn-sm" style="padding:5px 8px;opacity:${wi === 0 ? '.25' : '1'};" title="Mover módulo para cima" ${wi === 0 ? 'disabled' : ''} onclick="event.stopPropagation();reorderModule('${p.id}','${sid}',${wi},-1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-sm" style="padding:5px 8px;opacity:${wi === (p.workouts||[]).length - 1 ? '.25' : '1'};" title="Mover módulo para baixo" ${wi === (p.workouts||[]).length - 1 ? 'disabled' : ''} onclick="event.stopPropagation();reorderModule('${p.id}','${sid}',${wi},1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-sm" style="padding:5px 8px;" title="Clonar módulo para outro aluno" onclick="event.stopPropagation();openCloneModuleModal('${p.id}','${sid}',${wi})">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
-            <button class="btn btn-danger btn-sm" style="padding:6px 9px;" title="Remover módulo" onclick="event.stopPropagation();deleteModule('${p.id}','${sid}',${wi})">
+            <button class="btn btn-danger btn-sm" style="padding:5px 8px;" title="Remover módulo" onclick="event.stopPropagation();deleteModule('${p.id}','${sid}',${wi})">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
             </button>
           </div>
@@ -12398,6 +12404,23 @@
         toast('Módulo excluído.');
         await openStudentDetail(sid);
       } catch (e) { toast('Erro: ' + e.message, 'error'); }
+    };
+
+    window.reorderModule = async (planId, sid, fromIndex, direction) => {
+      const toIndex = fromIndex + direction;
+      try {
+        const snap = await _getDoc(_doc(_db, 'plans', planId));
+        if (!snap.exists) { toast('Plano não encontrado.', 'error'); return; }
+        const workouts = [...(snap.data().workouts || [])];
+        if (toIndex < 0 || toIndex >= workouts.length) return;
+        // Swap the two modules
+        const temp = workouts[fromIndex];
+        workouts[fromIndex] = workouts[toIndex];
+        workouts[toIndex] = temp;
+        await _updateDoc(_doc(_db, 'plans', planId), { workouts });
+        toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Ordem atualizada!');
+        await openStudentDetail(sid);
+      } catch (e) { toast('Erro ao reordenar: ' + e.message, 'error'); }
     };
 
     // ── Manager CRUD ──
