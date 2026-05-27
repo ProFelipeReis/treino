@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#111110" />
-  <title>Trainly —- Painel do Personal</title>
+  <title>Trainly — Painel do Gestor</title>
 
 
 
@@ -2972,13 +2972,6 @@
       font-size: .82rem !important;
       padding: 6px 9px !important;
     }
-
-    .rest-inline { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
-    .rest-time-input { width: 78px; height: 36px; padding: 0 10px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-size: .82rem; font-family: var(--body); text-align: center; box-sizing: border-box; flex: 0 0 auto; }
-    .rest-time-input:focus { outline: none; border-color: var(--accent-soft); box-shadow: 0 0 0 3px var(--accent-dim); }
-    .rest-unit-btn { appearance: none; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text2); border-radius: 10px; height: 36px; padding: 0 14px; font-size: .78rem; font-weight: 800; line-height: 1; min-width: 58px; transition: all .15s; box-sizing: border-box; flex: 0 0 auto; }
-    .rest-unit-btn:hover { background: var(--surface3); color: var(--text); }
-    .rest-unit-btn.active { background: var(--accent-dim); border-color: var(--accent-soft); color: #6a5000; }
 
     .ex-custom-video-toggle {
       display: inline-flex;
@@ -11008,7 +11001,7 @@
       }
     };
     window.removeExFromBlock = (bi, ei) => { ST.workoutBlocks[bi].exercises.splice(ei, 1); _rerenderActiveEditor(); };
-    window.updateExInBlock = (bi, ei, f, v) => { if (f === 'restTime') { ST.workoutBlocks[bi].exercises[ei][f] = (v === '' || v === null || v === undefined) ? null : Number(v); } else if (f === 'restUnit') { ST.workoutBlocks[bi].exercises[ei][f] = (v === 'min') ? 'min' : 's'; } else { ST.workoutBlocks[bi].exercises[ei][f] = v; } _rerenderActiveEditor(); };
+    window.updateExInBlock = (bi, ei, f, v) => { if (f === 'restTime') { ST.workoutBlocks[bi].exercises[ei][f] = (v === '' || v === null || v === undefined) ? null : Math.max(1, Number(v) || 0); } else if (f === 'restUnit') { ST.workoutBlocks[bi].exercises[ei][f] = (v === 'min') ? 'min' : 's'; } else { ST.workoutBlocks[bi].exercises[ei][f] = v; } _rerenderActiveEditor(); };
     // ── Exercise Search Widget ──────────────────────────────────────
     (function() {
       let _activeDropdown = null;
@@ -11451,11 +11444,13 @@
             <select onchange="updateExInBlock(${bi},${ei},'biset',this.value)"><option value="">Nenhum</option>${bisets}</select>
           </div>
           <div class="ex-field">
-            <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
+            <span class="ex-field-label">Tempo de descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
             <div class="rest-inline">
-              <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
-              <button type="button" class="rest-unit-btn ${!ex.restUnit || ex.restUnit === 's' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','s')">Seg</button>
-              <button type="button" class="rest-unit-btn ${ex.restUnit === 'min' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','min')">Min</button>
+              <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime ?? ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
+              <div class="rest-unit-group">
+                <button type="button" class="rest-unit-btn ${!ex.restUnit || ex.restUnit === 's' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','s')">Seg</button>
+                <button type="button" class="rest-unit-btn ${ex.restUnit === 'min' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','min')">Min</button>
+              </div>
             </div>
           </div>
         </div>
@@ -12118,7 +12113,7 @@
       if (!ST.workoutBlocks.length) { document.getElementById('plan-error').textContent = 'Adicione ao menos um treino.'; return; }
       for (const wb of ST.workoutBlocks) { if (!wb.exercises.filter(e => e.name).length) { document.getElementById('plan-error').textContent = `"${wb.title}" precisa de ao menos um exercício.`; return; } }
       const btn = document.getElementById('btn-save-plan'); btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
-      const workouts = ST.workoutBlocks.map(wb => ({ title: wb.title, days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) }));
+      const workouts = ST.workoutBlocks.map(wb => ({ title: wb.title, days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, restTime: e.restTime === '' || e.restTime === null || e.restTime === undefined ? null : Number(e.restTime), restUnit: e.restUnit === 'min' ? 'min' : 's', obs: e.obs || '' })) }));
       const data = { title, startDate: document.getElementById('plan-startdate').value || '', expiry: document.getElementById('plan-expiry').value || '', workouts, studentId: ST.planStudentId, createdAt: Date.now() };
       if (ST.editPlanId && window.__gestorPlans && window.__gestorPlans[ST.editPlanId] && window.__gestorPlans[ST.editPlanId].sequential) {
         data.sequential = window.__gestorPlans[ST.editPlanId].sequential;
@@ -12196,6 +12191,16 @@
         <div class="ex-field"><span class="ex-field-label">Séries</span><input type="number" min="1" max="20" value="${seriesCount}" oninput="updateSeriesCountModule(${bi},${ei},this.value,true)" onblur="updateSeriesCountModule(${bi},${ei},this.value,false)"/></div>
         <div class="ex-field"><span class="ex-field-label">Reps por série</span><div class="ex-reps-chips">${repsChips}</div></div>
         <div class="ex-field"><span class="ex-field-label">Bi-set com</span><select onchange="updateExInBlock(${bi},${ei},'biset',this.value)"><option value="">Nenhum</option>${bisets}</select></div>
+        <div class="ex-field">
+          <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
+          <div class="rest-inline">
+            <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
+            <div class="rest-unit-group">
+              <button type="button" class="rest-unit-btn ${!ex.restUnit || ex.restUnit === 's' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','s')">Seg</button>
+              <button type="button" class="rest-unit-btn ${ex.restUnit === 'min' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','min')">Min</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="ex-row-bottom">
         <div class="ex-techniques">
@@ -12285,7 +12290,7 @@
       // Evita duplo clique durante o save
       if (btn.classList.contains('btn-loading')) return;
       btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
-      const moduleData = { title: wb.title || 'Treino', days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) };
+      const moduleData = { title: wb.title || 'Treino', days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, restTime: e.restTime === '' || e.restTime === null || e.restTime === undefined ? null : Number(e.restTime), restUnit: e.restUnit === 'min' ? 'min' : 's', obs: e.obs || '' })) };
       // Timeout de segurança: 15s — desbloqueia o botão mesmo se a Promise travar
       // #15 — safetyTimer: clearTimeout centralizado no finally (garante execução em TODOS os caminhos)
       const safetyTimer = setTimeout(() => {
