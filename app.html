@@ -2959,70 +2959,6 @@
       background: var(--surface);
     }
 
-    /* ── Descanso inline ── */
-    .rest-inline {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .rest-time-input {
-      width: 52px;
-      padding: 5px 8px;
-      border: 1.5px solid var(--border);
-      border-radius: 7px;
-      font-size: .82rem;
-      font-family: var(--body);
-      background: var(--bg);
-      color: var(--text);
-      text-align: center;
-      flex-shrink: 0;
-    }
-
-    .rest-time-input:focus {
-      outline: none;
-      border-color: var(--accent);
-      background: var(--surface);
-    }
-
-    .rest-unit-group {
-      display: flex;
-      border: 1.5px solid var(--border);
-      border-radius: 7px;
-      overflow: hidden;
-      background: var(--surface2);
-      flex-shrink: 0;
-    }
-
-    .rest-unit-btn {
-      padding: 5px 8px;
-      font-size: .72rem;
-      font-weight: 700;
-      font-family: var(--body);
-      color: var(--text3);
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      transition: all .12s;
-      letter-spacing: .03em;
-      line-height: 1;
-    }
-
-    .rest-unit-btn + .rest-unit-btn {
-      border-left: 1.5px solid var(--border);
-    }
-
-    .rest-unit-btn.active {
-      background: var(--accent-dim);
-      color: #111110;
-      font-weight: 800;
-    }
-
-    .rest-unit-btn:not(.active):hover {
-      background: var(--surface3);
-      color: var(--text2);
-    }
-
     .ex-obs-wrap textarea::placeholder {
       color: var(--text3);
     }
@@ -11510,7 +11446,7 @@
           <div class="ex-field">
             <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
             <div class="rest-inline">
-              <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" onchange="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
+              <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
               <div class="rest-unit-group">
                 <button type="button" class="rest-unit-btn ${!ex.restUnit || ex.restUnit === 's' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','s')">Seg</button>
                 <button type="button" class="rest-unit-btn ${ex.restUnit === 'min' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','min')">Min</button>
@@ -12177,7 +12113,7 @@
       if (!ST.workoutBlocks.length) { document.getElementById('plan-error').textContent = 'Adicione ao menos um treino.'; return; }
       for (const wb of ST.workoutBlocks) { if (!wb.exercises.filter(e => e.name).length) { document.getElementById('plan-error').textContent = `"${wb.title}" precisa de ao menos um exercício.`; return; } }
       const btn = document.getElementById('btn-save-plan'); btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
-      const workouts = ST.workoutBlocks.map(wb => ({ title: wb.title, days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) }));
+      const workouts = ST.workoutBlocks.map(wb => ({ title: wb.title, days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '', restTime: e.restTime || null, restUnit: e.restUnit || 's' })) }));
       const data = { title, startDate: document.getElementById('plan-startdate').value || '', expiry: document.getElementById('plan-expiry').value || '', workouts, studentId: ST.planStudentId, createdAt: Date.now() };
       if (ST.editPlanId && window.__gestorPlans && window.__gestorPlans[ST.editPlanId] && window.__gestorPlans[ST.editPlanId].sequential) {
         data.sequential = window.__gestorPlans[ST.editPlanId].sequential;
@@ -12258,7 +12194,7 @@
         <div class="ex-field">
           <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
           <div class="rest-inline">
-            <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" onchange="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
+            <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
             <div class="rest-unit-group">
               <button type="button" class="rest-unit-btn ${!ex.restUnit || ex.restUnit === 's' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','s')">Seg</button>
               <button type="button" class="rest-unit-btn ${ex.restUnit === 'min' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','min')">Min</button>
@@ -12354,7 +12290,7 @@
       // Evita duplo clique durante o save
       if (btn.classList.contains('btn-loading')) return;
       btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
-      const moduleData = { title: wb.title || 'Treino', days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) };
+      const moduleData = { title: wb.title || 'Treino', days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '', restTime: e.restTime || null, restUnit: e.restUnit || 's' })) };
       // Timeout de segurança: 15s — desbloqueia o botão mesmo se a Promise travar
       // #15 — safetyTimer: clearTimeout centralizado no finally (garante execução em TODOS os caminhos)
       const safetyTimer = setTimeout(() => {
