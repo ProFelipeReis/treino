@@ -1825,6 +1825,54 @@
     }
     .dash-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
+    /* ── Alunos em Treino ── */
+    .training-now-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .training-now-card {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r2); padding: 12px 14px;
+      transition: border-color .15s, box-shadow .15s;
+      animation: trainingCardIn .3s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes trainingCardIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+    .training-now-card:hover { border-color: var(--accent-soft); box-shadow: var(--shadow); }
+    .training-now-avatar {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+      background: var(--accent-dim); border: 1.5px solid var(--accent-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--head); font-weight: 800; font-size: .88rem; color: #6a5000;
+    }
+    .training-now-info { flex: 1; min-width: 0; }
+    .training-now-name { font-weight: 700; font-size: .88rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .training-now-workout {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .72rem; font-weight: 600; color: #6a5000;
+      background: var(--accent-dim); border: 1px solid var(--accent-soft);
+      border-radius: 6px; padding: 2px 8px; margin-top: 3px;
+    }
+    .training-now-elapsed { font-size: .7rem; color: var(--text3); font-weight: 600; margin-top: 2px; }
+    .training-now-pulse {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+      flex-shrink: 0; box-shadow: 0 0 0 0 rgba(46,125,82,.5);
+      animation: pulseGreen 1.8s ease-in-out infinite;
+    }
+    @keyframes pulseGreen {
+      0%   { box-shadow: 0 0 0 0 rgba(46,125,82,.5); }
+      60%  { box-shadow: 0 0 0 6px rgba(46,125,82,.0); }
+      100% { box-shadow: 0 0 0 0 rgba(46,125,82,.0); }
+    }
+    .training-now-empty {
+      color: var(--text3); font-size: .82rem; font-weight: 600;
+      padding: 18px 0; text-align: center;
+    }
+    .training-now-chat-btn {
+      flex-shrink: 0; width: 34px; height: 34px; border-radius: 9px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s; color: var(--text2);
+    }
+    .training-now-chat-btn:hover { border-color: var(--accent-soft); background: var(--accent-dim); color: #6a5000; }
+
     @media(max-width: 480px) {
       .dash-new-row { grid-template-columns: 1fr 1fr; }
       .dash-rate-row { grid-template-columns: 1fr 1fr 1fr; }
@@ -6769,6 +6817,16 @@
               </svg> Assinar agora</button>
           </div>
 
+          <!-- ── Alunos em Treino Agora ── -->
+          <div class="dash-section-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Alunos em treino agora
+            <span id="training-now-count" style="font-size:.68rem;font-weight:700;background:var(--green-dim);color:var(--green);border:1px solid rgba(46,125,82,.2);border-radius:99px;padding:2px 9px;display:none;"></span>
+          </div>
+          <div id="training-now-list" class="training-now-list">
+            <div class="training-now-empty">Carregando...</div>
+          </div>
+
           <!-- ── KPIs Principais ── -->
           <div class="dash-section-title">Visão geral</div>
           <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-bottom:20px;">
@@ -8556,6 +8614,7 @@
     const _query = (col, ...constraints) => { let q = col; constraints.forEach(fn => { q = fn(q); }); return q; };
     const _where = (field, op, val) => (q) => q.where(field, op, val);
     const _orderBy = (field, dir) => (q) => q.orderBy(field, dir || 'asc');
+    const _limit = (n) => (q) => q.limit(n); // #10 — teto de segurança nas queries
 
     window.EX_LIB = {
       "Peito": ["Supino Reto", "Supino Reto no Smith", "Supino Reto com Halter", "Supino Inclinado", "Supino Inclinado no Smith", "Supino Inclinado com Halter", "Supino Declinado", "Supino Declinado com Halter", "Supino Articulado", "Supino na Polia", "Crucifixo Reto", "Crucifixo Inclinado", "Crossover Superior", "Crossover Medial", "Crossover Inferior", "Voador Peitoral", "Flexão de Braço", "Pullover com Barra", "Pullover com Halter"],
@@ -8999,6 +9058,9 @@
       if (tabId === 'tab-gestores') loadManagers();
       if (tabId === 'tab-feedbacks') loadFeedbacks();
       if (tabId === 'tab-chat') { loadChatList(); closeChatDetail(); }
+      if (tabId === 'tab-dashboard') {
+        if (typeof window.startTrainingNowListener === 'function') window.startTrainingNowListener();
+      }
       if (tabId === 'tab-ceo') { loadCeoManagers(); loadPricing(); loadCrefPending(); }
     };
     window.goToAlunos = () => switchTab('tab-alunos', document.querySelector('[data-tab="tab-alunos"]'));
@@ -9020,6 +9082,7 @@
           .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         renderStudentsGrid(ST.students);
         updateStats();
+        window.startTrainingNowListener(); // Alunos em treino agora
       } catch (err) {
         document.getElementById('students-grid').innerHTML = `<div style="padding:20px;color:red;font-family:monospace;font-size:12px;background:#fff3f3;border-radius:8px;border:1px solid red;grid-column:1/-1;"><b>ERRO Firebase:</b><br>${err.code || ''}: ${err.message}</div>`;
         console.error('loadStudents error:', err);
@@ -9652,6 +9715,160 @@
       } catch (e) { toast('Erro: ' + e.message, 'error'); }
       finally { btn.classList.remove('btn-loading'); btn.textContent = 'Salvar alterações'; }
     };
+    // ── Alunos em Treino Agora ──────────────────────────────────────────────────
+    // Usa a coleção `notifications` existente:
+    //   workout_started  → aluno iniciou treino
+    //   workout_finished / workout_done / workout_skipped → aluno terminou
+    // Considera "em treino" quem tem started SEM um finished/done/skipped
+    // com timestamp POSTERIOR, nos últimos 180 minutos (3h — janela de segurança).
+
+    window._trainingNowUnsub = null;
+    window._trainingNowElapsedTimers = [];
+
+    window.startTrainingNowListener = function () {
+      // Cancela listener anterior se existir
+      if (window._trainingNowUnsub) { try { window._trainingNowUnsub(); } catch(e){} window._trainingNowUnsub = null; }
+      // Para timers de elapsed
+      window._trainingNowElapsedTimers.forEach(function(t){ clearInterval(t); });
+      window._trainingNowElapsedTimers = [];
+
+      var u = window.CURRENT_USER || {};
+      var since = Date.now() - 180 * 60 * 1000; // últimas 3h
+      var q;
+      try {
+        if (u.role === 'ceo' || u.isMaster) {
+          q = _query(_col(_db, 'notifications'), _where('timestamp', '>', since));
+        } else {
+          q = _query(_col(_db, 'notifications'), _where('managerId', '==', u.username), _where('timestamp', '>', since));
+        }
+      } catch(e) { return; }
+
+      window._trainingNowUnsub = q.onSnapshot(function(snap) {
+        var notifs = snap.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); });
+        window._renderTrainingNow(notifs);
+      }, function(err) {
+        // Fallback: poll único se onSnapshot falhar (ex: índice composto ausente)
+        console.warn('trainingNow listener falhou, usando fallback poll:', err.message);
+        window._pollTrainingNow();
+      });
+    };
+
+    window._pollTrainingNow = async function() {
+      try {
+        var u = window.CURRENT_USER || {};
+        var since = Date.now() - 180 * 60 * 1000;
+        var snap;
+        if (u.role === 'ceo' || u.isMaster) {
+          snap = await _getDocs(_query(_col(_db, 'notifications'), _where('timestamp', '>', since)));
+        } else {
+          snap = await _getDocs(_query(_col(_db, 'notifications'), _where('managerId', '==', u.username), _where('timestamp', '>', since)));
+        }
+        var notifs = snap.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); });
+        window._renderTrainingNow(notifs);
+      } catch(e) { console.warn('_pollTrainingNow:', e.message); }
+    };
+
+    window._renderTrainingNow = function(notifs) {
+      // Para timers anteriores
+      window._trainingNowElapsedTimers.forEach(function(t){ clearInterval(t); });
+      window._trainingNowElapsedTimers = [];
+
+      var el = document.getElementById('training-now-list');
+      var countEl = document.getElementById('training-now-count');
+      if (!el) return;
+
+      // Agrupa por studentId: pega o evento mais recente por aluno
+      var byStudent = {};
+      notifs.forEach(function(n) {
+        if (!n.studentId && !n.sid) return;
+        var sid = n.studentId || n.sid;
+        if (!byStudent[sid] || (n.timestamp || 0) > (byStudent[sid].timestamp || 0)) {
+          byStudent[sid] = n;
+        }
+      });
+
+      // Filtra apenas quem tem `workout_started` como ÚLTIMO evento
+      var training = Object.values(byStudent).filter(function(n) {
+        return n.type === 'workout_started';
+      }).sort(function(a,b){ return (b.timestamp||0) - (a.timestamp||0); });
+
+      // Atualiza contador no título
+      if (countEl) {
+        if (training.length > 0) {
+          countEl.textContent = training.length + ' online';
+          countEl.style.display = 'inline-flex';
+        } else {
+          countEl.style.display = 'none';
+        }
+      }
+
+      if (!training.length) {
+        el.innerHTML = '<div class="training-now-empty">Nenhum aluno treinando no momento</div>';
+        return;
+      }
+
+      el.innerHTML = training.map(function(n) {
+        var sid = n.studentId || n.sid || '';
+        var name = escHtml(n.studentName || 'Aluno');
+        var initials = (n.studentName || '?').split(' ').map(function(w){ return w[0]; }).slice(0,2).join('').toUpperCase();
+        var workout = escHtml(n.workoutTitle || n.planTitle || 'Treino');
+        var ts = n.timestamp || 0;
+        var elapsedId = 'tnow-elapsed-' + sid;
+        return '<div class="training-now-card">'
+          + '<div class="training-now-avatar">' + initials + '</div>'
+          + '<div class="training-now-info">'
+          +   '<div class="training-now-name">' + name + '</div>'
+          +   '<div class="training-now-workout">'
+          +     '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+          +     workout
+          +   '</div>'
+          +   '<div class="training-now-elapsed" id="' + elapsedId + '">–</div>'
+          + '</div>'
+          + '<div class="training-now-pulse"></div>'
+          + '<button class="training-now-chat-btn" title="Abrir chat com ' + name + '" onclick="window._openChatFromDash('' + sid + '')">'
+          +   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+          + '</button>'
+          + '</div>';
+      }).join('');
+
+      // Iniciar timers de elapsed por card
+      training.forEach(function(n) {
+        var sid = n.studentId || n.sid || '';
+        var ts = n.timestamp || 0;
+        if (!ts) return;
+        function updateElapsed() {
+          var elEl = document.getElementById('tnow-elapsed-' + sid);
+          if (!elEl) return;
+          var diff = Math.floor((Date.now() - ts) / 1000);
+          if (diff < 0) diff = 0;
+          var h = Math.floor(diff / 3600);
+          var m = Math.floor((diff % 3600) / 60);
+          var s = diff % 60;
+          var str = h > 0
+            ? h + 'h ' + String(m).padStart(2,'0') + 'min'
+            : m > 0 ? m + 'min ' + String(s).padStart(2,'0') + 's'
+            : s + 's';
+          elEl.textContent = 'Em treino há ' + str;
+        }
+        updateElapsed();
+        var t = setInterval(updateElapsed, 1000);
+        window._trainingNowElapsedTimers.push(t);
+      });
+    };
+
+    // Abre o chat navegando para a aba de chat e abrindo o detalhe
+    window._openChatFromDash = function(sid) {
+      // Navega para aba de chat
+      var chatTab = document.querySelector('[data-tab="tab-chat"]');
+      if (chatTab) chatTab.click();
+      // Pequeno delay para garantir que a aba renderizou
+      setTimeout(function() {
+        if (typeof window.openChatDetail === 'function') {
+          window.openChatDetail(sid);
+        }
+      }, 150);
+    };
+
     window.updateStats = async () => {
       const total = ST.students.length;
       document.getElementById('stat-alunos').textContent = total;
@@ -12061,6 +12278,7 @@
       btn.classList.add('btn-loading'); btn.textContent = 'Salvando...';
       const moduleData = { title: wb.title || 'Treino', days: wb.days || [], exercises: wb.exercises.filter(e => e.name).map(e => ({ name: e.name === '__custom__' ? (e.customName || 'Personalizado') : e.name, series: Number(e.series) || 1, reps: e.reps || '12', repsArr: e.repsArr || [e.reps || '12'], videoUrl: (e.customVideoEnabled && e.customVideoUrl) ? e.customVideoUrl : (e.videoUrl || ''), unilateral: !!e.unilateral, biset: e.biset || '', bisetName: e.biset || '', isometria: !!e.isometria, isometriaSegs: e.isometriaSegs || '', restPause: !!e.restPause, dropSet: !!e.dropSet, obs: e.obs || '' })) };
       // Timeout de segurança: 15s — desbloqueia o botão mesmo se a Promise travar
+      // #15 — safetyTimer: clearTimeout centralizado no finally (garante execução em TODOS os caminhos)
       const safetyTimer = setTimeout(() => {
         btn.classList.remove('btn-loading'); btn.textContent = 'Salvar módulo';
         errEl.textContent = 'Tempo esgotado. Verifique sua conexão e tente novamente.';
@@ -12076,18 +12294,19 @@
         const workouts = [...(snap.data().workouts || [])];
         if (ST.moduleIndex !== null && ST.moduleIndex !== undefined) { workouts[ST.moduleIndex] = moduleData; } else { workouts.push(moduleData); }
         await _updateDoc(_doc(_db, 'plans', ST.modulePlanId), { workouts });
-        clearTimeout(safetyTimer);
         // Atualiza snapshot para evitar falso alerta de "alterações não salvas"
         ST._moduleSnapshot = JSON.stringify(ST.workoutBlocks && ST.workoutBlocks[0]);
         toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Módulo salvo!');
         closeModal('modal-module');
         await openStudentDetail(ST.moduleStudentId);
       } catch (e) {
-        clearTimeout(safetyTimer);
         errEl.textContent = 'Erro: ' + e.message;
         toast('Erro ao salvar. Tente novamente.', 'error');
       }
-      finally { btn.classList.remove('btn-loading'); btn.textContent = 'Salvar módulo'; }
+      finally {
+        clearTimeout(safetyTimer); // #15 — sempre cancela o timer, independente do caminho
+        btn.classList.remove('btn-loading'); btn.textContent = 'Salvar módulo';
+      }
     };
 
     window.deleteModule = async (planId, sid, moduleIndex) => {
@@ -12117,7 +12336,7 @@
     };
 
     window.saveProfile = async function () {
-      var u = window.CURRENT_USER || {};
+      var u = window.CURRENT_USER || {}; // #14 — fallback seguro
       var name = document.getElementById('profile-name').value.trim();
       var phone = document.getElementById('profile-phone').value.trim();
       var pass = document.getElementById('profile-pass').value;
@@ -12148,10 +12367,12 @@
             if (pass) { masterUpd.passwordHash = await _sha256(pass); masterUpd.password = null; }
             await _updateDoc(_doc(_db, 'managers', masterSnap.docs[0].id), masterUpd);
           }
-          // Propaga para todos os alunos do master
-          var studSnap = await _getDocs(_query(_col(_db, 'students'), _where('managerId', '==', (window.CURRENT_USER || {}).username || '')));
-          for (var sd of studSnap.docs) {
-            await _updateDoc(_doc(_db, 'students', sd.id), { managerName: finalName, managerPhone: finalPhone });
+          // #8 — Propaga para todos os alunos do master via batch (era loop sequencial)
+          var studSnap = await _getDocs(_query(_col(_db, 'students'), _where('managerId', '==', (window.CURRENT_USER || {}).username || ''), _limit(500)));
+          if (studSnap.docs.length > 0) {
+            var batchSP1 = _db.batch();
+            studSnap.docs.forEach(function(sd) { batchSP1.update(sd.ref, { managerName: finalName, managerPhone: finalPhone }); });
+            await batchSP1.commit();
           }
         } else {
           // Gestor comum — atualiza no Firestore managers
@@ -12160,10 +12381,12 @@
             var upd = { name: finalName, phone: finalPhone };
             if (pass) { upd.passwordHash = await _sha256(pass); upd.password = null; }
             await _updateDoc(_doc(_db, 'managers', snap.docs[0].id), upd);
-            // Propaga para alunos
-            var studSnap2 = await _getDocs(_query(_col(_db, 'students'), _where('managerId', '==', u.username)));
-            for (var sd2 of studSnap2.docs) {
-              await _updateDoc(_doc(_db, 'students', sd2.id), { managerName: finalName, managerPhone: finalPhone });
+            // #8 — Propaga para alunos via batch (era loop sequencial)
+            var studSnap2 = await _getDocs(_query(_col(_db, 'students'), _where('managerId', '==', u.username), _limit(500)));
+            if (studSnap2.docs.length > 0) {
+              var batchSP2 = _db.batch();
+              studSnap2.docs.forEach(function(sd2) { batchSP2.update(sd2.ref, { managerName: finalName, managerPhone: finalPhone }); });
+              await batchSP2.commit();
             }
           }
         }
@@ -12346,10 +12569,12 @@
           var upd = { name, phone, isMaster };
           if (pass) { upd.passwordHash = await _sha256(pass); upd.password = null; }
           await _updateDoc(_doc(_db, 'managers', editId), upd);
-          // Propagate phone and name update to all students of this manager
-          var studSnap = await _getDocs(_query(_col(_db, 'students'), _where('managerId', '==', username)));
-          for (var sd of studSnap.docs) {
-            await _updateDoc(_doc(_db, 'students', sd.id), { managerPhone: phone, managerName: name || username });
+          // #9 — Propaga para alunos via batch (era loop sequencial)
+          var studSnap = await _getDocs(_query(_col(_db, 'students'), _where('managerId', '==', username), _limit(500)));
+          if (studSnap.docs.length > 0) {
+            var batchSM = _db.batch();
+            studSnap.docs.forEach(function(sd) { batchSM.update(sd.ref, { managerPhone: phone, managerName: name || username }); });
+            await batchSM.commit();
           }
           toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Gestor atualizado!');
         } else {
@@ -12382,7 +12607,7 @@
       if (!g) return;
       g.innerHTML = '<div class="spinner"></div>';
       try {
-        var snap = await _getDocs(_query(_col(_db, 'managers'), _orderBy('createdAt', 'desc')));
+        var snap = await _getDocs(_query(_col(_db, 'managers'), _orderBy('createdAt', 'desc'), _limit(500))); // #10
         var managers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderManagersGrid(managers);
       } catch (e) {
@@ -12472,26 +12697,30 @@
         // Get all students for this manager
         var q;
         if (u.role === 'ceo' || u.isMaster) {
-          q = _query(_col(_db, 'students'), _orderBy('createdAt', 'desc'));
+          q = _query(_col(_db, 'students'), _orderBy('createdAt', 'desc'), _limit(500)); // #10
         } else {
-          q = _query(_col(_db, 'students'), _where('managerId', '==', u.username));
+          q = _query(_col(_db, 'students'), _where('managerId', '==', u.username), _limit(500)); // #10
         }
         var snap = await _getDocs(q);
         var students = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
 
-        // For each student, get latest message and unread count
-        var chatItems = [];
-        for (var s of students) {
-          try {
-            var msgsSnap = await _db.collection('chats').doc(s.id).collection('messages').orderBy('ts', 'desc').limit(1).get();
-            if (!msgsSnap.empty) {
+        // #7 — Paralelo com Promise.all (era loop sequencial N+1 queries)
+        // #11 — catch com console.warn em vez de silenciado
+        var chatItems = (await Promise.all(
+          students.map(async function(s) {
+            try {
+              var msgsSnap = await _db.collection('chats').doc(s.id).collection('messages').orderBy('ts', 'desc').limit(1).get();
+              if (msgsSnap.empty) return null;
               var lastMsg = Object.assign({ id: msgsSnap.docs[0].id }, msgsSnap.docs[0].data());
               var unreadSnap = await _db.collection('chats').doc(s.id).collection('messages')
                 .where('sender', '==', 'student').where('readByManager', '==', false).get();
-              chatItems.push({ student: s, lastMsg: lastMsg, unread: unreadSnap.size });
+              return { student: s, lastMsg: lastMsg, unread: unreadSnap.size };
+            } catch(e) {
+              console.warn('loadChatList: erro ao carregar chat do aluno ' + s.id + ':', e.message);
+              return null;
             }
-          } catch (e) { }
-        }
+          })
+        )).filter(Boolean);
 
         // Sort by latest message timestamp
         chatItems.sort(function (a, b) { return (b.lastMsg.ts || 0) - (a.lastMsg.ts || 0); });
@@ -12606,8 +12835,8 @@
         await _db.collection('chats').doc(window._chatActiveSid).collection('messages').add({
           text: text, sender: 'manager', ts: Date.now(), readByManager: true, readByStudent: false
         });
-        window.loadChatDetailMessages();
-        window.loadChatList();
+        window.loadChatDetailMessages().catch(function(e){ console.warn('loadChatDetailMessages:', e.message); });
+        window.loadChatList().catch(function(e){ console.warn('loadChatList pós-envio:', e.message); });
       } catch (e) { toast('Erro ao enviar: ' + e.message, 'error'); }
     };
 
@@ -12629,7 +12858,7 @@
         }
         toast('Conversa limpa!');
         if (window._chatActiveSid === sid) window.closeChatDetail();
-        window.loadChatList();
+        window.loadChatList().catch(function(e){ console.warn('loadChatList pós-delete:', e.message); }); // #13
       } catch (e) { toast('Erro: ' + e.message, 'error'); }
     };
 
@@ -13271,9 +13500,9 @@
       }
 
       if (!savedToFirestore) {
-        // Avisa o usuário que o acesso está ativo agora mas pode ser perdido
-        console.warn('activateSubscription: sessao local OK mas Firestore nao salvo. Usuario perdera acesso apos logout.');
-        toast('⚠️ Assinatura ativa nesta sessão, mas houve um problema ao salvar. Contate o suporte se o acesso sumir após relogar.');
+        // #12 — Avisa o usuário claramente e orienta próximos passos
+        console.warn('activateSubscription: sessao local OK mas Firestore nao salvo. managerId=', managerId, 'plan=', plan);
+        toast('⚠️ Pagamento recebido, mas houve falha ao salvar. Seu acesso está ativo agora. Se sumir após relogar, entre em contato com o suporte informando: ID ' + String((paymentResult && paymentResult.id) || 'N/A'), 'error');
       }
       return savedToFirestore;
     }
@@ -15886,6 +16115,29 @@
     // LOGOUT
     // ════════════════════════════════════════════════════════
     window.doLogout = async function () {
+      // #5 e #6 — Encerra todos os listeners antes de sair para evitar memory leaks
+      try {
+        if (window._freqUnsubMap) {
+          Object.values(window._freqUnsubMap).forEach(function(fn) { try { fn(); } catch(e){} });
+          window._freqUnsubMap = {};
+        }
+      } catch(e) {}
+      try {
+        if (window._trainingNowUnsub) { window._trainingNowUnsub(); window._trainingNowUnsub = null; }
+        if (window._trainingNowElapsedTimers) {
+          window._trainingNowElapsedTimers.forEach(function(t){ clearInterval(t); });
+          window._trainingNowElapsedTimers = [];
+        }
+      } catch(e) {}
+      try {
+        if (window._chatSnapshotUnsubs) {
+          window._chatSnapshotUnsubs.forEach(function(fn) { try { fn(); } catch(e){} });
+          window._chatSnapshotUnsubs = [];
+        }
+      } catch(e) {}
+      try {
+        if (window._chatPollGestor) { clearInterval(window._chatPollGestor); window._chatPollGestor = null; }
+      } catch(e) {}
       try {
         if (_auth && _auth.currentUser) await _auth.signOut();
       } catch (e) { }
