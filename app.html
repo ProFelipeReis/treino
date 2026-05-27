@@ -11510,7 +11510,7 @@
           <div class="ex-field">
             <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
             <div class="rest-inline">
-              <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
+              <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" onchange="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
               <div class="rest-unit-group">
                 <button type="button" class="rest-unit-btn ${!ex.restUnit || ex.restUnit === 's' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','s')">Seg</button>
                 <button type="button" class="rest-unit-btn ${ex.restUnit === 'min' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','min')">Min</button>
@@ -12258,7 +12258,7 @@
         <div class="ex-field">
           <span class="ex-field-label">Descanso <span style="font-weight:500;color:var(--text3);">(opcional)</span></span>
           <div class="rest-inline">
-            <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" oninput="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
+            <input type="number" min="1" max="999" placeholder="—" value="${ex.restTime || ''}" onchange="updateExInBlock(${bi},${ei},'restTime',this.value ? Number(this.value) : null)" class="rest-time-input" />
             <div class="rest-unit-group">
               <button type="button" class="rest-unit-btn ${!ex.restUnit || ex.restUnit === 's' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','s')">Seg</button>
               <button type="button" class="rest-unit-btn ${ex.restUnit === 'min' ? 'active' : ''}" onclick="updateExInBlock(${bi},${ei},'restUnit','min')">Min</button>
