@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#111110" />
-  <title>Trainly - Painel do Personal</title>
+  <title>Trainly — Painel do Gestor</title>
 
 
 
@@ -2973,13 +2973,13 @@
       padding: 6px 9px !important;
     }
 
-    .rest-panel { display: flex; align-items: center; gap: 8px; }
-    .rest-unit-group { display: inline-flex; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 999px; padding: 3px; gap: 3px; }
-    .rest-unit-btn { appearance: none; border: none; background: transparent; color: var(--text2); font-size: .76rem; font-weight: 800; padding: 6px 11px; border-radius: 999px; transition: all .15s; }
-    .rest-unit-btn:hover { background: var(--surface3); color: var(--text); }
-    .rest-unit-btn.active { background: var(--accent-dim); color: #6a5000; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
-    .rest-time-input { width: 70px; padding: 7px 9px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-size: .82rem; font-family: var(--body); text-align: center; }
+    .rest-inline { display: flex; align-items: center; gap: 8px; }
+    .rest-time-input { width: 72px; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-size: .82rem; font-family: var(--body); text-align: center; }
     .rest-time-input:focus { outline: none; border-color: var(--accent-soft); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .rest-unit-group { display: inline-flex; align-items: center; gap: 6px; }
+    .rest-unit-btn { appearance: none; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text2); border-radius: 10px; padding: 8px 12px; font-size: .78rem; font-weight: 800; line-height: 1; transition: all .15s; min-width: 56px; }
+    .rest-unit-btn:hover { background: var(--surface3); color: var(--text); }
+    .rest-unit-btn.active { background: var(--accent-dim); border-color: var(--accent-soft); color: #6a5000; }
 
     .ex-custom-video-toggle {
       display: inline-flex;
