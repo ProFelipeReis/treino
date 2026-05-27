@@ -5341,11 +5341,11 @@
             <span class="ex-pill">${ex.series} séries</span>
             <span class="ex-pill-sep"></span>
             <span class="ex-pill">${repsDisplay} rep</span>
+            ${ex.restTime ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-rest">${ex.restTime}${ex.restUnit === 'min' ? 'min' : 's'} descanso</span>` : ''}
             ${ex.unilateral ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Unilateral</span>' : ''}
             ${ex.isometria ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Isometria${ex.isometriaSegs ? ' ' + ex.isometriaSegs + 's' : ''}</span>` : ''}
             ${ex.restPause ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Rest-pause</span>' : ''}
             ${ex.dropSet ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Drop-set</span>' : ''}
-            ${ex.restTime ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-rest"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${ex.restTime}${ex.restUnit === 'min' ? 'min' : 's'} descanso</span>` : ''}
             ${ex.biset ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Bi-set</span>' : ''}
           </div>
           ${ex.obs ? '<div class="ex-obs">' + ex.obs + '</div>' : ''}
