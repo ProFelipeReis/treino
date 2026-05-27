@@ -10824,6 +10824,14 @@
     <div class="plan-workouts" id="plan-workouts-${p.id}">
       ${(p.workouts || []).map((w, wi) => `
         <div class="workout-row" style="padding:0;display:flex;align-items:stretch;">
+          <div style="display:flex;flex-direction:column;justify-content:center;gap:2px;padding:0 6px 0 10px;flex-shrink:0;border-right:1px solid var(--border);">
+            <button class="btn btn-ghost btn-sm" style="padding:4px 6px;opacity:${wi === 0 ? '.2' : '.7'};" title="Mover módulo para cima" ${wi === 0 ? 'disabled' : ''} onclick="event.stopPropagation();reorderModule('${p.id}','${sid}',${wi},-1)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-sm" style="padding:4px 6px;opacity:${wi === (p.workouts||[]).length - 1 ? '.2' : '.7'};" title="Mover módulo para baixo" ${wi === (p.workouts||[]).length - 1 ? 'disabled' : ''} onclick="event.stopPropagation();reorderModule('${p.id}','${sid}',${wi},1)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
           <div style="flex:1;padding:10px 14px;cursor:pointer;" onclick="event.stopPropagation();openModuleModal('${p.id}','${sid}',${wi})">
             <div class="workout-row-header">
               <div class="workout-row-tag">T${wi + 1}</div>
@@ -10835,12 +10843,6 @@
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:4px;margin:8px 10px;flex-shrink:0;align-self:center;">
-            <button class="btn btn-ghost btn-sm" style="padding:5px 8px;opacity:${wi === 0 ? '.25' : '1'};" title="Mover módulo para cima" ${wi === 0 ? 'disabled' : ''} onclick="event.stopPropagation();reorderModule('${p.id}','${sid}',${wi},-1)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-            </button>
-            <button class="btn btn-ghost btn-sm" style="padding:5px 8px;opacity:${wi === (p.workouts||[]).length - 1 ? '.25' : '1'};" title="Mover módulo para baixo" ${wi === (p.workouts||[]).length - 1 ? 'disabled' : ''} onclick="event.stopPropagation();reorderModule('${p.id}','${sid}',${wi},1)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
             <button class="btn btn-ghost btn-sm" style="padding:5px 8px;" title="Clonar módulo para outro aluno" onclick="event.stopPropagation();openCloneModuleModal('${p.id}','${sid}',${wi})">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
