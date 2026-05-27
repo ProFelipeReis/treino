@@ -2575,18 +2575,11 @@
 
     .ex-pill-rest {
       background: rgba(46, 125, 82, .08);
-      border-color: rgba(46, 125, 82, .22);
+      border-color: rgba(46, 125, 82, .20);
       color: var(--green);
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 3px 9px 3px 7px;
-      font-weight: 800;
-    }
-
-    .ex-pill-rest svg {
-      flex-shrink: 0;
-      opacity: .85;
+      gap: 4px;
     }
 
     .rest-inline {
@@ -5414,7 +5407,7 @@
             <span class="ex-pill">${ex.series} séries</span>
             <span class="ex-pill-sep"></span>
             <span class="ex-pill">${repsDisplay} rep</span>
-            ${ex.restTime ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-rest"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${ex.restTime}${ex.restUnit === 'min' ? 'min' : 's'} descanso</span>` : ''}
+            ${ex.restTime ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-rest">${ex.restTime}${ex.restUnit === 'min' ? 'min' : 's'} descanso</span>` : ''}
             ${ex.unilateral ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Unilateral</span>' : ''}
             ${ex.isometria ? `<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Isometria${ex.isometriaSegs ? ' ' + ex.isometriaSegs + 's' : ''}</span>` : ''}
             ${ex.restPause ? '<span class="ex-pill-sep"></span><span class="ex-pill ex-pill-accent">Rest-pause</span>' : ''}
