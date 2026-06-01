@@ -3803,10 +3803,7 @@
         justify-content: center;
       }
 
-      #chat-detail-panel {
-        flex: none;
-        height: calc(100dvh - 180px);
-      }
+      /* chat-detail-panel já é fullscreen, sem override mobile */
 
       .notif-panel {
         position: fixed !important;
@@ -4011,23 +4008,23 @@
       flex-shrink: 0;
     }
 
-    /* ── CHAT DETAIL PANEL (gestor) ── */
+    /* ── CHAT DETAIL PANEL (gestor) — FULLSCREEN ── */
     #chat-detail-panel {
       display: none;
       flex-direction: column;
-      /* Ocupa o espaço restante dentro do tab, sem ultrapassar */
-      flex: 1;
-      min-height: 0;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--r2);
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      background: var(--bg);
       overflow: hidden;
-      box-shadow: var(--shadow);
-      margin-top: 16px;
+      /* animação de entrada */
+      transform: translateX(100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
     }
 
     #chat-detail-panel.visible {
       display: flex;
+      transform: translateX(0);
     }
 
     .chat-detail-head {
@@ -4035,9 +4032,136 @@
       align-items: center;
       gap: 12px;
       padding: 14px 18px;
+      padding-top: calc(14px + env(safe-area-inset-top, 0px));
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
       background: var(--surface);
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    }
+
+    /* Botão voltar estilizado */
+    .chat-back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 12px 7px 8px;
+      font-family: var(--body);
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+
+    .chat-back-btn:active {
+      background: var(--surface3);
+      transform: scale(.96);
+    }
+
+    /* ── EMOJI REACTIONS ── */
+    .chat-msg {
+      position: relative;
+    }
+
+    .emoji-reaction-bar {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 40px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 5px 8px;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(.7) translateY(8px);
+      transition: opacity .18s, transform .18s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    .chat-msg.mine .emoji-reaction-bar {
+      right: 0;
+    }
+
+    .chat-msg.theirs .emoji-reaction-bar {
+      left: 0;
+    }
+
+    .emoji-reaction-bar.show {
+      opacity: 1;
+      pointer-events: all;
+      transform: scale(1) translateY(0);
+    }
+
+    .emoji-btn-react {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: transform .12s;
+      line-height: 1;
+    }
+
+    .emoji-btn-react:active,
+    .emoji-btn-react:hover {
+      transform: scale(1.35);
+      background: var(--surface2);
+    }
+
+    /* Badge de reação na bolha */
+    .chat-reaction-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: .75rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 7px;
+      margin-top: 4px;
+      cursor: pointer;
+      transition: all .15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+
+    .chat-reaction-badge:hover {
+      border-color: var(--accent-soft);
+      background: var(--accent-dim);
+    }
+
+    .chat-reaction-badge .rct-emoji {
+      font-size: .9rem;
+      line-height: 1;
+    }
+
+    .chat-reaction-badge .rct-count {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--text2);
+    }
+
+    /* overlay de fundo ao abrir reaction bar */
+    #reaction-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+    }
+
+    #reaction-overlay.on {
+      display: block;
     }
 
     .chat-detail-messages {
@@ -7109,14 +7233,20 @@
           <div id="chat-list-gestor" class="chat-list">
             <div class="spinner"></div>
           </div>
+          <!-- Overlay para fechar emoji picker ao clicar fora -->
+          <div id="reaction-overlay" onclick="closeAllReactionBars()"></div>
+
           <div id="chat-detail-panel">
             <div class="chat-detail-head">
+              <button class="chat-back-btn" onclick="closeChatDetail()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                Voltar
+              </button>
               <div class="chat-list-avatar" id="chat-detail-avatar">?</div>
-              <div style="flex:1;">
+              <div style="flex:1;min-width:0;">
                 <div style="font-weight:800;font-size:.95rem;" id="chat-detail-name">Aluno</div>
                 <div style="font-size:.74rem;color:var(--text3);font-weight:500;" id="chat-detail-code"></div>
               </div>
-              <button class="btn btn-ghost btn-sm" onclick="closeChatDetail()">← Voltar</button>
             </div>
             <div class="chat-detail-messages" id="chat-detail-messages">
               <div class="chat-empty-state">Carregando...</div>
@@ -12863,7 +12993,12 @@
     window.openChatDetail = async function (sid) {
       window._chatActiveSid = sid;
       var panel = document.getElementById('chat-detail-panel');
-      panel.classList.add('visible');
+      // Garante que está no DOM mas invisível antes de animar
+      panel.style.display = 'flex';
+      requestAnimationFrame(function() {
+        panel.classList.add('visible');
+      });
+      document.body.style.overflow = 'hidden';
 
       var student = ST.students.find(function (s) { return s.id === sid; }) || { id: sid, name: sid };
       document.getElementById('chat-detail-name').textContent = student.name || student.code || sid;
@@ -12897,16 +13032,60 @@
           el.innerHTML = '<div class="chat-empty-state">Nenhuma mensagem. Diga olá! 👋</div>';
           return;
         }
+
+        var wasAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+
         var html = msgs.map(function (m) {
           var mine = m.sender === 'manager';
           var time = m.ts ? new Date(m.ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
-          return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '">'
+          // Reactions badge
+          var reactionHtml = '';
+          if (m.reactions && Object.keys(m.reactions).length) {
+            var grouped = {};
+            Object.values(m.reactions).forEach(function(r){ grouped[r] = (grouped[r]||0)+1; });
+            reactionHtml = '<div class="chat-reactions-wrap" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
+              + Object.entries(grouped).map(function(e){
+                  return '<span class="chat-reaction-badge" onclick="toggleReactionGestor(\''+m.id+'\',\''+e[0]+'\')">'
+                    + '<span class="rct-emoji">'+e[0]+'</span>'
+                    + (e[1]>1 ? '<span class="rct-count">'+e[1]+'</span>' : '')
+                    + '</span>';
+                }).join('')
+              + '</div>';
+          }
+          var pickerBar = '<div class="emoji-reaction-bar" id="rbar_'+m.id+'">'
+            + ['😄','😂','😢','😡','❤️','👍'].map(function(e){
+                return '<button class="emoji-btn-react" onclick="event.stopPropagation();toggleReactionGestor(\''+m.id+'\',\''+e+'\')">'+e+'</button>';
+              }).join('')
+            + '</div>';
+          return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="cmsg_'+m.id+'" data-msgid="'+m.id+'">'
+            + pickerBar
             + '<div class="chat-bubble">' + escHtml(m.text) + '</div>'
+            + reactionHtml
             + '<div class="chat-time-label">' + time + '</div>'
             + '</div>';
         }).join('');
         el.innerHTML = html;
-        el.scrollTop = el.scrollHeight;
+
+        // Press & hold para abrir emoji picker
+        el.querySelectorAll('.chat-msg').forEach(function(msgEl) {
+          var msgId = msgEl.dataset.msgid;
+          var pressTimer = null;
+          var startX = 0, startY = 0;
+          function startPress(cx, cy) {
+            startX = cx; startY = cy;
+            pressTimer = setTimeout(function() { showReactionBar(msgId); }, 450);
+          }
+          function cancelPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
+          msgEl.addEventListener('touchstart', function(e) { var t=e.touches[0]; startPress(t.clientX,t.clientY); }, {passive:true});
+          msgEl.addEventListener('touchmove', function(e) { var t=e.touches[0]; if(Math.abs(t.clientX-startX)>8||Math.abs(t.clientY-startY)>8) cancelPress(); }, {passive:true});
+          msgEl.addEventListener('touchend', cancelPress);
+          msgEl.addEventListener('touchcancel', cancelPress);
+          msgEl.addEventListener('mousedown', function(e) { if(e.button!==0) return; startPress(e.clientX,e.clientY); });
+          msgEl.addEventListener('mouseup', cancelPress);
+          msgEl.addEventListener('mouseleave', cancelPress);
+        });
+
+        if (wasAtBottom || el.scrollTop === 0) el.scrollTop = el.scrollHeight;
 
         // Mark messages from student as read by manager
         var hadUnread = false;
@@ -12916,16 +13095,62 @@
             _db.collection('chats').doc(window._chatActiveSid).collection('messages').doc(m.id).update({ readByManager: true }).catch(function () { });
           }
         }
-        // Atualiza badge imediatamente se havia não lidos
         if (hadUnread) window.updateChatBadge();
       } catch (e) { console.warn('loadChatDetailMessages:', e.message); }
+    };
+
+    // ── Reaction helpers ──
+    window._activeReactionMsgId = null;
+
+    window.showReactionBar = function(msgId) {
+      closeAllReactionBars();
+      var bar = document.getElementById('rbar_' + msgId);
+      if (!bar) return;
+      bar.classList.add('show');
+      window._activeReactionMsgId = msgId;
+      var overlay = document.getElementById('reaction-overlay');
+      if (overlay) overlay.classList.add('on');
+      if (navigator.vibrate) navigator.vibrate(30);
+    };
+
+    window.closeAllReactionBars = function() {
+      document.querySelectorAll('.emoji-reaction-bar.show').forEach(function(b){ b.classList.remove('show'); });
+      var overlay = document.getElementById('reaction-overlay');
+      if (overlay) overlay.classList.remove('on');
+      window._activeReactionMsgId = null;
+    };
+
+    window.toggleReactionGestor = async function(msgId, emoji) {
+      closeAllReactionBars();
+      if (!window._chatActiveSid) return;
+      var u = window.CURRENT_USER || {};
+      var reactorId = 'manager_' + (u.username || 'me');
+      try {
+        var ref = _db.collection('chats').doc(window._chatActiveSid).collection('messages').doc(msgId);
+        var snap = await ref.get();
+        var data = snap.data() || {};
+        var reactions = data.reactions || {};
+        if (reactions[reactorId] === emoji) {
+          delete reactions[reactorId];
+        } else {
+          reactions[reactorId] = emoji;
+        }
+        await ref.update({ reactions: reactions });
+        window.loadChatDetailMessages().catch(function(){});
+      } catch(e) { console.warn('toggleReactionGestor:', e.message); }
     };
 
     window.closeChatDetail = function () {
       window._chatActiveSid = null;
       if (window._chatPollGestor) { clearInterval(window._chatPollGestor); window._chatPollGestor = null; }
       var panel = document.getElementById('chat-detail-panel');
-      if (panel) panel.classList.remove('visible');
+      if (panel) {
+        panel.classList.remove('visible');
+        // Após animação de saída, esconde
+        setTimeout(function() { panel.style.display = ''; }, 300);
+      }
+      document.body.style.overflow = '';
+      closeAllReactionBars();
     };
 
     window.sendChatMessageGestor = async function () {
