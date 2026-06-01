@@ -13132,6 +13132,8 @@
       panel.style.display = 'flex';
       requestAnimationFrame(function() {
         panel.classList.add('visible');
+        // Empurra um estado no histórico para o botão voltar do Android interceptar
+        history.pushState({ trainlyChatOpen: true }, '');
       });
       document.body.style.overflow = 'hidden';
 
@@ -13214,8 +13216,8 @@
           return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="cmsg_'+m.id+'" data-msgid="'+m.id+'" data-text="'+escHtml(m.text).replace(/"/g,'&quot;').slice(0,80)+'" data-sender="'+(mine?'manager':'student')+'">'
             + pickerBar
             + '<div class="chat-msg-row">'
-            + replyBtn
             + '<div class="chat-bubble">' + quoteHtml + escHtml(m.text) + '</div>'
+            + replyBtn
             + '</div>'
             + reactionHtml
             + '<div class="chat-time-label">' + time + '</div>'
@@ -13349,19 +13351,32 @@
       }, 120);
     };
 
-    window.closeChatDetail = function () {
+    window.closeChatDetail = function (fromPopstate) {
       window._chatActiveSid = null;
       if (window._chatPollGestor) { clearInterval(window._chatPollGestor); window._chatPollGestor = null; }
       var panel = document.getElementById('chat-detail-panel');
       if (panel) {
         panel.classList.remove('visible');
-        // Após animação de saída, esconde
         setTimeout(function() { panel.style.display = ''; }, 300);
       }
       document.body.style.overflow = '';
       closeAllReactionBars();
       window.cancelReply();
+      // Se foi fechado pelo botão X (não pelo popstate), volta no histórico para limpar o estado
+      if (!fromPopstate) {
+        if (history.state && history.state.trainlyChatOpen) {
+          history.back();
+        }
+      }
     };
+
+    // Intercepta botão voltar do Android/navegador
+    window.addEventListener('popstate', function(e) {
+      var panel = document.getElementById('chat-detail-panel');
+      if (panel && panel.classList.contains('visible')) {
+        window.closeChatDetail(true); // true = veio do popstate, não chamar history.back() de novo
+      }
+    });
 
     window.sendChatMessageGestor = async function () {
       var inp = document.getElementById('chat-gestor-input');
