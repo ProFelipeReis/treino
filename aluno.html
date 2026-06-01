@@ -4727,7 +4727,7 @@
       container.querySelectorAll('.yt-lock-overlay').forEach(el => {
         if (started) {
           const url = el.dataset.yturl || '';
-          const vidId = ytId(url);
+          const vidId = window.ytId ? window.ytId(url) : '';
           if (!vidId) return;
           const thumbUrl = `https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
           const ytUrl = `https://www.youtube.com/watch?v=${vidId}`;
@@ -4826,10 +4826,17 @@
         toast('Erro ao carregar planos, tente novamente.', 'error');
       });
       loadFrequencySection(student);
-      // Init chat — usa managerName como nome de exibição do treinador
-      window.initChat(student.id, student.managerId, student.managerName || student.managerId, db);
-      // Check for pending alert from manager
-      window.checkAndShowAlert(student.id, db, student.managerName || student.managerId);
+      // Init chat — aguarda script não-modular definir initChat
+      (function waitForChat(retries) {
+        if (typeof window.initChat === 'function') {
+          window.initChat(student.id, student.managerId, student.managerName || student.managerId, db);
+          if (typeof window.checkAndShowAlert === 'function') {
+            window.checkAndShowAlert(student.id, db, student.managerName || student.managerId);
+          }
+        } else if (retries > 0) {
+          setTimeout(function() { waitForChat(retries - 1); }, 50);
+        }
+      })(40);
     }
 
     // ── Restore timer on app load ──
@@ -5483,9 +5490,9 @@
 
           // Video: locked or not depending on started state
           let videoHtml = '';
-          if (ex.videoUrl && ytId(ex.videoUrl)) {
+          if (ex.videoUrl && window.ytId && window.ytId(ex.videoUrl)) {
             const vid = ex.videoUrl;
-            const vidId = ytId(vid);
+            const vidId = window.ytId(vid);
             const thumbUrl = `https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
             const ytUrl = `https://www.youtube.com/watch?v=${vidId}`;
             if (alreadyStarted && !upcoming) {
@@ -5866,7 +5873,7 @@
           Object.values(m.reactions).forEach(function(r){ grouped[r] = (grouped[r]||0)+1; });
           reactionHtml = '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
             + Object.entries(grouped).map(function(e){
-                return '<span class="chat-reaction-badge" onclick="toggleReactionAluno(''+m.id+'',''+e[0]+'')">'
+                return '<span class="chat-reaction-badge" onclick="toggleReactionAluno(\''+m.id+'\',\''+e[0]+'\')">'
                   + '<span class="rct-emoji">'+e[0]+'</span>'
                   + (e[1]>1 ? '<span class="rct-count">'+e[1]+'</span>' : '')
                   + '</span>';
@@ -5877,12 +5884,15 @@
         // Emoji picker bar
         var pickerBar = '<div class="emoji-reaction-bar" id="arbar_'+m.id+'">'
           + ['😄','😂','😢','😡','❤️','👍'].map(function(e){
-              return '<button class="emoji-btn-react" onclick="event.stopPropagation();toggleReactionAluno(''+m.id+'',''+e+'')">'+e+'</button>';
+              return '<button class="emoji-btn-react" onclick="event.stopPropagation();toggleReactionAluno(\''+m.id+'\',\''+e+'\')">' + e + '</button>';
             }).join('')
           + '</div>';
 
         // Botão responder
-        var replyBtn = '<button class="chat-reply-btn" title="Responder" onclick="event.stopPropagation();setReplyAluno(''+m.id+'',''+escHtml(m.text).replace(/'/g,'\\'+'\'').slice(0,80)+'',''+(mine?'student':'manager')+'')">'
+        var _replyId = m.id;
+        var _replyText = escHtml(m.text).replace(/'/g, "&#39;").slice(0, 80);
+        var _replyRole = mine ? 'student' : 'manager';
+        var replyBtn = '<button class="chat-reply-btn" title="Responder" onclick="event.stopPropagation();setReplyAluno(\'' + _replyId + '\',\'' + _replyText + '\',\'' + _replyRole + '\')">'
           + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>'
           + '</button>';
 
