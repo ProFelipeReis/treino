@@ -4224,6 +4224,7 @@
       border-top: 1px solid var(--border);
       flex-shrink: 0;
       background: var(--surface);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     .chat-gestor-input {
@@ -7379,8 +7380,10 @@
                 Voltar
               </button>
               <div class="chat-list-avatar" id="chat-detail-avatar">?</div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-weight:800;font-size:.95rem;" id="chat-detail-name">Aluno</div>
+              <div style="flex:1;min-width:0;cursor:pointer;" onclick="goToStudentFromChat()">
+                <div style="font-weight:800;font-size:.95rem;display:flex;align-items:center;gap:5px;" id="chat-detail-name">Aluno
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
                 <div style="font-size:.74rem;color:var(--text3);font-weight:500;" id="chat-detail-code"></div>
               </div>
             </div>
@@ -13345,6 +13348,18 @@
       window._replyTo = null;
       var preview = document.getElementById('reply-preview');
       if (preview) preview.classList.remove('on');
+    };
+
+    window.goToStudentFromChat = function() {
+      var sid = window._chatActiveSid;
+      if (!sid) return;
+      window.closeChatDetail();
+      // Navega para aba de alunos e abre o detalhe do aluno
+      var alunosTab = document.querySelector('[data-tab="tab-alunos"]');
+      if (alunosTab) alunosTab.click();
+      setTimeout(function() {
+        if (typeof window.openStudentDetail === 'function') window.openStudentDetail(sid);
+      }, 120);
     };
 
     window.closeChatDetail = function () {
