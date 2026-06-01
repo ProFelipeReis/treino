@@ -3173,19 +3173,17 @@
     #reaction-overlay-aluno.on { display: block; }
 
     /* ── REPLY / RESPONDER (aluno) ── */
-    .chat-msg-row { display: flex; align-items: flex-end; gap: 6px; }
+    .chat-msg-row { display: flex; align-items: center; gap: 6px; }
     .chat-msg.mine .chat-msg-row { flex-direction: row-reverse; }
     .chat-reply-btn {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: var(--surface2); border: 1.5px solid var(--border);
+      width: 24px; height: 24px; border-radius: 50%;
+      background: none; border: none;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; opacity: 0;
-      transition: opacity .15s, background .15s, transform .15s;
-      flex-shrink: 0; color: var(--text3);
+      cursor: pointer; opacity: 1;
+      transition: transform .15s, opacity .15s;
+      flex-shrink: 0; color: var(--text3); padding: 0;
     }
-    .chat-msg:hover .chat-reply-btn { opacity: 1; }
-    @media (hover: none) { .chat-reply-btn { opacity: 1; } }
-    .chat-reply-btn:active { background: var(--accent-dim); border-color: var(--accent-soft); transform: scale(.9); }
+    .chat-reply-btn:active { transform: scale(.85); color: var(--accent2); }
     .chat-quote {
       border-left: 3px solid var(--accent);
       background: rgba(0,0,0,.07); border-radius: 6px 6px 0 0;
@@ -5899,8 +5897,8 @@
         return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="acmsg_'+m.id+'" data-msgid="'+m.id+'">'
           + pickerBar
           + '<div class="chat-msg-row">'
-          + replyBtn
           + '<div class="chat-bubble">' + quoteHtml + escHtml(m.text) + '</div>'
+          + replyBtn
           + '</div>'
           + reactionHtml
           + '<div class="chat-time">' + time + '</div>'
