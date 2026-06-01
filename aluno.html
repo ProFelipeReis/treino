@@ -3123,13 +3123,110 @@
       font-weight: 600;
     }
 
+
+    /* ── EMOJI REACTIONS (aluno) ── */
+    .chat-msg { position: relative; }
+
+    .emoji-reaction-bar {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 40px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 5px 8px;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(.7) translateY(8px);
+      transition: opacity .18s, transform .18s cubic-bezier(.34,1.56,.64,1);
+    }
+    .chat-msg.mine .emoji-reaction-bar { right: 0; }
+    .chat-msg.theirs .emoji-reaction-bar { left: 0; }
+    .emoji-reaction-bar.show {
+      opacity: 1; pointer-events: all;
+      transform: scale(1) translateY(0);
+    }
+    .emoji-btn-react {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; background: none; border: none;
+      cursor: pointer; transition: transform .12s; line-height: 1;
+    }
+    .emoji-btn-react:active, .emoji-btn-react:hover {
+      transform: scale(1.35); background: var(--surface2);
+    }
+    .chat-reaction-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: .75rem; background: var(--surface);
+      border: 1.5px solid var(--border); border-radius: 20px;
+      padding: 2px 7px; margin-top: 4px; cursor: pointer;
+      transition: all .15s; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .chat-reaction-badge:hover { border-color: var(--accent-soft); background: var(--accent-dim); }
+    .chat-reaction-badge .rct-emoji { font-size: .9rem; line-height: 1; }
+    .chat-reaction-badge .rct-count { font-size: .7rem; font-weight: 700; color: var(--text2); }
+    #reaction-overlay-aluno { display: none; position: fixed; inset: 0; z-index: 99; }
+    #reaction-overlay-aluno.on { display: block; }
+
+    /* ── REPLY / RESPONDER (aluno) ── */
+    .chat-msg-row { display: flex; align-items: flex-end; gap: 6px; }
+    .chat-msg.mine .chat-msg-row { flex-direction: row-reverse; }
+    .chat-reply-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; opacity: 0;
+      transition: opacity .15s, background .15s, transform .15s;
+      flex-shrink: 0; color: var(--text3);
+    }
+    .chat-msg:hover .chat-reply-btn { opacity: 1; }
+    @media (hover: none) { .chat-reply-btn { opacity: 1; } }
+    .chat-reply-btn:active { background: var(--accent-dim); border-color: var(--accent-soft); transform: scale(.9); }
+    .chat-quote {
+      border-left: 3px solid var(--accent);
+      background: rgba(0,0,0,.07); border-radius: 6px 6px 0 0;
+      padding: 5px 9px; margin-bottom: 4px;
+      font-size: .74rem; line-height: 1.35;
+      color: rgba(255,255,255,.65); max-width: 100%; overflow: hidden;
+    }
+    .chat-msg.theirs .chat-quote { background: var(--surface2); color: var(--text3); }
+    .chat-quote-author { font-weight: 800; font-size: .7rem; margin-bottom: 2px; color: var(--accent); }
+    .chat-quote-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #reply-preview-aluno {
+      display: none; align-items: center; gap: 8px;
+      padding: 8px 14px 0; background: var(--surface);
+    }
+    #reply-preview-aluno.on { display: flex; }
+    .reply-preview-bar {
+      flex: 1; border-left: 3px solid var(--accent);
+      padding: 4px 10px; border-radius: 4px;
+      background: var(--surface2); min-width: 0;
+    }
+    .reply-preview-author { font-size: .7rem; font-weight: 800; color: var(--accent2); margin-bottom: 1px; }
+    .reply-preview-text { font-size: .78rem; color: var(--text2); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .reply-cancel-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--surface3); border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text3); flex-shrink: 0;
+      font-size: 1rem; line-height: 1; transition: background .15s;
+    }
+    .reply-cancel-btn:active { background: var(--border2); }
+    .chat-input-row {
+      display: flex; align-items: flex-end; gap: 8px;
+      padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    }
+
     .chat-input-wrap {
       display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+      flex-direction: column;
       border-top: 1px solid var(--border);
       flex-shrink: 0;
+      background: var(--surface);
     }
 
     #chat-input-aluno {
@@ -3491,6 +3588,9 @@
   </button>
 
   <!-- CHAT DRAWER (aluno) -->
+  <!-- Overlay reação emoji -->
+  <div id="reaction-overlay-aluno" onclick="closeAllReactionBarsAluno()"></div>
+
   <div id="chat-drawer">
     <div class="chat-drawer-head">
       <div class="chat-avatar" id="chat-trainer-avatar">TR</div>
@@ -3504,15 +3604,24 @@
       <div class="chat-empty">Nenhuma mensagem ainda.<br>Mande um olá!</div>
     </div>
     <div class="chat-input-wrap">
-      <textarea id="chat-input-aluno" placeholder="Mensagem..." rows="1" onkeydown="chatAlunoKeydown(event)"
-        oninput="autoResizeChatInput(this)"></textarea>
-      <button id="chat-send-btn" onclick="sendChatMessageAluno()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13" />
-          <polygon points="22 2 15 22 11 13 2 9 22 2" />
-        </svg>
-      </button>
+      <div id="reply-preview-aluno">
+        <div class="reply-preview-bar">
+          <div class="reply-preview-author" id="reply-preview-aluno-author"></div>
+          <div class="reply-preview-text" id="reply-preview-aluno-text"></div>
+        </div>
+        <button class="reply-cancel-btn" onclick="cancelReplyAluno()" title="Cancelar resposta">✕</button>
+      </div>
+      <div class="chat-input-row">
+        <textarea id="chat-input-aluno" placeholder="Mensagem..." rows="1" onkeydown="chatAlunoKeydown(event)"
+          oninput="autoResizeChatInput(this)"></textarea>
+        <button id="chat-send-btn" onclick="sendChatMessageAluno()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -5733,15 +5842,150 @@
         el.innerHTML = '<div class="chat-empty">Nenhuma mensagem ainda.<br>Mande um olá!</div>';
         return;
       }
+      var wasAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+
       el.innerHTML = msgs.map(function (m) {
         var mine = m.sender === 'student';
         var time = m.ts ? new Date(m.ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
-        return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '">'
-          + '<div class="chat-bubble">' + escHtml(m.text) + '</div>'
+
+        // Quote (resposta)
+        var quoteHtml = '';
+        if (m.replyTo) {
+          var trainerName = document.getElementById('chat-trainer-name').textContent || 'Treinador';
+          var qAuthor = m.replyTo.sender === 'student' ? 'Você' : trainerName;
+          quoteHtml = '<div class="chat-quote">'
+            + '<div class="chat-quote-author">' + escHtml(qAuthor) + '</div>'
+            + '<div class="chat-quote-text">' + escHtml((m.replyTo.text || '').slice(0, 80)) + '</div>'
+            + '</div>';
+        }
+
+        // Reactions badge
+        var reactionHtml = '';
+        if (m.reactions && Object.keys(m.reactions).length) {
+          var grouped = {};
+          Object.values(m.reactions).forEach(function(r){ grouped[r] = (grouped[r]||0)+1; });
+          reactionHtml = '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
+            + Object.entries(grouped).map(function(e){
+                return '<span class="chat-reaction-badge" onclick="toggleReactionAluno(''+m.id+'',''+e[0]+'')">'
+                  + '<span class="rct-emoji">'+e[0]+'</span>'
+                  + (e[1]>1 ? '<span class="rct-count">'+e[1]+'</span>' : '')
+                  + '</span>';
+              }).join('')
+            + '</div>';
+        }
+
+        // Emoji picker bar
+        var pickerBar = '<div class="emoji-reaction-bar" id="arbar_'+m.id+'">'
+          + ['😄','😂','😢','😡','❤️','👍'].map(function(e){
+              return '<button class="emoji-btn-react" onclick="event.stopPropagation();toggleReactionAluno(''+m.id+'',''+e+'')">'+e+'</button>';
+            }).join('')
+          + '</div>';
+
+        // Botão responder
+        var replyBtn = '<button class="chat-reply-btn" title="Responder" onclick="event.stopPropagation();setReplyAluno(''+m.id+'',''+escHtml(m.text).replace(/'/g,'\\'+'\'').slice(0,80)+'',''+(mine?'student':'manager')+'')">'
+          + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>'
+          + '</button>';
+
+        return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="acmsg_'+m.id+'" data-msgid="'+m.id+'">'
+          + pickerBar
+          + '<div class="chat-msg-row">'
+          + replyBtn
+          + '<div class="chat-bubble">' + quoteHtml + escHtml(m.text) + '</div>'
+          + '</div>'
+          + reactionHtml
           + '<div class="chat-time">' + time + '</div>'
           + '</div>';
       }).join('');
-      if (window._chatDrawerOpen) scrollChatBottom();
+
+      // Press & hold para emoji picker
+      el.querySelectorAll('.chat-msg').forEach(function(msgEl) {
+        var msgId = msgEl.dataset.msgid;
+        var pressTimer = null, startX = 0, startY = 0;
+        function startPress(cx, cy) {
+          startX = cx; startY = cy;
+          pressTimer = setTimeout(function() { showReactionBarAluno(msgId); }, 450);
+        }
+        function cancelPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
+        msgEl.addEventListener('touchstart', function(e){ var t=e.touches[0]; startPress(t.clientX,t.clientY); }, {passive:true});
+        msgEl.addEventListener('touchmove', function(e){ var t=e.touches[0]; if(Math.abs(t.clientX-startX)>8||Math.abs(t.clientY-startY)>8) cancelPress(); }, {passive:true});
+        msgEl.addEventListener('touchend', cancelPress);
+        msgEl.addEventListener('touchcancel', cancelPress);
+        msgEl.addEventListener('mousedown', function(e){ if(e.button!==0)return; startPress(e.clientX,e.clientY); });
+        msgEl.addEventListener('mouseup', cancelPress);
+        msgEl.addEventListener('mouseleave', cancelPress);
+      });
+
+      if (window._chatDrawerOpen && wasAtBottom) scrollChatBottom();
+      else if (window._chatDrawerOpen && el.scrollTop === 0) scrollChatBottom();
+    };
+
+    // ── Reaction helpers (aluno) ──
+    window.showReactionBarAluno = function(msgId) {
+      closeAllReactionBarsAluno();
+      var bar = document.getElementById('arbar_' + msgId);
+      if (!bar) return;
+      // Detecta posição: abre abaixo se perto do topo
+      var msgEl = document.getElementById('acmsg_' + msgId);
+      if (msgEl) {
+        var rect = msgEl.getBoundingClientRect();
+        if (rect.top < 80) {
+          bar.style.bottom = 'auto';
+          bar.style.top = 'calc(100% + 6px)';
+        } else {
+          bar.style.top = '';
+          bar.style.bottom = 'calc(100% + 6px)';
+        }
+      }
+      bar.classList.add('show');
+      var overlay = document.getElementById('reaction-overlay-aluno');
+      if (overlay) overlay.classList.add('on');
+      if (navigator.vibrate) navigator.vibrate(30);
+    };
+
+    window.closeAllReactionBarsAluno = function() {
+      document.querySelectorAll('.emoji-reaction-bar.show').forEach(function(b){ b.classList.remove('show'); });
+      var overlay = document.getElementById('reaction-overlay-aluno');
+      if (overlay) overlay.classList.remove('on');
+    };
+
+    window.toggleReactionAluno = async function(msgId, emoji) {
+      closeAllReactionBarsAluno();
+      var db = window._chatDb;
+      var sid = window._chatStudentId;
+      if (!db || !sid) return;
+      var reactorId = 'student_' + (sid || 'me');
+      try {
+        var ref = window._fsDoc(db, 'chats', sid, 'messages', msgId);
+        var snap = await window._fsGetDoc(ref);
+        var data = snap.data() || {};
+        var reactions = data.reactions || {};
+        if (reactions[reactorId] === emoji) {
+          delete reactions[reactorId];
+        } else {
+          reactions[reactorId] = emoji;
+        }
+        await window._fsUpdateDoc(ref, { reactions: reactions });
+        window.pollChatAluno();
+      } catch(e) { console.warn('toggleReactionAluno:', e); }
+    };
+
+    // ── Reply helpers (aluno) ──
+    window._replyToAluno = null;
+
+    window.setReplyAluno = function(msgId, text, sender) {
+      window._replyToAluno = { msgId: msgId, text: text, sender: sender };
+      var trainerName = document.getElementById('chat-trainer-name').textContent || 'Treinador';
+      var authorLabel = sender === 'student' ? 'Você' : trainerName;
+      document.getElementById('reply-preview-aluno-author').textContent = authorLabel;
+      document.getElementById('reply-preview-aluno-text').textContent = text;
+      document.getElementById('reply-preview-aluno').classList.add('on');
+      var inp = document.getElementById('chat-input-aluno');
+      if (inp) inp.focus();
+    };
+
+    window.cancelReplyAluno = function() {
+      window._replyToAluno = null;
+      document.getElementById('reply-preview-aluno').classList.remove('on');
     };
 
     window.sendChatMessageAluno = async function () {
@@ -5751,11 +5995,14 @@
       var text = (inp.value || '').trim();
       if (!text || !sid || !db || !window._fsAddDoc || !window._fsColl) return;
       inp.value = ''; inp.style.height = '';
+      var msgData = { text: text, sender: 'student', ts: Date.now(), readByManager: false, readByStudent: true };
+      if (window._replyToAluno) {
+        msgData.replyTo = { msgId: window._replyToAluno.msgId, text: window._replyToAluno.text, sender: window._replyToAluno.sender };
+        window.cancelReplyAluno();
+      }
       try {
         var msgsCol = window._fsColl(db, 'chats', sid, 'messages');
-        await window._fsAddDoc(msgsCol, {
-          text: text, sender: 'student', ts: Date.now(), readByManager: false, readByStudent: true
-        });
+        await window._fsAddDoc(msgsCol, msgData);
         window.pollChatAluno();
       } catch (e) {
         console.error('sendChatMessageAluno:', e);
