@@ -8801,7 +8801,7 @@
         <button class="btn btn-ghost" onclick="closeModal('modal-auto-plan')">Cancelar</button>
         <button id="btn-generate-plan" class="btn btn-primary" onclick="generateAutoPlan()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          Gerar plano com IA
+          Gerar plano
         </button>
       </div>
     </div>
@@ -11465,6 +11465,695 @@
       document.getElementById('auto-qty-display').textContent = window._autoQty;
     };
 
+    // ═══════════════════════════════════════════════════════════════
+    // BANCO DE EXERCÍCIOS — presets locais por grupo muscular,
+    // nível e gênero. Cada exercício: { name, sets, reps, obs }
+    // ═══════════════════════════════════════════════════════════════
+    const EXERCISE_DB = {
+      // ── PEITO ────────────────────────────────────────────────────
+      chest: {
+        M: {
+          beginner: [
+            { name: 'Supino reto com barra', sets: '3', reps: '10-12', obs: 'Desça a barra até tocar o peito' },
+            { name: 'Supino inclinado com halteres', sets: '3', reps: '10-12', obs: 'Mantenha os cotovelos a 45°' },
+            { name: 'Crucifixo na máquina (peck deck)', sets: '3', reps: '12-15', obs: 'Controle a descida' },
+            { name: 'Crossover no cabo (baixo para cima)', sets: '3', reps: '12-15', obs: 'Foque na contração no centro' },
+            { name: 'Flexão de braços', sets: '3', reps: '15-20', obs: 'Corpo reto, desça até o peito quase tocar' },
+            { name: 'Supino declinado com halteres', sets: '3', reps: '10-12', obs: 'Foco na parte inferior do peito' },
+          ],
+          intermediate: [
+            { name: 'Supino reto com barra', sets: '4', reps: '8-10', obs: 'Use carga progressiva' },
+            { name: 'Supino inclinado com barra', sets: '4', reps: '8-10', obs: 'Escápulas retraídas e deprimidas' },
+            { name: 'Crucifixo com halteres', sets: '3', reps: '12-15', obs: 'Leve flexão no cotovelo' },
+            { name: 'Crossover no cabo (alto para baixo)', sets: '3', reps: '12-15', obs: 'Espreme no centro por 1s' },
+            { name: 'Supino declinado com barra', sets: '3', reps: '10-12', obs: 'Agarre mais fechado para tricep' },
+            { name: 'Mergulho em paralelas (peito)', sets: '3', reps: '8-12', obs: 'Incline o tronco para frente' },
+            { name: 'Flexão diamante', sets: '3', reps: '12-15', obs: 'Mãos em triângulo no chão' },
+            { name: 'Peck deck', sets: '3', reps: '15', obs: 'Finalizador de peito' },
+          ],
+          advanced: [
+            { name: 'Supino reto com barra (pesado)', sets: '5', reps: '5-6', obs: 'Esquema 5x5, foco em força' },
+            { name: 'Supino inclinado com barra', sets: '4', reps: '6-8', obs: 'Carga alta com segurança' },
+            { name: 'Crucifixo inclinado com halteres', sets: '4', reps: '10-12', obs: 'Alongamento máximo' },
+            { name: 'Crossover alto para baixo', sets: '4', reps: '12-15', obs: 'Pausa de 2s na contração' },
+            { name: 'Mergulho em paralelas lastrado', sets: '4', reps: '8-10', obs: 'Adicione carga extra' },
+            { name: 'Supino com halteres (amplitude total)', sets: '3', reps: '10-12', obs: 'Amplitude máxima segura' },
+            { name: 'Pullover com halter', sets: '3', reps: '12-15', obs: 'Expande a caixa torácica' },
+            { name: 'Flexão com pés elevados', sets: '3', reps: '15-20', obs: 'Ativa mais a parte superior' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Supino inclinado com halteres', sets: '3', reps: '12-15', obs: 'Foco no peitoral superior' },
+            { name: 'Crucifixo na máquina (peck deck)', sets: '3', reps: '12-15', obs: 'Amplitude controlada' },
+            { name: 'Crossover no cabo (alto para baixo)', sets: '3', reps: '15', obs: 'Espreme no final' },
+            { name: 'Flexão de braços (joelhos)', sets: '3', reps: '12-15', obs: 'Progressão para flexão completa' },
+            { name: 'Supino reto com halteres leve', sets: '3', reps: '12-15', obs: 'Controle a descida' },
+          ],
+          intermediate: [
+            { name: 'Supino inclinado com barra', sets: '4', reps: '10-12', obs: 'Levantamento do peitoral' },
+            { name: 'Crucifixo inclinado com halteres', sets: '3', reps: '12-15', obs: 'Alongamento controlado' },
+            { name: 'Crossover baixo para cima', sets: '3', reps: '15', obs: 'Foco contração medial' },
+            { name: 'Peck deck', sets: '3', reps: '15', obs: 'Finalizador de peito' },
+            { name: 'Flexão de braços completa', sets: '3', reps: '10-15', obs: 'Corpo alinhado' },
+            { name: 'Supino reto com halteres', sets: '3', reps: '12', obs: 'Carga moderada' },
+          ],
+          advanced: [
+            { name: 'Supino inclinado com barra (pesado)', sets: '4', reps: '8-10', obs: 'Carga progressiva' },
+            { name: 'Supino reto com halteres', sets: '4', reps: '10-12', obs: 'Amplitude total' },
+            { name: 'Crucifixo com halteres', sets: '4', reps: '12-15', obs: 'Pausa no alongamento' },
+            { name: 'Crossover duplo', sets: '3', reps: '15', obs: 'Ambos os ângulos' },
+            { name: 'Mergulho em paralelas (assistido)', sets: '3', reps: '10-12', obs: 'Use apoio se precisar' },
+            { name: 'Flexão explosiva', sets: '3', reps: '8-10', obs: 'Fase concêntrica rápida' },
+          ],
+        },
+      },
+
+      // ── COSTAS ───────────────────────────────────────────────────
+      back: {
+        M: {
+          beginner: [
+            { name: 'Puxada frontal na polia', sets: '3', reps: '10-12', obs: 'Puxe até o queixo, não force' },
+            { name: 'Remada baixa na polia', sets: '3', reps: '10-12', obs: 'Peito no apoio, cotovelos atrás' },
+            { name: 'Remada unilateral com halter', sets: '3', reps: '12', obs: 'Apoie o joelho no banco' },
+            { name: 'Puxada na máquina', sets: '3', reps: '12-15', obs: 'Foco em retrair escápulas' },
+            { name: 'Remada curvada com barra', sets: '3', reps: '10-12', obs: 'Tronco a 45°, barra no umbigo' },
+          ],
+          intermediate: [
+            { name: 'Barra fixa (pronado)', sets: '4', reps: '6-10', obs: 'Amplitude total de movimento' },
+            { name: 'Remada curvada com barra', sets: '4', reps: '8-10', obs: 'Carga moderada-alta' },
+            { name: 'Puxada frontal na polia', sets: '3', reps: '10-12', obs: 'Variação de pegada' },
+            { name: 'Remada unilateral com halter', sets: '3', reps: '10-12', obs: 'Carga crescente' },
+            { name: 'Serrote com halter', sets: '3', reps: '12', obs: 'Rotação de tronco controlada' },
+            { name: 'Pulldown reto no cabo', sets: '3', reps: '12-15', obs: 'Ativa o latíssimo' },
+            { name: 'Remada na máquina', sets: '3', reps: '12-15', obs: 'Finalizador' },
+          ],
+          advanced: [
+            { name: 'Barra fixa lastrada', sets: '4', reps: '6-8', obs: 'Adicione carga extra' },
+            { name: 'Remada curvada com barra (pesado)', sets: '4', reps: '6-8', obs: 'Esquema força' },
+            { name: 'Levantamento terra', sets: '4', reps: '5', obs: 'Postura rígida, coluna neutra' },
+            { name: 'Remada Pendlay', sets: '4', reps: '6-8', obs: 'Barra parte do chão a cada rep' },
+            { name: 'Puxada supinado estreito', sets: '3', reps: '10-12', obs: 'Foco no bíceps e lat' },
+            { name: 'Pullover na polia', sets: '3', reps: '12-15', obs: 'Braços estendidos' },
+            { name: 'Serrote pesado', sets: '3', reps: '10', obs: 'Carga alta, amplitude completa' },
+            { name: 'Remada cavalinho', sets: '3', reps: '10-12', obs: 'Trapézio médio e inferior' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Puxada frontal na polia', sets: '3', reps: '12-15', obs: 'Postura ereta, puxe até o queixo' },
+            { name: 'Remada baixa na polia', sets: '3', reps: '12-15', obs: 'Cotovelos próximos ao corpo' },
+            { name: 'Remada unilateral com halter', sets: '3', reps: '12', obs: 'Apoio no banco' },
+            { name: 'Puxada na máquina', sets: '3', reps: '15', obs: 'Leve e controlado' },
+            { name: 'Extensão de coluna (hiperextensão)', sets: '3', reps: '15', obs: 'Sem hiperextender' },
+          ],
+          intermediate: [
+            { name: 'Puxada frontal na polia (pegada neutra)', sets: '4', reps: '10-12', obs: 'Cotovelos para baixo' },
+            { name: 'Remada curvada com barra leve', sets: '3', reps: '12', obs: 'Técnica perfeita' },
+            { name: 'Remada unilateral com halter', sets: '3', reps: '12', obs: 'Amplitude total' },
+            { name: 'Puxada supinada estreita', sets: '3', reps: '12-15', obs: 'Bíceps auxiliam' },
+            { name: 'Remada na máquina', sets: '3', reps: '15', obs: 'Escápulas retrai' },
+            { name: 'Hiperextensão', sets: '3', reps: '15', obs: 'Paravertebral' },
+          ],
+          advanced: [
+            { name: 'Barra fixa (assistida ou completa)', sets: '4', reps: '6-10', obs: 'Progressão constante' },
+            { name: 'Remada curvada com barra', sets: '4', reps: '10-12', obs: 'Carga moderada-alta' },
+            { name: 'Levantamento terra romeno', sets: '4', reps: '10-12', obs: 'Glúteos e coluna' },
+            { name: 'Puxada frontal com triângulo', sets: '3', reps: '12', obs: 'Pegada neutra' },
+            { name: 'Serrote com halter', sets: '3', reps: '12', obs: 'Rotação controlada' },
+            { name: 'Pulldown reto no cabo', sets: '3', reps: '15', obs: 'Finaliza o latíssimo' },
+          ],
+        },
+      },
+
+      // ── OMBROS ───────────────────────────────────────────────────
+      shoulders: {
+        M: {
+          beginner: [
+            { name: 'Desenvolvimento com halteres', sets: '3', reps: '10-12', obs: 'Não trave os cotovelos no topo' },
+            { name: 'Elevação lateral com halteres', sets: '3', reps: '12-15', obs: 'Cotovelos levemente flexionados' },
+            { name: 'Elevação frontal com halter', sets: '3', reps: '12', obs: 'Alternado, até a altura dos ombros' },
+            { name: 'Desenvolvimento na máquina', sets: '3', reps: '12-15', obs: 'Ajuste o encosto' },
+            { name: 'Crucifixo invertido (peck deck invertido)', sets: '3', reps: '15', obs: 'Deltóide posterior' },
+          ],
+          intermediate: [
+            { name: 'Desenvolvimento com barra (militar)', sets: '4', reps: '8-10', obs: 'Em pé ou sentado' },
+            { name: 'Elevação lateral com halteres', sets: '4', reps: '12-15', obs: 'Série descendente no último' },
+            { name: 'Desenvolvimento Arnold', sets: '3', reps: '10-12', obs: 'Rotação completa do ombro' },
+            { name: 'Elevação frontal com barra', sets: '3', reps: '10-12', obs: 'Pegada pronada' },
+            { name: 'Crucifixo invertido com halteres', sets: '3', reps: '15', obs: 'Deltóide posterior' },
+            { name: 'Encolhimento com halteres', sets: '3', reps: '12-15', obs: 'Trapézio superior' },
+          ],
+          advanced: [
+            { name: 'Desenvolvimento militar com barra (pesado)', sets: '4', reps: '6-8', obs: 'Em pé, core firme' },
+            { name: 'Elevação lateral no cabo', sets: '4', reps: '15', obs: 'Tensão constante' },
+            { name: 'Desenvolvimento Arnold pesado', sets: '4', reps: '8-10', obs: 'Carga moderada-alta' },
+            { name: 'Upright row com barra', sets: '3', reps: '10-12', obs: 'Puxe até o queixo' },
+            { name: 'Crucifixo invertido com halteres pesado', sets: '4', reps: '12-15', obs: 'Pause 1s no topo' },
+            { name: 'Face pull no cabo', sets: '3', reps: '15', obs: 'Rotação externa do ombro' },
+            { name: 'Elevação lateral drop-set', sets: '3', reps: '12+8+8', obs: '3 pesos diferentes seguidos' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Desenvolvimento com halteres', sets: '3', reps: '12-15', obs: 'Peso leve, técnica perfeita' },
+            { name: 'Elevação lateral com halteres', sets: '3', reps: '15', obs: 'Cotovelos semi-flexionados' },
+            { name: 'Elevação frontal alternada', sets: '3', reps: '12', obs: 'Controle na descida' },
+            { name: 'Crucifixo invertido na máquina', sets: '3', reps: '15', obs: 'Deltóide posterior' },
+          ],
+          intermediate: [
+            { name: 'Desenvolvimento com halteres', sets: '4', reps: '12', obs: 'Progressão de carga' },
+            { name: 'Elevação lateral com halteres', sets: '4', reps: '15', obs: 'Série descendente' },
+            { name: 'Face pull no cabo', sets: '3', reps: '15', obs: 'Ombros saudáveis' },
+            { name: 'Crucifixo invertido com halteres', sets: '3', reps: '15', obs: 'Postura inclinada' },
+            { name: 'Desenvolvimento Arnold', sets: '3', reps: '12', obs: 'Rotação completa' },
+          ],
+          advanced: [
+            { name: 'Desenvolvimento militar com halteres', sets: '4', reps: '10-12', obs: 'Carga alta' },
+            { name: 'Elevação lateral no cabo', sets: '4', reps: '15', obs: 'Tensão constante' },
+            { name: 'Face pull com corda', sets: '3', reps: '15', obs: 'Rotação externa' },
+            { name: 'Crucifixo invertido pesado', sets: '4', reps: '12', obs: 'Pause no topo' },
+            { name: 'Elevação frontal com barra', sets: '3', reps: '12', obs: 'Pegada pronada' },
+            { name: 'Upright row com halteres', sets: '3', reps: '12', obs: 'Amplitude moderada' },
+          ],
+        },
+      },
+
+      // ── BÍCEPS ───────────────────────────────────────────────────
+      biceps: {
+        M: {
+          beginner: [
+            { name: 'Rosca direta com barra', sets: '3', reps: '10-12', obs: 'Cotovelos fixos no corpo' },
+            { name: 'Rosca alternada com halteres', sets: '3', reps: '12', obs: 'Supine no topo' },
+            { name: 'Rosca martelo', sets: '3', reps: '12', obs: 'Polegar aponta para cima' },
+            { name: 'Rosca concentrada', sets: '3', reps: '12', obs: 'Cotovelo no joelho' },
+          ],
+          intermediate: [
+            { name: 'Rosca direta com barra (pesado)', sets: '4', reps: '8-10', obs: 'Carga progressiva' },
+            { name: 'Rosca alternada com halteres', sets: '3', reps: '10-12', obs: 'Supine completamente' },
+            { name: 'Rosca scott com barra EZ', sets: '3', reps: '10-12', obs: 'Bíceps isolado' },
+            { name: 'Rosca martelo no cabo', sets: '3', reps: '12', obs: 'Tensão constante' },
+            { name: 'Rosca concentrada', sets: '3', reps: '12', obs: 'Contração máxima' },
+          ],
+          advanced: [
+            { name: 'Rosca direta com barra (pesado)', sets: '4', reps: '6-8', obs: 'Força máxima' },
+            { name: 'Rosca scott com barra EZ', sets: '4', reps: '8-10', obs: 'Isola o bíceps' },
+            { name: 'Rosca inclinada com halteres', sets: '3', reps: '10-12', obs: 'Alongamento máximo' },
+            { name: 'Rosca 21s com barra', sets: '3', reps: '21', obs: '7+7+7 amplitude parcial/total' },
+            { name: 'Rosca araignée (aranha)', sets: '3', reps: '10-12', obs: 'No banco inclinado' },
+            { name: 'Rosca no cabo baixo', sets: '3', reps: '15', obs: 'Tensão no alongamento' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Rosca alternada com halteres', sets: '3', reps: '12-15', obs: 'Peso leve e controlado' },
+            { name: 'Rosca direta com barra EZ', sets: '3', reps: '12', obs: 'Punhos confortáveis' },
+            { name: 'Rosca martelo', sets: '3', reps: '12', obs: 'Antebraço ativo' },
+          ],
+          intermediate: [
+            { name: 'Rosca alternada com halteres', sets: '4', reps: '12', obs: 'Supine no topo' },
+            { name: 'Rosca direta com barra', sets: '3', reps: '12', obs: 'Carga progressiva' },
+            { name: 'Rosca scott com barra EZ', sets: '3', reps: '12', obs: 'Bíceps isolado' },
+            { name: 'Rosca martelo no cabo', sets: '3', reps: '15', obs: 'Tensão constante' },
+          ],
+          advanced: [
+            { name: 'Rosca direta com barra (pesado)', sets: '4', reps: '8-10', obs: 'Força' },
+            { name: 'Rosca inclinada com halteres', sets: '3', reps: '12', obs: 'Alongamento máximo' },
+            { name: 'Rosca scott', sets: '3', reps: '10-12', obs: 'Isola bíceps' },
+            { name: 'Rosca 21s', sets: '3', reps: '21', obs: 'Variação de amplitude' },
+            { name: 'Rosca concentrada', sets: '3', reps: '12', obs: 'Finalização' },
+          ],
+        },
+      },
+
+      // ── TRÍCEPS ──────────────────────────────────────────────────
+      triceps: {
+        M: {
+          beginner: [
+            { name: 'Tríceps pulley na polia', sets: '3', reps: '12-15', obs: 'Cotovelos fixos, extensão total' },
+            { name: 'Tríceps testa com barra EZ', sets: '3', reps: '10-12', obs: 'Desça até a testa' },
+            { name: 'Tríceps coice com halter', sets: '3', reps: '12', obs: 'Tronco paralelo ao chão' },
+            { name: 'Mergulho entre bancos', sets: '3', reps: '12-15', obs: 'Pés no chão' },
+          ],
+          intermediate: [
+            { name: 'Tríceps pulley com corda', sets: '4', reps: '12-15', obs: 'Abre a corda no final' },
+            { name: 'Tríceps testa com barra EZ', sets: '4', reps: '10-12', obs: 'Carga progressiva' },
+            { name: 'Mergulho em paralelas (tríceps)', sets: '3', reps: '8-12', obs: 'Tronco ereto' },
+            { name: 'Tríceps francês com halteres', sets: '3', reps: '10-12', obs: 'Atrás da cabeça' },
+            { name: 'Extensão com halter acima da cabeça', sets: '3', reps: '12', obs: 'Cabeça longa ativada' },
+          ],
+          advanced: [
+            { name: 'Mergulho em paralelas lastrado', sets: '4', reps: '8-10', obs: 'Adicione peso' },
+            { name: 'Tríceps testa pesado', sets: '4', reps: '8-10', obs: 'Carga alta' },
+            { name: 'Tríceps pulley drop-set', sets: '3', reps: '12+10+8', obs: 'Reduz carga sem descanso' },
+            { name: 'Extensão unilateral no cabo', sets: '3', reps: '12', obs: 'Cada braço' },
+            { name: 'Tríceps francês com barra EZ', sets: '3', reps: '10-12', obs: 'Cabeça longa' },
+            { name: 'Kickback com halteres', sets: '3', reps: '15', obs: 'Extensão total' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Tríceps pulley na polia', sets: '3', reps: '12-15', obs: 'Cotovelos fixos' },
+            { name: 'Tríceps coice com halter', sets: '3', reps: '12-15', obs: 'Leve e controlado' },
+            { name: 'Mergulho entre bancos', sets: '3', reps: '12-15', obs: 'Pés no chão' },
+          ],
+          intermediate: [
+            { name: 'Tríceps pulley com corda', sets: '4', reps: '15', obs: 'Abre no final' },
+            { name: 'Tríceps testa com barra EZ', sets: '3', reps: '12', obs: 'Técnica perfeita' },
+            { name: 'Extensão acima da cabeça com halter', sets: '3', reps: '12', obs: 'Cabeça longa' },
+            { name: 'Mergulho entre bancos', sets: '3', reps: '15', obs: 'Progressão' },
+          ],
+          advanced: [
+            { name: 'Tríceps pulley drop-set', sets: '3', reps: '15+12+10', obs: 'Série descendente' },
+            { name: 'Mergulho em paralelas (assistido)', sets: '3', reps: '10-12', obs: 'Progressão' },
+            { name: 'Tríceps francês com barra EZ', sets: '3', reps: '12', obs: 'Cabeça longa' },
+            { name: 'Extensão unilateral no cabo', sets: '3', reps: '12', obs: 'Cada braço' },
+            { name: 'Kickback com halter', sets: '3', reps: '15', obs: 'Extensão total' },
+          ],
+        },
+      },
+
+      // ── PERNAS (QUADRÍCEPS) ───────────────────────────────────────
+      quads: {
+        M: {
+          beginner: [
+            { name: 'Agachamento livre', sets: '3', reps: '10-12', obs: 'Joelhos não passam os pés' },
+            { name: 'Leg press 45°', sets: '3', reps: '10-12', obs: 'Pés afastados na largura dos ombros' },
+            { name: 'Extensora', sets: '3', reps: '12-15', obs: 'Extensão total, pause 1s' },
+            { name: 'Agachamento sumô', sets: '3', reps: '12', obs: 'Pés abertos, foco no adutor' },
+            { name: 'Avanço com halteres', sets: '3', reps: '12', obs: 'Cada perna' },
+          ],
+          intermediate: [
+            { name: 'Agachamento livre (pesado)', sets: '4', reps: '8-10', obs: 'Carga progressiva' },
+            { name: 'Leg press 45° (pesado)', sets: '4', reps: '10-12', obs: 'Amplitude total' },
+            { name: 'Hack squat', sets: '3', reps: '10-12', obs: 'Pés à frente da plataforma' },
+            { name: 'Extensora', sets: '3', reps: '15', obs: 'Finalizador de quadríceps' },
+            { name: 'Avanço com barra', sets: '3', reps: '10', obs: 'Cada perna' },
+            { name: 'Agachamento búlgaro', sets: '3', reps: '10', obs: 'Pé traseiro no banco' },
+          ],
+          advanced: [
+            { name: 'Agachamento livre (pesado)', sets: '5', reps: '5', obs: 'Esquema 5x5 força' },
+            { name: 'Front squat', sets: '4', reps: '6-8', obs: 'Foco no quadríceps' },
+            { name: 'Leg press 45° (muito pesado)', sets: '4', reps: '10-12', obs: 'Drop-set no último' },
+            { name: 'Hack squat', sets: '4', reps: '10-12', obs: 'Amplitude total' },
+            { name: 'Extensora bilateral', sets: '3', reps: '15', obs: 'Pausa 2s no topo' },
+            { name: 'Agachamento búlgaro com halteres', sets: '3', reps: '10-12', obs: 'Unilateral' },
+            { name: 'Avanço caminhando', sets: '3', reps: '20', obs: '10 cada perna' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Agachamento livre', sets: '3', reps: '12-15', obs: 'Técnica primeiro, carga depois' },
+            { name: 'Leg press 45°', sets: '3', reps: '12-15', obs: 'Pés alinhados' },
+            { name: 'Extensora', sets: '3', reps: '15', obs: 'Isolamento do quadríceps' },
+            { name: 'Agachamento sumô', sets: '3', reps: '15', obs: 'Foco no adutor' },
+            { name: 'Avanço alternado', sets: '3', reps: '12', obs: 'Cada perna' },
+          ],
+          intermediate: [
+            { name: 'Agachamento livre com barra', sets: '4', reps: '10-12', obs: 'Carga progressiva' },
+            { name: 'Leg press 45°', sets: '4', reps: '12-15', obs: 'Pés altos: glúteo; baixos: quad' },
+            { name: 'Agachamento búlgaro com halteres', sets: '3', reps: '12', obs: 'Unilateral' },
+            { name: 'Extensora', sets: '3', reps: '15', obs: 'Finalizador' },
+            { name: 'Avanço com halteres', sets: '3', reps: '12', obs: 'Cada perna' },
+            { name: 'Cadeira extensora unilateral', sets: '3', reps: '12', obs: 'Cada perna' },
+          ],
+          advanced: [
+            { name: 'Agachamento livre (pesado)', sets: '4', reps: '8-10', obs: 'Progressão de carga' },
+            { name: 'Hack squat', sets: '4', reps: '10-12', obs: 'Pés à frente' },
+            { name: 'Leg press pés altos', sets: '4', reps: '12-15', obs: 'Mais glúteo e posterior' },
+            { name: 'Agachamento búlgaro', sets: '4', reps: '12', obs: 'Com barra ou halteres' },
+            { name: 'Extensora drop-set', sets: '3', reps: '15+12+10', obs: 'Burnout do quad' },
+            { name: 'Avanço caminhando pesado', sets: '3', reps: '20', obs: '10 cada perna' },
+          ],
+        },
+      },
+
+      // ── GLÚTEOS ───────────────────────────────────────────────────
+      glutes: {
+        M: {
+          beginner: [
+            { name: 'Elevação pélvica', sets: '3', reps: '15', obs: 'Empurre quadril para cima' },
+            { name: 'Afundo com halteres', sets: '3', reps: '12', obs: 'Cada perna' },
+            { name: 'Abdução na máquina', sets: '3', reps: '15', obs: 'Abre os joelhos' },
+          ],
+          intermediate: [
+            { name: 'Hip thrust com barra', sets: '4', reps: '10-12', obs: 'Barra no quadril com proteção' },
+            { name: 'Agachamento sumô', sets: '3', reps: '12', obs: 'Pés muito abertos' },
+            { name: 'Afundo com barra', sets: '3', reps: '12', obs: 'Cada perna' },
+            { name: 'Abdução na máquina', sets: '3', reps: '15', obs: 'Controle' },
+          ],
+          advanced: [
+            { name: 'Hip thrust com barra (pesado)', sets: '4', reps: '8-10', obs: 'Pause 2s no topo' },
+            { name: 'Agachamento sumô pesado', sets: '4', reps: '10-12', obs: 'Amplitude total' },
+            { name: 'Levantamento terra romeno', sets: '4', reps: '10', obs: 'Coluna neutra' },
+            { name: 'Abdução no cabo (em pé)', sets: '3', reps: '15', obs: 'Cada perna' },
+            { name: 'Kickback no cabo', sets: '3', reps: '15', obs: 'Extensão do quadril' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Elevação pélvica no chão', sets: '3', reps: '15-20', obs: 'Empurre o quadril para cima' },
+            { name: 'Agachamento sumô com halter', sets: '3', reps: '15', obs: 'Pés bem abertos' },
+            { name: 'Abdução na máquina', sets: '3', reps: '15-20', obs: 'Abre os joelhos' },
+            { name: 'Avanço alternado', sets: '3', reps: '12', obs: 'Cada perna' },
+            { name: 'Elevação de perna no cabo (quadrupede)', sets: '3', reps: '15', obs: 'Cada lado' },
+            { name: 'Agachamento com elástico', sets: '3', reps: '15', obs: 'Elástico acima dos joelhos' },
+          ],
+          intermediate: [
+            { name: 'Hip thrust com barra', sets: '4', reps: '12-15', obs: 'Pause 2s no topo' },
+            { name: 'Agachamento sumô com barra', sets: '4', reps: '12', obs: 'Amplitude total' },
+            { name: 'Levantamento terra romeno', sets: '4', reps: '12', obs: 'Coluna neutra, foca no glúteo' },
+            { name: 'Abdução na máquina', sets: '3', reps: '20', obs: 'Série lenta' },
+            { name: 'Kickback no cabo', sets: '3', reps: '15', obs: 'Cada perna' },
+            { name: 'Agachamento búlgaro', sets: '3', reps: '12', obs: 'Unilateral — glúteo+quad' },
+            { name: 'Agachamento com elástico (faixa)', sets: '3', reps: '20', obs: 'Ativa glúteo médio' },
+          ],
+          advanced: [
+            { name: 'Hip thrust com barra (pesado)', sets: '4', reps: '10-12', obs: 'Carga alta, pausa no topo' },
+            { name: 'Agachamento sumô pesado', sets: '4', reps: '10-12', obs: 'Profundidade total' },
+            { name: 'Levantamento terra romeno (pesado)', sets: '4', reps: '10', obs: 'Hipóxia controlada' },
+            { name: 'Agachamento búlgaro com barra', sets: '4', reps: '10-12', obs: 'Carga progressiva' },
+            { name: 'Abdução no cabo em pé', sets: '4', reps: '15', obs: 'Cada perna' },
+            { name: 'Kickback no cabo pesado', sets: '3', reps: '15', obs: 'Extensão máxima' },
+            { name: 'Hip thrust unilateral', sets: '3', reps: '12', obs: 'Cada perna' },
+            { name: 'Afundo reverso com barra', sets: '3', reps: '12', obs: 'Glúteo em destaque' },
+          ],
+        },
+      },
+
+      // ── POSTERIOR DE COXA ─────────────────────────────────────────
+      hamstrings: {
+        M: {
+          beginner: [
+            { name: 'Mesa flexora', sets: '3', reps: '10-12', obs: 'Controle a descida' },
+            { name: 'Levantamento terra romeno', sets: '3', reps: '10-12', obs: 'Coluna neutra' },
+            { name: 'Flexora em pé no cabo', sets: '3', reps: '12', obs: 'Cada perna' },
+          ],
+          intermediate: [
+            { name: 'Mesa flexora (pesado)', sets: '4', reps: '10-12', obs: 'Carga progressiva' },
+            { name: 'Levantamento terra romeno com barra', sets: '4', reps: '10', obs: 'Tensão no isquiotibial' },
+            { name: 'Flexora em pé no cabo', sets: '3', reps: '12', obs: 'Unilateral' },
+            { name: 'Stiff com barra', sets: '3', reps: '10-12', obs: 'Joelhos semi-flexionados' },
+          ],
+          advanced: [
+            { name: 'Mesa flexora drop-set', sets: '4', reps: '12+10+8', obs: 'Série descendente' },
+            { name: 'Levantamento terra romeno pesado', sets: '4', reps: '8-10', obs: 'Máxima tensão' },
+            { name: 'Curl nórdico', sets: '3', reps: '6-8', obs: 'Exercício avançado' },
+            { name: 'Stiff com halteres', sets: '3', reps: '12', obs: 'Amplitude maior' },
+            { name: 'Flexora em pé no cabo unilateral', sets: '3', reps: '12', obs: 'Cada perna' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Mesa flexora', sets: '3', reps: '12-15', obs: 'Controle a descida' },
+            { name: 'Levantamento terra romeno com halteres', sets: '3', reps: '12', obs: 'Sente o posterior' },
+            { name: 'Flexora em pé no cabo', sets: '3', reps: '12', obs: 'Cada perna' },
+          ],
+          intermediate: [
+            { name: 'Mesa flexora', sets: '4', reps: '12-15', obs: 'Carga progressiva' },
+            { name: 'Levantamento terra romeno com barra', sets: '4', reps: '12', obs: 'Coluna neutra' },
+            { name: 'Stiff com halteres', sets: '3', reps: '12', obs: 'Foco no posterior' },
+            { name: 'Flexora em pé no cabo', sets: '3', reps: '15', obs: 'Unilateral' },
+          ],
+          advanced: [
+            { name: 'Mesa flexora drop-set', sets: '4', reps: '15+12+10', obs: 'Burnout' },
+            { name: 'Levantamento terra romeno pesado', sets: '4', reps: '10-12', obs: 'Carga alta' },
+            { name: 'Stiff com barra', sets: '3', reps: '12', obs: 'Amplitude máxima' },
+            { name: 'Curl nórdico', sets: '3', reps: '8', obs: 'Avançado' },
+            { name: 'Flexora sentada na máquina', sets: '3', reps: '15', obs: 'Pico de contração' },
+          ],
+        },
+      },
+
+      // ── PANTURRILHA ───────────────────────────────────────────────
+      calves: {
+        M: {
+          beginner: [
+            { name: 'Panturrilha em pé (máquina)', sets: '3', reps: '15-20', obs: 'Amplitude total' },
+            { name: 'Panturrilha sentado', sets: '3', reps: '15-20', obs: 'Sóleo ativado' },
+          ],
+          intermediate: [
+            { name: 'Panturrilha em pé (pesado)', sets: '4', reps: '15-20', obs: 'Pausa 2s em cima' },
+            { name: 'Panturrilha sentado', sets: '3', reps: '20', obs: 'Sóleo' },
+            { name: 'Panturrilha no leg press', sets: '3', reps: '20', obs: 'Pés na ponta da plataforma' },
+          ],
+          advanced: [
+            { name: 'Panturrilha em pé pesado', sets: '5', reps: '15-20', obs: 'Carga alta' },
+            { name: 'Panturrilha sentado pesado', sets: '4', reps: '20', obs: 'Sóleo' },
+            { name: 'Panturrilha no leg press', sets: '3', reps: '20', obs: 'Finalizador' },
+            { name: 'Panturrilha unilateral', sets: '3', reps: '15', obs: 'Cada perna' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Panturrilha em pé (máquina)', sets: '3', reps: '15-20', obs: 'Amplitude total' },
+            { name: 'Panturrilha sentado', sets: '3', reps: '20', obs: 'Sóleo' },
+          ],
+          intermediate: [
+            { name: 'Panturrilha em pé', sets: '4', reps: '20', obs: 'Pausa no topo' },
+            { name: 'Panturrilha sentado', sets: '3', reps: '20', obs: 'Sóleo' },
+            { name: 'Panturrilha no leg press', sets: '3', reps: '20', obs: 'Finalizador' },
+          ],
+          advanced: [
+            { name: 'Panturrilha em pé pesado', sets: '4', reps: '20', obs: 'Carga alta' },
+            { name: 'Panturrilha sentado pesado', sets: '4', reps: '20', obs: 'Sóleo' },
+            { name: 'Panturrilha unilateral', sets: '3', reps: '15', obs: 'Cada perna' },
+            { name: 'Panturrilha no leg press', sets: '3', reps: '20', obs: 'Finalizador' },
+          ],
+        },
+      },
+
+      // ── ABDÔMEN / CORE ────────────────────────────────────────────
+      core: {
+        M: {
+          beginner: [
+            { name: 'Abdominal supra (crunch)', sets: '3', reps: '20', obs: 'Não puxe o pescoço' },
+            { name: 'Prancha', sets: '3', reps: '30-45s', obs: 'Core firme, quadril neutro' },
+            { name: 'Elevação de pernas deitado', sets: '3', reps: '15', obs: 'Lombar no chão' },
+          ],
+          intermediate: [
+            { name: 'Abdominal na polia (crunch no cabo)', sets: '3', reps: '15-20', obs: 'Flexão do tronco' },
+            { name: 'Prancha lateral', sets: '3', reps: '30s', obs: 'Cada lado' },
+            { name: 'Elevação de pernas na barra', sets: '3', reps: '12-15', obs: 'Controlado' },
+            { name: 'Russian twist com anilha', sets: '3', reps: '20', obs: 'Rotação total' },
+          ],
+          advanced: [
+            { name: 'Abdominal na polia pesado', sets: '4', reps: '15', obs: 'Core como motor' },
+            { name: 'Dragon flag', sets: '3', reps: '6-8', obs: 'Exercício avançado' },
+            { name: 'Roda abdominal (ab wheel)', sets: '3', reps: '10-12', obs: 'Controlado' },
+            { name: 'Elevação de pernas na barra', sets: '3', reps: '15', obs: 'Com rotação' },
+            { name: 'Prancha com elevação de braço', sets: '3', reps: '10', obs: 'Cada lado' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Abdominal supra (crunch)', sets: '3', reps: '20', obs: 'Não puxe o pescoço' },
+            { name: 'Prancha', sets: '3', reps: '30s', obs: 'Core firme' },
+            { name: 'Elevação de pernas deitada', sets: '3', reps: '15', obs: 'Lombar no chão' },
+            { name: 'Bicicleta no chão', sets: '3', reps: '20', obs: 'Cotovelo no joelho oposto' },
+          ],
+          intermediate: [
+            { name: 'Crunch no cabo', sets: '3', reps: '15-20', obs: 'Flexão do tronco' },
+            { name: 'Prancha lateral', sets: '3', reps: '30s', obs: 'Cada lado' },
+            { name: 'Elevação de pernas na barra', sets: '3', reps: '12', obs: 'Controlado' },
+            { name: 'Russian twist com halter', sets: '3', reps: '20', obs: 'Rotação total' },
+            { name: 'Abdominal infra', sets: '3', reps: '15', obs: 'Quadril sobe' },
+          ],
+          advanced: [
+            { name: 'Crunch no cabo pesado', sets: '4', reps: '15', obs: 'Resistência no core' },
+            { name: 'Roda abdominal', sets: '3', reps: '10-12', obs: 'Amplitude máxima' },
+            { name: 'Elevação de pernas na barra', sets: '3', reps: '15', obs: 'Com torção' },
+            { name: 'Prancha com elevação alternada', sets: '3', reps: '10', obs: 'Braço e perna opostos' },
+            { name: 'Scissor kick', sets: '3', reps: '20', obs: 'Lombar colada' },
+          ],
+        },
+      },
+
+      // ── ANTEBRAÇO ─────────────────────────────────────────────────
+      forearms: {
+        M: {
+          beginner: [
+            { name: 'Rosca de punho com barra', sets: '3', reps: '15-20', obs: 'Amplitude total do pulso' },
+            { name: 'Rosca reversa com barra', sets: '3', reps: '12', obs: 'Extensor do antebraço' },
+          ],
+          intermediate: [
+            { name: 'Rosca de punho com barra', sets: '3', reps: '20', obs: 'Antebraço no banco' },
+            { name: 'Rosca reversa com barra', sets: '3', reps: '12-15', obs: 'Extensor' },
+            { name: 'Farmer walk', sets: '3', reps: '30s', obs: 'Caminha com peso pesado' },
+          ],
+          advanced: [
+            { name: 'Farmer walk pesado', sets: '4', reps: '30-40s', obs: 'Pegada forte' },
+            { name: 'Rosca de punho pesada', sets: '3', reps: '20', obs: 'Antebraço completo' },
+            { name: 'Rosca reversa pesada', sets: '3', reps: '12', obs: 'Extensor' },
+            { name: 'Plate pinch', sets: '3', reps: '30s', obs: 'Dois anilhas pincadas' },
+          ],
+        },
+        F: {
+          beginner: [
+            { name: 'Rosca de punho com halter', sets: '3', reps: '15', obs: 'Flexores do punho' },
+          ],
+          intermediate: [
+            { name: 'Rosca de punho com barra', sets: '3', reps: '15-20', obs: 'Antebraço no banco' },
+            { name: 'Rosca reversa', sets: '3', reps: '12', obs: 'Extensor' },
+          ],
+          advanced: [
+            { name: 'Rosca de punho pesada', sets: '3', reps: '20', obs: 'Amplitude total' },
+            { name: 'Rosca reversa', sets: '3', reps: '12-15', obs: 'Extensor' },
+            { name: 'Farmer walk', sets: '3', reps: '30s', obs: 'Pegada de aço' },
+          ],
+        },
+      },
+    };
+
+    // ── Mapa de estrutura dos treinos por tipo ────────────────────
+    const WORKOUT_STRUCTURE = {
+      upper_lower: {
+        titles: ['Upper (Superior)', 'Lower (Inferior)'],
+        days: [['seg','qua'], ['ter','qui']],
+        groups: {
+          M: [
+            ['chest','back','shoulders','biceps','triceps'],
+            ['quads','hamstrings','glutes','calves','core'],
+          ],
+          F: [
+            ['chest','back','shoulders','biceps','triceps'],
+            ['glutes','quads','hamstrings','calves','core'],
+          ],
+        },
+      },
+      abc: {
+        titles: ['Treino A', 'Treino B', 'Treino C'],
+        days: [['seg'],['qua'],['sex']],
+        groups: {
+          M: [
+            ['chest','triceps','shoulders'],
+            ['back','biceps','forearms'],
+            ['quads','hamstrings','calves','core'],
+          ],
+          F: [
+            ['chest','shoulders','triceps'],
+            ['back','biceps','core'],
+            ['glutes','quads','hamstrings','calves'],
+          ],
+        },
+      },
+      abcd: {
+        titles: ['Treino A', 'Treino B', 'Treino C', 'Treino D'],
+        days: [['seg'],['ter'],['qui'],['sab']],
+        groups: {
+          M: [
+            ['chest','triceps'],
+            ['back','biceps'],
+            ['shoulders','forearms','core'],
+            ['quads','hamstrings','calves'],
+          ],
+          F: [
+            ['chest','shoulders','triceps'],
+            ['back','biceps','core'],
+            ['glutes','hamstrings'],
+            ['quads','calves','core'],
+          ],
+        },
+      },
+      abcde: {
+        titles: ['Treino A', 'Treino B', 'Treino C', 'Treino D', 'Treino E'],
+        days: [['seg'],['ter'],['qua'],['qui'],['sex']],
+        groups: {
+          M: [
+            ['chest','triceps'],
+            ['back','biceps'],
+            ['shoulders','forearms'],
+            ['quads','calves'],
+            ['hamstrings','glutes','core'],
+          ],
+          F: [
+            ['chest','triceps'],
+            ['back','biceps'],
+            ['shoulders','core'],
+            ['glutes','hamstrings'],
+            ['quads','calves'],
+          ],
+        },
+      },
+      fullbody: {
+        titles: ['Full Body'],
+        days: [['seg','qua','sex']],
+        groups: {
+          M: [['chest','back','shoulders','quads','hamstrings','core']],
+          F: [['chest','back','shoulders','glutes','quads','core']],
+        },
+      },
+      push_pull_legs: {
+        titles: ['Push (Empurrar)', 'Pull (Puxar)', 'Legs (Pernas)'],
+        days: [['seg','qui'],['ter','sex'],['qua','sab']],
+        groups: {
+          M: [
+            ['chest','shoulders','triceps'],
+            ['back','biceps','forearms'],
+            ['quads','hamstrings','calves','core'],
+          ],
+          F: [
+            ['chest','shoulders','triceps'],
+            ['back','biceps','core'],
+            ['glutes','quads','hamstrings','calves'],
+          ],
+        },
+      },
+    };
+
+    // ── Engine de geração de presets ─────────────────────────────
+    function pickExercises(group, sex, level, qty, usedNames) {
+      const sexKey = (sex === 'F') ? 'F' : 'M';
+      const pool = (EXERCISE_DB[group] && EXERCISE_DB[group][sexKey] && EXERCISE_DB[group][sexKey][level]) || [];
+      // Filtra já usados e embaralha levemente
+      const available = pool.filter(e => !usedNames.has(e.name));
+      // Shuffle simples
+      for (let i = available.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [available[i], available[j]] = [available[j], available[i]];
+      }
+      const picked = available.slice(0, qty);
+      picked.forEach(e => usedNames.add(e.name));
+      return picked.map(e => ({ name: e.name, sets: e.sets, reps: e.reps, obs: e.obs }));
+    }
+
+    function generatePresetPlan(trainingType, experience, sex, exPerWorkout) {
+      const structure = WORKOUT_STRUCTURE[trainingType];
+      if (!structure) return [];
+      const sexKey = (sex === 'F') ? 'F' : 'M';
+      const groupsPerWorkout = structure.groups[sexKey] || structure.groups['M'];
+      const usedNames = new Set();
+
+      return structure.titles.map((title, wi) => {
+        const groups = groupsPerWorkout[wi] || [];
+        const exercises = [];
+
+        // Distribui exercícios proporcionalmente entre os grupos do treino
+        const totalGroups = groups.length;
+        const basePerGroup = Math.floor(exPerWorkout / totalGroups);
+        let remainder = exPerWorkout - (basePerGroup * totalGroups);
+
+        groups.forEach((group, gi) => {
+          const qty = basePerGroup + (gi < remainder ? 1 : 0);
+          const exs = pickExercises(group, sex, experience, qty, usedNames);
+          // Se não tiver suficientes no pool atual, tenta com outro nível
+          const fallbackLevel = experience === 'advanced' ? 'intermediate' : experience === 'intermediate' ? 'beginner' : 'intermediate';
+          const need = qty - exs.length;
+          if (need > 0) {
+            const extra = pickExercises(group, sex, fallbackLevel, need, usedNames);
+            exs.push(...extra);
+          }
+          exercises.push(...exs);
+        });
+
+        return {
+          title,
+          days: structure.days[wi] || [],
+          exercises: exercises.slice(0, exPerWorkout),
+        };
+      });
+    }
+
     window.generateAutoPlan = async () => {
       const title = document.getElementById('auto-plan-title').value.trim();
       const errEl = document.getElementById('auto-plan-error');
@@ -11480,80 +12169,29 @@
       const trainingType = typeBtn.dataset.value;
       const exPerWorkout = window._autoQty || 6;
 
-      // Pega gênero do aluno
       const student = ST.students.find(s => s.id === ST.planStudentId) || {};
-      const sex = student.sex || 'M'; // M, F, O
-      const sexLabel = sex === 'F' ? 'feminino' : sex === 'M' ? 'masculino' : 'neutro';
+      const sex = student.sex || 'M';
+
+      const btn = document.getElementById('btn-generate-plan');
+      btn.classList.add('btn-loading'); btn.disabled = true;
 
       // Mostra loading
       const modal = document.querySelector('#modal-auto-plan .modal');
       const loadingDiv = document.createElement('div');
       loadingDiv.className = 'ai-generating-overlay';
-      loadingDiv.innerHTML = `<div class="ai-generating-spinner"></div><div class="ai-generating-text">🤖 Gerando plano personalizado...<br><span style="font-size:.75rem;font-weight:500;color:var(--text3)">Isso pode levar alguns segundos</span></div>`;
+      loadingDiv.innerHTML = `<div class="ai-generating-spinner"></div><div class="ai-generating-text">⚡ Gerando plano personalizado...</div>`;
       modal.style.position = 'relative';
       modal.appendChild(loadingDiv);
 
-      const btn = document.getElementById('btn-generate-plan');
-      btn.classList.add('btn-loading'); btn.disabled = true;
-
-      const experienceMap = { beginner: 'Iniciante (1 a 6 meses)', intermediate: 'Intermediário (7 a 12 meses)', advanced: 'Avançado (mais de 1 ano)' };
-      const typeMap = { upper_lower: 'Upper/Lower (Superior e Inferior)', abc: 'ABC (3 dias por semana)', abcd: 'ABCD (4 dias por semana)', abcde: 'ABCDE (5 dias por semana)', fullbody: 'Full Body (corpo inteiro por sessão)', push_pull_legs: 'Push/Pull/Legs (Empurrar/Puxar/Pernas)' };
-
-      // Monta dias e letras dos treinos conforme tipo
-      const workoutLetters = { upper_lower: ['Upper','Lower'], abc: ['A','B','C'], abcd: ['A','B','C','D'], abcde: ['A','B','C','D','E'], fullbody: ['A'], push_pull_legs: ['Push','Pull','Legs'] };
-      const letters = workoutLetters[trainingType] || ['A','B','C'];
-
-      const prompt = `Você é um especialista em musculação e prescrição de treinos. Monte um plano de treino personalizado seguindo EXATAMENTE as regras abaixo.
-
-DADOS DO ALUNO:
-- Gênero: ${sexLabel}
-- Nível de experiência: ${experienceMap[experience]}
-- Tipo de treino: ${typeMap[trainingType]}
-- Exercícios por treino: ${exPerWorkout}
-
-REGRAS OBRIGATÓRIAS:
-1. Retorne APENAS JSON válido, sem texto antes ou depois, sem markdown, sem blocos de código.
-2. O JSON deve ter a chave "workouts" com um array de treinos.
-3. Cada treino tem: "title" (string, ex: "Treino A"), "exercises" (array de objetos).
-4. Cada exercício tem: "name" (nome do exercício em português), "sets" (número de séries), "reps" (repetições como string, ex: "10-12" ou "12"), "obs" (dica técnica breve, máx 60 caracteres).
-5. Para alunos do gênero ${sexLabel}: priorize exercícios adequados (${sex === 'F' ? 'foco em glúteos, coxas, core, peitoral superior e ombros para mulheres' : 'foco equilibrado em peito, costas, ombros, bíceps, tríceps e pernas para homens'}).
-6. Nível ${experienceMap[experience]}: ajuste complexidade (${experience === 'beginner' ? 'exercícios básicos, máquinas, pesos leves, 3 séries' : experience === 'intermediate' ? 'exercícios compostos + isolados, 3-4 séries' : 'exercícios avançados, compostos pesados, 4-5 séries, técnicas avançadas'}).
-7. Crie exatamente ${letters.length} treino(s) com os títulos: ${letters.map(l => `"Treino ${l}"`).join(', ')}.
-8. Cada treino deve ter exatamente ${exPerWorkout} exercícios.
-
-Responda SOMENTE com o JSON.`;
-
       try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 1000,
-            messages: [{ role: 'user', content: prompt }]
-          })
-        });
-        const data = await response.json();
-        let raw = (data.content || []).map(b => b.text || '').join('');
-        raw = raw.replace(/```json|```/g, '').trim();
-        const parsed = JSON.parse(raw);
-        const workouts = parsed.workouts || [];
+        // Gera o plano localmente via presets
+        ST.workoutBlocks = generatePresetPlan(trainingType, experience, sex, exPerWorkout);
 
-        // Formata para ST.workoutBlocks
-        const dayMap = { upper_lower: [['seg','qua'],['ter','qui']], abc: [['seg'],['qua'],['sex'], ], abcd: [['seg'],['ter'],['qui'],['sab']], abcde: [['seg'],['ter'],['qua'],['qui'],['sex']], fullbody: [['seg','qua','sex']], push_pull_legs: [['seg','qui'],['ter','sex'],['qua','sab']] };
-        const days = dayMap[trainingType] || [];
-        ST.workoutBlocks = workouts.map((w, i) => ({
-          title: w.title || `Treino ${letters[i] || i+1}`,
-          days: days[i] || [],
-          exercises: (w.exercises || []).map(e => ({
-            name: e.name || '',
-            sets: String(e.sets || 3),
-            reps: String(e.reps || '10-12'),
-            obs: e.obs || ''
-          }))
-        }));
+        if (!ST.workoutBlocks.length) {
+          errEl.textContent = 'Não foi possível gerar o plano. Tente outra combinação.';
+          return;
+        }
 
-        // Salva plano no Firestore
         const planData = {
           title,
           startDate: document.getElementById('auto-plan-startdate').value || '',
@@ -11574,25 +12212,24 @@ Responda SOMENTE com o JSON.`;
         toast('✅ Plano gerado com sucesso!');
         await openStudentDetail(ST.planStudentId);
 
-        // Abre editor do plano gerado
         setTimeout(() => {
           document.getElementById('plan-title').value = title;
           document.getElementById('plan-startdate').value = planData.startDate;
           document.getElementById('plan-expiry').value = planData.expiry;
-          document.getElementById('plan-modal-title').textContent = 'Plano gerado pela IA';
+          document.getElementById('plan-modal-title').textContent = 'Plano gerado automaticamente';
           const subtitleEl = document.querySelector('#modal-plan .plan-modal-subtitle');
-          if (subtitleEl) subtitleEl.textContent = 'Revise e ajuste os exercícios do plano';
+          if (subtitleEl) subtitleEl.textContent = 'Revise e ajuste os exercícios conforme necessário';
           renderWorkoutsEditor();
           openModal('modal-plan');
         }, 400);
 
       } catch (e) {
         errEl.textContent = 'Erro ao gerar plano: ' + (e.message || 'tente novamente.');
-        toast('Erro ao gerar plano com IA.', 'error');
+        toast('Erro ao gerar plano.', 'error');
       } finally {
         loadingDiv.remove();
-        btn.classList.remove('btn-loading'); btn.disabled = false; btn.textContent = ''; 
-        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Gerar plano com IA';
+        btn.classList.remove('btn-loading'); btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Gerar plano';
       }
     };
 
