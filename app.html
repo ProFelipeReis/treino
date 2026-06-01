@@ -13229,19 +13229,28 @@
         el.querySelectorAll('.chat-msg').forEach(function(msgEl) {
           var msgId = msgEl.dataset.msgid;
           var pressTimer = null;
+          var didOpen = false;
           var startX = 0, startY = 0;
           function startPress(cx, cy) {
+            didOpen = false;
             startX = cx; startY = cy;
-            pressTimer = setTimeout(function() { showReactionBar(msgId); }, 450);
+            pressTimer = setTimeout(function() {
+              didOpen = true;
+              pressTimer = null;
+              showReactionBar(msgId);
+            }, 450);
           }
           function cancelPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
           msgEl.addEventListener('touchstart', function(e) { var t=e.touches[0]; startPress(t.clientX,t.clientY); }, {passive:true});
           msgEl.addEventListener('touchmove', function(e) { var t=e.touches[0]; if(Math.abs(t.clientX-startX)>8||Math.abs(t.clientY-startY)>8) cancelPress(); }, {passive:true});
-          msgEl.addEventListener('touchend', cancelPress);
-          msgEl.addEventListener('touchcancel', cancelPress);
+          msgEl.addEventListener('touchend', function(e) {
+            if (didOpen) { e.preventDefault(); didOpen = false; return; }
+            cancelPress();
+          }, {passive:false});
+          msgEl.addEventListener('touchcancel', function() { didOpen = false; cancelPress(); });
           msgEl.addEventListener('mousedown', function(e) { if(e.button!==0) return; startPress(e.clientX,e.clientY); });
           msgEl.addEventListener('mouseup', cancelPress);
-          msgEl.addEventListener('mouseleave', cancelPress);
+          // mouseleave removido: não deve fechar o picker já aberto
         });
 
         if (wasAtBottom || el.scrollTop === 0) el.scrollTop = el.scrollHeight;
