@@ -4277,7 +4277,7 @@
     /* ── REPLY / RESPONDER ── */
     .chat-msg-row {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 6px;
     }
 
@@ -4286,38 +4286,25 @@
     }
 
     .chat-reply-btn {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: var(--surface2);
-      border: 1.5px solid var(--border);
+      background: none;
+      border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      opacity: 0;
-      transition: opacity .15s, background .15s, transform .15s;
+      opacity: 1;
+      transition: transform .15s, opacity .15s;
       flex-shrink: 0;
       color: var(--text3);
-    }
-
-    .chat-msg:hover .chat-reply-btn,
-    .chat-msg:focus-within .chat-reply-btn {
-      opacity: 1;
-    }
-
-    /* Mobile: sempre visível (não há hover) */
-    @media (hover: none) {
-      .chat-reply-btn {
-        opacity: 1;
-      }
+      padding: 0;
     }
 
     .chat-reply-btn:active {
-      background: var(--accent-dim);
-      border-color: var(--accent-soft);
-      color: #7a6000;
-      transform: scale(.9);
+      transform: scale(.85);
+      color: var(--accent2);
     }
 
     /* Quote dentro da bolha */
