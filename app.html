@@ -4220,11 +4220,10 @@
 
     .chat-detail-input-wrap {
       display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      padding: 12px 14px;
+      flex-direction: column;
       border-top: 1px solid var(--border);
       flex-shrink: 0;
+      background: var(--surface);
     }
 
     .chat-gestor-input {
@@ -4272,6 +4271,143 @@
       font-size: .85rem;
       padding: 60px 20px;
       font-weight: 600;
+    }
+
+    /* ── REPLY / RESPONDER ── */
+    .chat-msg-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .chat-msg.mine .chat-msg-row {
+      flex-direction: row-reverse;
+    }
+
+    .chat-reply-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity .15s, background .15s, transform .15s;
+      flex-shrink: 0;
+      color: var(--text3);
+    }
+
+    .chat-msg:hover .chat-reply-btn,
+    .chat-msg:focus-within .chat-reply-btn {
+      opacity: 1;
+    }
+
+    /* Mobile: sempre visível (não há hover) */
+    @media (hover: none) {
+      .chat-reply-btn {
+        opacity: 1;
+      }
+    }
+
+    .chat-reply-btn:active {
+      background: var(--accent-dim);
+      border-color: var(--accent-soft);
+      color: #7a6000;
+      transform: scale(.9);
+    }
+
+    /* Quote dentro da bolha */
+    .chat-quote {
+      border-left: 3px solid var(--accent);
+      background: rgba(0,0,0,.07);
+      border-radius: 6px 6px 0 0;
+      padding: 5px 9px;
+      margin-bottom: 4px;
+      font-size: .74rem;
+      line-height: 1.35;
+      color: rgba(255,255,255,.65);
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .chat-msg.theirs .chat-quote {
+      background: var(--surface2);
+      color: var(--text3);
+    }
+
+    .chat-quote-author {
+      font-weight: 800;
+      font-size: .7rem;
+      margin-bottom: 2px;
+      color: var(--accent);
+    }
+
+    .chat-quote-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Preview de resposta acima do input */
+    #reply-preview {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px 0;
+      background: var(--surface);
+    }
+
+    #reply-preview.on {
+      display: flex;
+    }
+
+    .reply-preview-bar {
+      flex: 1;
+      border-left: 3px solid var(--accent);
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: var(--surface2);
+      min-width: 0;
+    }
+
+    .reply-preview-author {
+      font-size: .7rem;
+      font-weight: 800;
+      color: var(--accent2);
+      margin-bottom: 1px;
+    }
+
+    .reply-preview-text {
+      font-size: .78rem;
+      color: var(--text2);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .reply-cancel-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--surface3);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text3);
+      flex-shrink: 0;
+      font-size: 1rem;
+      line-height: 1;
+      transition: background .15s;
+    }
+
+    .reply-cancel-btn:active {
+      background: var(--border2);
     }
 
     /* ── CRIAR ALERTA MODAL ── */
@@ -7252,15 +7388,24 @@
               <div class="chat-empty-state">Carregando...</div>
             </div>
             <div class="chat-detail-input-wrap">
-              <textarea class="chat-gestor-input" id="chat-gestor-input" placeholder="Mensagem..." rows="1"
-                onkeydown="chatGestorKeydown(event)" oninput="autoResizeChatGestor(this)"></textarea>
-              <button class="chat-send-btn-g" onclick="sendChatMessageGestor()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-              </button>
+              <div id="reply-preview">
+                <div class="reply-preview-bar">
+                  <div class="reply-preview-author" id="reply-preview-author"></div>
+                  <div class="reply-preview-text" id="reply-preview-text"></div>
+                </div>
+                <button class="reply-cancel-btn" onclick="cancelReply()" title="Cancelar resposta">✕</button>
+              </div>
+              <div style="display:flex;align-items:flex-end;gap:8px;padding:12px 14px;">
+                <textarea class="chat-gestor-input" id="chat-gestor-input" placeholder="Mensagem..." rows="1"
+                  onkeydown="chatGestorKeydown(event)" oninput="autoResizeChatGestor(this)"></textarea>
+                <button class="chat-send-btn-g" onclick="sendChatMessageGestor()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -13000,10 +13145,17 @@
       });
       document.body.style.overflow = 'hidden';
 
-      var student = ST.students.find(function (s) { return s.id === sid; }) || { id: sid, name: sid };
+      var student = ST.students.find(function (s) { return s.id === sid; });
+      if (!student) {
+        // Tenta pegar o nome direto do item da lista no DOM
+        var chatItem = document.getElementById('chatitem_' + sid);
+        var nameEl = chatItem ? chatItem.querySelector('.chat-list-name') : null;
+        var nameFromDom = nameEl ? nameEl.textContent.trim() : null;
+        student = { id: sid, name: nameFromDom || null, code: null };
+      }
       document.getElementById('chat-detail-name').textContent = student.name || student.code || sid;
       document.getElementById('chat-detail-code').textContent = student.code ? ('#' + student.code) : '';
-      document.getElementById('chat-detail-avatar').textContent = (student.name || '?').slice(0, 2).toUpperCase();
+      document.getElementById('chat-detail-avatar').textContent = ((student.name || student.code || '?')).slice(0, 2).toUpperCase();
 
       // Highlight selected e remove indicador de não lido imediatamente
       document.querySelectorAll('.chat-list-item').forEach(function (el) { el.classList.remove('active-chat'); });
@@ -13038,6 +13190,15 @@
         var html = msgs.map(function (m) {
           var mine = m.sender === 'manager';
           var time = m.ts ? new Date(m.ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+          // Quote (resposta a outra mensagem)
+          var quoteHtml = '';
+          if (m.replyTo) {
+            var qAuthor = m.replyTo.sender === 'manager' ? 'Você' : (document.getElementById('chat-detail-name').textContent || 'Aluno');
+            quoteHtml = '<div class="chat-quote">'
+              + '<div class="chat-quote-author">' + escHtml(qAuthor) + '</div>'
+              + '<div class="chat-quote-text">' + escHtml((m.replyTo.text || '').slice(0, 80)) + '</div>'
+              + '</div>';
+          }
           // Reactions badge
           var reactionHtml = '';
           if (m.reactions && Object.keys(m.reactions).length) {
@@ -13057,9 +13218,15 @@
                 return '<button class="emoji-btn-react" onclick="event.stopPropagation();toggleReactionGestor(\''+m.id+'\',\''+e+'\')">'+e+'</button>';
               }).join('')
             + '</div>';
-          return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="cmsg_'+m.id+'" data-msgid="'+m.id+'">'
+          var replyBtn = '<button class="chat-reply-btn" title="Responder" onclick="event.stopPropagation();setReply(\''+m.id+'\',\''+escHtml(m.text).replace(/'/g,'\\\'').slice(0,80)+'\',\''+(mine?'manager':'student')+'\')">'
+            + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>'
+            + '</button>';
+          return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="cmsg_'+m.id+'" data-msgid="'+m.id+'" data-text="'+escHtml(m.text).replace(/"/g,'&quot;').slice(0,80)+'" data-sender="'+(mine?'manager':'student')+'">'
             + pickerBar
-            + '<div class="chat-bubble">' + escHtml(m.text) + '</div>'
+            + '<div class="chat-msg-row">'
+            + replyBtn
+            + '<div class="chat-bubble">' + quoteHtml + escHtml(m.text) + '</div>'
+            + '</div>'
             + reactionHtml
             + '<div class="chat-time-label">' + time + '</div>'
             + '</div>';
@@ -13106,6 +13273,25 @@
       closeAllReactionBars();
       var bar = document.getElementById('rbar_' + msgId);
       if (!bar) return;
+
+      // Detecta se a mensagem está perto do topo — se sim, abre abaixo
+      var msgEl = document.getElementById('cmsg_' + msgId);
+      if (msgEl) {
+        var rect = msgEl.getBoundingClientRect();
+        var spaceAbove = rect.top;
+        // Se tiver menos de 80px acima, abre para baixo
+        if (spaceAbove < 80) {
+          bar.style.bottom = 'auto';
+          bar.style.top = 'calc(100% + 6px)';
+          bar.style.transform = '';
+          bar.classList.add('open-below');
+        } else {
+          bar.style.top = '';
+          bar.style.bottom = 'calc(100% + 6px)';
+          bar.classList.remove('open-below');
+        }
+      }
+
       bar.classList.add('show');
       window._activeReactionMsgId = msgId;
       var overlay = document.getElementById('reaction-overlay');
@@ -13140,6 +13326,27 @@
       } catch(e) { console.warn('toggleReactionGestor:', e.message); }
     };
 
+    // ── Reply / Responder ──
+    window._replyTo = null;
+
+    window.setReply = function(msgId, text, sender) {
+      window._replyTo = { msgId: msgId, text: text, sender: sender };
+      var authorLabel = sender === 'manager' ? 'Você' : (document.getElementById('chat-detail-name').textContent || 'Aluno');
+      document.getElementById('reply-preview-author').textContent = authorLabel;
+      document.getElementById('reply-preview-text').textContent = text;
+      var preview = document.getElementById('reply-preview');
+      preview.classList.add('on');
+      // Foca no input
+      var inp = document.getElementById('chat-gestor-input');
+      if (inp) { inp.focus(); }
+    };
+
+    window.cancelReply = function() {
+      window._replyTo = null;
+      var preview = document.getElementById('reply-preview');
+      if (preview) preview.classList.remove('on');
+    };
+
     window.closeChatDetail = function () {
       window._chatActiveSid = null;
       if (window._chatPollGestor) { clearInterval(window._chatPollGestor); window._chatPollGestor = null; }
@@ -13151,6 +13358,7 @@
       }
       document.body.style.overflow = '';
       closeAllReactionBars();
+      window.cancelReply();
     };
 
     window.sendChatMessageGestor = async function () {
@@ -13158,10 +13366,13 @@
       var text = (inp.value || '').trim();
       if (!text || !window._chatActiveSid) return;
       inp.value = ''; inp.style.height = '';
+      var msgData = { text: text, sender: 'manager', ts: Date.now(), readByManager: true, readByStudent: false };
+      if (window._replyTo) {
+        msgData.replyTo = { msgId: window._replyTo.msgId, text: window._replyTo.text, sender: window._replyTo.sender };
+        window.cancelReply();
+      }
       try {
-        await _db.collection('chats').doc(window._chatActiveSid).collection('messages').add({
-          text: text, sender: 'manager', ts: Date.now(), readByManager: true, readByStudent: false
-        });
+        await _db.collection('chats').doc(window._chatActiveSid).collection('messages').add(msgData);
         window.loadChatDetailMessages().catch(function(e){ console.warn('loadChatDetailMessages:', e.message); });
         window.loadChatList().catch(function(e){ console.warn('loadChatList pós-envio:', e.message); });
       } catch (e) { toast('Erro ao enviar: ' + e.message, 'error'); }
