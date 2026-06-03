@@ -4274,6 +4274,35 @@
       font-weight: 600;
     }
 
+    /* ── SEPARADOR DE DIA ── */
+    .chat-day-sep {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0 6px;
+      align-self: stretch;
+      width: 100%;
+    }
+    .chat-day-sep::before,
+    .chat-day-sep::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .chat-day-sep-label {
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      white-space: nowrap;
+      background: var(--surface2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
     /* ── REPLY / RESPONDER ── */
     .chat-msg-row {
       display: flex;
@@ -14541,9 +14570,39 @@
 
         var wasAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
 
+        // Função auxiliar: rótulo do dia
+        function _dayLabel(date) {
+          var today = new Date();
+          var yesterday = new Date(today);
+          yesterday.setDate(today.getDate() - 1);
+          function sameDay(a, b) {
+            return a.getFullYear() === b.getFullYear() &&
+                   a.getMonth()    === b.getMonth()    &&
+                   a.getDate()     === b.getDate();
+          }
+          if (sameDay(date, today))     return 'Hoje';
+          if (sameDay(date, yesterday)) return 'Ontem';
+          return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+        function _dayKey(date) {
+          return date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate();
+        }
+        var lastDayKey = null;
+
         var html = msgs.map(function (m) {
           var mine = m.sender === 'manager';
-          var time = m.ts ? new Date(m.ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+          var msgDate = m.ts ? new Date(m.ts) : null;
+          var time = msgDate ? msgDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+
+          // Separador de dia
+          var daySepHtml = '';
+          if (msgDate) {
+            var dk = _dayKey(msgDate);
+            if (dk !== lastDayKey) {
+              lastDayKey = dk;
+              daySepHtml = '<div class="chat-day-sep"><span class="chat-day-sep-label">' + _dayLabel(msgDate) + '</span></div>';
+            }
+          }
           // Quote (resposta a outra mensagem)
           var quoteHtml = '';
           if (m.replyTo) {
@@ -14575,7 +14634,7 @@
           var replyBtn = '<button class="chat-reply-btn" title="Responder" onclick="event.stopPropagation();setReply(\''+m.id+'\',\''+escHtml(m.text).replace(/'/g,'\\\'').slice(0,80)+'\',\''+(mine?'manager':'student')+'\')">'
             + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>'
             + '</button>';
-          return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="cmsg_'+m.id+'" data-msgid="'+m.id+'" data-text="'+escHtml(m.text).replace(/"/g,'&quot;').slice(0,80)+'" data-sender="'+(mine?'manager':'student')+'">'
+          return daySepHtml + '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="cmsg_'+m.id+'" data-msgid="'+m.id+'" data-text="'+escHtml(m.text).replace(/"/g,'&quot;').slice(0,80)+'" data-sender="'+(mine?'manager':'student')+'">'
             + pickerBar
             + '<div class="chat-msg-row">'
             + '<div class="chat-bubble">' + quoteHtml + escHtml(m.text) + '</div>'
