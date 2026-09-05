@@ -8618,6 +8618,38 @@
     </div>
   </div>
 
+  <!-- MODAL: MENSAGEM DIRETA DO CEO PARA QUALQUER ALUNO -->
+  <!-- Compose-only: propositalmente NÃO carrega o histórico da conversa do aluno
+       com o personal responsável — o CEO só pode enviar uma nova mensagem,
+       identificada como vinda do CEO, sem ler a conversa privada de outro personal. -->
+  <div id="modal-ceo-message" class="modal-overlay hidden">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>⭐ Mensagem como CEO</h3>
+        <button class="close-btn" onclick="closeModal('modal-ceo-message')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;">
+          <div id="ceo-msg-avatar" class="avatar" style="width:36px;height:36px;font-size:.82rem;flex-shrink:0;"></div>
+          <div>
+            <div id="ceo-msg-name" style="font-weight:700;font-size:.9rem;"></div>
+            <div style="font-size:.73rem;color:var(--text3);font-weight:600;">Aluno de outro personal</div>
+          </div>
+        </div>
+        <p style="font-size:.8rem;color:var(--text2);margin-bottom:12px;line-height:1.5;">
+          Por privacidade, o CEO não visualiza o histórico da conversa deste aluno com o personal responsável.
+          A mensagem abaixo será enviada diretamente e aparecerá para o aluno identificada como <strong>CEO</strong>.
+        </p>
+        <textarea id="ceo-msg-text" rows="4" placeholder="Escreva sua mensagem..." style="width:100%;resize:vertical;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:.88rem;"></textarea>
+        <div id="ceo-msg-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:18px;margin-top:8px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-ceo-message')">Cancelar</button>
+        <button id="btn-send-ceo-msg" class="btn btn-primary" style="background:linear-gradient(135deg,#f5c800,#e0a800);color:#111;" onclick="sendCeoMessageDirect()">Enviar como CEO →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: CONFIRMAR TRANSFERÊNCIA -->
   <div id="modal-transfer-confirm" class="modal-overlay hidden">
     <div class="modal confirm-modal">
@@ -10569,6 +10601,9 @@
 
       const age = s.dob ? calcAge(s.dob) : null;
       const sexLabel = { M: 'Masculino', F: 'Feminino', O: 'Outro' }[s.sex] || '';
+      const _cuNow = window.CURRENT_USER || {};
+      const isCeoViewer = _cuNow.role === 'ceo';
+      const isForeignStudent = isCeoViewer && s.managerId && s.managerId !== _cuNow.username;
 
       dv.innerHTML = `
     <button class="back-btn" onclick="showStudentsList()">← Voltar</button>
@@ -10594,6 +10629,7 @@
         ${s.email ? `<div style="font-size:.82rem;color:var(--text2);margin-top:2px;font-weight:500;">✉️ ${s.email}</div>` : ''}
       </div>
       <div class="detail-actions" style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
+        ${isForeignStudent ? `<button class="btn btn-primary btn-sm" style="background:linear-gradient(135deg,#f5c800,#e0a800);color:#111;" onclick="openCeoMessageModal('${sid}','${(s.name||'').replace(/'/g,"\\'")}')">⭐ Mensagem como CEO</button>` : ''}
         ${s.phone ? `<button class="btn btn-whatsapp btn-sm" onclick="${active.length ? `sendWhatsAppPlan('${sid}','${active[0].id}')` : `contactWhatsApp('${s.phone}','${s.name}')`}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Enviar via WhatsApp</button>` : ''}
         <button class="btn btn-ghost btn-sm" onclick="openEditStudentModal('${sid}')">✏️ Editar</button>
         <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">Excluir</button>
@@ -14750,14 +14786,26 @@
       try {
         var u = window.CURRENT_USER || {};
         // Get all students for this manager
+        // IMPORTANTE: mesmo sendo CEO, a aba Chat só pode listar/abrir as conversas
+        // dos ALUNOS DO PRÓPRIO CEO. Conversas de alunos de outros personais são
+        // privadas entre aquele personal e o aluno — o CEO não deve ler nem carregar
+        // essas mensagens aqui. Para falar com qualquer aluno, o CEO usa o botão
+        // "Mensagem como CEO" no perfil do aluno (openCeoMessageModal), que não
+        // expõe o histórico da conversa do personal responsável.
         var q;
         if (u.role === 'ceo' || u.isMaster) {
-          q = _query(_col(_db, 'students'), _orderBy('createdAt', 'desc'), _limit(500)); // #10
+          // CEO: busca todos os alunos, mas filtra em seguida para SÓ os próprios
+          // (não usamos where(managerId) aqui pois precisamos incluir também
+          // legado sem managerId, tratado como próprio do CEO — igual à lista de Alunos)
+          q = _query(_col(_db, 'students'), _orderBy('createdAt', 'desc'), _limit(500));
         } else {
           q = _query(_col(_db, 'students'), _where('managerId', '==', u.username), _limit(500)); // #10
         }
         var snap = await _getDocs(q);
         var students = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+        if (u.role === 'ceo' || u.isMaster) {
+          students = students.filter(function (s) { return !s.managerId || s.managerId === u.username; });
+        }
 
         // #7 — Paralelo com Promise.all (era loop sequencial N+1 queries)
         // #11 — catch com console.warn em vez de silenciado
@@ -14931,10 +14979,11 @@
           var replyBtn = '<button class="chat-reply-btn" title="Responder" onclick="event.stopPropagation();setReply(\''+m.id+'\',\''+escHtml(m.text).replace(/'/g,'\\\'').slice(0,80)+'\',\''+(mine?'manager':'student')+'\')">'
             + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>'
             + '</button>';
+          var ceoTagHtml = m.senderRole === 'ceo' ? '<div style="font-size:.65rem;font-weight:800;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">⭐ ' + escHtml(m.senderName || 'CEO') + '</div>' : '';
           return daySepHtml + '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="cmsg_'+m.id+'" data-msgid="'+m.id+'" data-text="'+escHtml(m.text).replace(/"/g,'&quot;').slice(0,80)+'" data-sender="'+(mine?'manager':'student')+'">'
             + pickerBar
             + '<div class="chat-msg-row">'
-            + '<div class="chat-bubble">' + quoteHtml + escHtml(m.text) + '</div>'
+            + '<div class="chat-bubble">' + quoteHtml + ceoTagHtml + escHtml(m.text) + '</div>'
             + replyBtn
             + '</div>'
             + reactionHtml
@@ -15105,12 +15154,64 @@
       }
     });
 
+    // ── CEO: enviar mensagem direta a um aluno de outro personal ──
+    // Não lê/mostra o histórico da conversa (privacidade do personal responsável).
+    // A mensagem é gravada com senderRole/senderName = CEO para que o app do aluno
+    // identifique claramente que não foi o personal quem escreveu.
+    window.openCeoMessageModal = function (sid, name) {
+      window._ceoMsgTargetSid = sid;
+      document.getElementById('ceo-msg-name').textContent = name || 'Aluno';
+      document.getElementById('ceo-msg-avatar').textContent = (name || '?').slice(0, 2).toUpperCase();
+      document.getElementById('ceo-msg-text').value = '';
+      document.getElementById('ceo-msg-error').textContent = '';
+      window.openModal('modal-ceo-message');
+    };
+
+    window.sendCeoMessageDirect = async function () {
+      var sid = window._ceoMsgTargetSid;
+      var errEl = document.getElementById('ceo-msg-error');
+      var text = (document.getElementById('ceo-msg-text').value || '').trim();
+      if (!sid) return;
+      if (!text) { errEl.textContent = 'Escreva uma mensagem antes de enviar.'; return; }
+      var u = window.CURRENT_USER || {};
+      if (u.role !== 'ceo') { errEl.textContent = 'Apenas o CEO pode usar este envio.'; return; }
+      var btn = document.getElementById('btn-send-ceo-msg');
+      btn.disabled = true; btn.textContent = 'Enviando...';
+      try {
+        await _db.collection('chats').doc(sid).collection('messages').add({
+          text: text,
+          sender: 'manager',
+          senderRole: 'ceo',
+          senderName: u.displayName || 'CEO',
+          ts: Date.now(),
+          readByManager: true,
+          readByStudent: false,
+        });
+        toast('Mensagem enviada como CEO!');
+        window.closeModal('modal-ceo-message');
+      } catch (e) {
+        errEl.textContent = 'Erro ao enviar: ' + e.message;
+      } finally {
+        btn.disabled = false; btn.textContent = 'Enviar como CEO →';
+      }
+    };
+
     window.sendChatMessageGestor = async function () {
       var inp = document.getElementById('chat-gestor-input');
       var text = (inp.value || '').trim();
       if (!text || !window._chatActiveSid) return;
       inp.value = ''; inp.style.height = '';
+      var u = window.CURRENT_USER || {};
       var msgData = { text: text, sender: 'manager', ts: Date.now(), readByManager: true, readByStudent: false };
+      // Identifica quem realmente enviou. Se for o CEO, marca explicitamente para
+      // que o app do aluno possa exibir "CEO" em vez do nome do personal responsável.
+      if (u.role === 'ceo') {
+        msgData.senderRole = 'ceo';
+        msgData.senderName = u.displayName || 'CEO';
+      } else {
+        msgData.senderRole = 'manager';
+        msgData.senderName = u.displayName || u.username || '';
+      }
       if (window._replyTo) {
         msgData.replyTo = { msgId: window._replyTo.msgId, text: window._replyTo.text, sender: window._replyTo.sender };
         window.cancelReply();
@@ -15166,7 +15267,16 @@
 
       try {
         var snap = await _getDocs(q);
-        snap.docs.forEach(function (d) {
+        var docsToWatch = snap.docs;
+        if (u.role === 'ceo' || u.isMaster) {
+          // O badge de "não lidas" da aba Chat também só pode refletir os PRÓPRIOS
+          // alunos do CEO — não os de outros personais (mesma regra da lista de chats).
+          docsToWatch = docsToWatch.filter(function (d) {
+            var s = d.data();
+            return !s.managerId || s.managerId === u.username;
+          });
+        }
+        docsToWatch.forEach(function (d) {
           var sid = d.id;
           // Listener em tempo real para mensagens não lidas deste aluno
           // Evita índice composto: filtra só por sender, checa readByManager em JS
