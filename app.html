@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#111110" />
-  <title>Trainly — Painel do Personal</title>
+  <title>Trainly - Painel do Personal</title>
 
 
 
@@ -2637,7 +2637,9 @@
       flex-shrink: 0;
       user-select: none;
       transition: color .15s;
-      padding: 2px;
+      padding: 8px 6px;
+      margin: -6px -2px;
+      touch-action: none;
     }
 
     .drag-handle:hover {
@@ -13558,67 +13560,85 @@
       setTimeout(initDragDrop, 0);
     };
 
-    // ── Drag-and-drop reordering ──
+    // ── Drag-and-drop reordering (Pointer Events: mouse + touch) ──
     window.initDragDrop = function () {
-      // Only allow drag when initiated from the handle
-      let _dragAllowed = false;
+      document.querySelectorAll('.exercises-list').forEach(list => {
+        list.querySelectorAll('.drag-handle').forEach(handle => {
+          if (handle._dndBound) return;
+          handle._dndBound = true;
+          handle.style.touchAction = 'none';
 
-      document.querySelectorAll('.exercise-item').forEach(item => {
-        const handle = item.querySelector('.drag-handle');
-
-        // Enable drag only on handle mousedown/touchstart
-        if (handle) {
-          handle.addEventListener('mousedown', () => { _dragAllowed = true; item.draggable = true; });
-          handle.addEventListener('touchstart', () => { _dragAllowed = true; item.draggable = true; }, { passive: true });
-        }
-
-        // Disable drag on mouseup anywhere (covers click-to-select text in inputs)
-        item.addEventListener('mouseup', () => { _dragAllowed = false; item.draggable = false; });
-        item.addEventListener('mouseleave', () => { if (!_dragAllowed) { item.draggable = false; } });
-
-        // Prevent drag starting from inputs, selects, textareas
-        item.addEventListener('dragstart', e => {
-          const tag = (e.target.tagName || '').toLowerCase();
-          if (!_dragAllowed || ['input', 'select', 'textarea', 'label'].includes(tag)) {
+          handle.addEventListener('pointerdown', e => {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            const item = handle.closest('.exercise-item');
+            if (!item) return;
             e.preventDefault();
-            item.draggable = false;
-            return;
-          }
-          e.dataTransfer.effectAllowed = 'move';
-          e.dataTransfer.setData('text/plain', JSON.stringify({
-            bi: +item.dataset.bi,
-            ei: +item.dataset.ei
-          }));
-          item.classList.add('dragging');
-        });
-        item.addEventListener('dragend', () => {
-          _dragAllowed = false;
-          item.draggable = false;
-          item.classList.remove('dragging');
-          document.querySelectorAll('.exercise-item').forEach(i => i.classList.remove('drag-over'));
-        });
-        item.addEventListener('dragover', e => {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
-          document.querySelectorAll('.exercise-item').forEach(i => i.classList.remove('drag-over'));
-          item.classList.add('drag-over');
-        });
-        item.addEventListener('dragleave', () => {
-          item.classList.remove('drag-over');
-        });
-        item.addEventListener('drop', e => {
-          e.preventDefault();
-          item.classList.remove('drag-over');
-          try {
-            const { bi: fromBi, ei: fromEi } = JSON.parse(e.dataTransfer.getData('text/plain'));
-            const toBi = +item.dataset.bi;
-            const toEi = +item.dataset.ei;
-            if (fromBi !== toBi || fromEi === toEi) return;
-            const exs = ST.workoutBlocks[fromBi].exercises;
-            const [moved] = exs.splice(fromEi, 1);
-            exs.splice(toEi, 0, moved);
-            renderWorkoutsEditor();
-          } catch (err) { }
+
+            const items = Array.from(list.querySelectorAll('.exercise-item'));
+            const fromIdx = items.indexOf(item);
+            const bi = +item.dataset.bi;
+            const startY = e.clientY;
+            const prevScroll = list.closest('.modal-body');
+            let toIdx = fromIdx;
+
+            try { handle.setPointerCapture(e.pointerId); } catch (_) { }
+            item.classList.add('dragging');
+            item.style.position = 'relative';
+            item.style.zIndex = '50';
+            item.style.transition = 'none';
+            document.body.style.userSelect = 'none';
+
+            const rects = items.map(it => it.getBoundingClientRect());
+
+            const onMove = ev => {
+              const dy = ev.clientY - startY;
+              item.style.transform = `translateY(${dy}px)`;
+              // Auto-scroll do modal perto das bordas
+              if (prevScroll) {
+                const r = prevScroll.getBoundingClientRect();
+                if (ev.clientY < r.top + 50) prevScroll.scrollTop -= 12;
+                else if (ev.clientY > r.bottom - 50) prevScroll.scrollTop += 12;
+              }
+              // Descobre o índice alvo pela posição atual do card arrastado
+              const center = rects[fromIdx].top + rects[fromIdx].height / 2 + dy;
+              let t = fromIdx;
+              for (let i = 0; i < rects.length; i++) {
+                const mid = rects[i].top + rects[i].height / 2;
+                if (i < fromIdx && center < mid) { t = i; break; }
+                if (i > fromIdx && center > mid) { t = i; }
+              }
+              toIdx = t;
+              items.forEach((it, i) => it.classList.toggle('drag-over', i === toIdx && i !== fromIdx));
+            };
+
+            const cleanup = () => {
+              handle.removeEventListener('pointermove', onMove);
+              handle.removeEventListener('pointerup', onUp);
+              handle.removeEventListener('pointercancel', onCancel);
+              try { handle.releasePointerCapture(e.pointerId); } catch (_) { }
+              document.body.style.userSelect = '';
+              items.forEach(it => it.classList.remove('drag-over'));
+              item.classList.remove('dragging');
+              item.style.transform = '';
+              item.style.position = '';
+              item.style.zIndex = '';
+              item.style.transition = '';
+            };
+            const onCancel = () => cleanup();
+            const onUp = () => {
+              cleanup();
+              if (toIdx !== fromIdx) {
+                const exs = ST.workoutBlocks[bi].exercises;
+                const [moved] = exs.splice(fromIdx, 1);
+                exs.splice(toIdx, 0, moved);
+                _rerenderActiveEditor();
+              }
+            };
+
+            handle.addEventListener('pointermove', onMove);
+            handle.addEventListener('pointerup', onUp);
+            handle.addEventListener('pointercancel', onCancel);
+          });
         });
       });
     };
