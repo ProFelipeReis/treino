@@ -6076,6 +6076,117 @@
         -webkit-touch-callout: none !important;
       }
     }
+    /* ── Troca de senha de gestores (CEO / MASTER) ── */
+    .mgr-reset-notice {
+      margin-top: 10px;
+      font-size: .74rem;
+      font-weight: 600;
+      color: #8a6c00;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-soft);
+      border-radius: 8px;
+      padding: 7px 10px;
+      line-height: 1.45;
+    }
+
+    .mgr-reset-confirm {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: var(--r);
+      background: var(--red-dim);
+      border: 1px solid rgba(224, 62, 62, .25);
+    }
+
+    .mgr-reset-confirm.open { display: block; }
+
+    .mgr-reset-confirm-title {
+      font-size: .82rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .mgr-reset-confirm-text {
+      font-size: .76rem;
+      color: var(--text2);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .mgr-reset-confirm-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .pwreq-box {
+      background: var(--accent-dim);
+      border: 1.5px solid var(--accent-soft);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .pwreq-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .84rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .pwreq-count {
+      background: var(--accent);
+      color: #111110;
+      border-radius: 99px;
+      font-size: .7rem;
+      font-weight: 800;
+      padding: 1px 8px;
+    }
+
+    .pwreq-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 0;
+      border-top: 1px solid var(--accent-soft);
+    }
+
+    .pwreq-item:first-of-type { border-top: none; padding-top: 0; }
+
+    .pwreq-info { min-width: 0; }
+    .pwreq-name { font-size: .84rem; font-weight: 700; color: var(--text); }
+    .pwreq-meta { font-size: .72rem; color: var(--text3); margin-top: 2px; }
+    .pwreq-actions { display: flex; gap: 6px; align-items: center; }
+    .pwreq-note { font-size: .72rem; color: var(--text3); font-weight: 600; }
+
+    .pw-badge {
+      margin-left: auto;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 99px;
+      background: var(--red);
+      color: #fff;
+      font-size: .66rem;
+      font-weight: 800;
+      line-height: 18px;
+      text-align: center;
+    }
+
+    .mobile-nav-item-gestores { position: relative; }
+    .mobile-nav-item-gestores .pw-badge {
+      position: absolute;
+      top: 2px;
+      left: calc(50% + 4px);
+      margin-left: 0;
+    }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png" />
@@ -7369,6 +7480,7 @@
             </div>
             <div style="font-size:.72rem;color:var(--text3);margin-top:6px;">⏳ Válido por 48h · Uso único</div>
           </div>
+          <div id="pwreset-requests-box"></div>
           <div id="managers-grid" class="students-grid">
             <div class="spinner"></div>
           </div>
@@ -14517,7 +14629,7 @@
             } catch (authErr) {
               if (authErr.code === 'auth/requires-recent-login') {
                 // Reautentica automaticamente e tenta novamente
-                var authEmail = _authEmail(u.username);
+                var authEmail = u.authEmail || _authEmail(u.username);
                 var oldPass = document.getElementById('profile-pass-current') ? document.getElementById('profile-pass-current').value : null;
                 if (oldPass) {
                   var cred = firebase.auth.EmailAuthProvider.credential(authEmail, oldPass);
@@ -14726,7 +14838,9 @@
       try {
         var snap = await _getDocs(_query(_col(_db, 'managers'), _orderBy('createdAt', 'desc'), _limit(500))); // #10
         var managers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        managers.forEach(function (m) { window._mgrByUser[m.username] = m; });
         renderManagersGrid(managers);
+        renderPwResetBox();
       } catch (e) {
         g.innerHTML = `<div style="padding:20px;color:red;font-size:12px;grid-column:1/-1;">Erro: ${e.message}</div>`;
       }
@@ -14739,7 +14853,7 @@
         return;
       }
       g.innerHTML = list.map(m => `
-    <div class="student-card">
+    <div class="student-card" id="mgr-card-${m.id}">
       <div class="student-card-top">
         <div class="avatar" style="${m.isMaster ? 'background:var(--accent-dim);border-color:var(--accent-soft);' : ''}">${(m.name || m.username || '?').slice(0, 2).toUpperCase()}</div>
         <div>
@@ -14751,11 +14865,13 @@
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:4px;">
         <span class="mgr-badge ${m.role === 'ceo' ? 'mgr-ceo' : m.isMaster ? 'mgr-master' : 'mgr-comum'}">${m.role === 'ceo' ? '⭐ CEO' : m.isMaster ? '⭐ Master' : 'Comum'}</span>
-        <div style="display:flex;gap:6px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${_mgrResetBtn(m)}
           <button class="btn btn-ghost btn-sm" onclick="openAddManagerModal(${JSON.stringify(m).replace(/"/g, '&quot;')})">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="deleteManager('${m.id}','${m.username}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
         </div>
       </div>
+      ${_mgrResetPanel(m)}
     </div>`).join('');
     };
 
@@ -14765,6 +14881,232 @@
       toast('Gestor excluído.');
       await loadManagers();
     };
+
+    // ═══════════════════════════════════════════
+    // TROCA DE SENHA DE GESTORES (CEO / MASTER) — 100% no navegador
+    // Fluxo: botão no card → confirmar → senha apagada (gestor fica "pendente")
+    //        → no próximo login ele cria e repete a nova senha (login.html).
+    // Também recebe as solicitações feitas pela tela de login.
+    // ═══════════════════════════════════════════
+    window._mgrByUser = window._mgrByUser || {};
+
+    function _roleOf(m) { return (m && (m.role || (m.isMaster ? 'master' : 'comum'))) || 'comum'; }
+
+    // Quem pode ter a senha trocada por quem:
+    //  • CEO    → qualquer gestor, exceto ele mesmo
+    //  • MASTER → somente gestores comuns (nunca CEO nem outro MASTER)
+    function _canResetMgrPassword(m) {
+      var u = window.CURRENT_USER || {};
+      var me = _roleOf(u);
+      if (me !== 'ceo' && me !== 'master') return false;
+      if (!m || m.username === u.username) return false;
+      var target = _roleOf(m);
+      if (target === 'ceo') return false;
+      if (me === 'master' && target !== 'comum') return false;
+      return true;
+    }
+
+    // Conta "substituta" usada quando o gestor esqueceu a senha (mesma regra no login.html).
+    // O ponto no e-mail garante que nunca colide com o e-mail de outro usuário.
+    function _authEmailAlt(username) {
+      return username.toLowerCase().replace(/[^a-z0-9]/g, '') + '.reset@trainly-app.internal';
+    }
+    async function _tempPassFor(username) {
+      return 'Tr!' + (await window._sha256(username.toLowerCase() + '|trainly-reset-v1')).slice(0, 24);
+    }
+
+    function _mgrResetBtn(m) {
+      if (!_canResetMgrPassword(m)) return '';
+      return '<button class="btn btn-ghost btn-sm" id="mgr-reset-btn-' + m.id + '" onclick="mgrResetAsk(\'' + m.id + '\')" title="Trocar senha">'
+        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Trocar senha</button>';
+    }
+
+    function _mgrResetPanel(m) {
+      var notice = m.mustSetPassword
+        ? '<div class="mgr-reset-notice">Senha apagada. O gestor vai criar uma nova no próximo login.</div>'
+        : '';
+      if (!_canResetMgrPassword(m)) return notice;
+      var who = escHtml(m.name || m.username);
+      return notice
+        + '<div class="mgr-reset-confirm" id="mgr-reset-confirm-' + m.id + '">'
+        + '<div class="mgr-reset-confirm-title">Apagar a senha de @' + escHtml(m.username) + '?</div>'
+        + '<div class="mgr-reset-confirm-text">A senha atual deixa de valer. No próximo login, ' + who + ' vai criar uma nova senha e repeti-la.</div>'
+        + '<div class="mgr-reset-confirm-actions">'
+        + '<button class="btn btn-ghost btn-sm" onclick="mgrResetCancel(\'' + m.id + '\')">Cancelar</button>'
+        + '<button class="btn btn-danger btn-sm" id="mgr-reset-go-' + m.id + '" onclick="mgrResetConfirm(\'' + m.id + '\')">Confirmar troca de senha</button>'
+        + '</div></div>';
+    }
+
+    window.mgrResetAsk = function (id) {
+      document.querySelectorAll('.mgr-reset-confirm.open').forEach(function (el) { el.classList.remove('open'); });
+      var box = document.getElementById('mgr-reset-confirm-' + id);
+      if (box) box.classList.add('open');
+    };
+
+    window.mgrResetCancel = function (id) {
+      var box = document.getElementById('mgr-reset-confirm-' + id);
+      if (box) box.classList.remove('open');
+    };
+
+    // Apaga a senha: marca o gestor como "pendente" e prepara a conta temporária de entrada.
+    async function _applyPasswordReset(managerId) {
+      var u = window.CURRENT_USER || {};
+      var snap = await _db.collection('managers').doc(managerId).get();
+      if (!snap.exists) throw new Error('Gestor não encontrado.');
+      var m = Object.assign({ id: snap.id }, snap.data());
+      if (!_canResetMgrPassword(m)) throw new Error('Você não tem permissão para trocar a senha deste gestor.');
+
+      var alt = _authEmailAlt(m.username);
+      if (m.authEmail === alt) {
+        throw new Error('Este gestor já passou por uma troca sem a senha antiga. Uma nova troca só é possível se ele lembrar a senha atual.');
+      }
+
+      // App secundário: cria a conta temporária sem derrubar a sessão de quem está logado
+      var tmpApp = firebase.initializeApp(firebase.app().options, 'reset-' + Date.now());
+      try {
+        try {
+          await tmpApp.auth().createUserWithEmailAndPassword(alt, await _tempPassFor(m.username));
+        } catch (e) {
+          if (e.code !== 'auth/email-already-in-use') throw e;
+        }
+        try { await tmpApp.auth().signOut(); } catch (e) { }
+      } finally {
+        try { await tmpApp.delete(); } catch (e) { }
+      }
+
+      await _db.collection('managers').doc(m.id).update({
+        passwordHash: null, password: null,
+        mustSetPassword: true,
+        passwordResetBy: u.username || '', passwordResetAt: Date.now()
+      });
+
+      // Fecha as solicitações pendentes desse usuário
+      var rs = await _db.collection('passwordResetRequests')
+        .where('username', '==', m.username).where('status', '==', 'pending').get();
+      if (!rs.empty) {
+        var batch = _db.batch();
+        rs.docs.forEach(function (d) {
+          batch.update(d.ref, { status: 'approved', resolvedBy: u.username || '', resolvedAt: Date.now() });
+        });
+        await batch.commit();
+      }
+    }
+
+    async function _runReset(managerId, btn, idleLabel) {
+      if (btn) { btn.classList.add('btn-loading'); btn.textContent = 'Apagando...'; }
+      try {
+        await _applyPasswordReset(managerId);
+        toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Senha apagada. O gestor criará uma nova no próximo login.');
+        await loadManagers();
+      } catch (e) {
+        toast('Não foi possível trocar a senha: ' + (e && e.message ? e.message : 'erro desconhecido'), 'error');
+        if (btn) { btn.classList.remove('btn-loading'); btn.textContent = idleLabel; }
+      }
+    }
+
+    window.mgrResetConfirm = function (id) {
+      return _runReset(id, document.getElementById('mgr-reset-go-' + id), 'Confirmar troca de senha');
+    };
+
+    // ── Solicitações vindas da tela de login ──
+    window._pwResetPending = [];
+
+    function _pendingByUser() {
+      var seen = {}, out = [];
+      (window._pwResetPending || []).forEach(function (r) {
+        if (!r.username || seen[r.username]) return;
+        seen[r.username] = true; out.push(r);
+      });
+      return out;
+    }
+
+    function renderPwResetBox() {
+      var box = document.getElementById('pwreset-requests-box');
+      if (!box) return;
+      var list = _pendingByUser();
+      if (!list.length) { box.innerHTML = ''; return; }
+      box.innerHTML = '<div class="pwreq-box">'
+        + '<div class="pwreq-title">Solicitações de troca de senha <span class="pwreq-count">' + list.length + '</span></div>'
+        + list.map(function (r) {
+          var m = window._mgrByUser[r.username];
+          var when = r.createdAt ? new Date(r.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+          var enc = encodeURIComponent(r.username);
+          var reject = '<button class="btn btn-ghost btn-sm" data-user="' + enc + '" onclick="pwReqReject(this)">Recusar</button>';
+          var actions, name = escHtml((m && m.name) || r.username);
+          if (m === null) actions = '<span class="pwreq-note">Usuário não encontrado</span>' + reject;
+          else if (m && !_canResetMgrPassword(m)) actions = '<span class="pwreq-note">Somente o CEO pode aprovar</span>' + reject;
+          else actions = reject + '<button class="btn btn-primary btn-sm" data-user="' + enc + '" onclick="pwReqApprove(this)">Aprovar</button>';
+          return '<div class="pwreq-item">'
+            + '<div class="pwreq-info"><div class="pwreq-name">' + name + ' <span style="color:var(--text3);font-weight:600;">@' + escHtml(r.username) + '</span></div>'
+            + '<div class="pwreq-meta">Pediu troca de senha' + (when ? ' em ' + when : '') + '</div></div>'
+            + '<div class="pwreq-actions">' + actions + '</div></div>';
+        }).join('')
+        + '</div>';
+    }
+    window.renderPwResetBox = renderPwResetBox;
+
+    function _updatePwResetBadge() {
+      var n = _pendingByUser().length;
+      document.querySelectorAll('.sidebar-item-gestores,.mobile-nav-item-gestores').forEach(function (el) {
+        var b = el.querySelector('.pw-badge');
+        if (!n) { if (b) b.remove(); return; }
+        if (!b) { b = document.createElement('span'); b.className = 'pw-badge'; el.appendChild(b); }
+        b.textContent = n;
+      });
+    }
+
+    window.pwReqApprove = function (btn) {
+      var user = decodeURIComponent(btn.dataset.user);
+      var m = window._mgrByUser[user];
+      if (!m) return;
+      return _runReset(m.id, btn, 'Aprovar');
+    };
+
+    window.pwReqReject = async function (btn) {
+      var user = decodeURIComponent(btn.dataset.user);
+      var u = window.CURRENT_USER || {};
+      try {
+        var rs = await _db.collection('passwordResetRequests')
+          .where('username', '==', user).where('status', '==', 'pending').get();
+        var batch = _db.batch();
+        rs.docs.forEach(function (d) {
+          batch.update(d.ref, { status: 'rejected', resolvedBy: u.username || '', resolvedAt: Date.now() });
+        });
+        await batch.commit();
+        toast('Solicitação recusada.');
+      } catch (e) {
+        toast('Erro ao recusar: ' + e.message, 'error');
+      }
+    };
+
+    async function _ensureMgrCache(list) {
+      for (var i = 0; i < list.length; i++) {
+        var uname = list[i].username;
+        if (!uname || window._mgrByUser[uname] !== undefined) continue;
+        try {
+          var s = await _db.collection('managers').where('username', '==', uname).limit(1).get();
+          window._mgrByUser[uname] = s.empty ? null : Object.assign({ id: s.docs[0].id }, s.docs[0].data());
+        } catch (e) { }
+      }
+    }
+
+    // Escuta solicitações pendentes em tempo real (só CEO / MASTER, após o Auth estar pronto)
+    (function startPwResetListener() {
+      var timer = setInterval(function () {
+        var u = window.CURRENT_USER;
+        if (!u || !(u.role === 'ceo' || u.role === 'master' || u.isMaster)) return;
+        if (typeof _auth === 'undefined' || !_auth || !_auth.currentUser) return;
+        clearInterval(timer);
+        _db.collection('passwordResetRequests').where('status', '==', 'pending').onSnapshot(async function (snap) {
+          window._pwResetPending = snap.docs
+            .map(function (d) { return Object.assign({ id: d.id }, d.data()); })
+            .sort(function (a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
+          await _ensureMgrCache(window._pwResetPending);
+          renderPwResetBox();
+          _updatePwResetBadge();
+        }, function (err) { console.warn('passwordResetRequests:', err.message); });
+      }, 1500);
+    })();
 
     // ── Verifica retorno de pagamento MP na inicialização ──
     document.addEventListener('DOMContentLoaded', function () {
