@@ -11734,6 +11734,8 @@
 
     // ── Escolha Manual ──
     window.choosePlanCreationManual = () => {
+      // Agora a criação manual segue o fluxo guiado (AB/ABC/ABCD/ABCDE -> exercícios -> séries/reps)
+      if (window.choosePlanCreationQuick) { return choosePlanCreationQuick(); }
       closeModal('modal-plan-creation-type');
       document.getElementById('peinfo-error').textContent = '';
       document.getElementById('peinfo-title').value = '';
