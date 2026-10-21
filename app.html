@@ -8871,6 +8871,14 @@
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+        <button class="plan-creation-type-btn plan-creation-type-btn--quick" onclick="choosePlanCreationQuick()">
+          <div class="plan-creation-type-icon">⚡</div>
+          <div class="plan-creation-type-text">
+            <strong>Criação rápida</strong>
+            <span>Escolha AB, ABC, ABCD ou ABCDE e selecione os exercícios de cada treino</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
         <button class="plan-creation-type-btn plan-creation-type-btn--ai" onclick="choosePlanCreationAuto()">
           <div class="plan-creation-type-icon">🤖</div>
           <div class="plan-creation-type-text">
@@ -8880,6 +8888,21 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CRIAÇÃO RÁPIDA DE PLANO -->
+  <div id="modal-quick-plan" class="modal-overlay hidden">
+    <div class="modal" style="max-width:640px;">
+      <div class="modal-header">
+        <div>
+          <h3>⚡ Criação rápida</h3>
+          <p id="qp-subtitle" style="font-size:.76rem;color:rgba(255,255,255,.6);font-weight:500;margin-top:2px;">Qual o plano de treino?</p>
+        </div>
+        <button class="close-btn" onclick="closeModal('modal-quick-plan')">✕</button>
+      </div>
+      <div class="modal-body" id="qp-body"></div>
+      <div class="modal-footer" id="qp-footer"></div>
     </div>
   </div>
 
@@ -13046,6 +13069,161 @@
           exercises: exercises.slice(0, exPerWorkout),
         };
       });
+    }
+
+    // ══════════════ CRIAÇÃO RÁPIDA ══════════════
+    // Fluxo: escolhe AB/ABC/ABCD/ABCDE -> para cada letra: seleciona exercícios (por módulo) -> define séries/reps (só daquele treino)
+    const qpEsc = t => String(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    window._QP = null;
+
+    window.choosePlanCreationQuick = () => {
+      closeModal('modal-plan-creation-type');
+      window._QP = { type: '', title: '', start: '', expiry: '', step: 'setup', idx: 0, picks: [], sets: [], err: '' };
+      renderQuickPlan();
+      openModal('modal-quick-plan');
+    };
+
+    window.qpSet = (k, v) => { _QP[k] = v; };
+    window.qpPickType = (t) => {
+      if (_QP.type !== t) { _QP.picks = []; _QP.sets = []; }
+      _QP.type = t; _QP.err = ''; renderQuickPlan();
+    };
+
+    function renderQuickPlan() {
+      const Q = _QP, body = document.getElementById('qp-body'), foot = document.getElementById('qp-footer'), sub = document.getElementById('qp-subtitle');
+      const letters = Q.type.split('');
+      const L = letters[Q.idx];
+      const err = `<div style="color:var(--red);font-size:.82rem;font-weight:600;min-height:18px;margin-top:12px;">${qpEsc(Q.err || '')}</div>`;
+      const btnBack = (fn) => `<button class="btn btn-ghost" onclick="${fn}">Voltar</button>`;
+
+      if (Q.step === 'setup') {
+        sub.textContent = 'Qual o plano de treino?';
+        body.innerHTML = `
+          <div class="form-group" style="margin-bottom:14px;"><label>Nome do plano *</label>
+            <input class="form-control" type="text" placeholder="Ex: Plano Junho 2025" value="${qpEsc(Q.title)}" oninput="qpSet('title',this.value)"/></div>
+          <div class="form-row" style="margin-bottom:18px;">
+            <div class="form-group" style="margin-bottom:0;"><label>Data de início (opcional)</label><input class="form-control" type="date" value="${Q.start}" oninput="qpSet('start',this.value)"/></div>
+            <div class="form-group" style="margin-bottom:0;"><label>Data de vencimento (opcional)</label><input class="form-control" type="date" value="${Q.expiry}" oninput="qpSet('expiry',this.value)"/></div>
+          </div>
+          <div class="qp-label">Qual o plano de treino? *</div>
+          <div class="qp-types">${['AB', 'ABC', 'ABCD', 'ABCDE'].map(t => `<button type="button" class="qp-type ${Q.type === t ? 'selected' : ''}" onclick="qpPickType('${t}')">${t}</button>`).join('')}</div>${err}`;
+        foot.innerHTML = `<button class="btn btn-ghost" onclick="closeModal('modal-quick-plan')">Cancelar</button><button class="btn btn-primary" onclick="qpNext()">Continuar</button>`;
+        return;
+      }
+
+      if (Q.step === 'pick') {
+        const sel = Q.picks[Q.idx] || [];
+        sub.textContent = `Treino ${L} · ${Q.idx + 1} de ${letters.length} — selecione os exercícios`;
+        const mods = Object.entries(window.EX_LIB || {}).map(([cat, list]) => `
+          <div class="qp-module" data-mod>
+            <div class="qp-module-title">${qpEsc(cat)}</div>
+            <div class="qp-chips">${list.map(n => `<button type="button" class="qp-chip ${sel.includes(n) ? 'selected' : ''}" data-name="${qpEsc(n)}" onclick="qpToggle(this)">${qpEsc(n)}</button>`).join('')}</div>
+          </div>`).join('');
+        body.innerHTML = `
+          <input class="form-control" type="text" placeholder="🔍 Buscar exercício..." oninput="qpFilter(this.value)" style="margin-bottom:14px;"/>
+          ${mods}${err}`;
+        foot.innerHTML = `${btnBack('qpBack()')}<button class="btn btn-primary" id="qp-confirm-btn" onclick="qpNext()">Confirmar treino ${L} (<span id="qp-count">${sel.length}</span>)</button>`;
+        return;
+      }
+
+      // step === 'sets'
+      const sel = Q.picks[Q.idx] || [], cur = Q.sets[Q.idx] || { series: '3', reps: '12' };
+      sub.textContent = `Treino ${L} · ${Q.idx + 1} de ${letters.length} — séries e repetições`;
+      body.innerHTML = `
+        <div class="qp-label">Exercícios do Treino ${L} (${sel.length})</div>
+        <div class="qp-chips" style="margin-bottom:18px;">${sel.map(n => `<span class="qp-chip selected" style="cursor:default;">${qpEsc(n)}</span>`).join('')}</div>
+        <div class="qp-label">Quantas séries e repetições?</div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0;"><label>Séries</label><input class="form-control" type="number" min="1" max="20" value="${qpEsc(cur.series)}" oninput="qpSetSets('series',this.value)"/></div>
+          <div class="form-group" style="margin-bottom:0;"><label>Repetições</label><input class="form-control" type="text" placeholder="Ex: 12 ou 8-10" value="${qpEsc(cur.reps)}" oninput="qpSetSets('reps',this.value)"/></div>
+        </div>
+        <p style="font-size:.76rem;color:var(--text3);margin-top:10px;">Vale somente para o Treino ${L}. Os outros treinos terão a sua própria configuração.</p>${err}`;
+      const last = Q.idx === letters.length - 1;
+      foot.innerHTML = `${btnBack('qpBack()')}<button class="btn btn-primary" onclick="qpNext()">${last ? 'Criar plano' : 'Confirmar e ir para o Treino ' + letters[Q.idx + 1]}</button>`;
+    }
+
+    window.qpSetSets = (k, v) => { (_QP.sets[_QP.idx] = _QP.sets[_QP.idx] || { series: '3', reps: '12' })[k] = v; };
+
+    window.qpToggle = (el) => {
+      const n = el.dataset.name, arr = (_QP.picks[_QP.idx] = _QP.picks[_QP.idx] || []);
+      const i = arr.indexOf(n);
+      if (i === -1) arr.push(n); else arr.splice(i, 1);
+      document.querySelectorAll('#qp-body .qp-chip').forEach(c => { if (c.dataset.name === n) c.classList.toggle('selected', i === -1); });
+      const c = document.getElementById('qp-count'); if (c) c.textContent = arr.length;
+      _QP.err = '';
+    };
+
+    window.qpFilter = (q) => {
+      const t = q.trim().toLowerCase();
+      document.querySelectorAll('#qp-body .qp-chip').forEach(c => { c.style.display = (!t || c.dataset.name.toLowerCase().includes(t)) ? '' : 'none'; });
+      document.querySelectorAll('#qp-body [data-mod]').forEach(m => { m.style.display = [...m.querySelectorAll('.qp-chip')].some(c => c.style.display !== 'none') ? '' : 'none'; });
+    };
+
+    window.qpBack = () => {
+      const Q = _QP; Q.err = '';
+      if (Q.step === 'sets') Q.step = 'pick';
+      else if (Q.step === 'pick') { if (Q.idx === 0) Q.step = 'setup'; else { Q.idx--; Q.step = 'sets'; } }
+      renderQuickPlan();
+    };
+
+    window.qpNext = async () => {
+      const Q = _QP, letters = Q.type.split('');
+      Q.err = '';
+      if (Q.step === 'setup') {
+        if (!Q.title.trim()) Q.err = 'Informe o nome do plano.';
+        else if (!Q.type) Q.err = 'Selecione o plano de treino (AB, ABC, ABCD ou ABCDE).';
+        if (Q.err) return renderQuickPlan();
+        Q.step = 'pick'; Q.idx = 0; return renderQuickPlan();
+      }
+      if (Q.step === 'pick') {
+        if (!(Q.picks[Q.idx] || []).length) { Q.err = `Selecione pelo menos 1 exercício para o Treino ${letters[Q.idx]}.`; return renderQuickPlan(); }
+        Q.step = 'sets'; return renderQuickPlan();
+      }
+      // sets
+      const cur = Q.sets[Q.idx] || { series: '3', reps: '12' };
+      const n = parseInt(cur.series);
+      if (!n || n < 1 || n > 20) Q.err = 'Informe um número de séries entre 1 e 20.';
+      else if (!String(cur.reps).trim()) Q.err = 'Informe as repetições.';
+      if (Q.err) return renderQuickPlan();
+      Q.sets[Q.idx] = { series: String(n), reps: String(cur.reps).trim() };
+      if (Q.idx < letters.length - 1) { Q.idx++; Q.step = 'pick'; return renderQuickPlan(); }
+      await finishQuickPlan();
+    };
+
+    async function finishQuickPlan() {
+      const Q = _QP;
+      const btn = document.querySelector('#qp-footer .btn-primary');
+      if (btn) { btn.disabled = true; btn.textContent = 'Criando...'; }
+      try {
+        const workouts = Q.type.split('').map((L, i) => {
+          const n = parseInt(Q.sets[i].series), reps = Q.sets[i].reps;
+          return {
+            title: 'Treino ' + L, days: [],
+            exercises: Q.picks[i].map(name => ({ name, series: n, reps: Array(n).fill(reps).join(', '), repsArr: Array(n).fill(reps), videoUrl: '', unilateral: false, biset: '', bisetName: '', isometria: false, isometriaSegs: '', restPause: false, dropSet: false, obs: '', restTime: null, restUnit: 's' }))
+          };
+        });
+        const planData = { title: Q.title.trim(), startDate: Q.start || '', expiry: Q.expiry || '', workouts, studentId: ST.planStudentId, createdAt: Date.now() };
+        const planId = 'plan_' + Date.now();
+        await _setDoc(_doc(_db, 'plans', planId), planData);
+        ST.workoutBlocks = workouts; ST.editPlanId = planId;
+        ST._planSnapshot = JSON.stringify(workouts); ST._planTitleSnapshot = planData.title;
+        ST._planStartDateSnapshot = planData.startDate; ST._planExpirySnapshot = planData.expiry;
+        closeModal('modal-quick-plan');
+        toast('✅ Plano criado com sucesso!');
+        await openStudentDetail(ST.planStudentId);
+        setTimeout(() => {
+          document.getElementById('plan-title').value = planData.title;
+          document.getElementById('plan-startdate').value = planData.startDate;
+          document.getElementById('plan-expiry').value = planData.expiry;
+          document.getElementById('plan-modal-title').textContent = 'Plano criado — revise os treinos';
+          const sb = document.querySelector('#modal-plan .plan-modal-subtitle');
+          if (sb) sb.textContent = 'Defina os dias da semana e ajuste o que precisar';
+          renderWorkoutsEditor(); openModal('modal-plan');
+        }, 400);
+      } catch (e) {
+        Q.err = 'Erro ao criar plano: ' + (e.message || 'tente novamente.');
+        renderQuickPlan(); toast('Erro ao criar plano.', 'error');
+      }
     }
 
     window.generateAutoPlan = async () => {
@@ -19125,6 +19303,21 @@
       opacity: .85;
     }
 
+
+    /* ── CRIAÇÃO RÁPIDA ── */
+    .plan-creation-type-btn--quick { border-color: rgba(56,161,105,.35); background: rgba(56,161,105,.06); }
+    .plan-creation-type-btn--quick:hover { border-color: var(--green); background: rgba(56,161,105,.12); }
+    .qp-label { font-size: .78rem; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+    .qp-types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .qp-type { padding: 14px 6px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--surface2); font-family: var(--body); font-weight: 800; font-size: .95rem; color: var(--text); cursor: pointer; transition: all .15s; }
+    .qp-type:hover { border-color: var(--border2); }
+    .qp-type.selected { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+    .qp-module { margin-bottom: 18px; }
+    .qp-module-title { font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+    .qp-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .qp-chip { padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface2); font-family: var(--body); font-size: .8rem; font-weight: 600; color: var(--text); cursor: pointer; text-align: left; transition: all .12s; }
+    .qp-chip:hover { border-color: var(--border2); background: var(--surface3); }
+    .qp-chip.selected { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); font-weight: 700; }
     /* ── MODAL ESCOLHA TIPO CRIAÇÃO PLANO ── */
     .plan-creation-type-btn {
       display: flex;
