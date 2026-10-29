@@ -326,12 +326,27 @@
   }
 
   // ------------------------------------------------------------ download
+  function mimeFor(filename) {
+    return /\.zip$/i.test(filename || '') ? 'application/zip'
+      : /\.pdf$/i.test(filename || '') ? 'application/pdf' : 'application/octet-stream';
+  }
+  // Garante o tipo MIME: sem ele, vários navegadores (Safari/iOS, Chrome no Android)
+  // ignoram o atributo "download" de um blob e o arquivo simplesmente não baixa.
+  function typedBlob(blob, filename) {
+    if (blob && blob.type) return blob;
+    try { return new Blob([blob], { type: mimeFor(filename) }); } catch (e) { return blob; }
+  }
   function downloadBlob(blob, filename) {
+    blob = typedBlob(blob, filename);
+    if (root.navigator && root.navigator.msSaveOrOpenBlob) { root.navigator.msSaveOrOpenBlob(blob, filename); return; }
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
-    a.href = url; a.download = filename; a.style.display = 'none';
-    document.body.appendChild(a); a.click();
-    setTimeout(function () { try { URL.revokeObjectURL(url); a.remove(); } catch (e) { } }, 20000);
+    a.href = url; a.download = filename; a.rel = 'noopener'; a.style.display = 'none';
+    document.body.appendChild(a);
+    // navegadores sem suporte a "download" (iOS antigo, alguns webviews): abre o arquivo
+    if (!('download' in a)) { a.remove(); root.open(url, '_blank'); return; }
+    a.click();
+    setTimeout(function () { try { URL.revokeObjectURL(url); a.remove(); } catch (e) { } }, 180000);
   }
 
   // ------------------------------------------------------------ ZIP em lote
@@ -392,14 +407,15 @@
           skipped.forEach(function (x) { lines.push(' - ' + x.name + ' (' + x.reason + ')'); });
         }
         zip.file('LEIA-ME.txt', lines.join('\r\n'));
-        return zip.generateAsync({ type: outType, compression: 'DEFLATE', compressionOptions: { level: 6 } }, function (m) {
+        return zip.generateAsync({ type: outType, mimeType: 'application/zip', compression: 'DEFLATE', compressionOptions: { level: 6 } }, function (m) {
           onProgress({ phase: 'zip', percent: Math.round(m.percent) });
         });
       });
     }).then(function (out) {
       var d = new Date(), p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+      var zipName = 'treinos-trainly-' + d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()) + '.zip';
       return {
-        blob: out, exported: exported, skipped: skipped,
+        blob: outType === 'blob' ? typedBlob(out, zipName) : out, exported: exported, skipped: skipped,
         filename: 'treinos-trainly-' + d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()) + '.zip'
       };
     });
