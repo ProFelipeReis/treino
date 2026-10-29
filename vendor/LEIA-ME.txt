@@ -1,0 +1,8 @@
+Bibliotecas de terceiros usadas pelo Trainly (copiadas sem alteração):
+
+  jspdf.umd.min.js   jsPDF 4.2.1   licença MIT        https://github.com/parallax/jsPDF
+  jszip.min.js       JSZip 3.10.2   licença MIT/GPLv3  https://github.com/Stuk/jszip
+
+Ficam dentro do site (e não em CDN) para funcionar mesmo se o CDN estiver fora do ar.
+Para atualizar: baixe a nova versão pelo npm (npm install jspdf jszip) e copie os
+arquivos de dist/ para esta pasta. Os arquivos .min.js já trazem o aviso de licença.

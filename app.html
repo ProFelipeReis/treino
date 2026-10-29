@@ -18,6 +18,8 @@
     rel="stylesheet">
   <!-- Mercado Pago SDK -->
   <script src="https://sdk.mercadopago.com/js/v2"></script>
+  <script src="payment-config.js"></script>
+  <script src="pdf-export.js"></script>
   <!-- Firebase SDK loaded early so login can query Firestore immediately -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
@@ -6225,90 +6227,22 @@
             </div>
           </div>
           <button class="btn-subscribe" onclick="goToPayment()">Continuar para pagamento →</button>
+          <div style="text-align:center;margin-top:10px;font-size:.73rem;color:var(--text3);">Você será levado ao Mercado Pago para pagar com cartão, Pix ou boleto</div>
         </div>
 
 
-        <div id="sub-step-card" style="display:none;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-            <button onclick="backToPlan()"
-              style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.8rem;font-weight:700;cursor:pointer;color:var(--text2);">&#8592;
-              Voltar</button>
-            <div style="font-size:.85rem;font-weight:700;color:var(--text);" id="sub-card-plan-summary"></div>
-          </div>
-
-          <div class="form-group">
-            <label
-              style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Numero
-              do cartao</label>
-            <div style="position:relative;">
-              <input id="mp-cardNumber" class="form-control" type="text" inputmode="numeric"
-                placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number"
-                oninput="onCardNumberInput(this)" />
-              <span id="mp-card-brand"
-                style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.82rem;font-weight:700;color:var(--text3);pointer-events:none;"></span>
-            </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div class="form-group">
-              <label
-                style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Validade</label>
-              <input id="mp-expirationDate" class="form-control" type="text" inputmode="numeric" placeholder="MM/AA"
-                maxlength="5" autocomplete="cc-exp" oninput="onExpiryInput(this)" />
-            </div>
-            <div class="form-group">
-              <label
-                style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">CVV</label>
-              <input id="mp-securityCode" class="form-control" type="text" inputmode="numeric" placeholder="123"
-                maxlength="4" autocomplete="cc-csc" />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label
-              style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nome
-              impresso no cartao</label>
-            <input id="mp-cardholderName" class="form-control" type="text" placeholder="Como esta no cartao"
-              autocomplete="cc-name" oninput="this.value=this.value.toUpperCase()" />
-          </div>
-
-          <div class="form-group">
-            <label
-              style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">CPF
-              do titular</label>
-            <input id="mp-docNumber" class="form-control" type="text" inputmode="numeric" placeholder="000.000.000-00"
-              maxlength="14" autocomplete="off" oninput="maskCPF(this)" />
-          </div>
-
-          <div class="form-group">
-            <label
-              style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">E-mail
-              para recibo</label>
-            <input id="mp-email" class="form-control" type="email" placeholder="seu@email.com" autocomplete="email" />
-          </div>
-
-          <div class="form-group" id="mp-installments-wrap" style="display:none;">
-            <label
-              style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Parcelas</label>
-            <select id="mp-installments" class="form-control">
-              <option value="1">1x (sem juros)</option>
-            </select>
-          </div>
-
-          <div id="sub-pay-error"
-            style="color:var(--red);font-size:.82rem;font-weight:700;min-height:18px;margin-bottom:10px;padding:0 2px;">
-          </div>
-          <button class="btn-subscribe" id="btn-pay-card" onclick="submitCardPayment()">&#128274; Pagar com
-            cartao</button>
-          <div style="text-align:center;margin-top:10px;font-size:.73rem;color:var(--text3);">Pagamento seguro via
-            Mercado Pago</div>
+        <div id="sub-step-waiting" style="display:none;text-align:center;padding:20px 0;">
+          <p style="font-weight:800;font-size:1rem;color:var(--text);margin-bottom:8px;">Aguardando confirmação do pagamento</p>
+          <p style="font-size:.85rem;color:var(--text2);line-height:1.6;margin-bottom:18px;">Pix costuma confirmar em instantes; boleto pode levar mais tempo. Assim que o Mercado Pago confirmar, seu acesso é liberado automaticamente. Você pode fechar esta tela e voltar depois.</p>
+          <button class="btn-subscribe" onclick="payRecheck()">Já paguei &mdash; verificar agora</button>
+          <button class="btn-subscribe" style="margin-top:10px;background:transparent;color:var(--text2);border:1px solid #ddd;" onclick="backToPlan()">Escolher outro plano</button>
         </div>
 
 
         <div id="sub-step-processing" style="display:none;text-align:center;padding:20px 0;">
           <div class="spinner" style="margin:0 auto 16px;"></div>
-          <p style="font-weight:700;font-size:.95rem;color:var(--text);">Processando pagamento...</p>
-          <p style="font-size:.82rem;color:var(--text3);margin-top:6px;">Aguarde, isso leva alguns segundos.</p>
+          <p id="sub-proc-title" style="font-weight:700;font-size:.95rem;color:var(--text);">Processando...</p>
+          <p id="sub-proc-sub" style="font-size:.82rem;color:var(--text3);margin-top:6px;">Aguarde, isso leva alguns segundos.</p>
         </div>
 
 
@@ -7445,6 +7379,7 @@
                   <input class="search-input" type="text" id="search-students" placeholder="Buscar aluno..."
                     oninput="filterStudents()" />
                 </div>
+                <button class="btn btn-ghost btn-sm" onclick="openExportAllModal()">Exportar todos (ZIP)</button>
                 <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Novo</button>
               </div>
             </div>
@@ -8697,6 +8632,36 @@
   </div>
 
   <!-- MODAL: TRANSFERIR ALUNO -->
+  <div id="modal-export-all" class="modal-overlay hidden">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Exportar treinos de todos os alunos</h3>
+        <button class="close-btn" onclick="cancelExportAll()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:.85rem;color:var(--text2);line-height:1.55;margin-bottom:10px;">
+          Gera um PDF para cada aluno com os planos ativos e futuros e baixa tudo em um arquivo ZIP.
+        </p>
+        <div id="export-all-info" style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:12px;"></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.83rem;color:var(--text2);cursor:pointer;margin-bottom:14px;">
+          <input type="checkbox" id="export-all-expired" /> Incluir também planos vencidos
+        </label>
+        <div id="export-all-progress" style="display:none;margin-bottom:6px;">
+          <div style="height:8px;border-radius:99px;background:var(--surface2);overflow:hidden;border:1px solid var(--border);">
+            <div id="export-all-bar" style="height:100%;width:0%;background:#f5c800;transition:width .2s;"></div>
+          </div>
+          <div id="export-all-status" style="font-size:.8rem;color:var(--text2);margin-top:8px;line-height:1.5;"></div>
+        </div>
+        <div id="export-all-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:18px;margin-top:6px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="export-all-cancel" class="btn btn-ghost" onclick="cancelExportAll()">Fechar</button>
+        <button id="export-all-again" class="btn btn-ghost" style="display:none;" onclick="redownloadExportAll()">Baixar de novo</button>
+        <button id="export-all-go" class="btn btn-primary" onclick="startExportAll()">Gerar ZIP</button>
+      </div>
+    </div>
+  </div>
+
   <div id="modal-transfer" class="modal-overlay hidden">
     <div class="modal modal-sm">
       <div class="modal-header">
@@ -10773,7 +10738,7 @@
       </div>
       <div class="detail-actions" style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
         ${isForeignStudent ? `<button class="btn btn-primary btn-sm" style="background:linear-gradient(135deg,#f5c800,#e0a800);color:#111;" onclick="openCeoMessageModal('${sid}','${(s.name||'').replace(/'/g,"\\'")}')">⭐ Mensagem como CEO</button>` : ''}
-        ${s.phone ? `<button class="btn btn-whatsapp btn-sm" onclick="${active.length ? `sendWhatsAppPlan('${sid}','${active[0].id}')` : `contactWhatsApp('${s.phone}','${s.name}')`}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Enviar via WhatsApp</button>` : ''}
+        ${s.phone ? `<button class="btn btn-whatsapp btn-sm" onclick="${active.length ? `sendWhatsAppPlan('${sid}','${active[0].id}')` : `contactWhatsApp('${sid}')`}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Enviar via WhatsApp</button>` : ''}
         <button class="btn btn-ghost btn-sm" onclick="openEditStudentModal('${sid}')">✏️ Editar</button>
         <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">Excluir</button>
       </div>
@@ -11261,190 +11226,76 @@
     };
 
     // WhatsApp direct contact
-    window.contactWhatsApp = function (phone, name) {
-      const cleaned = phone.replace(/\D/g, '');
-      let num = cleaned;
-      if (!num.startsWith('55')) num = '55' + num;
-      const msg = encodeURIComponent(`Olá ${name}! Aqui é seu treinador. <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h5"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>`);
-      window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PDF e WhatsApp  (geração de PDF real em pdf-export.js: sem pop-up, sem impressão)
+    // ═══════════════════════════════════════════════════════════════════════════
+    const _studentById = (sid) => (ST.students || []).find(s => s.id === sid) || null;
+    const _firstName = (n) => String(n || '').trim().split(/\s+/)[0] || '';
+    const _APP_LINK = 'https://trainly.online/aluno';
+
+    function _pdfFileName(student, plan) {
+      const a = TrainlyPDF.safeFileName(student && student.name, 'aluno');
+      const b = TrainlyPDF.safeFileName(plan && plan.title, 'ficha');
+      return ('Ficha - ' + a + ' - ' + b).slice(0, 100) + '.pdf';
+    }
+
+    async function _buildPlanPdf(planId, sidOrName) {
+      const plan = window.__gestorPlans && window.__gestorPlans[planId];
+      if (!plan) throw new Error('Plano não encontrado.');
+      const student = _studentById(sidOrName) || { name: sidOrName || '' };
+      const blob = await TrainlyPDF.pdfBlob(student.name || 'Aluno', [plan], { getPlanStatus: getPlanStatus });
+      return { blob: blob, student: student, plan: plan };
+    }
+
+    // Contato simples com o aluno (sem ficha)
+    window.contactWhatsApp = function (a, b) {
+      const st = _studentById(a);
+      const phone = st ? st.phone : a;
+      const name = st ? st.name : (b || '');
+      const num = TrainlyShare.waNumber(phone);
+      if (!num) toast('Telefone do aluno inválido ou ausente. Escolha o contato no WhatsApp.', 'error');
+      TrainlyShare.openWhatsApp(num, 'Olá ' + _firstName(name) + '! Aqui é seu treinador. 💪');
     };
 
-    // PDF Export for gestor — professional layout
-    window.exportPlanPDF = function (planId, studentName) {
-      const p = window.__gestorPlans && window.__gestorPlans[planId];
-      if (!p) { toast('Plano não encontrado.', 'error'); return; }
-      const DAYS2 = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-      const DAYS_FULL = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-      const status = getPlanStatus(p);
-      const expired = status === 'expired';
-      const startStr = p.startDate ? new Date(p.startDate + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) : '';
-      const expiryStr = p.expiry ? new Date(p.expiry + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Sem data de vencimento';
-      const periodStr = startStr && p.expiry ? startStr + ' → ' + expiryStr : startStr ? 'Início: ' + startStr : p.expiry ? 'Vence em: ' + expiryStr : 'Sem data definida';
-      const today = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-
-      let exercisesHTML = '';
-      (p.workouts || []).forEach((w, wi) => {
-        const daysStr = (w.days || []).map(d => DAYS2[d]).join(', ') || 'Sem dias definidos';
-        let exRows = '';
-        (w.exercises || []).forEach((ex, ei) => {
-          const repsArr = Array.isArray(ex.repsArr) ? ex.repsArr : (ex.reps ? ex.reps.split(',').map(s => s.trim()) : [ex.reps || '']);
-          const uniqueReps = [...new Set(repsArr)];
-          const repsDisplay = uniqueReps.length === 1 ? uniqueReps[0] : repsArr.join(' / ');
-          const tags = [];
-          if (ex.biset) tags.push('Bi-set: ' + ex.biset);
-          if (ex.unilateral) tags.push('Unilateral');
-          if (ex.isometria) tags.push('Isometria' + (ex.isometriaSegs ? ' ' + ex.isometriaSegs + 's' : ''));
-          if (ex.restPause) tags.push('Rest-pause');
-          if (ex.dropSet) tags.push('Drop-set');
-          exRows += `<tr>
-        <td class="ex-num">${ei + 1}</td>
-        <td class="ex-name-cell">
-          <strong>${ex.name}</strong>
-          ${tags.length ? '<div class="ex-tags">' + tags.map(t => '<span class="tag">' + t + '</span>').join('') + '</div>' : ''}
-          ${ex.obs ? '<div class="ex-obs">' + ex.obs + '</div>' : ''}
-        </td>
-        <td class="ex-stat">${ex.series}</td>
-        <td class="ex-stat">${repsDisplay}</td>
-      </tr>`;
-        });
-        exercisesHTML += `
-      <div class="workout-block">
-        <div class="workout-header">
-          <div class="workout-badge">${String.fromCharCode(65 + wi)}</div>
-          <div class="workout-info">
-            <div class="workout-title">${w.title || 'Treino ' + (wi + 1)}</div>
-            <div class="workout-days">${daysStr}</div>
-          </div>
-          <div class="workout-count">${(w.exercises || []).length} exercício${(w.exercises || []).length !== 1 ? 's' : ''}</div>
-        </div>
-        <table class="ex-table">
-          <thead><tr>
-            <th class="th-num">#</th>
-            <th class="th-name">Exercício</th>
-            <th class="th-stat">Séries</th>
-            <th class="th-stat">Reps</th>
-          </tr></thead>
-          <tbody>${exRows}</tbody>
-        </table>
-      </div>`;
-      });
-
-      const html = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Ficha de Treino — ${studentName}</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#fff;color:#111110;font-size:13px;line-height:1.5;}
-
-  /* PAGE */
-  .page{max-width:720px;margin:0 auto;padding:36px 32px;}
-
-  /* HEADER */
-  .header{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:20px;border-bottom:2px solid #111110;margin-bottom:24px;}
-  .header-left{}
-  .brand{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#999990;margin-bottom:6px;}
-  .student{font-size:22px;font-weight:800;color:#111110;letter-spacing:-.02em;line-height:1.1;}
-  .plan-name{font-size:14px;font-weight:600;color:#555550;margin-top:4px;}
-  .header-right{text-align:right;}
-  .validity-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#999990;margin-bottom:3px;}
-  .validity{font-size:13px;font-weight:700;color:${expired ? '#e03e3e' : '#2e7d52'};}
-  .generated{font-size:10px;color:#bbbbbb;margin-top:6px;}
-
-  /* STATUS BADGE */
-  .status-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;margin-bottom:20px;font-size:12px;font-weight:700;${expired ? 'background:#fef2f2;border:1px solid #fecaca;color:#e03e3e;' : 'background:#f0faf5;border:1px solid #bbf0d5;color:#2e7d52;'}}
-  .status-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
-
-  /* WORKOUT BLOCK */
-  .workout-block{margin-bottom:20px;border:1px solid #e4e4e0;border-radius:12px;overflow:hidden;page-break-inside:avoid;}
-  .workout-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f7f7f5;border-bottom:1px solid #e4e4e0;}
-  .workout-badge{width:32px;height:32px;border-radius:8px;background:#f5c800;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#111110;flex-shrink:0;}
-  .workout-info{flex:1;}
-  .workout-title{font-weight:800;font-size:14px;color:#111110;}
-  .workout-days{font-size:11px;color:#888880;font-weight:600;margin-top:2px;}
-  .workout-count{font-size:11px;font-weight:700;color:#999990;white-space:nowrap;}
-
-  /* TABLE */
-  .ex-table{width:100%;border-collapse:collapse;}
-  .ex-table thead tr{background:#fafafa;}
-  .ex-table th{padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999990;border-bottom:1px solid #e4e4e0;text-align:left;}
-  .th-num{width:32px;text-align:center;}
-  .th-stat{width:68px;text-align:center;}
-  .ex-table tbody tr{border-bottom:1px solid #f0f0ed;}
-  .ex-table tbody tr:last-child{border-bottom:none;}
-  .ex-table tbody tr:nth-child(even){background:#fafaf8;}
-  .ex-num{text-align:center;font-weight:700;font-size:11px;color:#bbbbbb;padding:10px 6px;}
-  .ex-name-cell{padding:10px 10px 10px 6px;}
-  .ex-name-cell strong{font-weight:700;font-size:13px;color:#111110;}
-  .ex-stat{text-align:center;font-weight:800;font-size:14px;color:#111110;padding:10px 6px;}
-  .ex-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
-  .tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#fef9e0;color:#8a6c00;border:1px solid #f5e080;}
-  .ex-obs{font-size:11px;color:#888880;font-style:italic;margin-top:4px;line-height:1.4;}
-
-  /* FOOTER */
-  .footer{margin-top:28px;padding-top:14px;border-top:1px solid #e4e4e0;display:flex;justify-content:space-between;align-items:center;}
-  .footer-left{font-size:10px;color:#cccccc;font-weight:600;}
-  .footer-right{font-size:10px;color:#cccccc;}
-
-  /* PRINT */
-  @media print{
-    body{font-size:12px;}
-    .page{padding:20px;}
-    .workout-block{page-break-inside:avoid;}
-    @page{margin:16mm 12mm;}
-  }
-  @media(max-width:600px){
-    .page{padding:20px 16px;}
-    .header{flex-direction:column;gap:12px;}
-    .header-right{text-align:left;}
-    .th-stat,.ex-stat{width:52px;font-size:12px;}
-  }
-</style>
-</head>
-<body>
-<div class="page">
-
-  <div class="header">
-    <div class="header-left">
-      <div class="brand">Trainly</div>
-      <div class="student">${studentName}</div>
-      <div class="plan-name">${p.title}</div>
-    </div>
-    <div class="header-right">
-      <div class="validity-label">Validade</div>
-      <div class="validity">${periodStr}${expired ? ' · Vencido' : ''}</div>
-      <div class="generated">Gerado em ${today}</div>
-    </div>
-  </div>
-
-  <div class="status-bar">
-    <div class="status-dot"></div>
-    <span>${expired ? 'Plano vencido — solicite uma atualização ao treinador' : 'Plano ativo'}</span>
-  </div>
-
-  ${exercisesHTML}
-
-  <div class="footer">
-    <div class="footer-left">Trainly · Ficha gerada automaticamente</div>
-    <div class="footer-right">${today}</div>
-  </div>
-
-</div>
-<scr'+'ipt>window.onload=function(){window.print();}<\/script>
-
-
-</body>
-</html>`;
-
-      const win = window.open('', '_blank');
-      if (win) { win.document.write(html); win.document.close(); toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF pronto para imprimir!'); }
-      else { toast('Permita pop-ups para exportar PDF.', 'error'); }
+    // Baixa a ficha em PDF
+    window.exportPlanPDF = async function (planId, sidOrName) {
+      try {
+        toast('Gerando PDF...');
+        const r = await _buildPlanPdf(planId, sidOrName);
+        TrainlyPDF.downloadBlob(r.blob, _pdfFileName(r.student, r.plan));
+        toast('PDF gerado!');
+      } catch (e) {
+        console.error('exportPlanPDF:', e);
+        toast(e && e.message ? e.message : 'Não foi possível gerar o PDF.', 'error');
+      }
     };
 
-    // WhatsApp plan share
+    // Envia a ficha em PDF: no celular abre o menu de compartilhar (escolha o WhatsApp);
+    // no computador baixa o PDF e abre a conversa para você anexar.
+    window.sendPlanPdfWhatsApp = async function (sid, planId) {
+      try {
+        const student = _studentById(sid) || {};
+        toast('Preparando PDF...');
+        const r = await _buildPlanPdf(planId, sid);
+        const fname = _pdfFileName(r.student, r.plan);
+        const text = 'Olá ' + _firstName(student.name) + ', segue sua ficha de treino em PDF. 🏋️';
+        let file = null;
+        try { file = new File([r.blob], fname, { type: 'application/pdf' }); } catch (e) { }
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try { await navigator.share({ files: [file], title: 'Ficha de treino', text: text }); return; }
+          catch (e) { if (e && e.name === 'AbortError') return; /* sem permissão: cai no plano B */ }
+        }
+        TrainlyPDF.downloadBlob(r.blob, fname);
+        TrainlyShare.openWhatsApp(TrainlyShare.waNumber(student.phone),
+          text + '\n\n(O PDF foi baixado no seu aparelho: anexe o arquivo nesta conversa.)', false);
+        toast('PDF baixado. Anexe o arquivo no WhatsApp.');
+      } catch (e) {
+        console.error('sendPlanPdfWhatsApp:', e);
+        toast(e && e.message ? e.message : 'Não foi possível preparar o PDF.', 'error');
+      }
+    };
+
+    // Ficha em texto no WhatsApp (mantida; agora com telefone tratado e limite de tamanho)
     window.sharePlanWhatsApp = function (planId, studentName, studentPhone) {
       const p = window.__gestorPlans && window.__gestorPlans[planId];
       if (!p) { toast('Plano não encontrado.', 'error'); return; }
@@ -11465,18 +11316,123 @@
         msg += `\n`;
       });
       msg += `_Enviado via Trainly_ ⚡`;
-      const encoded = encodeURIComponent(msg);
-      let url = 'https://wa.me/';
-      if (studentPhone) {
-        const cleaned = studentPhone.replace(/\D/g, '');
-        let num = cleaned;
-        if (!num.startsWith('55')) num = '55' + num;
-        url += num;
+      // O link do WhatsApp tem limite de tamanho: fichas grandes viram aviso curto
+      if (encodeURIComponent(msg).length > 3500) {
+        msg = `🏋️ *Trainly — Ficha de Treino*\n👤 *${studentName}*\n📋 *${p.title}*\n\nSua ficha é grande demais para uma mensagem. Acesse: ${_APP_LINK}`;
       }
-      url += `?text=${encoded}`;
-      window.open(url, '_blank');
+      TrainlyShare.openWhatsApp(TrainlyShare.waNumber(studentPhone), msg);
       toast('Abrindo WhatsApp...');
     };
+
+    // ── Exportar TODOS os alunos (um PDF por aluno, tudo num ZIP) ──────────────
+    window._exportAll = { busy: false, cancelled: false, result: null };
+
+    function _exportAllStudents() {
+      const cu = window.CURRENT_USER || {};
+      const all = ST.students || [];
+      // CEO/master enxergam alunos de outros gestores; aqui exportamos só os do próprio usuário
+      if (cu.role === 'ceo' || cu.role === 'master' || cu.isMaster) return all.filter(s => s.managerId === cu.username);
+      return all;
+    }
+
+    async function _fetchPlansForStudents(ids) {
+      const map = new Map();
+      ids.forEach(id => map.set(id, []));
+      for (let i = 0; i < ids.length; i += 10) {
+        const chunk = ids.slice(i, i + 10);
+        const snap = await _getDocs(_query(_col(_db, 'plans'), _where('studentId', 'in', chunk)));
+        snap.docs.forEach(d => {
+          const pl = { id: d.id, ...d.data() };
+          const arr = map.get(pl.studentId);
+          if (arr) arr.push(pl);
+        });
+      }
+      return map;
+    }
+
+    function _exportAllUI(state) {
+      const $ = (id) => document.getElementById(id);
+      const go = $('export-all-go'), cancel = $('export-all-cancel'), again = $('export-all-again');
+      if (go) { go.disabled = state.busy; go.style.display = state.hideGo ? 'none' : ''; }
+      if (cancel) cancel.textContent = state.busy ? 'Cancelar exportação' : 'Fechar';
+      if (again) again.style.display = state.canRedownload ? '' : 'none';
+      const prog = $('export-all-progress'); if (prog) prog.style.display = state.showProgress ? 'block' : 'none';
+      const bar = $('export-all-bar'); if (bar) bar.style.width = (state.percent || 0) + '%';
+      const st = $('export-all-status'); if (st && state.status != null) st.textContent = state.status;
+      const er = $('export-all-error'); if (er) er.textContent = state.error || '';
+    }
+
+    window.openExportAllModal = function () {
+      const list = _exportAllStudents();
+      const info = document.getElementById('export-all-info');
+      if (info) info.textContent = list.length
+        ? list.length + (list.length === 1 ? ' aluno será processado.' : ' alunos serão processados.')
+        : 'Você ainda não tem alunos cadastrados.';
+      window._exportAll.busy = false; window._exportAll.cancelled = false; window._exportAll.result = null;
+      _exportAllUI({ busy: false, showProgress: false, percent: 0, status: '', error: '', hideGo: !list.length });
+      openModal('modal-export-all');
+    };
+
+    window.cancelExportAll = function () {
+      if (window._exportAll.busy) { window._exportAll.cancelled = true; return; }
+      closeModal('modal-export-all');
+    };
+
+    window.redownloadExportAll = function () {
+      const r = window._exportAll.result;
+      if (r) TrainlyPDF.downloadBlob(r.blob, r.filename);
+    };
+
+    window.startExportAll = async function () {
+      const X = window._exportAll;
+      if (X.busy) return;
+      const students = _exportAllStudents();
+      if (!students.length) return;
+      const includeExpired = !!(document.getElementById('export-all-expired') || {}).checked;
+      X.busy = true; X.cancelled = false; X.result = null;
+      _exportAllUI({ busy: true, showProgress: true, percent: 3, status: 'Buscando os planos dos alunos...', error: '' });
+      try {
+        const result = await TrainlyPDF.exportAllToZip({
+          students: students,
+          includeExpired: includeExpired,
+          getPlanStatus: getPlanStatus,
+          fetchPlans: _fetchPlansForStudents,
+          isCancelled: () => X.cancelled,
+          onProgress: (p) => {
+            if (p.phase === 'pdf') {
+              _exportAllUI({ busy: true, showProgress: true, percent: 5 + Math.round(85 * p.done / p.total), status: 'Gerando PDF ' + p.done + ' de ' + p.total + '...' });
+            } else if (p.phase === 'zip') {
+              _exportAllUI({ busy: true, showProgress: true, percent: 90 + Math.round(p.percent / 10), status: 'Compactando o ZIP...' });
+            }
+          }
+        });
+        X.result = result;
+        TrainlyPDF.downloadBlob(result.blob, result.filename);
+        let msg = 'Pronto! ' + result.exported.length + (result.exported.length === 1 ? ' PDF' : ' PDFs') + ' no ZIP.';
+        if (result.skipped.length) {
+          const names = result.skipped.slice(0, 6).map(s => s.name).join(', ');
+          msg += ' Sem PDF (' + result.skipped.length + '): ' + names + (result.skipped.length > 6 ? '...' : '') + '. A lista completa está no LEIA-ME.txt do ZIP.';
+        }
+        X.busy = false;
+        _exportAllUI({ busy: false, showProgress: true, percent: 100, status: msg, error: '', canRedownload: true, hideGo: true });
+        toast('ZIP gerado!');
+      } catch (e) {
+        X.busy = false;
+        if (e && e.code === 'CANCELLED') {
+          _exportAllUI({ busy: false, showProgress: false, percent: 0, status: '', error: 'Exportação cancelada.' });
+        } else if (e && e.code === 'NO_PLANS') {
+          _exportAllUI({ busy: false, showProgress: false, percent: 0, status: '', error: includeExpired
+            ? 'Nenhum aluno tem plano para exportar.'
+            : 'Nenhum aluno tem plano ativo ou futuro. Marque "incluir planos vencidos" para exportar os antigos.' });
+        } else {
+          console.error('startExportAll:', e);
+          _exportAllUI({ busy: false, showProgress: false, percent: 0, status: '', error: 'Não foi possível gerar o ZIP: ' + ((e && e.message) || 'erro desconhecido') });
+        }
+      }
+    };
+
+    // pré-carrega a biblioteca de PDF em segundo plano (deixa o primeiro PDF mais rápido)
+    setTimeout(function () { try { TrainlyPDF.ensureLibs(false).catch(function () { }); } catch (e) { } }, 4000);
 
     const planCardHTML = (p, sid, idx, status = 'active') => {
       window.__gestorPlans = window.__gestorPlans || {};
@@ -11517,7 +11473,7 @@
       </div>
       <div class="plan-actions">
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openSequentialModal('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M3 6h18M3 12h18M3 18h18"/></svg> Habilitar Treino Sequencial</button>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();exportPlanPDF('${p.id}','${student.name || ''}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Gerar PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();exportPlanPDF('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Gerar PDF</button>
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPlanEditInfoModal('${sid}','${p.id}')">✏️ Editar</button>
         <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePlan('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Excluir</button>
       </div>
@@ -11688,7 +11644,8 @@
       </div>`).join('')}`;
       document.getElementById('pv-footer').innerHTML = `
     <button class="btn btn-whatsapp" onclick="sendWhatsAppPlan('${sid}','${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> WhatsApp</button>
-    <button class="btn btn-ghost" onclick="closeModal('modal-plan-view');exportPlanPDF('${p.id}','${student.name || ''}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
+    <button class="btn btn-whatsapp" onclick="sendPlanPdfWhatsApp('${sid}','${p.id}')">PDF no WhatsApp</button>
+    <button class="btn btn-ghost" onclick="closeModal('modal-plan-view');exportPlanPDF('${p.id}','${sid}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
     <button class="btn btn-primary" onclick="closeModal('modal-plan-view');openPlanModal('${sid}','${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar</button>
     <button class="btn btn-danger" onclick="deletePlan('${p.id}','${sid}')">Excluir</button>`;
       openModal('modal-plan-view');
@@ -13982,23 +13939,17 @@
       if (!e.target.closest('.ctx-menu-wrap')) closeAllCtxMenus();
     });
 
-    // ── WhatsApp: send plan link with student code ──
+    // ── WhatsApp: envia o link do app e o código de acesso do aluno ──
     window.sendWhatsAppPlan = function (sid, planId) {
-      const student = ST.students.find(s => s.id === sid) || {};
+      const student = _studentById(sid) || {};
       const name = student.name || '';
       const code = student.code || '';
-      const phone = student.phone || '';
-      const msg = `Olá *${name}*, seu treino está pronto! 🏋️\n\n*https://trainly.online*\n\n*Código de acesso:* \`${code}\``;
-      const encoded = encodeURIComponent(msg);
-      let url = 'https://wa.me/';
-      if (phone) {
-        const cleaned = phone.replace(/\D/g, '');
-        let num = cleaned;
-        if (!num.startsWith('55')) num = '55' + num;
-        url += num;
-      }
-      url += `?text=${encoded}`;
-      window.open(url, '_blank');
+      const num = TrainlyShare.waNumber(student.phone);
+      const msg = 'Olá *' + name + '*, seu treino está pronto! 🏋️\n\n' +
+        'Acesse: ' + _APP_LINK + '\n\n' +
+        '*Código de acesso:* ' + code;
+      if (!num) toast('Aluno sem telefone válido: escolha o contato no WhatsApp.', 'error');
+      TrainlyShare.openWhatsApp(num, msg);
       toast('Abrindo WhatsApp...');
     };
 
@@ -16048,19 +15999,27 @@
     // ════════════════════════════════════════════════════════════
     // SUBSCRIPTION WALL — Liberação manual pelo CEO
     // ════════════════════════════════════════════════════════════
-    // ─── Mercado Pago ─────────────────────────────────────────────────────────────
-    var MP_PUBLIC_KEY = 'APP_USR-f12a2b24-0d63-4c1a-ab86-7e1ac6302acf';
-    var MP_BACKEND_URL = 'https://mercadopagopayment-ax2n6uynda-uc.a.run.app';
-    // ──────────────────────────────────────────────────────────────────────────────
-
-    var _mpInstance = null;
+    // ─── Pagamento (Mercado Pago, via servidor de pagamentos do Trainly) ───────────
+    // O cartão NUNCA passa por este site: o pagamento acontece na página do
+    // Mercado Pago. Quem confirma o pagamento e libera a assinatura é o servidor
+    // (pasta payments-worker), consultando o Mercado Pago com a chave secreta.
+    // Este código só pede o checkout e aguarda a liberação no Firestore.
+    var MP_PUBLIC_KEY = '';    // legado: não é mais usado
+    var MP_BACKEND_URL = '';   // legado: não é mais usado
+    var _mpInstance = null;    // legado: blocos antigos ainda citam
+    var _mpPaymentMethodId = '';
     var _mpSelectedPlan = 'monthly';
     var _mpPricing = { monthly: 0, discount: 0 };
-    var _mpPaymentMethodId = '';   // bandeira detectada (visa, master, elo...)
+    var _payBusy = false;
+
+    function _payApi() {
+      var u = String(window.TRAINLY_PAYMENT_API || '').replace(/\/+$/, '');
+      return (!u || /COLE-AQUI/i.test(u)) ? '' : u;
+    }
+    function _sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
     // ── Exibe subscription wall e carrega preços ──────────────────────────────────
     window.showSubscriptionWall = async function () {
-      // login screen is now a separate page
       document.getElementById('screen-dashboard').style.display = 'none';
       document.getElementById('screen-sub-wall').style.display = 'flex';
       subShowStep('plan');
@@ -16074,11 +16033,6 @@
         }
       } catch (e) { console.warn('loadPricing wall:', e); }
       renderSubWallPrices();
-
-      // Inicializa SDK MP
-      if (!_mpInstance && window.MercadoPago) {
-        _mpInstance = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
-      }
     };
 
     // ── Renderiza preços nos cards de plano ───────────────────────────────────────
@@ -16109,343 +16063,119 @@
       document.getElementById('plan-annual').classList.toggle('selected', plan === 'annual');
     };
 
-    // ── Avança para o formulário de cartão ───────────────────────────────────────
-    window.goToPayment = function () {
+    function subSetProcessing(title, sub) {
+      var a = document.getElementById('sub-proc-title'); if (a) a.textContent = title;
+      var b = document.getElementById('sub-proc-sub'); if (b) b.textContent = sub || '';
+    }
+
+    // Token do Firebase Auth de quem está logado (o servidor confere quem é).
+    async function _getIdTokenOrNull() {
+      var tries = 0;
+      while (typeof _auth === 'undefined' || !_auth) { if (++tries > 30) return null; await _sleep(100); }
+      var user = _auth.currentUser;
+      if (!user) {
+        user = await new Promise(function (resolve) {
+          var done = false;
+          var unsub = _auth.onAuthStateChanged(function (u) { if (done) return; done = true; unsub(); resolve(u); });
+          setTimeout(function () { if (done) return; done = true; try { unsub(); } catch (e) { } resolve(null); }, 4000);
+        });
+      }
+      if (!user) return null;
+      try { return await user.getIdToken(); } catch (e) { return null; }
+    }
+
+    // ── "Continuar para pagamento": pede o checkout ao servidor e redireciona ──────
+    window.goToPayment = async function () {
+      if (_payBusy) return;
       if (!_mpPricing.monthly) {
         toast('Precos nao configurados. Contate o administrador.', 'error');
         return;
       }
-      var disc = _mpPricing.discount;
-      var annualMonthly = _mpPricing.monthly * 12 * (1 - disc / 100) / 12;
-      var fmt = function (v) { return 'R$ ' + v.toFixed(2).replace('.', ','); };
-
-      var summary = _mpSelectedPlan === 'monthly'
-        ? 'Plano Mensal — ' + fmt(_mpPricing.monthly) + '/mes'
-        : 'Plano Anual — ' + fmt(annualMonthly) + '/mes (cobrado anualmente)';
-
-      var el = document.getElementById('sub-card-plan-summary');
-      if (el) el.textContent = summary;
-
-      // Limpa campos
-      ['mp-cardNumber', 'mp-expirationDate', 'mp-securityCode', 'mp-cardholderName', 'mp-docNumber'].forEach(function (id) {
-        var el = document.getElementById(id); if (el) el.value = '';
-      });
-      document.getElementById('sub-pay-error').textContent = '';
-      document.getElementById('mp-card-brand').textContent = '';
-      document.getElementById('mp-installments-wrap').style.display = 'none';
-      _mpPaymentMethodId = '';
-
-      subShowStep('card');
-    };
-
-    // ── Volta para seleção de plano ───────────────────────────────────────────────
-    window.backToPlan = function () {
-      subShowStep('plan');
-    };
-
-    // ── Mascara número do cartão (grupos de 4) e detecta bandeira ────────────────
-    window.onCardNumberInput = function (input) {
-      var raw = input.value.replace(/\D/g, '').slice(0, 16);
-      var groups = raw.match(/.{1,4}/g) || [];
-      input.value = groups.join(' ');
-
-      // Detecta bandeira pelo prefixo
-      var brand = '';
-      var brandEl = document.getElementById('mp-card-brand');
-      if (/^4/.test(raw)) brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Visa';
-      else if (/^5[1-5]/.test(raw)) brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Mastercard';
-      else if (/^3[47]/.test(raw)) brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Amex';
-      else if (/^6(?:011|5)/.test(raw)) brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Discover';
-      else if (/^(?:606282|3841)/.test(raw)) brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Hipercard';
-      else if (/^(?:4011|4312|4389|4514|4576|5041|5067|5090|6277|6362|6516|6550)/.test(raw)) brand = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Elo';
-      if (brandEl) brandEl.innerHTML = brand;
-
-      // Detecta payment_method_id para MP
-      if (/^4/.test(raw)) _mpPaymentMethodId = 'visa';
-      else if (/^5[1-5]/.test(raw)) _mpPaymentMethodId = 'master';
-      else if (/^3[47]/.test(raw)) _mpPaymentMethodId = 'amex';
-      else if (/^(?:606282|3841)/.test(raw)) _mpPaymentMethodId = 'hipercard';
-      else _mpPaymentMethodId = '';
-
-      // Busca parcelas se tiver 6+ dígitos
-      if (raw.length >= 6 && _mpInstance && _mpPaymentMethodId) {
-        loadInstallments(raw.slice(0, 6));
-      }
-    };
-
-    // ── Mascara validade MM/AA ────────────────────────────────────────────────────
-    window.onExpiryInput = function (input) {
-      var raw = input.value.replace(/\D/g, '').slice(0, 4);
-      if (raw.length > 2) input.value = raw.slice(0, 2) + '/' + raw.slice(2);
-      else input.value = raw;
-    };
-
-    // ── Busca parcelas disponíveis via MP ─────────────────────────────────────────
-    async function loadInstallments(bin) {
-      if (!_mpInstance) return;
-      try {
-        var amount = getSelectedAmount();
-        var result = await _mpInstance.getInstallments({
-          amount: String(amount.toFixed(2)),
-          bin: bin,
-          paymentTypeId: 'credit_card'
-        });
-        var wrap = document.getElementById('mp-installments-wrap');
-        var sel = document.getElementById('mp-installments');
-        if (!result || !result[0] || !result[0].payer_costs) { if (wrap) wrap.style.display = 'none'; return; }
-        var costs = result[0].payer_costs;
-        if (wrap) wrap.style.display = 'block';
-        if (sel) {
-          sel.innerHTML = costs.map(function (c) {
-            var label = c.installments + 'x de R$ ' + c.installment_amount.toFixed(2).replace('.', ',');
-            if (c.installment_rate === 0) label += ' (sem juros)';
-            return '<option value="' + c.installments + '">' + label + '</option>';
-          }).join('');
-        }
-      } catch (e) { console.warn('getInstallments:', e); }
-    }
-
-    // ── Valor total do plano selecionado ──────────────────────────────────────────
-    function getSelectedAmount() {
-      var m = _mpPricing.monthly;
-      var disc = _mpPricing.discount;
-      return _mpSelectedPlan === 'annual' ? m * 12 * (1 - disc / 100) : m;
-    }
-
-    // ── Submete pagamento: valida → tokeniza → envia ao backend ──────────────────
-    window.submitCardPayment = async function () {
-      var errEl = document.getElementById('sub-pay-error');
-      errEl.textContent = '';
-
-      // ── Lê campos ──
-      var cardRaw = (document.getElementById('mp-cardNumber').value || '').replace(/\s/g, '');
-      var expiry = (document.getElementById('mp-expirationDate').value || '').trim();
-      var cvv = (document.getElementById('mp-securityCode').value || '').trim();
-      var name = (document.getElementById('mp-cardholderName').value || '').trim();
-      var cpf = (document.getElementById('mp-docNumber').value || '').replace(/\D/g, '');
-      var email = (document.getElementById('mp-email').value || '').trim();
-
-      // ── Validações ──
-      if (cardRaw.length < 13) { errEl.textContent = 'Numero do cartao invalido.'; return; }
-      if (!expiry.match(/^\d{2}\/\d{2}$/)) { errEl.textContent = 'Validade invalida. Use MM/AA.'; return; }
-      if (cvv.length < 3) { errEl.textContent = 'CVV invalido.'; return; }
-      if (!name || name.length < 3) { errEl.textContent = 'Informe o nome do titular.'; return; }
-      if (cpf.length !== 11) { errEl.textContent = 'CPF invalido (11 digitos).'; return; }
-      if (!email || !email.includes('@')) { errEl.textContent = 'Informe um e-mail valido.'; return; }
-
-      if (!_mpInstance) {
-        errEl.textContent = 'SDK Mercado Pago nao carregou. Recarregue a pagina.';
+      var api = _payApi();
+      if (!api) {
+        toast('Pagamento indisponível no momento. Contate o suporte.', 'error');
         return;
       }
-
+      _payBusy = true;
       subShowStep('processing');
-
+      subSetProcessing('Abrindo pagamento seguro...', 'Você será levado ao Mercado Pago.');
       try {
-        var parts = expiry.split('/');
-        var expMonth = parts[0];
-        var expYear = '20' + parts[1];
-
-        // ── Cria token seguro do cartão via SDK MP ──
-        var tokenResult = await _mpInstance.createCardToken({
-          cardNumber: cardRaw,
-          cardExpirationMonth: expMonth,
-          cardExpirationYear: expYear,
-          securityCode: cvv,
-          cardholderName: name,
-          identificationType: 'CPF',
-          identificationNumber: cpf
+        var token = await _getIdTokenOrNull();
+        if (!token) throw new Error('Sua sessão expirou. Saia e entre novamente para pagar.');
+        var u = window.CURRENT_USER || {};
+        var resp = await fetch(api + '/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ plan: _mpSelectedPlan, managerId: u.id || '', returnUrl: window.location.origin + window.location.pathname })
         });
-
-        if (!tokenResult || !tokenResult.id) {
-          throw new Error((tokenResult && tokenResult.cause && tokenResult.cause[0] && tokenResult.cause[0].description) || 'Erro ao tokenizar cartao.');
-        }
-
-        await processPaymentWithToken(tokenResult.id);
-
+        var data = {};
+        try { data = await resp.json(); } catch (e) { }
+        if (!resp.ok || !data.url) throw new Error(data.message || 'Não foi possível abrir o pagamento. Tente novamente.');
+        window.location.href = data.url;   // vai para o Mercado Pago
       } catch (err) {
-        console.error('submitCardPayment error:', err);
-        subShowStep('card');
-        var errMsg = typeof err === 'string' ? err
-          : (err && err.message) ? err.message
-            : (err && err.cause) ? JSON.stringify(err.cause)
-              : (err && err.error) ? JSON.stringify(err.error)
-                : JSON.stringify(err);
-        if (errMsg === '{}' || !errMsg) errMsg = 'Verifique os dados do cartão e tente novamente.';
-        errEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ' + errMsg;
+        _payBusy = false;
+        subShowStep('plan');
+        toast(err && err.message ? err.message : 'Não foi possível abrir o pagamento.', 'error');
       }
     };
 
-    // ── Envia token ao backend e processa ─────────────────────────────────────────
-    async function processPaymentWithToken(token) {
+    window.backToPlan = function () { _payBusy = false; subShowStep('plan'); };
+
+    // ── Confirmação: lê o Firestore (quem grava é o servidor) ─────────────────────
+    async function _fetchMyManagerDoc() {
       var u = window.CURRENT_USER || {};
-      var amount = getSelectedAmount();
-      var installments = parseInt((document.getElementById('mp-installments') || {}).value || '1') || 1;
-      var name = (document.getElementById('mp-cardholderName').value || '').trim();
-      var cpf = (document.getElementById('mp-docNumber').value || '').replace(/\D/g, '');
-
-      // Busca o managerId real do Firestore caso nao esteja na sessao
-      var managerId = u.id || '';
-      if (!managerId && u.username) {
-        try {
-          var snap = await _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username)));
-          if (!snap.empty) {
-            managerId = snap.docs[0].id;
-            window.CURRENT_USER.id = managerId;
-            try { localStorage.setItem('forge_gestor_session', JSON.stringify(window.CURRENT_USER)); } catch (e) { }
-          }
-        } catch (e) { console.warn('Nao conseguiu buscar managerId:', e); }
+      var id = u.id;
+      if (!id && u.username) {
+        var s = await _db.collection('managers').where('username', '==', u.username).limit(1).get();
+        if (!s.empty) { id = s.docs[0].id; u.id = id; }
       }
-
-      var body = {
-        token: token,
-        amount: amount,
-        installments: installments,
-        payment_method_id: _mpPaymentMethodId || '',
-        description: 'Trainly ' + (_mpSelectedPlan === 'annual' ? 'Anual' : 'Mensal'),
-        payer: {
-          email: (document.getElementById('mp-email').value || '').trim(),
-          identification: { type: 'CPF', number: cpf },
-          first_name: name
-        },
-        plan: _mpSelectedPlan,
-        managerId: managerId,
-        username: u.username || ''
-      };
-
-      try {
-        var resp = await fetch(MP_BACKEND_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        var result = await resp.json();
-
-        console.log('MP result:', JSON.stringify(result));
-
-        if (result.status === 'approved' || result.status === 'authorized') {
-          await activateSubscription(managerId, _mpSelectedPlan, result);
-          subShowStep('success');
-          document.getElementById('sub-success-msg').textContent =
-            _mpSelectedPlan === 'annual'
-              ? 'Plano anual ativado! Acesso liberado por 12 meses.'
-              : 'Plano mensal ativado! Acesso liberado por 30 dias.';
-        } else if (result.status === 'pending' || result.status === 'in_process') {
-          subShowStep('success');
-          document.getElementById('sub-success-msg').textContent = 'Pagamento em analise. Voce recebera a confirmacao em breve.';
-        } else {
-          subShowStep('card');
-          var detail = result.status_detail || result.message || result.error || 'Pagamento recusado. Verifique os dados.';
-          document.getElementById('sub-pay-error').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ' + detail;
-        }
-      } catch (backendErr) {
-        console.warn('Backend erro:', backendErr.message);
-        subShowStep('card');
-        document.getElementById('sub-pay-error').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Erro de conexao com o servidor. Tente novamente.';
-      }
+      if (!id) return null;
+      var snap = await _db.collection('managers').doc(id).get();
+      return snap.exists ? snap.data() : null;
     }
 
-    // ── Ativa assinatura no Firestore e na sessao local ───────────────────────────
-    async function activateSubscription(managerId, plan, paymentResult) {
-      var now = Date.now();
-      var subEndsAt = plan === 'annual'
-        ? now + 365 * 24 * 60 * 60 * 1000
-        : now + 30 * 24 * 60 * 60 * 1000;
-
-      // Aguarda Auth inicializar
-      var attempts = 0;
-      while (!_auth && attempts < 20) { await new Promise(r => setTimeout(r, 100)); attempts++; }
-
-      // ── CORREÇÃO: Garante que o Firebase Auth tem sessão ativa ───────────────
-      // O Firestore exige isAuth() para escrever. Se o Auth expirou ou não foi
-      // restaurado (ex: usuário veio da sessão localStorage), faz re-login silencioso.
-      if (_auth && !_auth.currentUser && window.CURRENT_USER && window.CURRENT_USER.username) {
-        try {
-          var authEmail = _authEmail(window.CURRENT_USER.username);
-          // Tenta restaurar sessão via onAuthStateChanged (pode já estar carregando)
-          await new Promise(function (resolve) {
-            var unsub = _auth.onAuthStateChanged(function (user) {
-              unsub();
-              resolve(user);
-            });
-          });
-        } catch (authRestoreErr) {
-          console.warn('activateSubscription: nao conseguiu restaurar Auth:', authRestoreErr.message);
-        }
-      }
-
-      // Se managerId vazio, tenta buscar pelo username da sessão
-      if (!managerId && window.CURRENT_USER && window.CURRENT_USER.username) {
-        try {
-          var snap = await _getDocs(_query(_col(_db, 'managers'), _where('username', '==', window.CURRENT_USER.username)));
-          if (!snap.empty) { managerId = snap.docs[0].id; window.CURRENT_USER.id = managerId; }
-        } catch (e) { console.warn('activateSubscription: busca por username falhou', e); }
-      }
-
-      var savedToFirestore = false;
-      if (managerId) {
-        var paymentData = {
-          subEndsAt: subEndsAt,
-          trialEndsAt: null,
-          lastPayment: {
-            plan: plan,
-            amount: typeof getSelectedAmount === 'function' ? getSelectedAmount() : 0,
-            paymentId: String(paymentResult.id || ''),
-            status: paymentResult.status || 'approved',
-            date: now
-          }
-        };
-
-        // ── Tentativa 1: Firestore direto (requer Auth ativo) ────────────────
-        try {
-          await _updateDoc(_doc(_db, 'managers', managerId), paymentData);
-          savedToFirestore = true;
-          console.log('activateSubscription OK: managerId=', managerId, 'subEndsAt=', new Date(subEndsAt).toLocaleDateString('pt-BR'));
-        } catch (fsErr) {
-          console.error('activateSubscription FIRESTORE FALHOU:', fsErr.code, fsErr.message);
-
-          // ── Tentativa 2: Backend /activate com Admin SDK (não depende de Auth do cliente) ──
-          try {
-            var fbResp = await fetch(MP_BACKEND_URL + '/activate', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                managerId: managerId,
-                plan: plan,
-                subEndsAt: subEndsAt,
-                paymentId: String(paymentResult.id || ''),
-                username: (window.CURRENT_USER || {}).username || ''
-              })
-            });
-            if (fbResp.ok) {
-              savedToFirestore = true;
-              console.log('activateSubscription: salvo via backend /activate');
-            } else {
-              var fbBody = await fbResp.text().catch(function () { return ''; });
-              console.error('activateSubscription backend /activate retornou erro:', fbResp.status, fbBody);
-            }
-          } catch (bErr) {
-            console.error('activateSubscription backend fallback falhou:', bErr.message);
-          }
-        }
-      } else {
-        console.error('activateSubscription: managerId nao encontrado — assinatura NAO salva no Firestore!');
-      }
-
-      // Atualiza sessão local para acesso imediato sem depender do Firestore
-      if (window.CURRENT_USER) {
-        window.CURRENT_USER.subEndsAt = subEndsAt;
-        window.CURRENT_USER.trialEndsAt = null;
-        window.CURRENT_USER.subStatus = { ok: true, type: 'active', daysLeft: plan === 'annual' ? 365 : 30 };
-        try { localStorage.setItem('forge_gestor_session', JSON.stringify(window.CURRENT_USER)); } catch (e) { }
-      }
-
-      if (!savedToFirestore) {
-        // #12 — Avisa o usuário claramente e orienta próximos passos
-        console.warn('activateSubscription: sessao local OK mas Firestore nao salvo. managerId=', managerId, 'plan=', plan);
-        toast('⚠️ Pagamento recebido, mas houve falha ao salvar. Seu acesso está ativo agora. Se sumir após relogar, entre em contato com o suporte informando: ID ' + String((paymentResult && paymentResult.id) || 'N/A'), 'error');
-      }
-      return savedToFirestore;
+    function _applyActiveSubscription(d) {
+      var u = window.CURRENT_USER;
+      if (!u) return;
+      var left = Math.max(1, Math.ceil((d.subEndsAt - Date.now()) / 86400000));
+      u.subEndsAt = d.subEndsAt;
+      u.trialEndsAt = null;
+      u.subStatus = { ok: true, type: 'active', daysLeft: left };
+      try { localStorage.setItem('forge_gestor_session', JSON.stringify(u)); } catch (e) { }
     }
+
+    // true quando o servidor já liberou a assinatura. Tenta por até maxMs.
+    window.checkSubscriptionNow = async function (maxMs) {
+      var t0 = Date.now();
+      for (; ;) {
+        try {
+          var d = await _fetchMyManagerDoc();
+          if (d && typeof d.subEndsAt === 'number' && d.subEndsAt > Date.now()) { _applyActiveSubscription(d); return true; }
+        } catch (e) { console.warn('checkSubscriptionNow:', e && e.message); }
+        if (Date.now() - t0 >= maxMs) return false;
+        await _sleep(3000);
+      }
+    };
+
+    function _showPaySuccess() {
+      var left = (window.CURRENT_USER && window.CURRENT_USER.subStatus && window.CURRENT_USER.subStatus.daysLeft) || 0;
+      var msg = document.getElementById('sub-success-msg');
+      if (msg) msg.textContent = 'Acesso liberado' + (left ? ' por ' + left + ' dias.' : '.');
+      subShowStep('success');
+    }
+
+    window.payRecheck = async function () {
+      subShowStep('processing');
+      subSetProcessing('Verificando seu pagamento...', 'Aguarde alguns segundos.');
+      var ok = await checkSubscriptionNow(15000);
+      if (ok) _showPaySuccess(); else subShowStep('waiting');
+    };
+
+    // Mantido só para não quebrar blocos antigos. A ativação agora é do servidor.
+    window.activateSubscription = async function () {
+      console.warn('activateSubscription desativado: a ativação é feita pelo servidor de pagamentos.');
+      return false;
+    };
 
     // ── Entra no painel apos pagamento ───────────────────────────────────────────
     window.enterAfterPayment = function () {
@@ -16455,7 +16185,7 @@
 
     // ── Alterna entre steps do formulario ────────────────────────────────────────
     function subShowStep(step) {
-      ['plan', 'card', 'processing', 'success'].forEach(function (s) {
+      ['plan', 'processing', 'waiting', 'success'].forEach(function (s) {
         var el = document.getElementById('sub-step-' + s);
         if (el) el.style.display = (s === step) ? 'block' : 'none';
       });
@@ -16470,15 +16200,25 @@
       input.value = v;
     };
 
+    // Volta do Mercado Pago: ?pay=ok | pending | fail
     window.checkPaymentReturn = async function () {
       var params = new URLSearchParams(window.location.search);
-      var paymentId = params.get('payment_id');
-      var status = params.get('status');
-      if (paymentId && status === 'approved' && window.CURRENT_USER) {
-        await activateSubscription(window.CURRENT_USER.id, 'monthly', { id: paymentId, status: 'approved' });
-        history.replaceState({}, '', window.location.pathname);
-        toast('Pagamento confirmado! Bem-vindo ao Trainly.');
+      var pay = params.get('pay');
+      if (!pay) return;
+      history.replaceState({}, '', window.location.pathname);   // limpa a URL
+      var t0 = Date.now();
+      while (!window.CURRENT_USER && Date.now() - t0 < 15000) await _sleep(200);
+      if (!window.CURRENT_USER) return;   // sem sessão: ao entrar, a assinatura já estará liberada
+      await showSubscriptionWall();
+      if (pay === 'fail') {
+        subShowStep('plan');
+        toast('O pagamento não foi concluído. Você pode tentar novamente.', 'error');
+        return;
       }
+      subShowStep('processing');
+      subSetProcessing('Confirmando seu pagamento...', 'Isso costuma levar alguns segundos.');
+      var ok = await checkSubscriptionNow(pay === 'ok' ? 60000 : 8000);
+      if (ok) _showPaySuccess(); else subShowStep('waiting');
     };
 
     // ════════════════════════════════════════════════════════════
