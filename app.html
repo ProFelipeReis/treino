@@ -15260,7 +15260,11 @@
           } else if (sess.subStatus && !sess.subStatus.ok) {
             (function w() { if (window.showSubscriptionWall) { showSubscriptionWall(); } else { setTimeout(w, 100); } })();
           } else {
-            window.showDashboard();
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', function () { window.showDashboard(); });
+            } else {
+              window.showDashboard();
+            }
           }
         } else {
           clearSession();
