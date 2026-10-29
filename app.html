@@ -3036,6 +3036,16 @@
       border-top: 1px solid var(--border);
     }
 
+    .ex-video-preview {
+      display: flex; align-items: center; gap: 10px; margin: 8px 10px 0;
+      padding: 6px; border: 1px solid var(--border); border-radius: 10px;
+      background: var(--surface2); text-decoration: none; color: var(--text);
+      font-size: .8rem; font-weight: 700; width: fit-content; max-width: calc(100% - 20px);
+    }
+    .ex-video-preview:hover { border-color: var(--accent); }
+    .ex-video-preview img { width: 96px; height: 54px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #000; }
+    .ex-video-preview.ex-video-none { border-style: dashed; background: transparent; color: var(--text3); font-weight: 600; font-size: .76rem; padding: 6px 10px; }
+
     .ex-custom-video-input {
       font-size: .82rem !important;
       padding: 6px 9px !important;
@@ -8656,7 +8666,7 @@
       </div>
       <div class="modal-footer">
         <button id="export-all-cancel" class="btn btn-ghost" onclick="cancelExportAll()">Fechar</button>
-        <button id="export-all-again" class="btn btn-ghost" style="display:none;" onclick="redownloadExportAll()">Baixar de novo</button>
+        <a id="export-all-link" class="btn btn-primary" style="display:none;text-decoration:none;" href="#" download="treinos-trainly.zip">⬇ Baixar ZIP</a>
         <button id="export-all-go" class="btn btn-primary" onclick="startExportAll()">Gerar ZIP</button>
       </div>
     </div>
@@ -9240,14 +9250,14 @@
     const _limit = (n) => (q) => q.limit(n); // #10 — teto de segurança nas queries
 
     window.EX_LIB = {
-      "Peito": ["Supino Reto", "Supino Reto no Smith", "Supino Reto com Halter", "Supino Inclinado", "Supino Inclinado no Smith", "Supino Inclinado com Halter", "Supino Declinado", "Supino Declinado com Halter", "Supino Articulado", "Supino na Polia", "Crucifixo Reto", "Crucifixo Inclinado", "Crossover Superior", "Crossover Medial", "Crossover Inferior", "Voador Peitoral", "Flexão de Braço", "Pullover com Barra", "Pullover com Halter"],
+      "Peito": ["Supino Reto", "Supino Reto no Smith", "Supino Reto com Halter", "Supino Inclinado", "Supino Inclinado no Smith", "Supino Inclinado com Halter", "Supino Declinado", "Supino Declinado com Halter", "Supino Articulado", "Supino Panata", "Supino na Polia", "Crucifixo Reto", "Crucifixo Inclinado", "Crossover Superior", "Crossover Medial", "Crossover Inferior", "Voador Peitoral", "Flexão de Braço", "Pullover com Barra", "Pullover com Halter"],
       "Tríceps": ["Tríceps Testa com Barra", "Tríceps Testa com Halter", "Tríceps Testa na Polia com Barra", "Tríceps Testa na Polia com Corda", "Tríceps Testa Unilateral na Polia", "Tríceps Corda", "Tríceps Pulley", "Tríceps Pulley Barra V", "Tríceps Banco", "Tríceps Francês na Polia", "Tríceps Francês com Halter", "Tríceps Coice na Polia", "Tríceps Coice com Halter", "Tríceps Paralela", "Tríceps Máquina Paralela", "Tríceps Pegada Unilateral", "Tríceps Pegada Unilateral Inverso", "Tríceps Inverso na Polia"],
-      "Costas": ["Puxada na Frente Pronada", "Puxada na Frente Supinada", "Puxada na Frente Barra Romana", "Puxada na Frente com Triângulo", "Barra Fixa", "Remada Curvada Pronada", "Remada Curvada Supinada", "Remada Curvada Serrote", "Remada Serrote na Polia", "Remada Baixa Aberta", "Remada Baixa Supinada", "Remada Baixa com Triângulo", "Remada Baixa Máquina Neutra", "Remada Baixa Máquina Pronada", "Remada Baixa Máquina Supinada", "Remada Cavalinho", "Pulldown Aberto", "Pulldown Fechado", "Pulldown Hammer Pronada", "Levantamento Terra"],
+      "Costas": ["Puxada na Frente Pronada", "Puxada na Frente Supinada", "Puxada na Frente Barra Romana", "Puxada na Frente com Triângulo", "Barra Fixa", "Remada Curvada Pronada", "Remada Curvada Supinada", "Remada Curvada Serrote", "Remada Serrote na Polia", "Remada Baixa Aberta", "Remada Baixa Supinada", "Remada Baixa com Triângulo", "Remada Baixa Máquina Neutra", "Remada Baixa Máquina Pronada", "Remada Baixa Máquina Supinada", "Remada High Row", "Remada Curvada Máquina Guiada", "Remada Cavalinho", "Pulldown Aberto", "Pulldown Fechado", "Pulldown Hammer Pronada", "Levantamento Terra"],
       "Bíceps": ["Rosca Direta Barra W", "Rosca Direta Barra Reta", "Rosca Banco 45° Alternada", "Rosca Alternada", "Rosca Martelo", "Rosca Martelo Alternada", "Rosca Concentrada", "Rosca Banco Scott", "Rosca Banco Scott com Halter", "Rosca Banco Scott com Barra", "Rosca na Polia com Corda", "Rosca na Polia com Barra Reta", "Rosca Unilateral na Polia", "Rosca Inversa na Barra", "Rosca Inversa na Polia"],
       "Ombro": ["Elevação Frontal", "Elevação Frontal com Barra", "Elevação Frontal com Anilha", "Elevação Frontal na Polia", "Elevação Frontal Alternada", "Elevação Frontal Inversa com Barra", "Desenvolvimento Máquina", "Desenvolvimento com Halter", "Desenvolvimento com Barra", "Remada Alta na Polia", "Remada Alta na Barra W", "Arnold Press", "Elevação Lateral", "Elevação Lateral no Banco 45°", "Elevação Lateral na Polia", "Crucifixo Invertido na Polia", "Crucifixo Invertido", "Face Pull", "Voador Inverso", "Encolhimento de Ombros no Smith", "Encolhimento de Ombros com Halter", "Encolhimento de Ombros com Barra"],
-      "Quadríceps": ["Agachamento Livre", "Agachamento Sumo", "Agachamento no Smith", "Leg Press 90° no Smith", "Leg Press 45°", "Leg Press 45° Unilateral", "Leg Press Horizontal", "Leg Press Horizontal Unilateral", "Cadeira Extensora", "Cadeira Extensora Unilateral", "Avanço com Barra", "Afundo com Halter", "Afundo com Caneleira", "Afundo com Barra", "Afundo no Smith", "Afundo com Salto", "Agachamento Hack", "Agachamento Búlgaro", "Step-up", "Levantamento Terra Sumô"],
+      "Quadríceps": ["Agachamento Livre", "Agachamento Sumo", "Agachamento no Smith", "Leg Press 90° no Smith", "Leg Press 45°", "Leg Press 45° Unilateral", "Leg Press Horizontal", "Leg Press Horizontal Unilateral", "Cadeira Extensora", "Cadeira Extensora Unilateral", "Avanço com Barra", "Afundo com Halter", "Afundo com Caneleira", "Afundo com Barra", "Afundo no Smith", "Afundo com Salto", "Agachamento Hack", "Hack Machine Pêndulo", "Sumô Máquina", "Agachamento Búlgaro", "Step-up", "Levantamento Terra Sumô"],
       "Posteriores": ["Mesa Flexora", "Mesa Flexora Unilateral", "Cadeira Flexora", "Cadeira Flexora Unilateral", "Stiff", "Stiff no Smith", "Good Morning"],
-      "Glúteos": ["Cadeira Abdutora", "Abdução de Quadril na Polia", "Abdução de Quadril com Caneleira", "Agachamento Livre", "Agachamento no Smith", "Agachamento Búlgaro", "Agachamento Sumo", "Agachamento Taça", "Agachamento Hack", "Levantamento Terra Sumô", "Afundo com Halter", "Stiff", "Elevação Pélvica", "Elevação Pélvica na Bola", "Coice na Polia", "Glúteo 4 Apoios no Smith", "Glúteo 4 Apoios com Caneleira", "Glúteo 4 Apoios Perna Estendida", "Flexão de Quadril com Caneleira"],
+      "Glúteos": ["Cadeira Abdutora", "Abdução de Quadril na Polia", "Abdução de Quadril com Caneleira", "Agachamento Livre", "Agachamento no Smith", "Agachamento Búlgaro", "Agachamento Sumo", "Agachamento Taça", "Agachamento Hack", "Levantamento Terra Sumô", "Afundo com Halter", "Stiff", "Elevação Pélvica", "Elevação Pélvica na Bola", "Coice na Polia", "Glúteo 4 Apoios no Smith", "Glúteo 4 Apoios com Caneleira", "Glúteo 4 Apoios Perna Estendida", "Glúteo 4 Apoios Máquina", "Recuo no Smith", "Recuo com Halter", "Sumô Máquina", "Flexão de Quadril com Caneleira"],
       "Adutores": ["Cadeira Adutora", "Adução de Quadril na Polia", "Adução de Quadril com Caneleira"],
       "Panturrilha": ["Elevação em Pé", "Panturrilha no Leg Press", "Panturrilha Unilateral"],
       "Abdômen": ["Abdominal Supra", "Abdominal Remador", "Abdominal na Polia", "Abdominal Infra", "Abdominal Oblíquo", "Abdominal Oblíquo na Polia", "Prancha", "Abdominal Infra na Paralela", "Abdominal Bicicleta"],
@@ -9619,6 +9629,17 @@
       return 'active';
     };
     const ytId = url => { if (!url) return ''; const m = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/); return m ? m[1] : '' };
+    // Vídeo do exercício que o aluno verá (personalizado > vídeo da biblioteca)
+    const exVideoUrl = ex => (ex && ex.customVideoEnabled && ex.customVideoUrl) ? ex.customVideoUrl : ((ex && ex.videoUrl) || '');
+    // Prévia do vídeo para o personal (mesmo link/miniatura que o aluno recebe)
+    window.exVideoPreviewHTML = ex => {
+      if (!ex || !ex.name) return '';
+      const id = ytId(exVideoUrl(ex));
+      if (!id) return ex.name === '__custom__' ? '' : '<div class="ex-video-preview ex-video-none">Sem vídeo cadastrado para este exercício</div>';
+      return '<a class="ex-video-preview" href="https://www.youtube.com/watch?v=' + id + '" target="_blank" rel="noopener" title="Abrir no YouTube">' +
+        '<img src="https://img.youtube.com/vi/' + id + '/mqdefault.jpg" loading="lazy" alt="" />' +
+        '<span>▶ Ver vídeo do exercício</span></a>';
+    };
     const ytEmbed = url => { const id = ytId(url); return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1` : '' };
 
     // ── showDashboard: chamado após login bem-sucedido (não-CEO, assinatura ok) ──
@@ -11350,12 +11371,22 @@
       return map;
     }
 
+    function _exportAllReset() {
+      const X = window._exportAll;
+      if (X.result && X.result.url) { try { URL.revokeObjectURL(X.result.url); } catch (e) { } }
+      X.busy = false; X.cancelled = false; X.result = null;
+    }
+
     function _exportAllUI(state) {
       const $ = (id) => document.getElementById(id);
-      const go = $('export-all-go'), cancel = $('export-all-cancel'), again = $('export-all-again');
+      const go = $('export-all-go'), cancel = $('export-all-cancel'), link = $('export-all-link');
       if (go) { go.disabled = state.busy; go.style.display = state.hideGo ? 'none' : ''; }
       if (cancel) cancel.textContent = state.busy ? 'Cancelar exportação' : 'Fechar';
-      if (again) again.style.display = state.canRedownload ? '' : 'none';
+      if (link) {
+        const r = window._exportAll.result;
+        if (state.canRedownload && r && r.url) { link.href = r.url; link.setAttribute('download', r.filename); link.style.display = ''; }
+        else { link.style.display = 'none'; }
+      }
       const prog = $('export-all-progress'); if (prog) prog.style.display = state.showProgress ? 'block' : 'none';
       const bar = $('export-all-bar'); if (bar) bar.style.width = (state.percent || 0) + '%';
       const st = $('export-all-status'); if (st && state.status != null) st.textContent = state.status;
@@ -11368,7 +11399,7 @@
       if (info) info.textContent = list.length
         ? list.length + (list.length === 1 ? ' aluno será processado.' : ' alunos serão processados.')
         : 'Você ainda não tem alunos cadastrados.';
-      window._exportAll.busy = false; window._exportAll.cancelled = false; window._exportAll.result = null;
+      _exportAllReset();
       _exportAllUI({ busy: false, showProgress: false, percent: 0, status: '', error: '', hideGo: !list.length });
       openModal('modal-export-all');
     };
@@ -11383,13 +11414,14 @@
       if (r) TrainlyPDF.downloadBlob(r.blob, r.filename);
     };
 
+
     window.startExportAll = async function () {
       const X = window._exportAll;
       if (X.busy) return;
       const students = _exportAllStudents();
       if (!students.length) return;
       const includeExpired = !!(document.getElementById('export-all-expired') || {}).checked;
-      X.busy = true; X.cancelled = false; X.result = null;
+      _exportAllReset(); X.busy = true;
       _exportAllUI({ busy: true, showProgress: true, percent: 3, status: 'Buscando os planos dos alunos...', error: '' });
       try {
         const result = await TrainlyPDF.exportAllToZip({
@@ -11406,9 +11438,10 @@
             }
           }
         });
+        result.url = URL.createObjectURL(result.blob);   // link real "Baixar ZIP" (clique do usuário = download garantido)
         X.result = result;
-        TrainlyPDF.downloadBlob(result.blob, result.filename);
-        let msg = 'Pronto! ' + result.exported.length + (result.exported.length === 1 ? ' PDF' : ' PDFs') + ' no ZIP.';
+        try { TrainlyPDF.downloadBlob(result.blob, result.filename); } catch (e) { console.warn('download automático bloqueado:', e); }
+        let msg = 'Pronto! ' + result.exported.length + (result.exported.length === 1 ? ' PDF' : ' PDFs') + ' no ZIP. Se o download não começar sozinho, toque em "Baixar ZIP".';
         if (result.skipped.length) {
           const names = result.skipped.slice(0, 6).map(s => s.name).join(', ');
           msg += ' Sem PDF (' + result.skipped.length + '): ' + names + (result.skipped.length > 6 ? '...' : '') + '. A lista completa está no LEIA-ME.txt do ZIP.';
@@ -13783,12 +13816,13 @@
           <div class="ex-obs-wrap">
             <textarea placeholder="Observações: cadência, descanso..." oninput="updateExInBlock(${bi},${ei},'obs',this.value)" onblur="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs || ''}</textarea>
           </div>
+          ${window.exVideoPreviewHTML(ex)}
           <div class="ex-custom-video-wrap">
             <label class="tech-pill ex-custom-video-toggle" style="cursor:pointer;user-select:none;">
               <input type="checkbox" ${ex.customVideoEnabled ? 'checked' : ''} onchange="toggleCustomVideo(${bi},${ei},this.checked)"/>
               Vídeo personalizado
             </label>
-            ${ex.customVideoEnabled ? `<input type="url" class="form-control ex-custom-video-input" placeholder="URL do YouTube..." value="${(ex.customVideoUrl || '').replace(/"/g, '&quot;')}" oninput="updateExInBlock(${bi},${ei},'customVideoUrl',this.value)" style="margin-top:6px;font-size:.82rem;"/>` : ''}
+            ${ex.customVideoEnabled ? `<input type="url" class="form-control ex-custom-video-input" placeholder="URL do YouTube..." value="${(ex.customVideoUrl || '').replace(/"/g, '&quot;')}" oninput="updateExInBlock(${bi},${ei},'customVideoUrl',this.value)" onchange="_rerenderActiveEditor()" style="margin-top:6px;font-size:.82rem;"/>` : ''}
           </div>
         </div>
       </div>`;
@@ -14543,12 +14577,13 @@
         <div class="ex-obs-wrap">
           <textarea placeholder="Observações: cadência, descanso..." oninput="updateExInBlock(${bi},${ei},'obs',this.value)" onblur="updateExInBlock(${bi},${ei},'obs',this.value)">${ex.obs || ''}</textarea>
         </div>
+          ${window.exVideoPreviewHTML(ex)}
           <div class="ex-custom-video-wrap">
             <label class="tech-pill ex-custom-video-toggle" style="cursor:pointer;user-select:none;">
               <input type="checkbox" ${ex.customVideoEnabled ? 'checked' : ''} onchange="toggleCustomVideo(${bi},${ei},this.checked)"/>
               Vídeo personalizado
             </label>
-            ${ex.customVideoEnabled ? `<input type="url" class="form-control ex-custom-video-input" placeholder="URL do YouTube..." value="${(ex.customVideoUrl || '').replace(/"/g, '&quot;')}" oninput="updateExInBlock(${bi},${ei},'customVideoUrl',this.value)" style="margin-top:6px;font-size:.82rem;"/>` : ''}
+            ${ex.customVideoEnabled ? `<input type="url" class="form-control ex-custom-video-input" placeholder="URL do YouTube..." value="${(ex.customVideoUrl || '').replace(/"/g, '&quot;')}" oninput="updateExInBlock(${bi},${ei},'customVideoUrl',this.value)" onchange="_rerenderActiveEditor()" style="margin-top:6px;font-size:.82rem;"/>` : ''}
           </div>
       </div>
     </div>`;
