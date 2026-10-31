@@ -9681,6 +9681,7 @@
       window._trialCheckInterval = setInterval(async function () {
         var u = window.CURRENT_USER || {};
         if (!u.username || u.role === 'ceo') return;
+        if (document.hidden) return;
         try {
           var snap = await _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username)));
           if (snap.empty) return;
@@ -14411,19 +14412,63 @@
       }
     };
 
-    window.pollNotifications = async function () {
+    // OTIMIZAÇÃO: antes baixava TODAS as notificações (CEO: a coleção inteira) a cada 30 s.
+    // Agora: 1ª carga = últimas 100 dos últimos 30 dias; depois só busca as NOVAS (timestamp maior
+    // que a última vista, normalmente 0 documentos); não consulta com a aba em segundo plano.
+    window._NOTIF_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+    window._NOTIF_MAX = 100;
+    window._notifLastTs = 0;
+    window._notifLoaded = false;
+    window._notifNoIndex = false;
+    window._notifFallbackAt = 0;
+
+    window.pollNotifications = async function (force) {
       try {
+        if (document.hidden && force !== true) return;
         const u = window.CURRENT_USER || {};
-        let snap;
-        if (u.role === 'ceo' || u.isMaster) {
-          snap = await _getDocs(_col(_db, 'notifications'));
+        if (!u.username && !(u.role === 'ceo' || u.isMaster)) return;
+        const isCeo = (u.role === 'ceo' || u.isMaster);
+        const first = !window._notifLoaded;
+        const since = first
+          ? (Date.now() - window._NOTIF_WINDOW_MS)
+          : Math.max(0, window._notifLastTs - 60000); // 1 min de folga (relógios diferentes)
+
+        let docs = [];
+        if (window._notifNoIndex) {
+          // Sem o índice (managerId + timestamp) no Firestore: modo econômico, no máx. a cada 5 min
+          if (!first && Date.now() - window._notifFallbackAt < 300000 && force !== true) return;
+          window._notifFallbackAt = Date.now();
+          let q = _db.collection('notifications');
+          if (!isCeo) q = q.where('managerId', '==', u.username);
+          docs = (await q.limit(window._NOTIF_MAX).get()).docs;
         } else {
-          snap = await _getDocs(_query(_col(_db, 'notifications'), _where('managerId', '==', u.username)));
+          try {
+            let q = _db.collection('notifications');
+            if (!isCeo) q = q.where('managerId', '==', u.username);
+            q = q.where('timestamp', '>', since).orderBy('timestamp', 'asc');
+            docs = (await (first ? q.limitToLast(window._NOTIF_MAX) : q.limit(window._NOTIF_MAX)).get()).docs;
+          } catch (e) {
+            if (/index/i.test(e && e.message || '')) {
+              console.warn('pollNotifications: falta o índice do Firestore (notifications: managerId + timestamp). Usando modo econômico.', e.message);
+              window._notifNoIndex = true;
+              window._notifFallbackAt = Date.now();
+              let q2 = _db.collection('notifications');
+              if (!isCeo) q2 = q2.where('managerId', '==', u.username);
+              docs = (await q2.limit(window._NOTIF_MAX).get()).docs;
+            } else { throw e; }
+          }
         }
+
         const prev = window._notifData.length;
-        window._notifData = snap.docs
-          .map(d => ({ id: d.id, ...d.data() }))
-          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        const byId = {};
+        window._notifData.forEach(n => { byId[n.id] = n; });
+        docs.forEach(d => { byId[d.id] = { id: d.id, ...d.data() }; });
+        window._notifData = Object.values(byId)
+          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+          .slice(0, window._NOTIF_MAX);
+        window._notifData.forEach(n => { if ((n.timestamp || 0) > window._notifLastTs) window._notifLastTs = n.timestamp; });
+        window._notifLoaded = true;
+
         const newUnread = window._notifData.filter(n => !n.read);
         updateNotifBadge();
         if (prev > 0 && newUnread.length > (window._lastUnreadCount || 0)) {
@@ -14437,6 +14482,14 @@
         if (window._notifPanelOpen) renderNotifPanel();
       } catch (e) { console.warn('pollNotifications:', e.message); }
     };
+
+    // Ao voltar para a aba, atualiza na hora (o polling fica pausado em segundo plano)
+    if (!window._notifVisHooked) {
+      window._notifVisHooked = true;
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden && window._notifInterval) window.pollNotifications();
+      });
+    }
 
     // ── Feedbacks screen ──
     window.loadFeedbacks = async function () {
@@ -14480,7 +14533,8 @@
     window._notifInterval = null;
     window.startNotifPolling = function startNotifPolling() {
       if (window._notifInterval) clearInterval(window._notifInterval);
-      pollNotifications();
+      window._notifLoaded = false; window._notifLastTs = 0; window._notifData = [];
+      pollNotifications(true);
       window._notifInterval = setInterval(pollNotifications, 30000);
     }
 
@@ -15646,16 +15700,31 @@
         if (dot) dot.remove();
       }
 
-      await window.loadChatDetailMessages();
-
-      if (window._chatPollGestor) clearInterval(window._chatPollGestor);
-      window._chatPollGestor = setInterval(window.loadChatDetailMessages, 4000);
+      // OTIMIZAÇÃO: antes lia TODA a conversa a cada 4 s. Agora um listener lê uma vez
+      // e depois recebe só o que mudou (e para quando a conversa é fechada).
+      if (window._chatPollGestor) { clearInterval(window._chatPollGestor); window._chatPollGestor = null; }
+      if (window._chatDetailUnsub) { try { window._chatDetailUnsub(); } catch (e) { } window._chatDetailUnsub = null; }
+      window._chatReadSent = {};
+      var _sidLive = sid;
+      window._chatDetailUnsub = _db.collection('chats').doc(sid).collection('messages').orderBy('ts', 'asc')
+        .onSnapshot(function (liveSnap) {
+          if (window._chatActiveSid !== _sidLive) return;
+          window.loadChatDetailMessages(liveSnap);
+        }, function (e) {
+          console.warn('chat detalhe listener falhou, usando leitura periódica:', e.message);
+          window._chatDetailUnsub = null;
+          if (window._chatPollGestor) clearInterval(window._chatPollGestor);
+          window._chatPollGestor = setInterval(function () { if (!document.hidden) window.loadChatDetailMessages(); }, 10000);
+          window.loadChatDetailMessages();
+        });
     };
 
-    window.loadChatDetailMessages = async function () {
+    window.loadChatDetailMessages = async function (preSnap) {
       if (!window._chatActiveSid) return;
+      // Com o listener ativo, ele já traz tudo em tempo real: não precisa reler a conversa
+      if (!preSnap && window._chatDetailUnsub) return;
       try {
-        var snap = await _db.collection('chats').doc(window._chatActiveSid).collection('messages').orderBy('ts', 'asc').get();
+        var snap = preSnap || await _db.collection('chats').doc(window._chatActiveSid).collection('messages').orderBy('ts', 'asc').get();
         var msgs = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
 
         var el = document.getElementById('chat-detail-messages');
@@ -15776,8 +15845,9 @@
         // Mark messages from student as read by manager
         var hadUnread = false;
         for (var m of msgs) {
-          if (m.sender === 'student' && !m.readByManager) {
+          if (m.sender === 'student' && !m.readByManager && !(window._chatReadSent && window._chatReadSent[m.id])) {
             hadUnread = true;
+            if (window._chatReadSent) window._chatReadSent[m.id] = true;
             _db.collection('chats').doc(window._chatActiveSid).collection('messages').doc(m.id).update({ readByManager: true }).catch(function () { });
           }
         }
@@ -15881,6 +15951,7 @@
     window.closeChatDetail = function (fromPopstate) {
       window._chatActiveSid = null;
       if (window._chatPollGestor) { clearInterval(window._chatPollGestor); window._chatPollGestor = null; }
+      if (window._chatDetailUnsub) { try { window._chatDetailUnsub(); } catch (e) { } window._chatDetailUnsub = null; }
       var panel = document.getElementById('chat-detail-panel');
       if (panel) {
         panel.classList.remove('visible');
@@ -16030,13 +16101,13 @@
         docsToWatch.forEach(function (d) {
           var sid = d.id;
           // Listener em tempo real para mensagens não lidas deste aluno
-          // Evita índice composto: filtra só por sender, checa readByManager em JS
+          // OTIMIZAÇÃO: duas igualdades não precisam de índice composto, então o Firestore
+          // devolve só as mensagens NÃO lidas (antes baixava todo o histórico de cada aluno).
           var unsub = _db.collection('chats').doc(sid).collection('messages')
             .where('sender', '==', 'student')
+            .where('readByManager', '==', false)
             .onSnapshot(function (msgSnap) {
-              var unread = msgSnap.docs.filter(function (m) {
-                return m.data().readByManager === false;
-              }).length;
+              var unread = msgSnap.size;
               window._chatUnreadCounts[sid] = unread;
               window._applyBadgeCount();
             }, function (e) { console.warn('chat snapshot err:', e.message); });
@@ -19076,6 +19147,7 @@
       } catch(e) {}
       try {
         if (window._chatPollGestor) { clearInterval(window._chatPollGestor); window._chatPollGestor = null; }
+        if (window._chatDetailUnsub) { window._chatDetailUnsub(); window._chatDetailUnsub = null; }
       } catch(e) {}
       try {
         if (_auth && _auth.currentUser) await _auth.signOut();
