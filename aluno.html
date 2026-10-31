@@ -6111,7 +6111,8 @@
       if (window._chatDrawerOpen) {
         window._chatUnread = 0;
         window.updateChatFabBadge(); // remove shake + badge
-        window.pollChatAluno();
+        // OTIMIZAÇÃO: com o listener ativo não precisa reler a conversa inteira ao abrir
+        if (!window._chatUnsub) window.pollChatAluno();
         setTimeout(function () { scrollChatBottom(); }, 150);
       }
     };
@@ -6119,6 +6120,7 @@
     window.pollChatAluno = async function () {
       var db = window._chatDb;
       var sid = window._chatStudentId;
+      if (document.hidden && window._chatPollInterval) return;
       if (!sid || !db || !window._fsGetDocs || !window._fsQuery || !window._fsOrderBy) return;
       try {
         var msgsCol = window._fsColl(db, 'chats', sid, 'messages');
