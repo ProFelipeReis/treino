@@ -7177,7 +7177,6 @@
       <div class="main-content">
         <div id="tab-dashboard" class="tab-panel active">
           <div class="tn-greet" id="dashboard-greeting">Dashboard</div>
-          <div class="tn-updated"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="dash-last-updated"></span></div>
 
           <div class="trial-dash-card" id="trial-dash-card">
             <div class="trial-dash-left">
@@ -7361,6 +7360,7 @@
                   <input class="search-input" type="text" id="search-students" placeholder="Buscar aluno..."
                     oninput="filterStudents()" />
                 </div>
+                <select class="tn-sort" id="sort-students" onchange="filterStudents()" aria-label="Ordenar alunos"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
                 <button class="btn btn-ghost btn-sm" onclick="openExportAllModal()">Exportar todos (ZIP)</button>
                 <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Novo</button>
               </div>
@@ -7374,7 +7374,8 @@
         <div id="tab-gestores" class="tab-panel">
           <div class="page-header">
             <div class="page-title">Gestores</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <select class="tn-sort" id="sort-managers" onchange="renderManagersGrid(window._mgrList||[])" aria-label="Ordenar gestores"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
               <button class="btn btn-ghost btn-sm" id="btn-inv-link" onclick="inviteGenLink()"><svg width="14"
                   height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
@@ -9774,6 +9775,18 @@
       if (tabId === 'tab-ceo') { loadCeoManagers(); loadPricing(); loadCrefPending(); }
     };
     window.goToAlunos = () => switchTab('tab-alunos', document.querySelector('[data-tab="tab-alunos"]'));
+    window.goToStudent = (sid) => { goToAlunos(); openStudentDetail(sid); };
+    // Ordenação das listas (padrão: ordem alfabética)
+    window._tnSort = function (list, mode, nameFn, dateFn) {
+      var arr = list.slice();
+      var cmp = function (a, b) { return String(nameFn(a) || '').localeCompare(String(nameFn(b) || ''), 'pt-BR', { sensitivity: 'base' }); };
+      var ms = function (x) { var d = dateFn(x); return d ? (d.toMillis ? d.toMillis() : d) : 0; };
+      if (mode === 'za') arr.sort(function (a, b) { return cmp(b, a); });
+      else if (mode === 'new') arr.sort(function (a, b) { return ms(b) - ms(a); });
+      else if (mode === 'old') arr.sort(function (a, b) { return ms(a) - ms(b); });
+      else arr.sort(cmp);
+      return arr;
+    };
 
     window.loadStudents = async () => {
       try {
@@ -9800,6 +9813,8 @@
     };
     window.renderStudentsGrid = list => {
       const g = document.getElementById('students-grid');
+      const _sel = document.getElementById('sort-students');
+      list = _tnSort(list, _sel ? _sel.value : 'az', s => s.name, s => s.createdAt);
       if (!list.length) {
         g.innerHTML = `<div class="empty-state"><div class="ei"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><p>Nenhum aluno cadastrado.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAddStudentModal()">+ Primeiro aluno</button></div>`;
         return;
@@ -10640,7 +10655,7 @@
             else { dateStr = new Date(ms).toLocaleDateString('pt-BR'); }
             const photo = s.photoURL || s.photo || s.avatar || '';
             const ph = photo ? '<img src="' + escHtml(photo) + '" alt="" loading="lazy" />' : escHtml(initials);
-            return `<div class="tn-new-card" onclick="openStudentDetail('${s.id}')">
+            return `<div class="tn-new-card" onclick="goToStudent('${s.id}')">
               <span class="tn-new-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
               <div class="tn-new-ph">${ph}</div>
               <div class="tn-new-name">${nm}</div>
@@ -14999,6 +15014,9 @@
 
     window.renderManagersGrid = function (list) {
       var g = document.getElementById('managers-grid');
+      window._mgrList = list;
+      var _sel = document.getElementById('sort-managers');
+      list = _tnSort(list, _sel ? _sel.value : 'az', function (m) { return m.name || m.username; }, function (m) { return m.createdAt; });
       if (!list.length) {
         g.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="ei"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>️</div><p>Nenhum gestor cadastrado além do master.</p></div>`;
         return;
@@ -19638,7 +19656,7 @@
 .tn .dash-section-title { margin-bottom: 14px; }
 
 /* ── Saudação ── */
-.tn .tn-greet { font-family: var(--head); font-size: 2.25rem; font-weight: 800; line-height: 1.1; letter-spacing: -.025em; color: var(--text); margin: 2px 0 12px; }
+.tn .tn-greet { font-family: var(--head); font-size: 2.25rem; font-weight: 800; line-height: 1.1; letter-spacing: -.025em; color: var(--text); margin: 2px 0 26px; }
 .tn .tn-greet .g-name { color: var(--accent); display: block; }
 .tn .tn-updated { display: flex; align-items: center; gap: 8px; color: var(--text3); font-size: .84rem; font-weight: 500; margin-bottom: 28px; }
 .tn .tn-updated svg { width: 17px; height: 17px; flex-shrink: 0; }
@@ -20057,6 +20075,27 @@
 @media (prefers-reduced-motion: reduce) {
   .tn *, .tn *::before, .tn *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* ── Botão "+ Adicionar plano de treino" (texto escuro legível sobre o verde) ── */
+.tn .add-plan-btn.add-plan-btn--dark {
+  background: linear-gradient(135deg, #2cf095 0%, #19c577 100%);
+  color: var(--on-accent); border: 0; font-weight: 800; font-size: .95rem; letter-spacing: .01em;
+  border-radius: 18px; padding: 18px 20px; box-shadow: 0 12px 26px -10px rgba(34, 224, 138, .6);
+}
+.tn .add-plan-btn.add-plan-btn--dark:hover, .tn .add-plan-btn.add-plan-btn--dark:active {
+  background: linear-gradient(135deg, #3bf5a0 0%, #1fd281 100%) !important;
+  color: var(--on-accent) !important; border: 0; filter: brightness(1.03);
+}
+.tn .add-plan-btn.add-plan-btn--dark:active { transform: scale(.98); }
+
+/* ── Ordenação (pílula) ── */
+.tn .tn-sort {
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23b4c2ce' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border: 1px solid var(--border2); border-radius: 999px; color: var(--text);
+  font-size: .8rem; font-weight: 600; padding: 8px 32px 8px 14px; width: auto;
+}
+.tn .tn-sort:focus { outline: none; border-color: var(--accent); }
 
   </style>
 
