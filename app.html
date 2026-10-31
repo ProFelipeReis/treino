@@ -7338,21 +7338,23 @@
         </div>
         <div id="tab-alunos" class="tab-panel">
           <div id="students-list-view">
-            <div class="page-header">
-              <div class="page-title">Alunos</div>
-              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                <div class="search-wrap">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.35-4.35" />
-                  </svg>
-                  <input class="search-input" type="text" id="search-students" placeholder="Buscar aluno..."
-                    oninput="filterStudents()" />
-                </div>
-                <select class="tn-sort" id="sort-students" onchange="filterStudents()" aria-label="Ordenar alunos"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
-                <button class="btn btn-ghost btn-sm" onclick="openExportAllModal()">Exportar todos (ZIP)</button>
-                <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Novo</button>
+            <div class="page-header lc-header">
+              <div>
+                <div class="page-title">Alunos</div>
+                <div class="page-sub" id="students-count"></div>
               </div>
+              <div class="lc-header-actions">
+                <button class="btn btn-ghost btn-sm" onclick="openExportAllModal()" title="Exportar todos os alunos (ZIP)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Exportar ZIP</button>
+                <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Novo aluno</button>
+              </div>
+            </div>
+            <div class="lc-toolbar">
+              <div class="search-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input class="search-input" type="text" id="search-students" placeholder="Buscar por nome ou código..." oninput="filterStudents()" />
+              </div>
+              <span class="lc-toolbar-label">Ordenar</span>
+              <select class="tn-sort" id="sort-students" onchange="filterStudents()" aria-label="Ordenar alunos"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
             </div>
             <div id="students-grid" class="students-grid">
               <div class="tn-skel card"></div><div class="tn-skel card"></div><div class="tn-skel card"></div>
@@ -7361,17 +7363,18 @@
           <div id="student-detail-view" class="hidden"></div>
         </div>
         <div id="tab-gestores" class="tab-panel">
-          <div class="page-header">
-            <div class="page-title">Gestores</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-              <select class="tn-sort" id="sort-managers" onchange="renderManagersGrid(window._mgrList||[])" aria-label="Ordenar gestores"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
-              <button class="btn btn-ghost btn-sm" id="btn-inv-link" onclick="inviteGenLink()"><svg width="14"
-                  height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg> Link de convite</button>
+          <div class="page-header lc-header">
+            <div>
+              <div class="page-title">Gestores</div>
+              <div class="page-sub" id="managers-count"></div>
             </div>
+            <div class="lc-header-actions">
+              <button class="btn btn-primary btn-sm" id="btn-inv-link" onclick="inviteGenLink()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link de convite</button>
+            </div>
+          </div>
+          <div class="lc-toolbar">
+            <span class="lc-toolbar-label">Ordenar</span>
+            <select class="tn-sort" id="sort-managers" onchange="renderManagersGrid(window._mgrList||[])" aria-label="Ordenar gestores"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
           </div>
           <div id="inv-link-box"
             style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;">
@@ -9841,6 +9844,7 @@
       const g = document.getElementById('students-grid');
       const _sel = document.getElementById('sort-students');
       list = _tnSort(list, _sel ? _sel.value : 'az', s => s.name, s => s.createdAt);
+      const _cnt = document.getElementById('students-count'); if (_cnt) _cnt.textContent = list.length + (list.length === 1 ? ' aluno' : ' alunos');
       if (!list.length) {
         g.innerHTML = `<div class="empty-state"><div class="ei"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><p>Nenhum aluno cadastrado.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAddStudentModal()">+ Primeiro aluno</button></div>`;
         return;
@@ -9849,33 +9853,33 @@
       const u = window.CURRENT_USER || {};
       const isMaster = u.role === 'ceo' || u.isMaster;
 
-      const cardHTML = s => `
-    <div class="student-card" onclick="openStudentDetail('${s.id}')">
-      <div class="student-card-top">
+      const cardHTML = s => {
+        const showMgr = isMaster && s.managerId && s.managerId !== (window.CURRENT_USER || {}).username && s.managerName;
+        const chips = (s.phone ? `<span class="lc-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>${s.phone}</span>` : '')
+          + (s.obs ? `<span class="lc-chip">${s.obs}</span>` : '')
+          + (showMgr ? `<span class="lc-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${s.managerName}</span>` : '');
+        return `
+    <div class="student-card lc" onclick="openStudentDetail('${s.id}')">
+      <div class="lc-top">
         <div class="avatar">${studentAvatar(s)}</div>
-        <div>
+        <div class="lc-id">
           <div class="student-name">${s.name}</div>
-          <div class="student-code">${s.code}</div>
+          <div class="lc-code">${s.code}</div>
         </div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:4px;">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          ${s.phone ? `<span style="font-size:.75rem;color:var(--text3);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> ${s.phone}</span>` : ''}
-          ${s.obs ? `<span style="font-size:.75rem;color:var(--text2);">${s.obs}</span>` : ''}
-          <span class="badge badge-active">ativo</span>
-          ${isMaster && s.managerId && s.managerId !== (window.CURRENT_USER || {}).username && s.managerName ? `<span style="font-size:.72rem;color:var(--text3);font-weight:600;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${s.managerName}</span>` : ''}
-        </div>
-        <div style="display:flex;gap:6px;align-items:center;" onclick="event.stopPropagation()">
-          <button class="btn btn-ghost btn-sm" onclick="openEditStudentModal('${s.id}')">✏️ Editar</button>
-          <div class="ctx-menu-wrap">
-            <button class="ctx-menu-btn" onclick="toggleCtxMenu('sctx_${s.id}')" title="Mais opções">•••</button>
-            <div class="ctx-menu hidden" id="sctx_${s.id}">
-              <div class="ctx-menu-item" onclick="closeAllCtxMenus();openTransferModal('${s.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Transferir aluno</div>
-            </div>
+        <div class="ctx-menu-wrap" onclick="event.stopPropagation()">
+          <button class="ctx-menu-btn" onclick="toggleCtxMenu('sctx_${s.id}')" title="Mais opções" aria-label="Mais opções"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></svg></button>
+          <div class="ctx-menu hidden" id="sctx_${s.id}">
+            <div class="ctx-menu-item" onclick="closeAllCtxMenus();openTransferModal('${s.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Transferir aluno</div>
           </div>
         </div>
       </div>
+      ${chips ? `<div class="lc-chips">${chips}</div>` : ''}
+      <div class="lc-foot" onclick="event.stopPropagation()">
+        <span class="badge badge-active">ativo</span>
+        <button class="btn btn-ghost btn-sm lc-edit" onclick="openEditStudentModal('${s.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Editar</button>
+      </div>
     </div>`;
+      };
 
       if (!isMaster) {
         // Gestor normal: lista simples
@@ -9898,13 +9902,7 @@
 
       if (others.length) {
         // Separador de seção
-        html += `<div style="grid-column:1/-1;margin-top:12px;margin-bottom:4px;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;">Alunos de outros gestores</span>
-        <div style="flex:1;height:1px;background:var(--border);"></div>
-        <span style="font-size:.72rem;font-weight:600;color:var(--text3);white-space:nowrap;">${others.length} aluno${others.length !== 1 ? 's' : ''}</span>
-      </div>
-    </div>`;
+        html += `<div class="lc-sep"><span>Alunos de outros gestores</span><i></i><span>${others.length} aluno${others.length !== 1 ? 's' : ''}</span></div>`;
         html += others.map(cardHTML).join('');
       }
 
@@ -13978,16 +13976,52 @@
     window.toggleCtxMenu = function (id) {
       const menu = document.getElementById(id);
       if (!menu) return;
-      const isHidden = menu.classList.contains('hidden');
+      const wasOpen = menu.classList.contains('ctx-open');
       closeAllCtxMenus();
-      if (isHidden) menu.classList.remove('hidden');
+      if (wasOpen) return;
+      const wrap = menu.parentElement;
+      const btn = wrap && wrap.querySelector('.ctx-menu-btn');
+      if (!btn) { menu.classList.remove('hidden'); return; }
+      // O menu sai do cartão (que corta o que passa da borda) e vai para o <body>
+      menu._home = wrap;
+      window._ctxOpenedAt = Date.now();
+      document.body.appendChild(menu);
+      menu.classList.add('tn', 'ctx-open');
+      menu.classList.remove('hidden');
+      const r = btn.getBoundingClientRect();
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const mw = menu.offsetWidth, mh = menu.offsetHeight;
+      let left = Math.min(Math.max(8, r.right - mw), vw - mw - 8);
+      let top = r.bottom + 6;
+      const bottomLimit = vh - (vw <= 768 ? 84 : 8);   // no celular, não passa por cima do menu de baixo
+      if (top + mh > bottomLimit) {               // sem espaço embaixo: abre para cima
+        const up = r.top - mh - 6;
+        top = up >= 8 ? up : Math.max(8, bottomLimit - mh);
+        menu.classList.add('flip-up');
+      }
+      menu.style.left = left + 'px';
+      menu.style.top = top + 'px';
     };
     window.closeAllCtxMenus = function () {
-      document.querySelectorAll('.ctx-menu').forEach(m => m.classList.add('hidden'));
+      document.querySelectorAll('.ctx-menu').forEach(m => {
+        const wasFloating = m.classList.contains('ctx-open');
+        m.classList.add('hidden');
+        m.classList.remove('ctx-open', 'flip-up');
+        m.style.left = m.style.top = '';
+        if (wasFloating) {
+          if (m._home && document.body.contains(m._home)) m._home.appendChild(m);
+          else m.remove();                  // o cartão foi redesenhado: descarta o menu antigo
+        }
+      });
     };
     document.addEventListener('click', function (e) {
-      if (!e.target.closest('.ctx-menu-wrap')) closeAllCtxMenus();
+      if (!e.target.closest('.ctx-menu-wrap') && !e.target.closest('.ctx-menu')) closeAllCtxMenus();
     });
+    window.addEventListener('scroll', function (e) {
+      if (Date.now() - (window._ctxOpenedAt || 0) < 250) return;   // ignora a rolagem que acabou de acontecer
+      if (!(e.target && e.target.closest && e.target.closest('.ctx-menu'))) closeAllCtxMenus();
+    }, true);
+    window.addEventListener('resize', function () { closeAllCtxMenus(); });
 
     // ── WhatsApp: envia o link do app e o código de acesso do aluno ──
     window.sendWhatsAppPlan = function (sid, planId) {
@@ -15281,31 +15315,39 @@
       window._mgrList = list;
       var _sel = document.getElementById('sort-managers');
       list = _tnSort(list, _sel ? _sel.value : 'az', function (m) { return m.name || m.username; }, function (m) { return m.createdAt; });
+      var _mc = document.getElementById('managers-count'); if (_mc) _mc.textContent = list.length + (list.length === 1 ? ' gestor' : ' gestores');
       if (!list.length) {
         g.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="ei"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>️</div><p>Nenhum gestor cadastrado além do master.</p></div>`;
         return;
       }
-      g.innerHTML = list.map(m => `
-    <div class="student-card" id="mgr-card-${m.id}">
-      <div class="student-card-top">
+      g.innerHTML = list.map(m => {
+        const chips = (m.cref ? `<span class="lc-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h3M13 15h4"/></svg>${m.cref}</span>` : '')
+          + (m.phone ? `<span class="lc-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>${m.phone}</span>` : '');
+        const canReset = _canResetMgrPassword(m);
+        return `
+    <div class="student-card lc" id="mgr-card-${m.id}" style="cursor:default;">
+      <div class="lc-top">
         <div class="avatar" style="${m.isMaster ? 'background:var(--accent-dim);border-color:var(--accent-soft);' : ''}">${(m.name || m.username || '?').slice(0, 2).toUpperCase()}</div>
-        <div>
+        <div class="lc-id">
           <div class="student-name">${m.name || m.username}</div>
-          <div class="student-code">@${m.username}</div>
-          ${m.cref ? `<div style="font-size:.74rem;color:var(--text2);margin-top:3px;font-weight:600;display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="7" y1="15" x2="10" y2="15"/><line x1="13" y1="15" x2="17" y2="15"/></svg> ${m.cref}</div>` : ''}
-          ${m.phone ? `<div style="font-size:.74rem;color:var(--text3);margin-top:2px;font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> ${m.phone}</div>` : ''}
+          <div class="lc-code">@${m.username}</div>
+        </div>
+        <div class="ctx-menu-wrap">
+          <button class="ctx-menu-btn" onclick="toggleCtxMenu('mctx_${m.id}')" title="Mais opções" aria-label="Mais opções"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></svg></button>
+          <div class="ctx-menu hidden" id="mctx_${m.id}">
+            ${canReset ? `<div class="ctx-menu-item" onclick="closeAllCtxMenus();mgrResetAsk('${m.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 2-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></svg> Trocar senha</div><div class="ctx-menu-sep"></div>` : ''}
+            <div class="ctx-menu-item danger" onclick="closeAllCtxMenus();deleteManager('${m.id}','${m.username}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg> Excluir gestor</div>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:4px;">
+      ${chips ? `<div class="lc-chips">${chips}</div>` : ''}
+      <div class="lc-foot">
         <span class="mgr-badge ${m.role === 'ceo' ? 'mgr-ceo' : m.isMaster ? 'mgr-master' : 'mgr-comum'}">${m.role === 'ceo' ? '⭐ CEO' : m.isMaster ? '⭐ Master' : 'Comum'}</span>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${_mgrResetBtn(m)}
-          <button class="btn btn-ghost btn-sm" onclick="openAddManagerModal(${JSON.stringify(m).replace(/"/g, '&quot;')})">✏️</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteManager('${m.id}','${m.username}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
-        </div>
+        <button class="btn btn-ghost btn-sm lc-edit" onclick="openAddManagerModal(${JSON.stringify(m).replace(/"/g, '&quot;')})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Editar</button>
       </div>
       ${_mgrResetPanel(m)}
-    </div>`).join('');
+    </div>`;
+      }).join('');
     };
 
     window.deleteManager = async function (id, username) {
@@ -20830,6 +20872,91 @@ html[data-theme="light"] .tn .tn-new-ph { box-shadow: none; }
       }
     })();
   </script>
+
+  <style id="trainly-lists">
+/* ═══════════ ALUNOS & GESTORES — layout refeito (só formas e estilos) ═══════════ */
+
+/* Cabeçalho da página */
+.tn .lc-header { align-items: flex-end; margin-bottom: 14px; gap: 14px; }
+.tn .page-sub { font-size: .82rem; font-weight: 500; color: var(--text3); margin-top: 4px; }
+.tn .lc-header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tn .lc-header-actions .btn { display: inline-flex; align-items: center; gap: 7px; }
+.tn .lc-header-actions .btn svg { width: 15px; height: 15px; }
+
+/* Barra de ferramentas (busca + ordenação) */
+.tn .lc-toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px; margin-bottom: 20px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+}
+.tn .lc-toolbar .search-wrap { flex: 1 1 220px; min-width: 0; position: relative; }
+.tn .lc-toolbar .search-input { width: 100%; background: var(--surface2); border-color: transparent; border-radius: 12px; padding-top: 11px; padding-bottom: 11px; }
+.tn .lc-toolbar .search-input:focus { background: var(--surface2); }
+.tn .lc-toolbar .tn-sort { border-radius: 12px; background-color: var(--surface2); border-color: transparent; padding: 11px 34px 11px 14px; }
+.tn .lc-toolbar-label { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); padding: 0 6px 0 4px; }
+
+/* Grade */
+.tn .students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; align-items: start; }
+@media (max-width: 520px) { .tn .students-grid { grid-template-columns: 1fr; } }
+
+/* Cartão */
+.tn .student-card.lc { padding: 0; overflow: visible; display: flex; flex-direction: column; border-radius: 18px; cursor: pointer; }
+.tn .student-card.lc::before { display: none; }
+.tn .lc-top { display: flex; align-items: center; gap: 14px; padding: 16px 14px 14px 16px; }
+.tn .student-card.lc .avatar { width: 54px; height: 54px; flex: 0 0 54px; border-radius: 16px; font-size: 1.05rem; }
+.tn .lc-id { flex: 1; min-width: 0; }
+.tn .student-card.lc .student-name { font-size: 1rem; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tn .lc-code { display: inline-flex; margin-top: 5px; font-size: .7rem; font-weight: 700; letter-spacing: .06em; color: var(--text3); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; }
+.tn .lc-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 14px; }
+.tn .lc-chip { display: inline-flex; align-items: center; gap: 6px; font-size: .74rem; font-weight: 500; color: var(--text2); background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 9px; max-width: 100%; }
+.tn .lc-chip svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--text3); }
+.tn .lc-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 14px 11px 16px; margin-top: auto; border-top: 1px solid var(--border); border-radius: 0 0 18px 18px; background: color-mix(in srgb, var(--surface2) 55%, transparent); }
+.tn .lc-edit { display: inline-flex; align-items: center; gap: 6px; }
+.tn .lc-edit svg { width: 14px; height: 14px; }
+.tn .student-card.lc:hover { transform: none; }
+
+/* Botão ••• */
+.tn .ctx-menu-btn { width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0; }
+.tn .ctx-menu-btn svg { width: 18px; height: 18px; }
+
+/* Menu "mais opções": sai do cartão e flutua sobre a página (nunca é cortado) */
+.ctx-menu.ctx-open {
+  position: fixed; right: auto; bottom: auto; z-index: 3500;
+  min-width: 210px; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); overflow-y: auto;
+  padding: 6px; border-radius: 16px;
+  background: var(--surface2); border: 1px solid var(--border2); box-shadow: 0 18px 48px rgba(0, 0, 0, .45);
+  animation: ctxIn .14s cubic-bezier(.22, 1, .36, 1);
+}
+.ctx-menu.ctx-open.flip-up { transform-origin: bottom right; }
+.ctx-menu.ctx-open .ctx-menu-item { padding: 10px 12px; border-radius: 10px; font-size: .84rem; font-weight: 600; color: var(--text); gap: 10px; }
+.ctx-menu.ctx-open .ctx-menu-item svg { width: 16px; height: 16px; color: var(--text3); flex-shrink: 0; }
+.ctx-menu.ctx-open .ctx-menu-item:hover { background: var(--surface3); color: var(--text); }
+.ctx-menu.ctx-open .ctx-menu-item.danger, .ctx-menu.ctx-open .ctx-menu-item.danger svg { color: var(--red); }
+.ctx-menu.ctx-open .ctx-menu-item.danger:hover { background: var(--red-dim); }
+.ctx-menu.ctx-open .ctx-menu-sep { height: 1px; background: var(--border); margin: 5px 4px; }
+
+/* Gestores: etiqueta de papel e aviso de senha dentro do cartão */
+.tn .student-card.lc .mgr-badge { border-radius: 8px; }
+.tn .student-card.lc .mgr-reset-notice { margin: 0 16px 12px; }
+.tn .student-card.lc .mgr-reset-confirm { margin: 0 16px 14px; }
+.tn .lc-sep { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin: 14px 0 2px; }
+.tn .lc-sep span { font-size: .72rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .12em; white-space: nowrap; }
+.tn .lc-sep i { flex: 1; height: 1px; background: var(--border); }
+
+@media (max-width: 600px) {
+  .tn .lc-header { flex-direction: column; align-items: stretch; }
+  .tn .lc-header-actions .btn-primary { flex: 1; justify-content: center; }
+}
+
+  
+@media (max-width: 600px) {
+  .tn .lc-toolbar { padding: 10px; gap: 8px; }
+  .tn .lc-toolbar .search-wrap { flex: 1 1 100%; }
+  .tn .lc-toolbar .tn-sort { flex: 1; }
+  .tn .lc-toolbar-label { order: 2; }
+  .tn .lc-toolbar .tn-sort { order: 3; }
+}
+</style>
 </body>
 
 </html>
