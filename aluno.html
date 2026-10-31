@@ -4023,6 +4023,86 @@
       reader.readAsDataURL(file);
     };
 
+
+    /* ── [PHOTO-PROMPT-AL] Pop-up "novidade: foto de perfil" ──
+       Aparece uma vez, no primeiro acesso ao painel, para o aluno que ainda não tem foto. */
+    var _alppPhoto = '', _alppBusy = false;
+    function _alppKey(st) { return 'trainly-al-photo-prompt-' + (st && st.id ? st.id : 'x'); }
+    function _alppRememberLocal(st) { try { localStorage.setItem(_alppKey(st), '1'); } catch (e) { } }
+    function _alppRender() {
+      var st = window._alGetStudent ? window._alGetStudent() : null;
+      var av = document.getElementById('alpp-avatar');
+      if (_alppPhoto) { av.innerHTML = '<img src="' + _alppPhoto + '" alt="">'; }
+      else { av.textContent = alInitials((st && st.name) || ''); }
+      document.getElementById('alpp-save').disabled = !_alppPhoto;
+      document.getElementById('alpp-pick-txt').textContent = _alppPhoto ? 'Trocar foto' : 'Escolher foto';
+    }
+    function _alppOpen() {
+      _alppPhoto = ''; _alppBusy = false;
+      document.getElementById('alpp-err').textContent = '';
+      document.getElementById('alpp-save').textContent = 'Salvar foto';
+      _alppRender();
+      openAlModal('modal-photo-prompt-al');
+    }
+    window.alCheckPhotoPrompt = async function () {
+      if (window._alppChecked) return; window._alppChecked = true;
+      var st = window._alGetStudent ? window._alGetStudent() : null;
+      if (!st || !st.id) return;
+      if (st.photoURL || st.photo || st.avatar) return;
+      try { if (localStorage.getItem(_alppKey(st))) return; } catch (e) { }
+      // Confere os dados mais recentes (foto pode ter sido colocada em outro aparelho)
+      try { var fresh = window._alRefreshStudent ? await window._alRefreshStudent() : null; if (fresh) st = fresh; } catch (e) { }
+      if (st.photoURL || st.photoPromptSeen) { _alppRememberLocal(st); return; }
+      var tries = 0;
+      (function wait() {
+        var busy = !!document.querySelector('.modal-overlay:not(.hidden)');
+        if (!busy) { _alppOpen(); return; }
+        if (++tries < 20) setTimeout(wait, 3000);
+      })();
+    };
+    window.alppPick = function () { var i = document.getElementById('alpp-input'); if (i) { i.value = ''; i.click(); } };
+    window.alppChosen = function (input) {
+      var file = input.files && input.files[0]; if (!file) return;
+      var err = document.getElementById('alpp-err'); err.textContent = '';
+      if (!/^image\//.test(file.type)) { err.textContent = 'Escolha um arquivo de imagem.'; return; }
+      var reader = new FileReader();
+      reader.onerror = function () { err.textContent = 'Não foi possível ler a imagem.'; };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { err.textContent = 'Imagem inválida ou formato não suportado.'; };
+        img.onload = function () {
+          var S = 320, w = img.width, h = img.height, side = Math.min(w, h);
+          var c = document.createElement('canvas'); c.width = S; c.height = S;
+          var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, S, S);
+          ctx.drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, S, S);
+          _alppPhoto = c.toDataURL('image/jpeg', 0.82); _alppRender();
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    };
+    window.alppSkip = async function () {
+      var st = window._alGetStudent ? window._alGetStudent() : null;
+      closeAlModal('modal-photo-prompt-al');
+      _alppRememberLocal(st);
+      try { if (window._alMarkPhotoPromptSeen) await window._alMarkPhotoPromptSeen(); } catch (e) { console.warn('photoPromptSeen:', e); }
+    };
+    window.alppSave = async function () {
+      if (_alppBusy || !_alppPhoto) return; _alppBusy = true;
+      var st = window._alGetStudent ? window._alGetStudent() : null;
+      var btn = document.getElementById('alpp-save'), err = document.getElementById('alpp-err');
+      btn.disabled = true; btn.textContent = 'Salvando...'; err.textContent = '';
+      try {
+        await window._alSaveProfile({ name: st.name, email: st.email || '', phone: st.phone || '', photoURL: _alppPhoto, photoPromptSeen: true });
+        _alppRememberLocal(st);
+        closeAlModal('modal-photo-prompt-al');
+      } catch (e) {
+        err.textContent = 'Não foi possível salvar a foto. ' + ((e && e.message) || 'Tente de novo.');
+        btn.disabled = false; btn.textContent = 'Salvar foto';
+      } finally { _alppBusy = false; }
+    };
+    /* ── [/PHOTO-PROMPT-AL] ── */
+
     window.saveAlProfile = async function () {
       var err = document.getElementById('al-profile-err'); err.textContent = '';
       var name = document.getElementById('al-in-name').value.trim();
@@ -4032,7 +4112,7 @@
       if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'E-mail inválido.'; return; }
       var btn = document.getElementById('al-save-btn'); btn.disabled = true; btn.textContent = 'Salvando...';
       try {
-        await window._alSaveProfile({ name: name, email: email, phone: phone, photoURL: _alPhoto || '' });
+        await window._alSaveProfile({ name: name, email: email, phone: phone, photoURL: _alPhoto || '', photoPromptSeen: true });
         _alPhotoDirty = false;
         _alPhoto = (window._alStudent && window._alStudent.photoURL) || _alPhoto; // já é o endereço final
         closeAlModal('modal-profile-al');
@@ -4040,6 +4120,39 @@
       finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
     };
   </script>
+
+  <!-- Pop-up: novidade da foto de perfil (aluno, primeiro acesso) -->
+  <div id="modal-photo-prompt-al" class="modal-overlay hidden">
+    <div class="modal-box-trainly">
+      <div class="modal-header-trainly">
+        <div class="modal-header-trainly-left">
+          <div class="mht-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+          <div><div class="mht-title">Novidade no Trainly</div><div class="mht-sub">Foto de perfil</div></div>
+        </div>
+        <button class="mht-close" onclick="alppSkip()" aria-label="Fechar">✕</button>
+      </div>
+      <div class="al-body alpp-body">
+        <button type="button" class="al-av al-av-big alpp-av" id="alpp-avatar" onclick="alppPick()" aria-label="Escolher foto de perfil">?</button>
+        <p class="alpp-title">Agora você pode ter sua foto de perfil!</p>
+        <p class="alpp-text">Seu treinador vai ver a sua foto no seu cartão. Escolha uma da galeria ou tire uma agora.</p>
+        <button type="button" class="al-photo-btn" onclick="alppPick()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span id="alpp-pick-txt">Escolher foto</span></button>
+        <input type="file" id="alpp-input" accept="image/*" class="hidden" onchange="alppChosen(this)" />
+        <div id="alpp-err" class="alpp-err"></div>
+        <button class="al-save" id="alpp-save" onclick="alppSave()" disabled>Salvar foto</button>
+        <button type="button" class="alpp-skip" onclick="alppSkip()">Agora não</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    .alpp-body { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+    .alpp-av { width: 104px; height: 104px; font-size: 2rem; }
+    .alpp-title { font-weight: 800; font-size: 1.05rem; color: var(--text); margin: 4px 0 0; }
+    .alpp-text { font-size: .86rem; color: var(--text3); line-height: 1.5; margin: 0; max-width: 320px; }
+    .alpp-err { color: var(--red); font-size: .8rem; font-weight: 600; min-height: 18px; }
+    #alpp-save { margin-bottom: 0; }
+    #alpp-save:disabled { opacity: .5; cursor: not-allowed; }
+    .alpp-skip { background: none; border: 0; color: var(--text3); font-family: var(--body); font-weight: 700; font-size: .85rem; cursor: pointer; padding: 6px 10px; }
+  </style>
 
   <div id="screen-login">
     <div class="lg-wrap">
@@ -4279,6 +4392,14 @@
       saveSession(_currentStudent);
       if (window.alApplyTopPhoto) window.alApplyTopPhoto();
       return _currentStudent;
+    };
+    window._alMarkPhotoPromptSeen = async () => {
+      if (!_currentStudent || !_currentStudent.id) return;
+      await ensureAuth();
+      await updateDoc(doc(db, 'students', _currentStudent.id), { photoPromptSeen: true });
+      _currentStudent = { ..._currentStudent, photoPromptSeen: true };
+      window._alStudent = _currentStudent;
+      saveSession(_currentStudent);
     };
     window._alSaveProfile = async (data) => {
       if (!_currentStudent || !_currentStudent.id) throw new Error('Sessão inválida. Entre novamente.');
@@ -4958,6 +5079,8 @@
           setTimeout(function () { splash.classList.remove('splash-in', 'splash-out'); if(vid) vid.pause(); }, 420);
         }
         document.getElementById('screen-app').style.cssText = 'display:flex;flex-direction:column;background:transparent;';
+        // Pop-up da novidade "foto de perfil" (primeiro acesso, aluno sem foto)
+        setTimeout(function () { if (window.alCheckPhotoPrompt) window.alCheckPhotoPrompt().catch(function () { }); }, 1500);
       }
       // ─────────────────────────────────────
 
