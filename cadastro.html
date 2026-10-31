@@ -18,6 +18,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="fotos-config.js"></script>
+  <script src="fotos.js"></script>
   <style>
     :root {
       --bg: #0d1218; --bg2: #111820;
@@ -1079,6 +1081,17 @@
 
     // ── Foto de perfil (opcional) ───────────────────────────
     window._cadPhotos = { reg: '', inv: '' };
+    // Envia a foto escolhida no cadastro para o R2 (a conta do Firebase já foi criada nesse ponto).
+    // Se o servidor de fotos não estiver configurado ou falhar, cai no modo antigo (foto dentro do Firestore).
+    window._cadUploadPhoto = async function(k, id) {
+      var d = (window._cadPhotos && window._cadPhotos[k]) || '';
+      if (!d) return { url: '', key: '' };
+      if (window.TrainlyFotos && TrainlyFotos.ativo() && TrainlyFotos.ehDataUrl(d)) {
+        try { var r = await TrainlyFotos.enviar(d, { kind: 'manager', id: id }); return { url: r.url, key: r.key }; }
+        catch (e) { console.warn('Foto: usando modo antigo.', e); }
+      }
+      return { url: d, key: '' };
+    };
     function cadErrEl(k) { return document.getElementById(k === 'inv' ? 'inv-error' : 'reg-error'); }
     function cadRenderPhoto(k) {
       var ph = window._cadPhotos[k], prev = document.getElementById(k + '-photo-preview');
@@ -1180,6 +1193,7 @@
 
         var hash = await window._sha256(password);
         _regNewId = 'mgr_' + Date.now();
+        var _phReg = await window._cadUploadPhoto('reg', _regNewId);
 
         var refCode = window._pendingRefCode
           || (document.getElementById('reg-ref-code') ? document.getElementById('reg-ref-code').value.trim() : '')
@@ -1192,7 +1206,7 @@
           await _db.collection('managers').doc(_regNewId).set({
             username: user, passwordHash: hash, name: name, cref: cref, crefDeclared: true,
             profType: 'personal',
-            photoURL: (window._cadPhotos && window._cadPhotos.reg) || '',
+            photoURL: _phReg.url, photoKey: _phReg.key, photoPromptSeen: true,
             email: email || authEmail,
             authUid: uid,
             role: 'comum', isMaster: false,
@@ -1487,6 +1501,7 @@
 
         var hash  = await window._sha256(pass);
         var newId = 'mgr_' + Date.now();
+        var _phInv = await window._cadUploadPhoto('inv', newId);
 
         // Get referral code of inviter
         var invByRefCode = invBy;
@@ -1500,7 +1515,7 @@
           role: 'comum', isMaster: false,
           cref: cref, crefDeclared: true,
           profType: 'personal',
-          photoURL: (window._cadPhotos && window._cadPhotos.inv) || '',
+          photoURL: _phInv.url, photoKey: _phInv.key, photoPromptSeen: true,
           authUid: uid,
           trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
           blocked: false, createdAt: Date.now(),
