@@ -8730,6 +8730,16 @@
         <button class="close-btn" onclick="closeModal('modal-profile')">✕</button>
       </div>
       <div class="modal-body">
+        <div class="pf-photo-wrap">
+          <button type="button" class="pf-av" id="profile-avatar" onclick="pickMgrPhoto()" aria-label="Alterar foto de perfil">?</button>
+          <div class="pf-photo-actions">
+            <button type="button" class="btn btn-ghost" onclick="pickMgrPhoto()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span id="profile-photo-btn-txt">Adicionar foto</span>
+            </button>
+            <button type="button" class="pf-photo-rm hidden" id="profile-photo-rm" onclick="removeMgrPhoto()">Remover foto</button>
+          </div>
+          <input type="file" id="profile-photo-input" accept="image/*" class="hidden" onchange="mgrPhotoChosen(this)" />
+        </div>
         <div class="form-group">
           <label>Nome de exibição</label>
           <input id="profile-name" class="form-control" type="text" placeholder="Seu nome" />
@@ -14710,8 +14720,7 @@
     window.openAccountModal = function () {
       var u = window.CURRENT_USER || {};
       var nm = u.displayName || u.username || 'Gestor';
-      var av = document.getElementById('acc-avatar');
-      if (av) av.textContent = nm.trim().split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase() || '?';
+      if (window.applyMgrPhoto) window.applyMgrPhoto();
       var an = document.getElementById('acc-name'); if (an) an.textContent = nm;
       var ar = document.getElementById('acc-role');
       if (ar) ar.textContent = u.role === 'ceo' ? 'CEO' : (u.role === 'master' || u.isMaster) ? 'Gestor master' : 'Gestor';
@@ -14726,6 +14735,61 @@
       if (m) m.setAttribute('content', mode === 'light' ? '#000000' : '#0d1218');
       document.querySelectorAll('[data-theme-opt]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-theme-opt') === mode); });
     };
+    /* ── Foto de perfil do gestor ── */
+    var _mgrPhoto = '', _mgrPhotoDirty = false;
+    function _mgrPhotoKey() { var u = window.CURRENT_USER || {}; return 'trainly-mgr-photo-' + (u.username || 'x'); }
+    function _mgrCurrentPhoto() {
+      var u = window.CURRENT_USER || {};
+      if (u.photoURL) return u.photoURL;
+      try { return localStorage.getItem(_mgrPhotoKey()) || ''; } catch (e) { return ''; }
+    }
+    function _setAvatarEl(el, photo, initials) {
+      if (!el) return;
+      if (photo) { el.innerHTML = '<img src="' + photo + '" alt="">'; } else { el.textContent = initials; }
+    }
+    function _mgrInitials() {
+      var u = window.CURRENT_USER || {};
+      return ((u.displayName || u.username || '?').trim().split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase()) || '?';
+    }
+    window.applyMgrPhoto = function () {
+      var ph = _mgrCurrentPhoto();
+      _setAvatarEl(document.getElementById('acc-avatar'), ph, _mgrInitials());
+      var btn = document.getElementById('topbar-account-btn');
+      if (btn) {
+        var svg = btn.querySelector('svg'), img = btn.querySelector('img');
+        if (ph) { if (!img) { img = document.createElement('img'); img.alt = ''; btn.appendChild(img); } img.src = ph; if (svg) svg.style.display = 'none'; }
+        else { if (img) img.remove(); if (svg) svg.style.display = ''; }
+      }
+    };
+    function _renderProfileAvatar() {
+      _setAvatarEl(document.getElementById('profile-avatar'), _mgrPhoto, _mgrInitials());
+      document.getElementById('profile-photo-rm').classList.toggle('hidden', !_mgrPhoto);
+      document.getElementById('profile-photo-btn-txt').textContent = _mgrPhoto ? 'Trocar foto' : 'Adicionar foto';
+    }
+    // PC: abre o explorador de arquivos. Celular: o navegador oferece Câmera ou Galeria.
+    window.pickMgrPhoto = function () { var i = document.getElementById('profile-photo-input'); if (i) { i.value = ''; i.click(); } };
+    window.removeMgrPhoto = function () { _mgrPhoto = ''; _mgrPhotoDirty = true; _renderProfileAvatar(); };
+    window.mgrPhotoChosen = function (input) {
+      var file = input.files && input.files[0]; if (!file) return;
+      var err = document.getElementById('profile-error'); err.textContent = '';
+      if (!/^image\//.test(file.type)) { err.textContent = 'Escolha um arquivo de imagem.'; return; }
+      var reader = new FileReader();
+      reader.onerror = function () { err.textContent = 'Não foi possível ler a imagem.'; };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { err.textContent = 'Imagem inválida ou formato não suportado.'; };
+        img.onload = function () {
+          var S = 320, w = img.width, h = img.height, side = Math.min(w, h);
+          var c = document.createElement('canvas'); c.width = S; c.height = S;
+          var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, S, S);
+          ctx.drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, S, S);
+          _mgrPhoto = c.toDataURL('image/jpeg', 0.82); _mgrPhotoDirty = true; _renderProfileAvatar();
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
     window.openProfileModal = function () {
       setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
       var u = window.CURRENT_USER || {};
@@ -14734,6 +14798,7 @@
       document.getElementById('profile-pass').value = '';
       document.getElementById('profile-pass-confirm').value = '';
       document.getElementById('profile-error').textContent = '';
+      _mgrPhoto = _mgrCurrentPhoto(); _mgrPhotoDirty = false; _renderProfileAvatar();
       openModal('modal-profile');
       setTimeout(() => document.getElementById('profile-phone').focus(), 100);
     };
@@ -14819,6 +14884,16 @@
           }
         }
 
+        // Foto de perfil: salva no aparelho já; no banco (managers.photoURL) em tentativa — será configurado depois
+        if (_mgrPhotoDirty) {
+          try { if (_mgrPhoto) localStorage.setItem(_mgrPhotoKey(), _mgrPhoto); else localStorage.removeItem(_mgrPhotoKey()); } catch (e) { }
+          window.CURRENT_USER.photoURL = _mgrPhoto || '';
+          try {
+            var phSnap = await _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username)));
+            if (!phSnap.empty) await _updateDoc(_doc(_db, 'managers', phSnap.docs[0].id), { photoURL: _mgrPhoto || '' });
+          } catch (phErr) { console.warn('Foto salva só neste aparelho (banco ainda não configurado):', phErr); }
+          _mgrPhotoDirty = false;
+        }
         // Atualiza memória e localStorage (incluindo senha)
         if (pass) { window.CURRENT_USER.passwordHash = await _sha256(pass); }
         window.CURRENT_USER.displayName = finalName;
@@ -14826,6 +14901,7 @@
         try { localStorage.setItem(LS_GESTOR, JSON.stringify(window.CURRENT_USER)); } catch (e) { }
 
         (window._applyUserUI || window._applyUserUIEarly || function(){})();
+        if (window.applyMgrPhoto) window.applyMgrPhoto();
         closeModal('modal-profile');
         if (pass) {
           _showPasswordChangedLogoutModal();
@@ -14898,6 +14974,7 @@
       var u = window.CURRENT_USER || {};
       var pill = document.getElementById('topbar-user-pill');
       if (pill) pill.textContent = u.displayName || u.username || 'gestor';
+      if (window.applyMgrPhoto) window.applyMgrPhoto();
       // Gestores tab: visível para master e CEO
       var showGestores = u.role === 'master' || u.role === 'ceo' || !!u.isMaster;
       document.querySelectorAll('.sidebar-item-gestores,.mobile-nav-item-gestores').forEach(function (el) {
@@ -18373,6 +18450,7 @@
       var u = window.CURRENT_USER || {};
       var pill = document.getElementById('topbar-user-pill');
       if (pill) pill.textContent = u.displayName || u.username || 'gestor';
+      if (window.applyMgrPhoto) window.applyMgrPhoto();
       var greetingEl = document.getElementById('dashboard-greeting');
       if (greetingEl) {
         var _h = new Date().getHours();
@@ -20224,6 +20302,16 @@
 .tn .tn-theme-prev i:last-child { width: 80%; opacity: .55; }
 .tn .tn-theme-prev.dark { background: #09111a; } .tn .tn-theme-prev.dark i { background: #3dbb86; }
 .tn .tn-theme-prev.light { background: #f7f7f5; } .tn .tn-theme-prev.light i { background: #f5c800; }
+
+/* ── Foto de perfil do gestor ── */
+.pf-photo-wrap { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+.pf-av { width: 84px; height: 84px; border-radius: 50%; flex-shrink: 0; padding: 0; overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.6rem; font-family: inherit; color: var(--text); background: var(--surface3); border: 1px solid var(--border2); }
+.pf-av img, .tn-acc-av img, .gear-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pf-photo-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.pf-photo-rm { background: none; border: 0; color: var(--red); font-size: .78rem; font-weight: 700; cursor: pointer; padding: 2px 4px; font-family: inherit; }
+.tn .tn-acc-av { overflow: hidden; }
+.gear-btn { overflow: hidden; position: relative; }
+.gear-btn img { position: absolute; inset: 0; border-radius: 50%; }
 
 /* ═══════════ MODO CLARO — paleta original (claro + amarelo) ═══════════ */
 html[data-theme="light"] .tn {
