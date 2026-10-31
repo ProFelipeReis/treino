@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <meta name="theme-color" content="#111110"/>
+  <meta name="theme-color" content="#09111a"/>
   <title>Trainly — Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,29 +22,39 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --accent: #f5c800;
-      --accent-soft: rgba(245,200,0,.25);
-      --red: #e03e3e;
-      --green: #2e7d52;
-      --text: #111110;
-      --text2: #555550;
-      --text3: #999990;
-      --surface: #ffffff;
-      --bg: #f7f7f5;
-      --border: #e4e4e0;
-      --border2: #d0d0cb;
+      --bg: #09111a;
+      --surface: #141b23;
+      --surface2: #1a232d;
+      --surface3: #222d39;
+      --field: #0b1219;
+      --border: rgba(170,190,210,.09);
+      --border2: rgba(170,190,210,.18);
+      --accent: #3dbb86;
+      --accent2: #34a876;
+      --accent-soft: rgba(61,187,134,.30);
+      --on-accent: #03150b;
+      --red: #e5707a;
+      --green: #4cc38a;
+      --text: #f5f8fb;
+      --text2: #aab6c2;
+      --text3: #8793a0;
       --r: 12px;
-      --shadow-md: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
-      --head: 'Nunito', sans-serif;
+      --shadow-md: 0 12px 32px rgba(0,0,0,.45);
+      --head: 'Plus Jakarta Sans', 'Nunito', sans-serif;
       --body: 'Plus Jakarta Sans', sans-serif;
+      color-scheme: dark;
     }
 
     html, body {
       height: 100%;
       font-family: var(--body);
+      color: var(--text);
       overflow: hidden;
-      background: #111110;
+      background: radial-gradient(560px 380px at 100% 0%, rgba(34,224,138,.20), transparent 70%), linear-gradient(rgba(9,17,26,.80), rgba(9,17,26,.88)), url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed, #09111a;
+      -webkit-font-smoothing: antialiased;
     }
+
+    ::selection { background: var(--accent-soft); color: #fff; }
 
     @media (hover: none) and (pointer: coarse) {
       * {
@@ -62,70 +72,56 @@
     /* ── TELA PRINCIPAL ── */
     #screen-login {
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       height: 100vh;
       height: 100dvh;
-      padding: 80px 24px 24px;
-      background: #000000;
-      position: relative;
-      overflow: hidden;
+      padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px));
+      overflow-y: auto;
       overscroll-behavior: none;
     }
 
-    #login-bg-canvas {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
+    .lg-wrap {
+      width: 100%;
+      max-width: 360px;
+      margin: auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeUp .6s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .lg-logo {
+      height: 150px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      margin-bottom: 28px;
     }
 
     /* ── CARD DE LOGIN ── */
-    .login-card {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 340px;
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.28);
-      border-radius: 24px;
-      padding: 36px 32px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.30), 0 1.5px 0 rgba(255,255,255,0.18) inset;
-      overflow: hidden;
-    }
-
-    .login-card::before {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,0.50) 0%, rgba(0,0,0,0.25) 60%),
-        url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed;
-      filter: blur(14px);
-      z-index: 0;
-    }
-
-    .login-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(10,10,8,0.28);
-      z-index: 1;
-    }
-
-    .login-card > * {
-      position: relative;
-      z-index: 3;
-    }
+    .login-card { width: 100%; border-radius: 20px; padding: 28px 24px; }
+    .login-card { position: relative; overflow: hidden; background: transparent; border: 1px solid rgba(255,255,255,.22);
+      box-shadow: 0 8px 32px rgba(0,0,0,.30), 0 1.5px 0 rgba(255,255,255,.14) inset; }
+    .login-card::before { content: ''; position: absolute; inset: -4px; z-index: 0;
+      background: linear-gradient(180deg, rgba(9,17,26,.55) 0%, rgba(9,17,26,.35) 60%), url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed;
+      filter: blur(14px); }
+    .login-card::after { content: ''; position: absolute; inset: 0; z-index: 1; background: rgba(9,17,26,.38); pointer-events: none; }
+    .login-card > * { position: relative; z-index: 3; }
 
     /* ── FORM ── */
     .form-group { margin-bottom: 16px; }
 
     .form-group label {
       display: block;
-      font-size: .75rem;
+      font-size: .72rem;
       font-weight: 700;
-      color: rgba(255,255,255,0.80);
+      color: var(--text2);
       margin-bottom: 7px;
       text-transform: uppercase;
       letter-spacing: .06em;
@@ -133,139 +129,55 @@
 
     .form-control {
       width: 100%;
-      padding: 11px 14px;
-      border: 1.5px solid rgba(255,255,255,0.28);
+      padding: 12px 14px;
+      border: 1.5px solid var(--border2);
       border-radius: var(--r);
-      font-size: .88rem;
-      transition: all .15s;
-      background: rgba(255,255,255,0.14);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      color: #ffffff;
+      font-size: .9rem;
       font-family: var(--body);
+      background: rgba(11,18,25,.55);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      color: var(--text);
+      transition: border-color .15s, box-shadow .15s;
     }
 
-    .form-control::placeholder { color: rgba(255,255,255,0.38); }
+    .form-control::placeholder { color: var(--text3); opacity: .7; }
 
     .form-control:focus {
       outline: none;
-      border-color: rgba(255,255,255,0.55);
-      background: rgba(255,255,255,0.22);
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.10);
-      color: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(61,187,134,.15);
     }
 
     /* ── BTN ── */
     .btn {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 7px;
-      padding: 9px 18px;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px;
+      margin-top: 4px;
+      border: 0;
       border-radius: var(--r);
-      font-size: .85rem;
-      font-weight: 700;
-      transition: all .15s;
-      cursor: pointer;
-      border: none;
       font-family: var(--body);
+      font-size: .95rem;
+      font-weight: 800;
+      letter-spacing: .01em;
+      cursor: pointer;
+      transition: transform .15s, filter .15s;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #3d3830 0%, #28231a 50%, #1a1610 100%);
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(0,0,0,.2);
-      font-weight: 800;
-      letter-spacing: .02em;
-      border: 1px solid rgba(245,200,0,.18);
+      background: linear-gradient(135deg, #3dbb86, #34a876);
+      color: var(--on-accent);
     }
 
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      background: linear-gradient(135deg, #4d4838 0%, #332d20 50%, #221d14 100%);
-      box-shadow: 0 4px 14px rgba(0,0,0,.22);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
-      box-shadow: 0 1px 4px rgba(0,0,0,.2);
-    }
+    .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.07); }
+    .btn-primary:active { transform: translateY(0); }
 
     .btn-loading { opacity: .5; pointer-events: none; }
 
-    /* ── TOAST ── */
-    #toast-container {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .toast {
-      background: var(--surface);
-      color: var(--text);
-      padding: 13px 18px;
-      border-radius: var(--r);
-      font-size: .82rem;
-      font-weight: 600;
-      border: 1px solid var(--border);
-      min-width: 240px;
-      position: relative;
-      animation: toastIn .25s cubic-bezier(.22,1,.36,1);
-      box-shadow: var(--shadow-md);
-    }
-
-    .toast.error::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0;
-      width: 3px; height: 100%;
-      background: var(--red);
-      border-radius: 3px 0 0 3px;
-    }
-
-    .toast.success::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0;
-      width: 3px; height: 100%;
-      background: var(--green);
-      border-radius: 3px 0 0 3px;
-    }
-
-    @keyframes toastIn {
-      from { transform: translateX(24px); opacity: 0; }
-      to   { transform: translateX(0);    opacity: 1; }
-    }
-
-    /* ── PAINÉIS (solicitar troca / nova senha) ── */
-    .panel-title {
-      font-family: var(--head);
-      font-size: 1.05rem;
-      font-weight: 900;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
-
-    .panel-text {
-      font-size: .8rem;
-      color: rgba(255,255,255,0.68);
-      line-height: 1.55;
-      margin-bottom: 18px;
-    }
-
-    .panel-done {
-      font-size: .82rem;
-      color: #ffffff;
-      line-height: 1.55;
-      background: rgba(46,125,82,.22);
-      border: 1px solid rgba(46,125,82,.5);
-      border-radius: var(--r);
-      padding: 12px 14px;
-      margin-bottom: 4px;
-    }
+    .card-foot { margin-top: 14px; text-align: center; }
 
     .link-btn {
       background: none;
@@ -273,13 +185,116 @@
       cursor: pointer;
       font-family: var(--body);
       font-size: .8rem;
-      color: rgba(255,255,255,0.68);
-      text-decoration: underline;
+      color: var(--text2);
       padding: 4px 0;
       transition: color .15s;
     }
 
-    .link-btn:hover { color: #ffffff; }
+    .link-btn:hover { color: var(--accent); }
+
+    /* ── LINKS FORA DO CARD ── */
+    .reg-link {
+      margin-top: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--body);
+      font-size: .84rem;
+      color: var(--text2);
+    }
+
+    .reg-link span { color: var(--accent); font-weight: 700; }
+    .reg-link:hover span { text-decoration: underline; }
+
+    .back-pill {
+      margin-top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 50px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      font-size: .78rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color .15s, border-color .15s;
+    }
+
+    .back-pill:hover { color: var(--text); border-color: var(--accent-soft); }
+
+    /* ── PAINÉIS (solicitar troca / nova senha) ── */
+    .panel-title {
+      font-family: var(--head);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .panel-text {
+      font-size: .8rem;
+      color: var(--text2);
+      line-height: 1.55;
+      margin-bottom: 18px;
+    }
+
+    .panel-text strong { color: var(--text); }
+
+    .panel-done {
+      font-size: .82rem;
+      color: var(--text);
+      line-height: 1.55;
+      background: rgba(76,195,138,.13);
+      border: 1px solid rgba(76,195,138,.35);
+      border-radius: var(--r);
+      padding: 12px 14px;
+      margin-bottom: 4px;
+    }
+
+    /* ── TOAST ── */
+    #toast-container {
+      position: fixed;
+      bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+      right: 24px;
+      max-width: calc(100vw - 48px);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: var(--surface2);
+      color: var(--text);
+      padding: 13px 18px;
+      border-radius: 14px;
+      font-size: .82rem;
+      font-weight: 600;
+      border: 1px solid var(--border2);
+      min-width: 240px;
+      position: relative;
+      overflow: hidden;
+      animation: toastIn .25s cubic-bezier(.22,1,.36,1);
+      box-shadow: var(--shadow-md);
+    }
+
+    .toast.error::before,
+    .toast.success::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0;
+      width: 3px; height: 100%;
+    }
+
+    .toast.error::before   { background: var(--red); }
+    .toast.success::before { background: var(--green); }
+
+    @keyframes toastIn {
+      from { transform: translateX(24px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
 
     /* ── TELA BLOQUEADO ── */
     #screen-blocked {
@@ -287,219 +302,107 @@
       position: fixed;
       inset: 0;
       z-index: 9000;
-      background: rgba(0,0,0,.85);
+      background: rgba(3,8,13,.78);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       align-items: center;
       justify-content: center;
       padding: 24px;
+      overflow-y: auto;
     }
 
     #screen-blocked.on { display: flex; }
 
     .blocked-card {
-      background: #1a1814;
-      border: 1.5px solid rgba(224,62,62,.35);
+      background: var(--surface);
+      border: 1px solid rgba(229,112,122,.35);
       border-radius: 20px;
       padding: 32px 28px;
       max-width: 400px;
       width: 100%;
+      margin: auto 0;
       text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,.5);
     }
 
     .blocked-icon {
       width: 52px; height: 52px;
       border-radius: 14px;
-      background: rgba(224,62,62,.12);
-      border: 1.5px solid rgba(224,62,62,.3);
+      background: rgba(229,112,122,.14);
+      border: 1px solid rgba(229,112,122,.35);
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 18px;
-      color: #e03e3e;
+      color: var(--red);
     }
 
     .blocked-title {
       font-family: var(--head);
-      font-size: 1.1rem; font-weight: 900;
-      color: #ffffff;
+      font-size: 1.1rem; font-weight: 800;
+      color: var(--text);
       margin-bottom: 8px;
     }
 
     .blocked-sub {
-      font-size: .82rem; color: rgba(255,255,255,.55);
+      font-size: .82rem; color: var(--text2);
       margin-bottom: 20px; line-height: 1.55;
     }
 
     .blocked-reasons-title {
       font-size: .68rem; font-weight: 800;
-      color: rgba(255,255,255,.4);
+      color: var(--text3);
       text-transform: uppercase; letter-spacing: .08em;
       margin-bottom: 10px; text-align: left;
     }
 
     .blocked-reason-item {
-      background: rgba(224,62,62,.08);
-      border: 1px solid rgba(224,62,62,.2);
+      background: rgba(229,112,122,.10);
+      border: 1px solid rgba(229,112,122,.25);
       border-radius: 8px;
       padding: 10px 14px;
       font-size: .82rem;
-      color: rgba(255,255,255,.75);
+      color: var(--text);
       text-align: left; margin-bottom: 8px;
     }
 
     .blocked-logout-btn {
       margin-top: 18px;
-      background: none;
-      border: 1.5px solid rgba(255,255,255,.2);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
       border-radius: var(--r);
-      color: rgba(255,255,255,.6);
+      color: var(--text);
       font-family: var(--body);
       font-size: .85rem; font-weight: 700;
       padding: 11px 24px;
       cursor: pointer;
       width: 100%;
-      transition: all .15s;
+      transition: border-color .15s;
     }
 
-    .blocked-logout-btn:hover {
-      border-color: rgba(255,255,255,.4);
-      color: #fff;
-    }
+    .blocked-logout-btn:hover { border-color: var(--accent-soft); }
   </style>
 </head>
 <body>
 
 <div id="screen-login">
-  <!-- Botão "Trocar perfil" -->
-  <a href="https://trainly.online/?choose=1"
-    onclick="try{localStorage.removeItem('trainly_role')}catch(e){}"
-    style="position:absolute;bottom:28px;left:24px;z-index:10;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:50px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);color:rgba(255,255,255,0.80);font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 20px rgba(0,0,0,0.25);transition:all .2s cubic-bezier(.22,1,.36,1);"
-    onmouseover="this.style.background='rgba(255,255,255,0.20)';this.style.color='#fff';this.style.transform='translateY(-2px)'"
-    onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.80)';this.style.transform='translateY(0)'">
-    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 12H5M12 5l-7 7 7 7"/>
-    </svg>
-    Trocar perfil
-  </a>
+  <div class="lg-wrap">
+    <img class="lg-logo" src="https://i.imgur.com/URJ9FaP.png" alt="Trainly"/>
 
-  <canvas id="login-bg-canvas"></canvas>
-
-  <script>
-    (function(){
-      const canvas = document.getElementById('login-bg-canvas');
-      const ctx = canvas.getContext('2d');
-      let W, H, squares, animId;
-
-      const bgImg = new Image();
-      bgImg.crossOrigin = 'anonymous';
-      bgImg.src = 'https://i.imgur.com/Fjj25UX.jpeg';
-      let bgLoaded = false;
-      bgImg.onload = function(){ bgLoaded = true; };
-
-      function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-
-      function mkSquare(){
-        const size = 28 + Math.random() * 68;
-        return {
-          x: Math.random() * W, y: Math.random() * H, size,
-          rot: Math.random() * Math.PI * 2,
-          rotSpeed: (Math.random() - 0.5) * 0.007,
-          alpha: 0.05 + Math.random() * 0.12,
-          dx: (Math.random() - 0.5) * 0.35,
-          dy: -(0.25 + Math.random() * 0.45),
-        };
-      }
-
-      function init(){ resize(); squares = Array.from({length: 40}, mkSquare); }
-
-      function getDividerY(px){
-        const leftY = H * 1.05, rightY = H * 0.82;
-        return leftY + (px / W) * (rightY - leftY);
-      }
-
-      function isAbove(px, py){ return py < getDividerY(px); }
-
-      function drawBg(){
-        const leftY = getDividerY(0), rightY = getDividerY(W);
-        ctx.beginPath();
-        ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,rightY); ctx.lineTo(0,leftY);
-        ctx.closePath();
-        ctx.fillStyle = '#111110'; ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(0,leftY); ctx.lineTo(W,rightY); ctx.lineTo(W,H); ctx.lineTo(0,H);
-        ctx.closePath();
-        ctx.fillStyle = '#f0f0ef'; ctx.fill();
-
-        if(bgLoaded){
-          ctx.save();
-          ctx.beginPath();
-          ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,rightY); ctx.lineTo(0,leftY);
-          ctx.closePath(); ctx.clip();
-          const iw = bgImg.naturalWidth, ih = bgImg.naturalHeight;
-          const scale = Math.max(W/iw, Math.max(leftY,rightY)/ih);
-          const dw = iw*scale, dh = ih*scale;
-          const dx = (W-dw)/2, dy = -dh*0.05;
-          ctx.globalAlpha = 0.22;
-          ctx.drawImage(bgImg, dx, dy, dw, dh);
-          ctx.globalAlpha = 1; ctx.restore();
-        }
-
-        ctx.beginPath();
-        ctx.moveTo(0,leftY); ctx.lineTo(W,rightY);
-        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1.5; ctx.stroke();
-      }
-
-      function drawSquare(s){
-        const above = isAbove(s.x, s.y);
-        ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot); ctx.globalAlpha = s.alpha;
-        ctx.strokeStyle = above ? 'rgba(255,255,255,0.18)' : 'rgba(17,17,16,0.22)';
-        ctx.fillStyle   = above ? 'rgba(46,46,42,0.30)'   : 'rgba(46,46,42,0.08)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.rect(-s.size/2, -s.size/2, s.size, s.size);
-        ctx.fill(); ctx.stroke(); ctx.restore();
-      }
-
-      function step(){
-        ctx.clearRect(0,0,W,H); drawBg();
-        squares.forEach(s => {
-          s.x += s.dx; s.y += s.dy; s.rot += s.rotSpeed;
-          if(s.y + s.size < 0){ s.y = H + s.size; s.x = Math.random() * W; }
-          if(s.x - s.size > W) s.x = -s.size;
-          if(s.x + s.size < 0) s.x = W + s.size;
-          drawSquare(s);
-        });
-        animId = requestAnimationFrame(step);
-      }
-
-      init(); step();
-      window.addEventListener('resize', resize);
-    })();
-  </script>
-
-  <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px;position:relative;z-index:2;margin-top:0px;">
-    <img src="https://i.imgur.com/orva0oM.png" alt="Trainly"
-      style="height:160px;width:auto;max-width:100%;object-fit:contain;margin-bottom:44px;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.5));"/>
-
-    <div class="login-card" style="width:100%;">
-      <div style="position:absolute;inset:0;z-index:2;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.13) 0%,transparent 55%);pointer-events:none;"></div>
+    <div class="login-card">
       <div id="panel-login">
-      <form id="login-form" onsubmit="return false;">
-        <div class="form-group">
-          <label>Usuário</label>
-          <input id="login-user" class="form-control" type="text" placeholder="Usuário" required autocomplete="username"/>
+        <form id="login-form" onsubmit="return false;">
+          <div class="form-group">
+            <label for="login-user">Usuário</label>
+            <input id="login-user" class="form-control" type="text" placeholder="Usuário" required autocomplete="username"/>
+          </div>
+          <div class="form-group">
+            <label for="login-pass">Senha</label>
+            <input id="login-pass" class="form-control" type="password" placeholder="••••••••" required autocomplete="current-password"/>
+          </div>
+          <button type="button" id="login-btn" onclick="doLogin()" class="btn btn-primary">Acessar painel →</button>
+        </form>
+        <div class="card-foot">
+          <button type="button" class="link-btn" onclick="showPanel('request')">Solicitar troca de senha</button>
         </div>
-        <div class="form-group">
-          <label>Senha</label>
-          <input id="login-pass" class="form-control" type="password" placeholder="••••••••" required autocomplete="current-password"/>
-        </div>
-        <button type="button" id="login-btn" onclick="doLogin()" class="btn btn-primary"
-          style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">
-          Acessar painel →
-        </button>
-      </form>
-      <div style="margin-top:14px;text-align:center;">
-        <button type="button" class="link-btn" onclick="showPanel('request')">Solicitar troca de senha</button>
-      </div>
       </div>
 
       <!-- Painel: solicitar troca de senha -->
@@ -508,18 +411,15 @@
         <p class="panel-text">Informe seu usuário. O CEO ou um MASTER vai analisar o pedido. Depois de aprovado, você cria uma nova senha no próximo login.</p>
         <div id="req-form">
           <div class="form-group">
-            <label>Usuário</label>
+            <label for="req-user">Usuário</label>
             <input id="req-user" class="form-control" type="text" placeholder="Usuário" autocomplete="username"/>
           </div>
-          <button type="button" id="req-btn" onclick="doRequestReset()" class="btn btn-primary"
-            style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">
-            Enviar solicitação
-          </button>
+          <button type="button" id="req-btn" onclick="doRequestReset()" class="btn btn-primary">Enviar solicitação</button>
         </div>
         <div id="req-done" class="panel-done" style="display:none;">
           Solicitação enviada. Quando o CEO ou um MASTER aprovar, entre com seu usuário e crie a nova senha.
         </div>
-        <div style="margin-top:14px;text-align:center;">
+        <div class="card-foot">
           <button type="button" class="link-btn" onclick="showPanel('login')">← Voltar ao login</button>
         </div>
       </div>
@@ -527,31 +427,31 @@
       <!-- Painel: criar nova senha (após aprovação) -->
       <div id="panel-newpass" style="display:none;">
         <div class="panel-title">Crie sua nova senha</div>
-        <p class="panel-text">A senha de <strong id="np-user" style="color:#fff;"></strong> foi apagada. Defina uma nova senha para continuar.</p>
+        <p class="panel-text">A senha de <strong id="np-user"></strong> foi apagada. Defina uma nova senha para continuar.</p>
         <div class="form-group">
-          <label>Nova senha</label>
+          <label for="np-pass">Nova senha</label>
           <input id="np-pass" class="form-control" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
         </div>
         <div class="form-group">
-          <label>Repita a nova senha</label>
+          <label for="np-pass2">Repita a nova senha</label>
           <input id="np-pass2" class="form-control" type="password" placeholder="Repita a nova senha" autocomplete="new-password"/>
         </div>
-        <button type="button" id="np-btn" onclick="doSetNewPassword()" class="btn btn-primary"
-          style="width:100%;justify-content:center;padding:13px;margin-top:4px;font-size:.95rem;">
-          Salvar nova senha
-        </button>
-        <div style="margin-top:14px;text-align:center;">
+        <button type="button" id="np-btn" onclick="doSetNewPassword()" class="btn btn-primary">Salvar nova senha</button>
+        <div class="card-foot">
           <button type="button" class="link-btn" onclick="cancelNewPassword()">← Voltar ao login</button>
         </div>
       </div>
     </div>
 
-    <div style="margin-top:18px;text-align:center;">
-      <button onclick="openRegisterScreen()"
-        style="background:none;border:none;cursor:pointer;font-family:var(--body);font-size:.84rem;color:rgba(255,255,255,0.65);transition:color .15s;">
-        Novo aqui? <span style="color:#ffffff;font-weight:700;text-decoration:underline;">Criar conta</span>
-      </button>
-    </div>
+    <button type="button" class="reg-link" onclick="openRegisterScreen()">Novo aqui? <span>Criar conta</span></button>
+
+    <a class="back-pill" href="https://trainly.online/?choose=1"
+      onclick="try{localStorage.removeItem('trainly_role')}catch(e){}">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Trocar perfil
+    </a>
   </div>
 </div>
 
@@ -792,10 +692,10 @@
       list.innerHTML = '<div class="blocked-reasons-title">Motivos registrados</div>'
         + reasons.map(function(r){ return '<div class="blocked-reason-item">'+r+'</div>'; }).join('')
         + (isCrefFake
-          ? '<div style="margin-top:12px;padding:12px 14px;background:#fff8e1;border-radius:8px;border:1px solid #ffc107;">'
-          + '<div style="font-size:.68rem;font-weight:800;color:#7d5a00;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">⚠️ Aviso Legal</div>'
-          + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;margin-bottom:6px;"><strong>Exercício Ilegal da Profissão:</strong> O exercício de atividade profissional sem preencher as condições legais é contravenção penal prevista no <strong>Art. 47 da Lei das Contravenções Penais</strong>.</p>'
-          + '<p style="font-size:.76rem;color:#5a3e00;line-height:1.7;"><strong>Uso de Documento Falso:</strong> A utilização de carteira do CREF, diploma ou qualquer identificação profissional falsa configura crime de uso de documento falso, conforme o <strong>Art. 304 do Código Penal</strong>.</p>'
+          ? '<div style="margin-top:12px;padding:12px 14px;background:rgba(217,164,65,.12);border-radius:8px;border:1px solid rgba(217,164,65,.35);">'
+          + '<div style="font-size:.68rem;font-weight:800;color:#d9a441;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">⚠️ Aviso Legal</div>'
+          + '<p style="font-size:.76rem;color:#e8d3a0;line-height:1.7;margin-bottom:6px;"><strong>Exercício Ilegal da Profissão:</strong> O exercício de atividade profissional sem preencher as condições legais é contravenção penal prevista no <strong>Art. 47 da Lei das Contravenções Penais</strong>.</p>'
+          + '<p style="font-size:.76rem;color:#e8d3a0;line-height:1.7;"><strong>Uso de Documento Falso:</strong> A utilização de carteira do CREF, diploma ou qualquer identificação profissional falsa configura crime de uso de documento falso, conforme o <strong>Art. 304 do Código Penal</strong>.</p>'
           + '</div>'
           : '');
     } else {
