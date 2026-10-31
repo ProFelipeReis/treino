@@ -20,6 +20,8 @@
   <!-- Mercado Pago SDK -->
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <script src="payment-config.js"></script>
+  <script src="fotos-config.js"></script>
+  <script src="fotos.js"></script>
   <script src="pdf-export.js"></script>
   <!-- Firebase SDK loaded early so login can query Firestore immediately -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
@@ -14865,15 +14867,25 @@
           }
         }
 
-        // Foto de perfil: salva no aparelho já; no banco (managers.photoURL) em tentativa — será configurado depois
+        // Foto de perfil: vai para o Cloudflare R2; o Firestore (managers) guarda só o endereço (photoURL) e a chave (photoKey).
+        // Se o servidor de fotos não estiver configurado (ou falhar), continua salvando como antes.
         if (_mgrPhotoDirty) {
-          try { if (_mgrPhoto) localStorage.setItem(_mgrPhotoKey(), _mgrPhoto); else localStorage.removeItem(_mgrPhotoKey()); } catch (e) { }
-          window.CURRENT_USER.photoURL = _mgrPhoto || '';
+          var phUrl = _mgrPhoto || '', phKey = u.photoKey || '';
           try {
             var phSnap = await _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username)));
-            if (!phSnap.empty) await _updateDoc(_doc(_db, 'managers', phSnap.docs[0].id), { photoURL: _mgrPhoto || '' });
-          } catch (phErr) { console.warn('Foto salva só neste aparelho (banco ainda não configurado):', phErr); }
-          _mgrPhotoDirty = false;
+            var phId = phSnap.empty ? null : phSnap.docs[0].id;
+            if (phId && window.TrainlyFotos && TrainlyFotos.ativo()) {
+              if (_mgrPhoto && TrainlyFotos.ehDataUrl(_mgrPhoto)) {
+                var phUp = await TrainlyFotos.enviar(_mgrPhoto, { kind: 'manager', id: phId });
+                if (phKey) TrainlyFotos.apagar(phKey);
+                phUrl = phUp.url; phKey = phUp.key;
+              } else if (!_mgrPhoto && phKey) { TrainlyFotos.apagar(phKey); phKey = ''; }
+            }
+            if (phId) await _updateDoc(_doc(_db, 'managers', phId), { photoURL: phUrl, photoKey: phKey });
+          } catch (phErr) { console.warn('Foto salva só neste aparelho:', phErr); }
+          try { if (phUrl) localStorage.setItem(_mgrPhotoKey(), phUrl); else localStorage.removeItem(_mgrPhotoKey()); } catch (e) { }
+          window.CURRENT_USER.photoURL = phUrl; window.CURRENT_USER.photoKey = phKey;
+          _mgrPhoto = phUrl; _mgrPhotoDirty = false;
         }
         // Atualiza memória e localStorage (incluindo senha)
         if (pass) { window.CURRENT_USER.passwordHash = await _sha256(pass); }
@@ -18591,6 +18603,7 @@
           displayName: mgr.name || user,
           phone: mgr.phone || '',
           photoURL: mgr.photoURL || '',
+          photoKey: mgr.photoKey || '',
           subStatus: subStatus,
           trialEndsAt: mgr.trialEndsAt || null,
           subEndsAt: mgr.subEndsAt || null,
