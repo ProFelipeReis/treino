@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <meta name="theme-color" content="#0d1218"/>
+  <script>try{var _t=localStorage.getItem("trainly-theme");if(_t==="light"||_t==="dark")document.documentElement.setAttribute("data-theme",_t);}catch(e){}</script>
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/9DDa1Th.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/9DDa1Th.png" />
@@ -3783,15 +3784,22 @@
       <div class="modal-header-trainly">
         <div class="modal-header-trainly-left">
           <div class="mht-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-          <div><div class="mht-title">Configurações</div><div class="mht-sub">Atalhos do seu app</div></div>
+          <div><div class="mht-title">Configurações</div><div class="mht-sub">Aparência do app</div></div>
         </div>
         <button class="mht-close" onclick="closeAlModal('modal-settings')" aria-label="Fechar">✕</button>
       </div>
       <div class="al-body">
-        <div class="al-group-title">Meu treino</div>
-        <div class="al-group"><button class="al-item" onclick="closeAlModal('modal-settings');openStudentFreqCalendar()"><span class="al-item-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="al-item-txt">Calendário de frequência</span><span class="al-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button><button class="al-item" onclick="closeAlModal('modal-settings');switchTab('historico')"><span class="al-item-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="al-item-txt">Histórico de treinos</span><span class="al-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button><button class="al-item" onclick="closeAlModal('modal-settings');switchTab('evolucao')"><span class="al-item-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg></span><span class="al-item-txt">Minha evolução</span><span class="al-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button></div>
-        <div class="al-group-title">Contato</div>
-        <div class="al-group"><button class="al-item" onclick="closeAlModal('modal-settings');toggleChatDrawer()"><span class="al-item-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span class="al-item-txt">Falar com meu treinador</span><span class="al-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button></div>
+        <div class="al-group-title">Aparência</div>
+        <div class="al-theme-opts">
+          <button type="button" class="al-theme-opt" data-theme-opt="dark" onclick="setTheme('dark')">
+            <span class="al-theme-prev dark"><i></i><i></i></span>
+            <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Modo escuro</b>
+          </button>
+          <button type="button" class="al-theme-opt" data-theme-opt="light" onclick="setTheme('light')">
+            <span class="al-theme-prev light"><i></i><i></i></span>
+            <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Modo claro</b>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -3802,31 +3810,150 @@
       <div class="modal-header-trainly">
         <div class="modal-header-trainly-left">
           <div class="mht-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-          <div><div class="mht-title">Meu perfil</div><div class="mht-sub">Sua conta no Trainly</div></div>
+          <div><div class="mht-title">Meu perfil</div><div class="mht-sub" id="al-trainer">Sua conta no Trainly</div></div>
         </div>
         <button class="mht-close" onclick="closeAlModal('modal-profile-al')" aria-label="Fechar">✕</button>
       </div>
       <div class="al-body">
-        <div class="al-user">
-          <div class="al-av" id="al-avatar">?</div>
-          <div><div class="al-name" id="al-name">—</div><div class="al-role" id="al-trainer">Aluno</div></div>
+        <div class="al-photo-wrap">
+          <button type="button" class="al-av al-av-big" id="al-avatar" onclick="alPickPhoto()" aria-label="Alterar foto de perfil">?</button>
+          <div class="al-photo-actions">
+            <button type="button" class="al-photo-btn" onclick="alPickPhoto()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <span id="al-photo-btn-txt">Adicionar foto</span>
+            </button>
+            <button type="button" class="al-photo-rm hidden" id="al-photo-rm" onclick="alRemovePhoto()">Remover foto</button>
+          </div>
+          <input type="file" id="al-photo-input" accept="image/*" class="hidden" onchange="alPhotoChosen(this)" />
         </div>
+        <div class="al-field">
+          <label for="al-in-name">Nome</label>
+          <input id="al-in-name" type="text" autocomplete="name" placeholder="Seu nome" />
+        </div>
+        <div class="al-field">
+          <label for="al-in-email">E-mail</label>
+          <input id="al-in-email" type="email" autocomplete="email" inputmode="email" placeholder="seu@email.com" />
+        </div>
+        <div class="al-field">
+          <label for="al-in-phone">Telefone / WhatsApp</label>
+          <input id="al-in-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="Ex: 27999999999" />
+        </div>
+        <div class="al-err" id="al-profile-err"></div>
+        <button class="al-save" id="al-save-btn" onclick="saveAlProfile()">Salvar alterações</button>
         <button class="al-logout" onclick="closeAlModal('modal-profile-al');doLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg> Sair da conta</button>
       </div>
     </div>
   </div>
 
   <script>
-    window.openAlModal = function (id) { var m = document.getElementById(id); if (m) m.classList.remove('hidden'); };
+    window.openAlModal = function (id) {
+      var m = document.getElementById(id); if (m) m.classList.remove('hidden');
+      if (id === 'modal-settings') setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+    };
     window.closeAlModal = function (id) { var m = document.getElementById(id); if (m) m.classList.add('hidden'); };
-    window.openAlProfile = function () {
-      var nm = (document.getElementById('student-pill') || {}).textContent || 'Aluno';
-      if (nm === '—') nm = 'Aluno';
+
+    /* ── Tema claro / escuro (igual ao app do treinador) ── */
+    window.setTheme = function (mode) {
+      mode = mode === 'light' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', mode);
+      try { localStorage.setItem('trainly-theme', mode); } catch (e) { }
+      var m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.setAttribute('content', mode === 'light' ? '#000000' : '#0d1218');
+      document.querySelectorAll('[data-theme-opt]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-theme-opt') === mode); });
+    };
+    setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+
+    /* ── Perfil do aluno ── */
+    var _alPhoto = '';       // dataURL atual (ou '' = sem foto)
+    var _alPhotoDirty = false;
+
+    function alInitials(nm) { return (nm || '').trim().split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase() || '?'; }
+    function alRenderAvatar(nm) {
+      var av = document.getElementById('al-avatar'); if (!av) return;
+      if (_alPhoto) { av.innerHTML = '<img src="' + _alPhoto + '" alt="Foto de perfil">'; }
+      else { av.textContent = alInitials(nm); }
+      var rm = document.getElementById('al-photo-rm'); if (rm) rm.classList.toggle('hidden', !_alPhoto);
+      var tx = document.getElementById('al-photo-btn-txt'); if (tx) tx.textContent = _alPhoto ? 'Trocar foto' : 'Adicionar foto';
+    }
+    function alApplyTopPhoto() {
+      var btn = document.getElementById('al-top-profile-btn'); if (!btn) return;
+      var src = (window._alStudent && window._alStudent.photoURL) || '';
+      var ico = btn.querySelector('svg'); var img = btn.querySelector('img');
+      if (src) {
+        if (!img) { img = document.createElement('img'); img.alt = ''; btn.appendChild(img); }
+        img.src = src; if (ico) ico.style.display = 'none';
+      } else { if (img) img.remove(); if (ico) ico.style.display = ''; }
+    }
+    window.alApplyTopPhoto = alApplyTopPhoto;
+
+    window.openAlProfile = async function () {
+      var st = window._alGetStudent ? window._alGetStudent() : null;
+      var nm = (st && st.name) || (document.getElementById('student-pill') || {}).textContent || '';
+      if (nm === '—') nm = '';
       var tr = (document.getElementById('trainer-name') || {}).textContent;
-      document.getElementById('al-name').textContent = nm;
-      document.getElementById('al-avatar').textContent = nm.trim().split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase() || '?';
-      document.getElementById('al-trainer').textContent = (tr && tr !== '—') ? 'Treinador: ' + tr : 'Aluno';
+      document.getElementById('al-trainer').textContent = (tr && tr !== '—') ? 'Treinador: ' + tr : 'Sua conta no Trainly';
+      document.getElementById('al-profile-err').textContent = '';
+      _alPhoto = (st && st.photoURL) || ''; _alPhotoDirty = false;
+      document.getElementById('al-in-name').value = nm;
+      document.getElementById('al-in-email').value = (st && st.email) || '';
+      document.getElementById('al-in-phone').value = (st && st.phone) || '';
+      alRenderAvatar(nm);
       openAlModal('modal-profile-al');
+      // Importa os dados mais recentes (o treinador pode ter preenchido e-mail/telefone no app.html)
+      if (window._alRefreshStudent) {
+        try {
+          var fresh = await window._alRefreshStudent();
+          if (fresh && !document.getElementById('modal-profile-al').classList.contains('hidden')) {
+            var f = function (id) { return document.getElementById(id); };
+            if (document.activeElement !== f('al-in-name')) f('al-in-name').value = fresh.name || '';
+            if (document.activeElement !== f('al-in-email')) f('al-in-email').value = fresh.email || '';
+            if (document.activeElement !== f('al-in-phone')) f('al-in-phone').value = fresh.phone || '';
+            if (!_alPhotoDirty) { _alPhoto = fresh.photoURL || ''; alRenderAvatar(f('al-in-name').value); }
+          }
+        } catch (e) { }
+      }
+    };
+
+    // Desktop: abre o explorador de arquivos. Celular: o navegador oferece Câmera ou Galeria.
+    window.alPickPhoto = function () { var i = document.getElementById('al-photo-input'); if (i) { i.value = ''; i.click(); } };
+    window.alRemovePhoto = function () { _alPhoto = ''; _alPhotoDirty = true; alRenderAvatar(document.getElementById('al-in-name').value); };
+    window.alPhotoChosen = function (input) {
+      var file = input.files && input.files[0]; if (!file) return;
+      var err = document.getElementById('al-profile-err'); err.textContent = '';
+      if (!/^image\//.test(file.type)) { err.textContent = 'Escolha um arquivo de imagem.'; return; }
+      var reader = new FileReader();
+      reader.onerror = function () { err.textContent = 'Não foi possível ler a imagem.'; };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { err.textContent = 'Imagem inválida ou formato não suportado.'; };
+        img.onload = function () {
+          var S = 320, w = img.width, h = img.height, side = Math.min(w, h);
+          var c = document.createElement('canvas'); c.width = S; c.height = S;
+          var ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, S, S);
+          ctx.drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, S, S); // recorte quadrado central
+          _alPhoto = c.toDataURL('image/jpeg', 0.82); _alPhotoDirty = true;
+          alRenderAvatar(document.getElementById('al-in-name').value);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.saveAlProfile = async function () {
+      var err = document.getElementById('al-profile-err'); err.textContent = '';
+      var name = document.getElementById('al-in-name').value.trim();
+      var email = document.getElementById('al-in-email').value.trim();
+      var phone = document.getElementById('al-in-phone').value.trim();
+      if (!name) { err.textContent = 'O nome não pode ficar vazio.'; return; }
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'E-mail inválido.'; return; }
+      var btn = document.getElementById('al-save-btn'); btn.disabled = true; btn.textContent = 'Salvando...';
+      try {
+        await window._alSaveProfile({ name: name, email: email, phone: phone, photoURL: _alPhoto || '' });
+        _alPhotoDirty = false;
+        closeAlModal('modal-profile-al');
+      } catch (e) { err.textContent = 'Erro ao salvar: ' + (e && e.message ? e.message : e); }
+      finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
     };
   </script>
 
@@ -4026,7 +4153,7 @@
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="student-pill" id="student-pill" style="display:none">—</div>
           <button class="top-icon-btn" onclick="openAlModal('modal-settings')" title="Configurações" aria-label="Configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
-          <button class="top-icon-btn" onclick="openAlProfile()" title="Meu perfil" aria-label="Meu perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+          <button class="top-icon-btn" id="al-top-profile-btn" onclick="openAlProfile()" title="Meu perfil" aria-label="Meu perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
         </div>
       </div>
       <div id="workout-timer-bar" style="display:none;">
@@ -4212,6 +4339,34 @@
     window._fsOrderBy = orderBy;
     window._fsWhere = where;
     window._fsOnSnapshot = onSnapshot;
+
+    // ── Perfil do aluno: atualizar / salvar ──
+    window._alGetStudent = () => _currentStudent;
+    window._alRefreshStudent = async () => {
+      if (!_currentStudent || !_currentStudent.id) return null;
+      await ensureAuth();
+      const snap = await getDoc(doc(db, 'students', _currentStudent.id));
+      if (!snap.exists()) return null;
+      _currentStudent = { ..._currentStudent, ...snap.data(), id: _currentStudent.id };
+      window._alStudent = _currentStudent;
+      saveSession(_currentStudent);
+      if (window.alApplyTopPhoto) window.alApplyTopPhoto();
+      return _currentStudent;
+    };
+    window._alSaveProfile = async (data) => {
+      if (!_currentStudent || !_currentStudent.id) throw new Error('Sessão inválida. Entre novamente.');
+      await ensureAuth();
+      await updateDoc(doc(db, 'students', _currentStudent.id), data);
+      _currentStudent = { ..._currentStudent, ...data };
+      window._alStudent = _currentStudent;
+      saveSession(_currentStudent);
+      const pill = document.getElementById('student-pill'); if (pill) pill.textContent = data.name;
+      const sp = document.getElementById('student-pill-sidebar'); if (sp) sp.textContent = data.name;
+      const first = data.name.trim().split(' ')[0];
+      const g = document.querySelector('#greeting-text .g-name'); if (g) g.textContent = first + ' 👋';
+      if (window.alApplyTopPhoto) window.alApplyTopPhoto();
+      toast('Perfil atualizado!', 'success');
+    };
 
     const DAYS_ABBR = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
     const DAYS_FULL = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
@@ -4840,6 +4995,9 @@
 
     function showApp(student) {
       _currentStudent = student;
+      window._alStudent = student;
+      if (window.alApplyTopPhoto) window.alApplyTopPhoto();
+      if (window._alRefreshStudent) window._alRefreshStudent().catch(function () { });
       _loadCheckState();
 
       // ── Splash pós-login ──
@@ -6902,6 +7060,115 @@ svg[fill="none"][stroke] { stroke-linecap: round; stroke-linejoin: round; }
 .al-logout:hover { background: #e2626d; }
 .al-logout:active { transform: scale(.97); }
 .al-logout svg { width: 19px; height: 19px; }
+
+/* ── Perfil editável + foto ── */
+.top-icon-btn { overflow: hidden; position: relative; }
+.top-icon-btn img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.al-av { overflow: hidden; flex-shrink: 0; }
+.al-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.al-photo-wrap { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.al-av-big { width: 84px; height: 84px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; padding: 0; font-family: var(--body); }
+.al-photo-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.al-photo-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: var(--body); font-weight: 700; font-size: .85rem; cursor: pointer; }
+.al-photo-btn:hover { background: var(--surface3); }
+.al-photo-btn svg { width: 18px; height: 18px; color: var(--accent); }
+.al-photo-rm { background: none; border: 0; color: var(--red); font-family: var(--body); font-size: .78rem; font-weight: 700; cursor: pointer; padding: 2px 4px; }
+.al-field { margin-bottom: 14px; }
+.al-field label { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--text3); font-weight: 700; margin: 0 4px 6px; }
+.al-field input { width: 100%; padding: 13px 14px; font-size: .95rem; font-family: var(--body); }
+.al-err { min-height: 18px; color: var(--red); font-size: .8rem; font-weight: 600; margin: -4px 4px 10px; }
+.al-save { width: 100%; padding: 14px; border-radius: 14px; background: var(--accent); color: var(--on-accent); border: 0; font-family: var(--body); font-weight: 800; font-size: .95rem; cursor: pointer; margin-bottom: 10px; transition: transform .12s ease, filter .15s ease; }
+.al-save:hover { filter: brightness(1.06); }
+.al-save:active { transform: scale(.97); }
+.al-save:disabled { opacity: .6; cursor: default; }
+.al-logout { background: var(--red-dim); color: var(--red); border: 1px solid rgba(229, 112, 122, .3); }
+.al-logout:hover { background: rgba(229, 112, 122, .22); }
+
+/* ── Seletor de aparência (Configurações) ── */
+.al-theme-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 4px; }
+.al-theme-opt { position: relative; display: flex; flex-direction: column; gap: 10px; align-items: stretch; padding: 10px; border-radius: 18px; background: var(--surface2); border: 1.5px solid var(--border); color: var(--text); font-family: var(--body); font-size: .85rem; font-weight: 700; text-align: left; cursor: pointer; transition: border-color .15s ease, transform .12s ease; }
+.al-theme-opt:active { transform: scale(.97); }
+.al-theme-opt.on { border-color: var(--accent); }
+.al-theme-opt.on::after { content: '✓'; position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: .7rem; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.al-theme-opt b { display: flex; align-items: center; gap: 7px; font-weight: 700; }
+.al-theme-opt b svg { width: 16px; height: 16px; }
+.al-theme-prev { height: 58px; border-radius: 12px; padding: 9px; display: flex; flex-direction: column; gap: 6px; justify-content: center; border: 1px solid rgba(128, 128, 128, .25); }
+.al-theme-prev i { display: block; height: 8px; border-radius: 4px; }
+.al-theme-prev i:first-child { width: 55%; }
+.al-theme-prev i:last-child { width: 80%; opacity: .55; }
+.al-theme-prev.dark { background: #09111a; } .al-theme-prev.dark i { background: #3dbb86; }
+.al-theme-prev.light { background: #f7f7f5; } .al-theme-prev.light i { background: #f5c800; }
+
+/* ═══════════ MODO CLARO — mesma paleta do app do treinador (claro + amarelo) ═══════════ */
+html[data-theme="light"] {
+  --bg: #f7f7f5; --bg2: #ffffff; --surface: #ffffff; --surface2: #f0f0ed; --surface3: #e8e8e4;
+  --border: #e4e4e0; --border2: #d0d0cb;
+  --accent: #f5c800; --accent2: #e0b400; --accent-dim: rgba(245, 200, 0, .10); --accent-soft: rgba(245, 200, 0, .30);
+  --accent-ink: #8a6c00; --on-accent: #111110;
+  --red: #e03e3e; --red-dim: rgba(224, 62, 62, .08);
+  --green: #2e7d52; --green-dim: rgba(46, 125, 82, .10); --green-soft: rgba(46, 125, 82, .18);
+  --amber: #b7860b; --blue: #2563eb;
+  --text: #111110; --text2: #555550; --text3: #8a8a82;
+  --shadow: 0 2px 12px rgba(0, 0, 0, .07), 0 1px 3px rgba(0, 0, 0, .05);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .07);
+  color-scheme: light;
+}
+html[data-theme="light"], html[data-theme="light"] body { background: #f7f7f5; }
+html[data-theme="light"] body { background-image: none; }
+html[data-theme="light"] ::selection { background: rgba(245, 200, 0, .4); color: #111110; }
+/* A tela de login mantém o visual escuro */
+html[data-theme="light"] #screen-login {
+  --surface: #141b23; --surface2: #1a232d; --surface3: #222d39; --border: rgba(170, 190, 210, .09); --border2: rgba(170, 190, 210, .18);
+  --text: #f5f8fb; --text2: #aab6c2; --text3: #8793a0; --accent: #3dbb86; --on-accent: #03150b; color-scheme: dark;
+}
+/* Topbar preta, como no app do treinador */
+html[data-theme="light"] .topbar { background: #000; border-bottom: 1px solid #2e2e2a; box-shadow: 0 2px 16px rgba(0, 0, 0, .3); }
+html[data-theme="light"] .topbar .top-icon-btn, html[data-theme="light"] .topbar .logout-btn { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .14); color: #e6e6e0; }
+html[data-theme="light"] .topbar .top-icon-btn:hover { background: rgba(245, 200, 0, .18); color: #fff; }
+html[data-theme="light"] .topbar .student-pill { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .14); color: #fff; }
+html[data-theme="light"] #topbar-timer-display { color: #fff; }
+/* Menus */
+html[data-theme="light"] #nav-sidebar { background: #fff; }
+html[data-theme="light"] #nav-bottom { background: rgba(255, 255, 255, .96); box-shadow: 0 -2px 16px rgba(0, 0, 0, .07); }
+html[data-theme="light"] .nav-item.active, html[data-theme="light"] .nav-item.active svg, html[data-theme="light"] .nav-bottom-item.active { color: #111110; }
+html[data-theme="light"] .nav-item.active svg { background: transparent; }
+/* Amarelo como texto fica ilegível no branco → usa o tom escuro */
+html[data-theme="light"] .greeting .g-name, html[data-theme="light"] .greeting span:not(.g-hi) { color: var(--accent-ink); }
+html[data-theme="light"] .today-card-label, html[data-theme="light"] .ex-pill-accent, html[data-theme="light"] .check-btn:hover { color: var(--accent-ink); }
+html[data-theme="light"] .al-photo-btn svg, html[data-theme="light"] .al-item-ico { color: var(--accent-ink); }
+html[data-theme="light"] .today-card-icon svg { color: var(--accent-ink) !important; }
+html[data-theme="light"] .today-card-skip-btn .skip-arrow { color: var(--accent-ink); }
+html[data-theme="light"] .freq-tl-lbl.today, html[data-theme="light"] .freq-cal-day.today-cal { color: var(--amber); }
+/* Botões e hovers */
+html[data-theme="light"] .start-workout-btn:hover, html[data-theme="light"] .btn-primary:hover, html[data-theme="light"] .modal-footer .btn-confirm:hover,
+html[data-theme="light"] .btn-t-primary:hover, html[data-theme="light"] .safari-tutorial-btn:hover, html[data-theme="light"] .btn-t-green:hover,
+html[data-theme="light"] #chat-send-btn:hover, html[data-theme="light"] .alert-popup-ok:hover, html[data-theme="light"] .suspended-ok-btn:hover,
+html[data-theme="light"] .modal-footer .btn-confirm.green:hover { background: #e0b400; }
+html[data-theme="light"] .start-workout-btn .wa-btn-icon { background: rgba(17, 17, 16, .12); }
+html[data-theme="light"] .plan-card-header:hover, html[data-theme="light"] .workout-accordion:hover { background: rgba(0, 0, 0, .03); }
+html[data-theme="light"] .plan-wrap.active-plan-wrap { border-color: rgba(245, 200, 0, .55); }
+html[data-theme="light"] .freq-cal-day.trained { border-color: rgba(245, 200, 0, .6); }
+html[data-theme="light"] .freq-tl-dot.trained { border-color: #d9a900; }
+html[data-theme="light"] .progress-bar-bg { background: rgba(0, 0, 0, .08); }
+html[data-theme="light"] .rest-time-input:focus, html[data-theme="light"] #feedback-text:focus { box-shadow: 0 0 0 3px rgba(245, 200, 0, .25); }
+/* Campos */
+html[data-theme="light"] #screen-app .form-control, html[data-theme="light"] #chat-drawer input, html[data-theme="light"] #chat-drawer textarea,
+html[data-theme="light"] .modal-box input, html[data-theme="light"] .modal-box textarea, html[data-theme="light"] .modal-box-trainly input, html[data-theme="light"] .modal-box-trainly textarea,
+html[data-theme="light"] #screen-app .form-control:focus, html[data-theme="light"] #chat-drawer input:focus, html[data-theme="light"] #chat-drawer textarea:focus,
+html[data-theme="light"] .modal-box textarea:focus, html[data-theme="light"] .modal-box-trainly textarea:focus { background: #f7f7f5; }
+html[data-theme="light"] #screen-app .form-control:focus, html[data-theme="light"] #chat-drawer input:focus, html[data-theme="light"] #chat-drawer textarea:focus,
+html[data-theme="light"] .modal-box textarea:focus, html[data-theme="light"] .modal-box-trainly textarea:focus, html[data-theme="light"] .modal-box-trainly input:focus { box-shadow: 0 0 0 3px rgba(245, 200, 0, .25); border-color: var(--accent); }
+/* Modais, avisos e chat */
+html[data-theme="light"] .modal-overlay, html[data-theme="light"] #alert-popup-overlay, html[data-theme="light"] #suspended-popup-overlay,
+html[data-theme="light"] #safari-tutorial-overlay, html[data-theme="light"] .freq-cal-overlay { background: rgba(0, 0, 0, .4); }
+html[data-theme="light"] .modal-box, html[data-theme="light"] .modal-box-trainly, html[data-theme="light"] #alert-popup-box,
+html[data-theme="light"] #suspended-popup-box, html[data-theme="light"] .safari-tutorial-modal, html[data-theme="light"] #chat-drawer { box-shadow: var(--shadow-md); }
+html[data-theme="light"] #chat-fab { box-shadow: 0 8px 22px rgba(0, 0, 0, .25); }
+html[data-theme="light"] .chat-msg.mine .chat-bubble { background: #f5c800; color: #111110; }
+html[data-theme="light"] .chat-quote { background: rgba(0, 0, 0, .06); }
+html[data-theme="light"] .al-logout { border-color: rgba(224, 62, 62, .3); }
+html[data-theme="light"] .al-logout:hover { background: rgba(224, 62, 62, .16); }
+html[data-theme="light"] .al-theme-opt.on { box-shadow: none; }
 
   </style>
 </body>
