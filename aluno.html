@@ -4010,13 +4010,10 @@
         var img = new Image();
         img.onerror = function () { err.textContent = 'Imagem inválida ou formato não suportado.'; };
         img.onload = function () {
-          var S = 320, w = img.width, h = img.height, side = Math.min(w, h);
-          var c = document.createElement('canvas'); c.width = S; c.height = S;
-          var ctx = c.getContext('2d');
-          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, S, S);
-          ctx.drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, S, S); // recorte quadrado central
-          _alPhoto = c.toDataURL('image/jpeg', 0.82); _alPhotoDirty = true;
-          alRenderAvatar(document.getElementById('al-in-name').value);
+          trainlyCropPhoto(img, function (url) {
+            _alPhoto = url; _alPhotoDirty = true;
+            alRenderAvatar(document.getElementById('al-in-name').value);
+          });
         };
         img.src = reader.result;
       };
@@ -4071,11 +4068,9 @@
         var img = new Image();
         img.onerror = function () { err.textContent = 'Imagem inválida ou formato não suportado.'; };
         img.onload = function () {
-          var S = 320, w = img.width, h = img.height, side = Math.min(w, h);
-          var c = document.createElement('canvas'); c.width = S; c.height = S;
-          var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, S, S);
-          ctx.drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, S, S);
-          _alppPhoto = c.toDataURL('image/jpeg', 0.82); _alppRender();
+          trainlyCropPhoto(img, function (url) {
+            _alppPhoto = url; _alppRender();
+          });
         };
         img.src = reader.result;
       };
@@ -6194,7 +6189,7 @@
         var quoteHtml = '';
         if (m.replyTo) {
           var trainerName = document.getElementById('chat-trainer-name').textContent || 'Treinador';
-          var qAuthor = m.replyTo.sender === 'student' ? 'Você' : trainerName;
+          var qAuthor = m.replyTo.sender === 'student' ? 'Você' : (m.replyTo.authorName || trainerName);
           quoteHtml = '<div class="chat-quote">'
             + '<div class="chat-quote-author">' + escHtml(qAuthor) + '</div>'
             + '<div class="chat-quote-text">' + escHtml((m.replyTo.text || '').slice(0, 80)) + '</div>'
@@ -6227,14 +6222,18 @@
         var _replyId = m.id;
         var _replyText = escHtml(m.text).replace(/'/g, "&#39;").slice(0, 80);
         var _replyRole = mine ? 'student' : 'manager';
-        var replyBtn = '<button class="chat-reply-btn" title="Responder" onclick="event.stopPropagation();setReplyAluno(\'' + _replyId + '\',\'' + _replyText + '\',\'' + _replyRole + '\')">'
+        var _replyAuthor = (!mine && m.senderRole === 'ceo') ? (m.senderName || 'Administrador') : '';
+        var replyBtn = '<button class="chat-reply-btn" title="Responder" onclick="event.stopPropagation();setReplyAluno(\'' + _replyId + '\',\'' + _replyText + '\',\'' + _replyRole + '\',\'' + escHtml(_replyAuthor).replace(/'/g, '&#39;') + '\')">'
           + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>'
           + '</button>';
 
+        // Mensagem enviada pelo CEO/Administrador: mostra o nome dele, nunca o do treinador
+        var ceoTagHtml = (!mine && m.senderRole === 'ceo')
+          ? '<div style="font-size:.65rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">⭐ ' + escHtml(m.senderName || 'Administrador') + '</div>' : '';
         return daySepHtml + '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" id="acmsg_'+m.id+'" data-msgid="'+m.id+'">'
           + pickerBar
           + '<div class="chat-msg-row">'
-          + '<div class="chat-bubble">' + quoteHtml + escHtml(m.text) + '</div>'
+          + '<div class="chat-bubble">' + ceoTagHtml + quoteHtml + escHtml(m.text) + '</div>'
           + replyBtn
           + '</div>'
           + reactionHtml
@@ -6325,10 +6324,11 @@
     // ── Reply helpers (aluno) ──
     window._replyToAluno = null;
 
-    window.setReplyAluno = function(msgId, text, sender) {
+    window.setReplyAluno = function(msgId, text, sender, authorName) {
       window._replyToAluno = { msgId: msgId, text: text, sender: sender };
+      if (authorName) window._replyToAluno.authorName = authorName;
       var trainerName = document.getElementById('chat-trainer-name').textContent || 'Treinador';
-      var authorLabel = sender === 'student' ? 'Você' : trainerName;
+      var authorLabel = sender === 'student' ? 'Você' : (authorName || trainerName);
       document.getElementById('reply-preview-aluno-author').textContent = authorLabel;
       document.getElementById('reply-preview-aluno-text').textContent = text;
       document.getElementById('reply-preview-aluno').classList.add('on');
@@ -6351,6 +6351,7 @@
       var msgData = { text: text, sender: 'student', ts: Date.now(), readByManager: false, readByStudent: true };
       if (window._replyToAluno) {
         msgData.replyTo = { msgId: window._replyToAluno.msgId, text: window._replyToAluno.text, sender: window._replyToAluno.sender };
+        if (window._replyToAluno.authorName) msgData.replyTo.authorName = window._replyToAluno.authorName;
         window.cancelReplyAluno();
       }
       try {
@@ -7225,6 +7226,107 @@ html[data-theme="light"] .al-logout:hover { background: rgba(224, 62, 62, .16); 
 html[data-theme="light"] .al-theme-opt.on { box-shadow: none; }
 
   </style>
+<script>
+/* ── [PHOTO-CROP] Editor de recorte da foto de perfil (zoom + arrastar + grade) ──
+   Uso: trainlyCropPhoto(imgElement, function (dataUrlJpeg) { ... }, onCancel?) */
+(function () {
+  if (window.trainlyCropPhoto) return;
+  var css = '' +
+    '.tcp-ov{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}' +
+    '.tcp-box{width:100%;max-width:380px;background:var(--surface,#161b22);color:var(--text,#fff);border:1px solid var(--border,rgba(255,255,255,.12));border-radius:20px;padding:18px 18px 16px;box-shadow:0 20px 60px rgba(0,0,0,.5);font-family:inherit}' +
+    '.tcp-title{font-weight:800;font-size:1rem;margin:0 0 4px}' +
+    '.tcp-sub{font-size:.78rem;color:var(--text3,#8b949e);margin:0 0 14px;line-height:1.4}' +
+    '.tcp-vp{position:relative;margin:0 auto;overflow:hidden;border-radius:14px;background:#000;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}' +
+    '.tcp-vp.drag{cursor:grabbing}' +
+    '.tcp-vp img{position:absolute;max-width:none;max-height:none;pointer-events:none;-webkit-user-drag:none;user-select:none}' +
+    '.tcp-mask{position:absolute;inset:0;pointer-events:none;border-radius:50%;box-shadow:0 0 0 999px rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.9)}' +
+    '.tcp-grid{position:absolute;inset:0;pointer-events:none;' +
+      'background-image:linear-gradient(to right,transparent calc(33.333% - .5px),rgba(255,255,255,.45) calc(33.333% - .5px),rgba(255,255,255,.45) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent calc(66.666% - .5px),rgba(255,255,255,.45) calc(66.666% - .5px),rgba(255,255,255,.45) calc(66.666% + .5px),transparent calc(66.666% + .5px)),' +
+      'linear-gradient(to bottom,transparent calc(33.333% - .5px),rgba(255,255,255,.45) calc(33.333% - .5px),rgba(255,255,255,.45) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent calc(66.666% - .5px),rgba(255,255,255,.45) calc(66.666% - .5px),rgba(255,255,255,.45) calc(66.666% + .5px),transparent calc(66.666% + .5px));' +
+      'border:1px solid rgba(255,255,255,.35);border-radius:14px}' +
+    '.tcp-zoom{display:flex;align-items:center;gap:10px;margin:16px 4px 4px}' +
+    '.tcp-zoom span{font-size:1.1rem;color:var(--text3,#8b949e);line-height:1;width:16px;text-align:center}' +
+    '.tcp-zoom input{flex:1;accent-color:var(--accent,#3ddc97);height:28px;margin:0}' +
+    '.tcp-act{display:flex;gap:10px;margin-top:14px}' +
+    '.tcp-act button{flex:1;padding:12px;border-radius:12px;font-family:inherit;font-weight:800;font-size:.9rem;cursor:pointer;border:1px solid var(--border,rgba(255,255,255,.14))}' +
+    '.tcp-cancel{background:transparent;color:var(--text,#fff)}' +
+    '.tcp-ok{background:var(--accent,#3ddc97);color:var(--on-accent,#000);border-color:transparent!important}';
+  var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+
+  window.trainlyCropPhoto = function (img, onDone, onCancel) {
+    var W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+    if (!W || !H) { if (onCancel) onCancel(); return; }
+    var V = Math.max(200, Math.min(320, window.innerWidth - 72));
+    var base = V / Math.min(W, H);      // escala mínima: a imagem sempre cobre o quadro
+    var MAXZ = 4, z = 1, tx = 0, ty = 0; // tx/ty: deslocamento do centro da imagem em relação ao centro do quadro
+
+    var ov = document.createElement('div'); ov.className = 'tcp-ov';
+    ov.innerHTML = '<div class="tcp-box" role="dialog" aria-modal="true" aria-label="Ajustar foto">' +
+      '<h3 class="tcp-title">Ajustar foto</h3>' +
+      '<p class="tcp-sub">Arraste para posicionar e use o zoom para enquadrar o rosto dentro do círculo.</p>' +
+      '<div class="tcp-vp" style="width:' + V + 'px;height:' + V + 'px"><img alt=""><div class="tcp-grid"></div><div class="tcp-mask"></div></div>' +
+      '<div class="tcp-zoom"><span>−</span><input type="range" min="100" max="' + (MAXZ * 100) + '" value="100" step="1" aria-label="Zoom"><span>+</span></div>' +
+      '<div class="tcp-act"><button type="button" class="tcp-cancel">Cancelar</button><button type="button" class="tcp-ok">Usar foto</button></div></div>';
+    document.body.appendChild(ov);
+    var vp = ov.querySelector('.tcp-vp'), im = vp.querySelector('img'), rng = ov.querySelector('input');
+    im.src = img.src;
+
+    function clamp() {
+      var s = base * z, mx = Math.max(0, (W * s - V) / 2), my = Math.max(0, (H * s - V) / 2);
+      tx = Math.min(mx, Math.max(-mx, tx)); ty = Math.min(my, Math.max(-my, ty));
+    }
+    function draw() {
+      clamp();
+      var s = base * z;
+      im.style.width = (W * s) + 'px'; im.style.height = (H * s) + 'px';
+      im.style.left = (V / 2 + tx - W * s / 2) + 'px'; im.style.top = (V / 2 + ty - H * s / 2) + 'px';
+      rng.value = Math.round(z * 100);
+    }
+    function setZoom(nz) { z = Math.min(MAXZ, Math.max(1, nz)); draw(); }
+    draw();
+
+    rng.addEventListener('input', function () { setZoom(rng.value / 100); });
+    vp.addEventListener('wheel', function (e) { e.preventDefault(); setZoom(z * (e.deltaY < 0 ? 1.08 : 1 / 1.08)); }, { passive: false });
+
+    // Arrastar (1 dedo/mouse) e pinça (2 dedos)
+    var ptrs = {}, lastDist = 0;
+    function dist() { var k = Object.keys(ptrs); if (k.length < 2) return 0; var a = ptrs[k[0]], b = ptrs[k[1]]; return Math.hypot(a.x - b.x, a.y - b.y); }
+    vp.addEventListener('pointerdown', function (e) {
+      try { vp.setPointerCapture(e.pointerId); } catch (x) { }
+      ptrs[e.pointerId] = { x: e.clientX, y: e.clientY }; vp.classList.add('drag'); lastDist = dist();
+    });
+    vp.addEventListener('pointermove', function (e) {
+      var p = ptrs[e.pointerId]; if (!p) return;
+      var n = Object.keys(ptrs).length;
+      if (n >= 2) {
+        ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+        var d = dist(); if (lastDist && d) setZoom(z * d / lastDist); lastDist = d;
+      } else {
+        tx += e.clientX - p.x; ty += e.clientY - p.y;
+        ptrs[e.pointerId] = { x: e.clientX, y: e.clientY }; draw();
+      }
+    });
+    function up(e) { delete ptrs[e.pointerId]; lastDist = dist(); if (!Object.keys(ptrs).length) vp.classList.remove('drag'); }
+    vp.addEventListener('pointerup', up); vp.addEventListener('pointercancel', up);
+
+    function close() { document.removeEventListener('keydown', onKey); if (ov.parentNode) ov.parentNode.removeChild(ov); }
+    function cancel() { close(); if (onCancel) onCancel(); }
+    function onKey(e) { if (e.key === 'Escape') cancel(); }
+    document.addEventListener('keydown', onKey);
+    ov.addEventListener('mousedown', function (e) { if (e.target === ov) cancel(); });
+    ov.querySelector('.tcp-cancel').onclick = cancel;
+    ov.querySelector('.tcp-ok').onclick = function () {
+      var S = 320, s = base * z, c = document.createElement('canvas'); c.width = S; c.height = S;
+      var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, S, S);
+      var left = V / 2 + tx - W * s / 2, top = V / 2 + ty - H * s / 2;   // posição da imagem no quadro
+      ctx.drawImage(img, -left / s, -top / s, V / s, V / s, 0, 0, S, S);
+      var url = c.toDataURL('image/jpeg', 0.82);
+      close(); onDone(url);
+    };
+  };
+})();
+
+</script>
 </body>
 
 </html>
