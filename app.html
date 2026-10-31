@@ -7338,23 +7338,24 @@
         </div>
         <div id="tab-alunos" class="tab-panel">
           <div id="students-list-view">
-            <div class="page-header lc-header">
+            <div class="page-header">
               <div>
                 <div class="page-title">Alunos</div>
                 <div class="page-sub" id="students-count"></div>
               </div>
-              <div class="lc-header-actions">
-                <button class="btn btn-ghost btn-sm" onclick="openExportAllModal()" title="Exportar todos os alunos (ZIP)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Exportar ZIP</button>
-                <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Novo aluno</button>
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <div class="search-wrap">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                  </svg>
+                  <input class="search-input" type="text" id="search-students" placeholder="Buscar aluno..."
+                    oninput="filterStudents()" />
+                </div>
+                <select class="tn-sort" id="sort-students" onchange="filterStudents()" aria-label="Ordenar alunos"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
+                <button class="btn btn-ghost btn-sm" onclick="openExportAllModal()">Exportar todos (ZIP)</button>
+                <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Novo</button>
               </div>
-            </div>
-            <div class="lc-toolbar">
-              <div class="search-wrap">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input class="search-input" type="text" id="search-students" placeholder="Buscar por nome ou código..." oninput="filterStudents()" />
-              </div>
-              <span class="lc-toolbar-label">Ordenar</span>
-              <select class="tn-sort" id="sort-students" onchange="filterStudents()" aria-label="Ordenar alunos"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
             </div>
             <div id="students-grid" class="students-grid">
               <div class="tn-skel card"></div><div class="tn-skel card"></div><div class="tn-skel card"></div>
@@ -7363,18 +7364,20 @@
           <div id="student-detail-view" class="hidden"></div>
         </div>
         <div id="tab-gestores" class="tab-panel">
-          <div class="page-header lc-header">
+          <div class="page-header">
             <div>
               <div class="page-title">Gestores</div>
               <div class="page-sub" id="managers-count"></div>
             </div>
-            <div class="lc-header-actions">
-              <button class="btn btn-primary btn-sm" id="btn-inv-link" onclick="inviteGenLink()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link de convite</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <select class="tn-sort" id="sort-managers" onchange="renderManagersGrid(window._mgrList||[])" aria-label="Ordenar gestores"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
+              <button class="btn btn-ghost btn-sm" id="btn-inv-link" onclick="inviteGenLink()"><svg width="14"
+                  height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg> Link de convite</button>
             </div>
-          </div>
-          <div class="lc-toolbar">
-            <span class="lc-toolbar-label">Ordenar</span>
-            <select class="tn-sort" id="sort-managers" onchange="renderManagersGrid(window._mgrList||[])" aria-label="Ordenar gestores"><option value="az">Nome (A–Z)</option><option value="za">Nome (Z–A)</option><option value="new">Mais recentes</option><option value="old">Mais antigos</option></select>
           </div>
           <div id="inv-link-box"
             style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;">
@@ -7849,7 +7852,7 @@
         </div>
         <div class="mobile-nav-item sidebar-item-ceo hidden" data-tab="tab-ceo" onclick="switchTab('tab-ceo',this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <span class="mobile-nav-label">CEO</span>
+          <span class="mobile-nav-label">Admin</span>
         </div>
         <div class="mobile-nav-item sidebar-item-ceo hidden" data-tab="tab-ceo-reports" onclick="switchTab('tab-ceo-reports',this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17v-5M13 17V8M18 17v-9"/></svg>
@@ -14295,7 +14298,7 @@
 
         list.innerHTML = allManagers.map(m => `
       <div class="clone-student-item" id="tmgr_${m.id}" onclick="selectTransferManager('${m.id}','${(m.name || m.username).replace(/'/g, '&#39;')}','${m.username}')">
-        <div class="avatar" style="width:34px;height:34px;font-size:.82rem;background:${m.isMaster ? 'var(--accent-dim)' : 'var(--surface2)'};border-color:${m.isMaster ? 'var(--accent-soft)' : 'var(--border2)'};">${(m.name || m.username || '?').slice(0, 2).toUpperCase()}</div>
+        <div class="avatar" style="width:34px;height:34px;font-size:.82rem;background:${m.isMaster ? 'var(--accent-dim)' : 'var(--surface2)'};border-color:${m.isMaster ? 'var(--accent-soft)' : 'var(--border2)'};">${studentAvatar({ name: m.name || m.username || '?', photoURL: m.photoURL || ((window.CURRENT_USER || {}).username === m.username ? (window.CURRENT_USER || {}).photoURL : '') })}</div>
         <div>
           <div style="font-weight:700;font-size:.88rem;">${m.name || m.username}${m.isMaster ? ' <span style="font-size:.7rem;color:var(--accent);font-weight:700;">⭐ Master</span>' : ''}</div>
           <div style="font-size:.72rem;color:var(--text3);font-weight:600;">@${m.username}</div>
@@ -15327,7 +15330,7 @@
         return `
     <div class="student-card lc" id="mgr-card-${m.id}" style="cursor:default;">
       <div class="lc-top">
-        <div class="avatar" style="${m.isMaster ? 'background:var(--accent-dim);border-color:var(--accent-soft);' : ''}">${(m.name || m.username || '?').slice(0, 2).toUpperCase()}</div>
+        <div class="avatar" style="${m.isMaster ? 'background:var(--accent-dim);border-color:var(--accent-soft);' : ''}">${studentAvatar({ name: m.name || m.username || '?', photoURL: m.photoURL || ((window.CURRENT_USER || {}).username === m.username ? (window.CURRENT_USER || {}).photoURL : '') })}</div>
         <div class="lc-id">
           <div class="student-name">${m.name || m.username}</div>
           <div class="lc-code">@${m.username}</div>
@@ -20956,6 +20959,9 @@ html[data-theme="light"] .tn .tn-new-ph { box-shadow: none; }
   .tn .lc-toolbar-label { order: 2; }
   .tn .lc-toolbar .tn-sort { order: 3; }
 }
+
+.tn .page-header { align-items: center; }
+.tn .page-header .page-sub { margin-top: 2px; }
 </style>
 </body>
 
