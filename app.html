@@ -7197,13 +7197,15 @@
           </div>
 
           <!-- ── Alunos em Treino Agora ── -->
-          <div class="dash-section-title">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Alunos em treino agora
-            <span id="training-now-count" style="font-size:.68rem;font-weight:700;border-radius:99px;padding:2px 9px;display:none;"></span>
-          </div>
-          <div id="training-now-list" class="training-now-list">
-            <div class="tn-skel row"></div>
+          <div class="tn-live">
+            <div class="tn-live-head">
+              <span class="tn-live-badge"><i></i>AO VIVO</span>
+              <span class="tn-live-title">Alunos em treino agora</span>
+              <span id="training-now-count" style="display:none;"></span>
+            </div>
+            <div id="training-now-list" class="training-now-list">
+              <div class="tn-skel row"></div>
+            </div>
           </div>
 
           <!-- ── Visão geral ── -->
@@ -7237,7 +7239,7 @@
               <i class="tn-kpi-bar"></i>
             </div>
             <div class="tn-kpi k-purple" onclick="goToAlunos()" role="button">
-              <span class="tn-kpi-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
+              <span class="tn-ring" id="tn-ring"></span>
               <div class="tn-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M14.8 9a2.6 2.6 0 0 0-2.8-1.5c-1.5 0-2.7.8-2.7 2 0 2.6 5.4 1.4 5.4 4 0 1.2-1.2 2-2.7 2a2.8 2.8 0 0 1-2.8-1.5M12 6v1.5M12 16.5V18"/></svg></div>
               <div class="tn-kpi-lbl">Taxa de renovação</div>
               <div class="stat-num" id="stat-taxa">—%</div>
@@ -7255,7 +7257,14 @@
             <div class="tn-skel new"></div><div class="tn-skel new"></div><div class="tn-skel new"></div>
           </div>
 
-          <div class="dash-section-title">Cadastros por período</div>
+          <div class="dash-section-title" style="margin-top:4px">Ações rápidas</div>
+          <div class="tn-actions">
+            <button class="tn-act" onclick="goToAlunos()"><span class="tn-act-ico c-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Ver alunos</span></button>
+            <button class="tn-act is-primary" onclick="openAddStudentModal()"><span class="tn-act-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span>Novo aluno</span></button>
+            <button class="tn-act" onclick="openCreateAlertModal()"><span class="tn-act-ico c-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span><span>Criar alerta</span></button>
+          </div>
+          
+          <div class="dash-section-title" style="margin-top:6px">Cadastros por período</div>
           <div class="dash-new-row">
             <div class="dash-new-card">
               <div class="dash-new-card-header">
@@ -7299,29 +7308,6 @@
                 <div class="dash-trend-bar-col" style="height:65%;background:var(--green-soft)"></div>
                 <div class="dash-trend-bar-col" style="height:100%;background:rgba(47,220,132,.65)"></div>
               </div>
-            </div>
-          </div>
-
-          <!-- ── Ações rápidas ── -->
-          <div class="quick-card" style="margin-bottom:20px;">
-            <h3>Ações rápidas</h3>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-ghost" onclick="goToAlunos()"><svg width="14" height="14" viewBox="0 0 24 24"
-                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  style="vertical-align:middle">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg> Ver alunos</button>
-              <button class="btn btn-primary" onclick="openAddStudentModal()">+ Novo aluno</button>
-              <button class="btn btn-ghost" onclick="openCreateAlertModal()"
-                style="background:rgba(255,194,71,.12);border-color:rgba(255,194,71,.4);color:var(--amber);font-weight:800;"><svg
-                  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
-                  <path d="M22 2L11 13" />
-                  <path d="M22 2L15 22 11 13 2 9l20-7z" />
-                </svg> Criar Alerta</button>
             </div>
           </div>
 
@@ -10543,8 +10529,9 @@
         var name = escHtml(n.studentName || 'Aluno');
         var workout = escHtml(n.workoutTitle || n.planTitle || 'Treino');
         var elapsedId = 'tnow-elapsed-' + sid;
+        var ini = escHtml((n.studentName || 'A').trim().split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase());
         return '<div class="training-now-card">'
-          + '<div class="training-now-pulse"></div>'
+          + '<div class="tn-av">' + ini + '<i class="training-now-pulse"></i></div>'
           + '<div class="training-now-info">'
           +   '<div class="training-now-name">' + name + '</div>'
           +   '<div class="training-now-sub">'
@@ -20097,6 +20084,110 @@
 }
 .tn .tn-sort:focus { outline: none; border-color: var(--accent); }
 
+/* ═══════════ DASHBOARD v2 — componentes refeitos ═══════════ */
+@keyframes tnUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes tnPulse { 0% { box-shadow: 0 0 0 0 rgba(47, 220, 132, .55); } 70% { box-shadow: 0 0 0 7px rgba(47, 220, 132, 0); } 100% { box-shadow: 0 0 0 0 rgba(47, 220, 132, 0); } }
+#tab-dashboard.active > * { animation: tnUp .55s cubic-bezier(.22, 1, .36, 1) both; }
+#tab-dashboard.active > :nth-child(2) { animation-delay: .05s; }
+#tab-dashboard.active > :nth-child(3) { animation-delay: .1s; }
+#tab-dashboard.active > :nth-child(4) { animation-delay: .15s; }
+#tab-dashboard.active > :nth-child(5) { animation-delay: .2s; }
+#tab-dashboard.active > :nth-child(6) { animation-delay: .25s; }
+#tab-dashboard.active > :nth-child(7) { animation-delay: .3s; }
+#tab-dashboard.active > :nth-child(n+8) { animation-delay: .35s; }
+
+/* Títulos de seção com marcador */
+.tn .dash-section-title::before { content: ''; width: 4px; height: 15px; border-radius: 4px; background: linear-gradient(180deg, #2cf095, #19a96a); flex-shrink: 0; }
+.tn .dash-section-title::after { background: linear-gradient(90deg, var(--border2), transparent); }
+.tn .tn-sec-head .dash-section-title::after { display: none; }
+
+/* Saudação */
+.tn .tn-greet { font-size: 2.5rem; line-height: 1.05; }
+.tn .tn-greet .g-name { background: linear-gradient(90deg, #35f0a0, #19c577 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* ── Bloco "ao vivo" ── */
+.tn .tn-live {
+  position: relative; overflow: hidden; margin-bottom: 30px; padding: 16px 16px 6px;
+  background: linear-gradient(135deg, rgba(34, 224, 138, .13), rgba(34, 224, 138, .02) 55%), var(--surface);
+  border: 1px solid rgba(34, 224, 138, .24); border-radius: 26px; box-shadow: var(--shadow);
+}
+.tn .tn-live::before { content: ''; position: absolute; right: -60px; top: -60px; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(34, 224, 138, .28), transparent 70%); pointer-events: none; }
+.tn .tn-live-head { position: relative; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.tn .tn-live-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .66rem; font-weight: 800; letter-spacing: .12em; color: var(--green); background: var(--green-dim); border: 1px solid rgba(47, 220, 132, .35); border-radius: 999px; padding: 4px 10px; }
+.tn .tn-live-badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: tnPulse 1.8s ease-out infinite; }
+.tn .tn-live-title { font-weight: 800; font-size: .98rem; flex: 1; letter-spacing: -.01em; }
+.tn #training-now-count { font-size: .74rem; font-weight: 800; border-radius: 999px; padding: 4px 11px; background: var(--accent); color: var(--on-accent) !important; border: 0 !important; }
+.tn .tn-live .training-now-list { margin: 0; gap: 0; position: relative; }
+.tn .tn-live .training-now-card { background: transparent; border: 0; border-top: 1px solid var(--border); border-radius: 0; box-shadow: none; padding: 12px 2px; }
+.tn .tn-live .training-now-card:first-child { border-top: 0; }
+.tn .tn-av { position: relative; width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .9rem; color: var(--accent); background: linear-gradient(145deg, rgba(34, 224, 138, .3), rgba(34, 224, 138, .08)); border: 1px solid var(--accent-soft); }
+.tn .tn-av .training-now-pulse { position: absolute; right: -1px; bottom: -1px; width: 12px; height: 12px; border: 2px solid var(--surface); animation: tnPulse 1.8s ease-out infinite; }
+.tn .tn-live .training-now-empty { background: transparent; border: 0; padding: 14px 0 18px; }
+.tn .tn-live .tn-skel { border-radius: 16px; margin-bottom: 10px; }
+
+/* ── KPIs v2 ── */
+.tn .tn-kpis { gap: 14px; }
+.tn .tn-kpi { padding: 18px 16px 40px; border-radius: 24px; background: linear-gradient(160deg, color-mix(in srgb, var(--k) 11%, transparent), transparent 55%), var(--surface); border-color: color-mix(in srgb, var(--k) 22%, var(--border)); }
+.tn .tn-kpi::before { content: ''; position: absolute; right: -38px; top: -38px; width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle, var(--k), transparent 68%); opacity: .2; pointer-events: none; }
+.tn .tn-kpi-ico { width: 50px; height: 50px; margin-bottom: 14px; box-shadow: 0 0 0 6px color-mix(in srgb, var(--k) 14%, transparent), 0 10px 22px -6px var(--k); }
+.tn .tn-kpi-ico svg { width: 24px; height: 24px; }
+.tn .tn-kpi .stat-num { font-size: 2.9rem; background: linear-gradient(180deg, #fff 30%, color-mix(in srgb, var(--k) 45%, #fff)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.tn .tn-kpi-sub { display: inline-flex; align-self: flex-start; margin-top: 12px; padding: 5px 10px 5px 8px; border-radius: 999px; background: color-mix(in srgb, var(--k) 13%, transparent); color: var(--text); font-size: .74rem; font-weight: 600; align-items: center; }
+.tn .tn-kpi-sub svg { width: 14px; height: 14px; margin-top: 0; }
+.tn .tn-kpi-bar { left: 16px; right: 16px; bottom: 16px; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, .07); box-shadow: none; overflow: hidden; }
+.tn .tn-kpi-bar::after { content: ''; display: block; height: 100%; width: var(--w, 0%); border-radius: inherit; background: linear-gradient(90deg, var(--k2), var(--k)); box-shadow: 0 0 12px var(--k); transition: width 1s cubic-bezier(.22, 1, .36, 1); }
+.tn .tn-ring { --p: 0; position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; background: conic-gradient(var(--k) calc(var(--p) * 1%), rgba(255, 255, 255, .09) 0); transition: background .6s; }
+.tn .tn-ring::after { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: var(--surface); }
+.tn .tn-ring::before { content: ''; position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--k); left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1; box-shadow: 0 0 10px var(--k); }
+
+/* ── Novos alunos v2 ── */
+.tn .tn-new-card { flex-basis: 172px; padding: 18px 14px 14px; border-radius: 24px; text-align: center; display: flex; flex-direction: column; align-items: center; background: radial-gradient(120% 70% at 50% 0%, rgba(34, 224, 138, .13), transparent 70%), var(--surface); }
+.tn .tn-new-chev { display: none; }
+.tn .tn-new-ph { width: 64px; height: 64px; margin-bottom: 12px; font-size: 1.15rem; border: 0; background: linear-gradient(145deg, rgba(34, 224, 138, .4), rgba(74, 148, 255, .2)); box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px rgba(34, 224, 138, .45); }
+.tn .tn-new-name { padding-right: 0; max-width: 100%; }
+.tn .tn-new-when { margin: 3px 0 12px; }
+.tn .tn-tag { padding: 4px 14px; }
+
+/* ── Ações rápidas (blocos) ── */
+.tn .tn-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+.tn .tn-act { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 8px 14px; border-radius: 22px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: .8rem; font-weight: 700; transition: transform .15s ease, border-color .2s ease, background .2s ease; }
+.tn .tn-act:hover { border-color: var(--border2); background: var(--surface2); }
+.tn .tn-act:active { transform: scale(.95); }
+.tn .tn-act-ico { width: 46px; height: 46px; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--accent); background: var(--accent-dim); border: 1px solid var(--accent-soft); }
+.tn .tn-act-ico svg { width: 22px; height: 22px; }
+.tn .tn-act-ico.c-blue { color: var(--blue); background: rgba(74, 148, 255, .13); border-color: rgba(74, 148, 255, .32); }
+.tn .tn-act-ico.c-amber { color: var(--amber); background: rgba(255, 194, 71, .13); border-color: rgba(255, 194, 71, .32); }
+.tn .tn-act.is-primary { background: linear-gradient(145deg, #2cf095, #19c577); border: 0; color: var(--on-accent); box-shadow: 0 14px 28px -12px rgba(34, 224, 138, .65); }
+.tn .tn-act.is-primary .tn-act-ico { background: rgba(3, 21, 11, .16); border-color: transparent; color: var(--on-accent); }
+.tn .tn-act.is-primary:hover { filter: brightness(1.05); background: linear-gradient(145deg, #2cf095, #19c577); }
+
+/* ── Cadastros por período v2 ── */
+.tn .dash-new-card { position: relative; overflow: hidden; border-radius: 24px; padding: 16px 16px 14px; }
+.tn .dash-new-card::before { content: ''; position: absolute; right: -40px; top: -40px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(34, 224, 138, .22), transparent 70%); pointer-events: none; }
+.tn .dash-new-card-num { font-size: 2.4rem; font-weight: 800; letter-spacing: -.03em; }
+.tn .dash-trend-bar { height: 44px; gap: 4px; align-items: flex-end; }
+.tn .dash-trend-bar-col { border-radius: 5px 5px 2px 2px; background: linear-gradient(180deg, rgba(160, 190, 210, .28), rgba(160, 190, 210, .08)); }
+.tn .dash-trend-bar-col.active { background: linear-gradient(180deg, #35f0a0, #19a96a); box-shadow: 0 0 14px rgba(34, 224, 138, .5); }
+
+/* ── Indicação v2 ── */
+.tn .referral-dash-banner { position: relative; overflow: hidden; border-radius: 26px; padding: 18px; border: 1px solid rgba(141, 112, 255, .32); background: linear-gradient(135deg, rgba(141, 112, 255, .2), rgba(74, 148, 255, .06) 60%), var(--surface); }
+.tn .referral-dash-banner::before { content: ''; position: absolute; left: -40px; bottom: -60px; width: 170px; height: 170px; border-radius: 50%; background: radial-gradient(circle, rgba(141, 112, 255, .35), transparent 70%); pointer-events: none; }
+.tn .referral-dash-icon { width: 46px; height: 46px; flex-shrink: 0; color: #c4b5ff; background: rgba(141, 112, 255, .18); border: 1px solid rgba(141, 112, 255, .4); }
+.tn .referral-dash-icon svg { width: 22px; height: 22px; }
+.tn .referral-dash-banner em { color: #c4b5ff; }
+.tn .referral-dash-banner .btn { position: relative; background: linear-gradient(135deg, #9d85ff, #6d4cf0); color: #fff; border: 0; box-shadow: 0 10px 22px -10px rgba(141, 112, 255, .8); }
+
+/* ── Lista de alunos / gestores (cartões refeitos) ── */
+.tn .students-grid { gap: 14px; }
+.tn .student-card { position: relative; overflow: hidden; padding: 16px 16px 14px; }
+.tn .student-card::before { content: ''; position: absolute; left: 0; top: 18px; bottom: 18px; width: 3px; border-radius: 0 4px 4px 0; background: linear-gradient(180deg, #2cf095, #19a96a); }
+.tn .student-card-top { margin-bottom: 12px; }
+.tn .avatar { box-shadow: 0 0 0 3px var(--surface), 0 0 0 4.5px rgba(34, 224, 138, .4); font-size: 1.05rem; }
+.tn .page-header .page-title { position: relative; }
+
+@media (max-width: 380px) { .tn .tn-actions { gap: 8px; } .tn .tn-act { font-size: .74rem; padding: 14px 4px 12px; } }
+.tn .tn-live-title { font-size: .9rem; } .tn .dash-new-card-title { font-size: .66rem; letter-spacing: .08em; }
+
   </style>
 
   <script>
@@ -20110,6 +20201,22 @@
       new MutationObserver(function (list) {
         list.forEach(function (r) { r.addedNodes.forEach(tag); });
       }).observe(document.body, { childList: true });
+      /* Barras de progresso e anel dos cartões a partir dos números reais */
+      function num(id) { var e = document.getElementById(id); return e ? (parseInt(String(e.textContent).replace(/\D/g, ''), 10) || 0) : 0; }
+      function setW(id, pct) { var e = document.getElementById(id); var k = e && e.closest('.tn-kpi'); if (k) k.style.setProperty('--w', Math.max(0, Math.min(100, pct)) + '%'); }
+      function tnDash() {
+        var total = num('stat-alunos'), novos = num('stat-alunos-sub'), taxa = num('stat-taxa');
+        setW('stat-alunos', total ? Math.max(8, novos / total * 100) : 0);
+        setW('stat-planos', taxa);
+        setW('stat-expired', taxa ? 100 - taxa : 0);
+        setW('stat-taxa', taxa);
+        var r = document.getElementById('tn-ring'); if (r) r.style.setProperty('--p', taxa);
+      }
+      ['stat-alunos', 'stat-alunos-sub', 'stat-planos', 'stat-expired', 'stat-taxa'].forEach(function (id) {
+        var e = document.getElementById(id);
+        if (e) new MutationObserver(tnDash).observe(e, { childList: true, characterData: true, subtree: true });
+      });
+      tnDash();
       var src = (document.querySelector('img[data-tn-logo]') || {}).src;
       if (src) {
         ['#screen-sub-wall .sub-wall-head img', '#trial-welcome-overlay .trial-welcome-head img'].forEach(function (q) {
