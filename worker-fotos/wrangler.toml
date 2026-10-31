@@ -1,0 +1,14 @@
+# Worker de fotos do Trainly (Cloudflare R2 + login do Firebase)
+name = "trainly-fotos"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[[r2_buckets]]
+binding = "FOTOS"
+bucket_name = "trainly-fotos"
+
+[vars]
+# Sites que podem enviar fotos (separe por vírgula, sem barra no final)
+ALLOWED_ORIGINS = "https://trainly.online,https://www.trainly.online"
+# ID do projeto Firebase (o mesmo do firebaseConfig do site)
+FIREBASE_PROJECT_ID = "fichasacademia-8717d"
