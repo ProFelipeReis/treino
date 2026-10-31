@@ -13,6 +13,8 @@
   <meta name="apple-mobile-web-app-title" content="Trainly" />
   <title>Trainly — Aluno</title>
   <script>try { localStorage.setItem('trainly_role', 'aluno') } catch (e) { }</script>
+  <script src="fotos-config.js"></script>
+  <script src="fotos.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -4032,6 +4034,7 @@
       try {
         await window._alSaveProfile({ name: name, email: email, phone: phone, photoURL: _alPhoto || '' });
         _alPhotoDirty = false;
+        _alPhoto = (window._alStudent && window._alStudent.photoURL) || _alPhoto; // já é o endereço final
         closeAlModal('modal-profile-al');
       } catch (e) { err.textContent = 'Erro ao salvar: ' + (e && e.message ? e.message : e); }
       finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
@@ -4280,6 +4283,18 @@
     window._alSaveProfile = async (data) => {
       if (!_currentStudent || !_currentStudent.id) throw new Error('Sessão inválida. Entre novamente.');
       await ensureAuth();
+      // Foto: vai para o Cloudflare R2; o Firestore guarda só o endereço (photoURL) e a chave (photoKey).
+      if (window.TrainlyFotos && TrainlyFotos.ativo()) {
+        const getTk = async () => (await ensureAuth()).getIdToken();
+        if (TrainlyFotos.ehDataUrl(data.photoURL)) {
+          const up = await TrainlyFotos.enviar(data.photoURL, { kind: 'student', id: _currentStudent.id, getToken: getTk });
+          if (_currentStudent.photoKey) TrainlyFotos.apagar(_currentStudent.photoKey, getTk);
+          data = { ...data, photoURL: up.url, photoKey: up.key };
+        } else if (!data.photoURL && _currentStudent.photoKey) {
+          TrainlyFotos.apagar(_currentStudent.photoKey, getTk);
+          data = { ...data, photoKey: '' };
+        }
+      }
       await updateDoc(doc(db, 'students', _currentStudent.id), data);
       _currentStudent = { ..._currentStudent, ...data };
       window._alStudent = _currentStudent;
