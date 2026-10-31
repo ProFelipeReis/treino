@@ -713,67 +713,155 @@
       flex: 1;
     }
 
-    /* LOGIN */
+    /* LOGIN — tema novo (escuro + verde), igual ao resto do site. Sempre escuro, mesmo no modo claro. */
     #screen-login {
+      --lg-surface: #141b23;
+      --lg-surface2: #1a232d;
+      --lg-field: #0b1219;
+      --lg-border2: rgba(170, 190, 210, .18);
+      --lg-text: #f5f8fb;
+      --lg-text2: #aab6c2;
+      --lg-text3: #8793a0;
+      --lg-accent: #3dbb86;
+      --lg-on-accent: #03150b;
+      --lg-red: #e5707a;
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       height: 100vh;
       height: 100dvh;
-      padding: calc(80px + env(safe-area-inset-top)) 24px 24px;
-      background: #000000;
+      padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px));
       position: relative;
-      overflow: hidden;
+      overflow-y: auto;
+      overscroll-behavior: none;
+      color: var(--lg-text);
+      color-scheme: dark;
+      background: radial-gradient(560px 380px at 100% 0%, rgba(34,224,138,.20), transparent 70%), linear-gradient(rgba(9,17,26,.80), rgba(9,17,26,.88)), url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed, #09111a;
     }
 
-    #login-bg-canvas {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .login-card {
-      position: relative;
-      z-index: 2;
-    }
-
-    .login-card {
+    #screen-login .lg-wrap {
       width: 100%;
-      max-width: 340px;
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: 24px;
-      padding: 36px 32px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.30), 0 1.5px 0 rgba(255, 255, 255, 0.18) inset;
-      overflow: hidden;
+      max-width: 360px;
+      margin: auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: lgFadeUp .6s cubic-bezier(.22, 1, .36, 1) both;
     }
 
-    /* Camada embaçada com imagem de fundo */
-    .login-card::before {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      background:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.50) 0%, rgba(0, 0, 0, 0.25) 60%),
-        url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed;
-      filter: blur(14px);
-      z-index: 0;
+    @keyframes lgFadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Overlay escuro moderado */
-    .login-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(10, 10, 8, 0.28);
-      z-index: 1;
+    #screen-login .lg-logo {
+      height: 150px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      margin-bottom: 28px;
     }
 
-    .login-card>* {
-      position: relative;
-      z-index: 3;
+    #screen-login .login-card { width: 100%; border-radius: 20px; padding: 28px 24px; }
+    #screen-login .login-card { position: relative; overflow: hidden; background: transparent; border: 1px solid rgba(255,255,255,.22);
+      box-shadow: 0 8px 32px rgba(0,0,0,.30), 0 1.5px 0 rgba(255,255,255,.14) inset; }
+    #screen-login .login-card::before { content: ''; position: absolute; inset: -4px; z-index: 0;
+      background: linear-gradient(180deg, rgba(9,17,26,.55) 0%, rgba(9,17,26,.35) 60%), url('https://i.imgur.com/Fjj25UX.jpeg') center/cover no-repeat fixed;
+      filter: blur(14px); }
+    #screen-login .login-card::after { content: ''; position: absolute; inset: 0; z-index: 1; background: rgba(9,17,26,.38); pointer-events: none; }
+    #screen-login .login-card > * { position: relative; z-index: 3; }
+
+    #screen-login .form-group { margin-bottom: 16px; }
+
+    #screen-login .form-group label {
+      display: block;
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--lg-text2);
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
     }
+
+    #screen-login .form-control {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--lg-border2);
+      border-radius: var(--r);
+      font-size: .9rem;
+      background: rgba(11, 18, 25, .55);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      color: var(--lg-text);
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    #screen-login .form-control::placeholder { color: var(--lg-text3); opacity: .7; }
+
+    #screen-login .form-control:focus {
+      outline: none;
+      border-color: var(--lg-accent);
+      background: rgba(11, 18, 25, .7);
+      box-shadow: 0 0 0 3px rgba(61, 187, 134, .15);
+      color: var(--lg-text);
+    }
+
+    #screen-login .lg-code {
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: 1.2rem;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    #screen-login .btn-primary {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #3dbb86, #34a876);
+      color: var(--lg-on-accent);
+      border: 0;
+      box-shadow: none;
+      font-weight: 800;
+      letter-spacing: .01em;
+    }
+
+    #screen-login .btn-primary:hover {
+      background: linear-gradient(135deg, #3dbb86, #34a876);
+      filter: brightness(1.07);
+      transform: translateY(-1px);
+      box-shadow: none;
+    }
+
+    #screen-login .btn-primary:active { transform: translateY(0); }
+    #screen-login .btn-primary:disabled { opacity: .5; }
+
+    #login-error {
+      color: var(--lg-red, #e5707a) !important;
+      font-size: .8rem;
+      font-weight: 600;
+      min-height: 20px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    #screen-login .lg-back {
+      margin-top: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 50px;
+      background: var(--lg-surface);
+      border: 1px solid var(--lg-border2);
+      color: var(--lg-text2);
+      font-family: var(--body);
+      font-size: .78rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color .15s, border-color .15s;
+    }
+
+    #screen-login .lg-back:hover { color: var(--lg-text); border-color: rgba(61, 187, 134, .30); }
 
     .form-group {
       margin-bottom: 16px;
@@ -841,10 +929,6 @@
     .btn-primary:disabled {
       opacity: .4;
       pointer-events: none;
-    }
-
-    #login-error {
-      color: #ffaaaa !important;
     }
 
     /* ── NAV MENU ── */
@@ -2815,9 +2899,6 @@
         padding: 16px 14px 4px;
       }
 
-      .login-card {
-        padding: 32px 24px;
-      }
     }
 
     @media (min-width: 601px) {
@@ -3958,186 +4039,29 @@
   </script>
 
   <div id="screen-login">
-    <a href="https://trainly.online?choose=1" onclick="try{localStorage.removeItem('trainly_role')}catch(e){}"
-      style="position:absolute;bottom:28px;left:24px;z-index:10;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:50px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);color:rgba(255,255,255,0.80);font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 20px rgba(0,0,0,0.25);transition:all .2s cubic-bezier(.22,1,.36,1);"
-      onmouseover="this.style.background='rgba(255,255,255,0.20)';this.style.color='#fff';this.style.transform='translateY(-2px)'"
-      onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.80)';this.style.transform='translateY(0)'">
-      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
-        stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5M12 5l-7 7 7 7" />
-      </svg>
-      Trocar perfil
-    </a>
-    <canvas id="login-bg-canvas"></canvas>
-    <script>
-      (function () {
-        const canvas = document.getElementById('login-bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let W, H, squares, animId;
+    <div class="lg-wrap">
+      <img class="lg-logo" src="https://i.imgur.com/URJ9FaP.png" alt="Trainly" />
 
-        // Preload background photo
-        const bgImg = new Image();
-        bgImg.crossOrigin = 'anonymous';
-        bgImg.src = 'https://i.imgur.com/Fjj25UX.jpeg';
-        let bgLoaded = false;
-        bgImg.onload = function () { bgLoaded = true; };
-
-        function resize() {
-          W = canvas.width = window.innerWidth;
-          H = canvas.height = window.innerHeight;
-        }
-
-        function mkSquare() {
-          const size = 28 + Math.random() * 68;
-          return {
-            x: Math.random() * W,
-            y: Math.random() * H,
-            size,
-            rot: Math.random() * Math.PI * 2,
-            rotSpeed: (Math.random() - 0.5) * 0.007,
-            alpha: 0.05 + Math.random() * 0.12,
-            dx: (Math.random() - 0.5) * 0.35,
-            dy: -(0.25 + Math.random() * 0.45),
-          };
-        }
-
-        function init() {
-          resize();
-          squares = Array.from({ length: 40 }, mkSquare);
-        }
-
-        // Diagonal reta igual ao trainly entrada
-        function getDividerY(px) {
-          const leftY = H * 1.05;
-          const rightY = H * 0.82;
-          return leftY + (px / W) * (rightY - leftY);
-        }
-
-        function isAboveTriangle(px, py) {
-          return py < getDividerY(px);
-        }
-
-        function drawBg() {
-          const leftY = getDividerY(0);
-          const rightY = getDividerY(W);
-
-          // 1. Fill dark area (above the diagonal)
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(W, 0);
-          ctx.lineTo(W, rightY);
-          ctx.lineTo(0, leftY);
-          ctx.closePath();
-          ctx.fillStyle = '#111110';
-          ctx.fill();
-
-          // 2. Fill light area below diagonal
-          ctx.beginPath();
-          ctx.moveTo(0, leftY);
-          ctx.lineTo(W, rightY);
-          ctx.lineTo(W, H);
-          ctx.lineTo(0, H);
-          ctx.closePath();
-          ctx.fillStyle = '#f0f0ef';
-          ctx.fill();
-
-          // 3. Draw photo clipped to the dark area
-          if (bgLoaded) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(W, 0);
-            ctx.lineTo(W, rightY);
-            ctx.lineTo(0, leftY);
-            ctx.closePath();
-            ctx.clip();
-            const iw = bgImg.naturalWidth, ih = bgImg.naturalHeight;
-            const scale = Math.max(W / iw, Math.max(leftY, rightY) / ih);
-            const dw = iw * scale, dh = ih * scale;
-            const dx = (W - dw) / 2, dy = -dh * 0.05;
-            ctx.globalAlpha = 0.22;
-            ctx.drawImage(bgImg, dx, dy, dw, dh);
-            ctx.globalAlpha = 1;
-            ctx.restore();
-          }
-
-          // 4. Edge line
-          ctx.beginPath();
-          ctx.moveTo(0, leftY);
-          ctx.lineTo(W, rightY);
-          ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        }
-
-        function drawSquare(s) {
-          const above = isAboveTriangle(s.x, s.y);
-          ctx.save();
-          ctx.translate(s.x, s.y);
-          ctx.rotate(s.rot);
-          ctx.globalAlpha = s.alpha;
-          if (above) {
-            ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-            ctx.fillStyle = 'rgba(46,46,42,0.30)';
-          } else {
-            ctx.strokeStyle = 'rgba(17,17,16,0.22)';
-            ctx.fillStyle = 'rgba(46,46,42,0.08)';
-          }
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.rect(-s.size / 2, -s.size / 2, s.size, s.size);
-          ctx.fill();
-          ctx.stroke();
-          ctx.restore();
-        }
-
-        function step() {
-          ctx.clearRect(0, 0, W, H);
-          drawBg();
-          squares.forEach(s => {
-            s.x += s.dx; s.y += s.dy; s.rot += s.rotSpeed;
-            if (s.y + s.size < 0) { s.y = H + s.size; s.x = Math.random() * W; }
-            if (s.x - s.size > W) s.x = -s.size;
-            if (s.x + s.size < 0) s.x = W + s.size;
-            drawSquare(s);
-          });
-          animId = requestAnimationFrame(step);
-        }
-
-        init();
-        step();
-        window.addEventListener('resize', () => { resize(); });
-
-        const loginEl = document.getElementById('screen-login');
-        if (loginEl) {
-          const obs = new MutationObserver(() => {
-            if (loginEl.style.display === 'none') cancelAnimationFrame(animId);
-          });
-          obs.observe(loginEl, { attributes: true, attributeFilter: ['style'] });
-        }
-      })();
-    </script>
-    <div
-      style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px;position:relative;z-index:2;">
-      <img src="https://i.imgur.com/orva0oM.png" alt="Trainly"
-        style="height:160px;width:auto;max-width:100%;object-fit:contain;margin-bottom:44px;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.5));" />
-      <div class="login-card" style="width:100%;">
-        <div
-          style="position:absolute;inset:0;z-index:2;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.13) 0%,transparent 55%);pointer-events:none;">
-        </div>
+      <div class="login-card">
         <form onsubmit="handleLogin(event)">
           <div class="form-group">
-            <label>Código de acesso</label>
-            <input id="login-code" class="form-control" type="text" placeholder="Ex: AB3X7K" maxlength="6"
-              autocomplete="off"
-              style="text-transform:uppercase;letter-spacing:.18em;font-size:1.2rem;text-align:center;font-weight:700;color:#ffffff;" />
+            <label for="login-code">Código de acesso</label>
+            <input id="login-code" class="form-control lg-code" type="text" placeholder="Ex: AB3X7K" maxlength="6"
+              autocomplete="off" />
           </div>
-          <div id="login-error"
-            style="color:var(--red);font-size:.8rem;font-weight:600;min-height:20px;margin-bottom:12px;"></div>
-          <button type="submit" id="btn-login" class="btn-primary" style="width:100%;padding:13px;">Acessar ficha
-            →</button>
+          <div id="login-error"></div>
+          <button type="submit" id="btn-login" class="btn-primary">Acessar ficha →</button>
         </form>
       </div>
+
+      <a class="lg-back" href="https://trainly.online?choose=1"
+        onclick="try{localStorage.removeItem('trainly_role')}catch(e){}">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7" />
+        </svg>
+        Trocar perfil
+      </a>
     </div>
   </div>
 
@@ -7026,9 +6950,6 @@ svg[fill="none"][stroke] { stroke-linecap: round; stroke-linejoin: round; }
 .empty-state .ei svg { stroke-width: 1.2; }
 .toast { background: var(--surface2); border: 1px solid var(--border2); border-radius: 14px; box-shadow: var(--shadow-md); }
 
-/* ── Tela de login: só o botão acompanha a nova cor ── */
-#screen-login .btn-primary { background: var(--accent); color: var(--on-accent); border: 0; }
-
 /* ── Ícones do topo (configurações e perfil) ── */
 .top-icon-btn {
   width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; padding: 0;
@@ -7116,11 +7037,6 @@ html[data-theme="light"] {
 html[data-theme="light"], html[data-theme="light"] body { background: #f7f7f5; }
 html[data-theme="light"] body { background-image: none; }
 html[data-theme="light"] ::selection { background: rgba(61, 187, 134, .4); color: #111110; }
-/* A tela de login mantém o visual escuro */
-html[data-theme="light"] #screen-login {
-  --surface: #141b23; --surface2: #1a232d; --surface3: #222d39; --border: rgba(170, 190, 210, .09); --border2: rgba(170, 190, 210, .18);
-  --text: #f5f8fb; --text2: #aab6c2; --text3: #8793a0; --accent: #3dbb86; --on-accent: #03150b; color-scheme: dark;
-}
 /* Topbar preta, como no app do treinador */
 html[data-theme="light"] .topbar { background: #000; border-bottom: 1px solid #2e2e2a; box-shadow: 0 2px 16px rgba(0, 0, 0, .3); }
 html[data-theme="light"] .topbar .top-icon-btn, html[data-theme="light"] .topbar .logout-btn { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .14); color: #e6e6e0; }
