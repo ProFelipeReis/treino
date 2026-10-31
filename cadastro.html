@@ -7,6 +7,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <title>Criar conta — Trainly</title>
+  <meta name="theme-color" content="#09111a" />
+  <script>try{var _t=localStorage.getItem("trainly-theme");if(_t==="light"||_t==="dark")document.documentElement.setAttribute("data-theme",_t);}catch(e){}</script>
   <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OKl5PjJ.png" />
   <link rel="icon" type="image/png" href="https://i.imgur.com/OKl5PjJ.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -18,31 +20,32 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
   <style>
     :root {
-      --bg: #f7f7f5;
-      --bg2: #ffffff;
-      --surface: #ffffff;
-      --surface2: #f0f0ed;
-      --surface3: #e8e8e4;
-      --border: #e4e4e0;
-      --border2: #d0d0cb;
-      --accent: #f5c800;
-      --accent2: #e0b400;
-      --accent-dim: rgba(245, 200, 0, .10);
-      --accent-soft: rgba(245, 200, 0, .25);
-      --red: #e03e3e;
-      --red-dim: rgba(224, 62, 62, .08);
-      --green: #2e7d52;
-      --green-dim: rgba(46, 125, 82, .08);
-      --green-soft: rgba(46, 125, 82, .15);
-      --text: #111110;
-      --text2: #555550;
-      --text3: #999990;
-      --head: 'Nunito', sans-serif;
-      --body: 'Plus Jakarta Sans', sans-serif;
-      --r: 12px;
-      --r2: 16px;
-      --shadow: 0 2px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
-      --shadow-md: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.07);
+      --bg: #0d1218; --bg2: #111820;
+      --surface: #141b23; --surface2: #1a232d; --surface3: #222d39;
+      --field: #0b1219;
+      --border: rgba(170, 190, 210, .09); --border2: rgba(170, 190, 210, .18);
+      --accent: #3dbb86; --accent2: #34a876;
+      --accent-dim: rgba(61, 187, 134, .12); --accent-soft: rgba(61, 187, 134, .30);
+      --accent-ink: #3dbb86; --on-accent: #03150b;
+      --red: #e5707a; --red-dim: rgba(229, 112, 122, .14);
+      --green: #4cc38a; --green-dim: rgba(76, 195, 138, .13); --green-soft: rgba(76, 195, 138, .24);
+      --text: #f5f8fb; --text2: #aab6c2; --text3: #8793a0;
+      --head: 'Plus Jakarta Sans', 'Nunito', sans-serif; --body: 'Plus Jakarta Sans', sans-serif;
+      --r: 12px; --r2: 16px;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .35); --shadow-md: 0 12px 32px rgba(0, 0, 0, .45);
+      color-scheme: dark;
+    }
+    /* Tema claro — mesma paleta do app (claro + verde Trainly) */
+    html[data-theme="light"] {
+      --bg: #f7f7f5; --bg2: #ffffff; --surface: #ffffff; --surface2: #f0f0ed; --surface3: #e8e8e4;
+      --field: #f7f7f5; --border: #e4e4e0; --border2: #d0d0cb;
+      --accent: #3dbb86; --accent2: #34a876; --accent-dim: rgba(61, 187, 134, .12); --accent-soft: rgba(61, 187, 134, .30);
+      --accent-ink: #1f7a54; --on-accent: #03150b;
+      --red: #e03e3e; --red-dim: rgba(224, 62, 62, .08);
+      --green: #2e7d52; --green-dim: rgba(46, 125, 82, .10); --green-soft: rgba(46, 125, 82, .18);
+      --text: #111110; --text2: #555550; --text3: #8a8a82;
+      --shadow: 0 2px 12px rgba(0, 0, 0, .07), 0 1px 3px rgba(0, 0, 0, .05); --shadow-md: 0 8px 32px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .07);
+      color-scheme: light;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,7 +69,7 @@
 
     body {
       font-family: var(--body);
-      background: #111110;
+      background: #09111a;
       color: var(--text);
       min-height: 100%;
       display: flex;
@@ -97,23 +100,24 @@
 
     /* ── Card ── */
     .reg-card {
-      background: #fff;
-      border: 1px solid #e4e4e0;
-      border-radius: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
       width: 100%;
       max-width: 420px;
       overflow: visible;
-      box-shadow: 0 8px 40px rgba(0,0,0,.25);
+      box-shadow: 0 24px 60px rgba(0,0,0,.5);
       position: relative;
       margin: auto 0;
       z-index: 2;
     }
 
     .reg-head {
-      background: #000;
+      background: transparent;
+      border-bottom: 1px solid var(--border);
       padding: 24px 32px 20px;
       text-align: center;
-      border-radius: 24px 24px 0 0;
+      border-radius: 20px 20px 0 0;
     }
 
     .reg-head img {
@@ -124,7 +128,7 @@
     }
 
     .reg-head h2 {
-      color: #fff;
+      color: var(--text);
       font-family: var(--head);
       font-size: 1.1rem;
       font-weight: 800;
@@ -132,7 +136,7 @@
     }
 
     .reg-head p {
-      color: rgba(255,255,255,.55);
+      color: var(--text3);
       font-size: .8rem;
     }
 
@@ -173,19 +177,19 @@
     .form-control {
       width: 100%;
       padding: 11px 14px;
-      border: 1.5px solid var(--border);
+      border: 1.5px solid var(--border2);
       border-radius: var(--r);
       font-size: .88rem;
       transition: all .15s;
-      background: var(--bg);
+      background: var(--field);
       color: var(--text);
     }
 
     .form-control:focus {
       outline: none;
       border-color: var(--accent);
-      background: var(--surface);
-      box-shadow: 0 0 0 3px rgba(245,200,0,.15);
+      background: var(--field);
+      box-shadow: 0 0 0 3px rgba(61,187,134,.15);
     }
 
     .form-control option { background: var(--surface); }
@@ -206,26 +210,23 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #3d3830 0%, #28231a 50%, #1a1610 100%);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      background: var(--accent);
+      color: var(--on-accent);
       font-weight: 800;
-      letter-spacing: .02em;
-      border: 1px solid rgba(245,200,0,.18);
+      border: 0;
+      border-radius: 12px;
+      box-shadow: none;
     }
 
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      background: linear-gradient(135deg, #4d4838 0%, #332d20 50%, #221d14 100%);
-      box-shadow: 0 4px 14px rgba(0,0,0,.22);
-    }
-
-    .btn-primary:active { transform: translateY(0); box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+    .btn-primary:hover { background: #48c793; }
+    .btn-primary:active { transform: scale(.97); }
+    html[data-theme="light"] .btn-primary:hover { background: #34a876; }
 
     .btn-ghost {
       background: var(--surface2);
       color: var(--text2);
-      border: 1.5px solid var(--border);
+      border: 1.5px solid var(--border2);
+      border-radius: 12px;
     }
 
     .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--surface3); }
@@ -248,9 +249,9 @@
     .inv-check {
       width: 80px; height: 80px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #2e7d52, #1a5c38);
+      background: linear-gradient(135deg, #3dbb86, #2c9068);
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 32px rgba(46,125,82,.35);
+      box-shadow: 0 8px 32px rgba(61,187,134,.35);
       animation: popIn .4s cubic-bezier(.22,1,.36,1) .1s both;
       margin: 0 auto 16px;
     }
@@ -282,7 +283,7 @@
     }
 
     .sub-plan {
-      border: 2px solid #e4e4e0;
+      border: 2px solid var(--border);
       border-radius: 16px;
       padding: 18px 16px;
       cursor: pointer;
@@ -291,15 +292,15 @@
       text-align: center;
     }
 
-    .sub-plan:hover  { border-color: var(--accent); background: rgba(245,200,0,.04); }
-    .sub-plan.selected { border-color: var(--accent); background: rgba(245,200,0,.08); }
+    .sub-plan:hover  { border-color: var(--accent); background: rgba(61,187,134,.06); }
+    .sub-plan.selected { border-color: var(--accent); background: rgba(61,187,134,.12); }
 
     .sub-plan-badge {
       position: absolute;
       top: -10px; left: 50%;
       transform: translateX(-50%);
       background: var(--accent);
-      color: #111110;
+      color: var(--on-accent);
       border-radius: 99px;
       padding: 2px 10px;
       font-size: .65rem;
@@ -310,7 +311,7 @@
     }
 
     .sub-plan-label { font-size: .72rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
-    .sub-plan-price { font-family: var(--head); font-size: 1.6rem; font-weight: 800; color: #111110; line-height: 1; }
+    .sub-plan-price { font-family: var(--head); font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1; }
     .sub-plan-period { font-size: .72rem; color: var(--text3); margin-top: 4px; }
     .sub-plan-saving { font-size: .7rem; color: var(--green); font-weight: 700; margin-top: 4px; }
 
@@ -320,8 +321,8 @@
       position: fixed;
       inset: 0;
       z-index: 7000;
-      background: rgba(0,0,0,.5);
-      backdrop-filter: blur(4px);
+      background: rgba(3,8,13,.74);
+      backdrop-filter: blur(8px);
       align-items: center;
       justify-content: center;
       padding: 16px;
@@ -330,15 +331,17 @@
     #modal-terms.on { display: flex; }
 
     .terms-card {
-      background: #fff;
+      background: var(--surface);
+      border: 1px solid var(--border2);
       border-radius: 20px;
       width: 100%;
       max-width: 580px;
       max-height: 85vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 16px 48px rgba(0,0,0,.2);
+      box-shadow: 0 24px 60px rgba(0,0,0,.5);
     }
+    .terms-header button { color: var(--text); }
 
     .terms-header {
       display: flex;
@@ -374,34 +377,35 @@
 
     /* ── Invite card ── */
     .inv-card {
-      background: #fff;
-      border: 1px solid #e4e4e0;
-      border-radius: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
       width: 100%;
       max-width: 400px;
       overflow: hidden;
-      box-shadow: 0 8px 40px rgba(0,0,0,.25);
+      box-shadow: 0 24px 60px rgba(0,0,0,.5);
       position: relative;
       min-height: 280px;
       z-index: 2;
     }
 
     .inv-head {
-      background: #000;
+      background: transparent;
+      border-bottom: 1px solid var(--border);
       padding: 28px 32px 24px;
       text-align: center;
     }
 
     .inv-head img { height: 32px; width: auto; object-fit: contain; margin-bottom: 16px; }
-    .inv-head h2 { color: #fff; font-family: var(--head); font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; }
-    .inv-head p  { color: rgba(255,255,255,.6); font-size: .82rem; }
+    .inv-head h2 { color: var(--text); font-family: var(--head); font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; }
+    .inv-head p  { color: var(--text3); font-size: .82rem; }
 
     .inv-body { padding: 28px 32px; }
     .inv-foot { padding: 0 32px 24px; text-align: center; font-size: .74rem; color: var(--text3); }
 
     .inv-success {
       position: absolute; inset: 0;
-      background: #fff; border-radius: 24px;
+      background: var(--surface); border-radius: 20px;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       gap: 14px;
@@ -415,12 +419,37 @@
 
     #page-loading {
       position: fixed; inset: 0;
-      background: #111110;
+      background: #09111a;
       display: flex; align-items: center; justify-content: center;
       z-index: 9999;
       transition: opacity .3s;
     }
     #page-loading.hidden { opacity: 0; pointer-events: none; }
+
+    html[data-theme="light"] .reg-head, html[data-theme="light"] .inv-head { background: #000; border-bottom-color: #000; }
+    html[data-theme="light"] .reg-head h2, html[data-theme="light"] .inv-head h2 { color: #fff; }
+    html[data-theme="light"] .reg-head p, html[data-theme="light"] .inv-head p { color: rgba(255,255,255,.6); }
+    html[data-theme="light"] #modal-terms { background: rgba(0,0,0,.4); }
+    ::selection { background: var(--accent-soft); color: var(--text); }
+
+    /* ── Foto de perfil (opcional) ── */
+    .cad-photo-center { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 6px 0 20px; }
+    .cad-photo-preview {
+      width: 120px; height: 120px; border-radius: 50%; padding: 0; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface2); border: 2px dashed var(--border2); color: var(--text3);
+      transition: border-color .15s ease, transform .12s ease;
+    }
+    .cad-photo-preview:hover { border-color: var(--accent); color: var(--accent); }
+    .cad-photo-preview:active { transform: scale(.97); }
+    .cad-photo-preview.has-photo { border-style: solid; border-color: var(--accent); }
+    .cad-photo-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cad-photo-preview svg { width: 38px; height: 38px; }
+    .cad-photo-rm { background: none; color: var(--red); font-size: .8rem; font-weight: 700; padding: 2px 6px; }
+    .cad-hide { display: none !important; }
+    .cad-photo-inline { display: flex; align-items: center; gap: 14px; }
+    .cad-photo-inline .cad-photo-preview { width: 64px; height: 64px; flex-shrink: 0; }
+    .cad-photo-inline .cad-photo-preview svg { width: 24px; height: 24px; }
 
   </style>
 </head>
@@ -495,17 +524,25 @@
 
       function isAbove(px, py){ return py < getDividerY(px); }
 
+      function pal(){
+        const light = document.documentElement.getAttribute('data-theme') === 'light';
+        return light
+          ? { top:'#09111a', bottom:'#f7f7f5', line:'rgba(61,187,134,0.45)', sqAbS:'rgba(61,187,134,0.30)', sqAbF:'rgba(61,187,134,0.10)', sqBeS:'rgba(31,122,84,0.28)', sqBeF:'rgba(61,187,134,0.08)' }
+          : { top:'#09111a', bottom:'#141b23', line:'rgba(61,187,134,0.30)', sqAbS:'rgba(61,187,134,0.28)', sqAbF:'rgba(61,187,134,0.10)', sqBeS:'rgba(61,187,134,0.20)', sqBeF:'rgba(61,187,134,0.06)' };
+      }
+
       function drawBg(){
+        const P = pal();
         const leftY = getDividerY(0), rightY = getDividerY(W);
         ctx.beginPath();
         ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,rightY); ctx.lineTo(0,leftY);
         ctx.closePath();
-        ctx.fillStyle = '#111110'; ctx.fill();
+        ctx.fillStyle = P.top; ctx.fill();
 
         ctx.beginPath();
         ctx.moveTo(0,leftY); ctx.lineTo(W,rightY); ctx.lineTo(W,H); ctx.lineTo(0,H);
         ctx.closePath();
-        ctx.fillStyle = '#f0f0ef'; ctx.fill();
+        ctx.fillStyle = P.bottom; ctx.fill();
 
         if(bgLoaded){
           ctx.save();
@@ -523,14 +560,15 @@
 
         ctx.beginPath();
         ctx.moveTo(0,leftY); ctx.lineTo(W,rightY);
-        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.strokeStyle = P.line; ctx.lineWidth = 1.5; ctx.stroke();
       }
 
       function drawSquare(s){
         const above = isAbove(s.x, s.y);
+        const P = pal();
         ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot); ctx.globalAlpha = s.alpha;
-        ctx.strokeStyle = above ? 'rgba(255,255,255,0.18)' : 'rgba(17,17,16,0.22)';
-        ctx.fillStyle   = above ? 'rgba(46,46,42,0.30)'   : 'rgba(46,46,42,0.08)';
+        ctx.strokeStyle = above ? P.sqAbS : P.sqBeS;
+        ctx.fillStyle   = above ? P.sqAbF : P.sqBeF;
         ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.rect(-s.size/2, -s.size/2, s.size, s.size);
         ctx.fill(); ctx.stroke(); ctx.restore();
@@ -571,9 +609,9 @@
       <div class="reg-step-indicator">
         <div class="reg-step-dot active" id="reg-dot-1"></div>
         <div style="flex:1;height:2px;background:var(--border);border-radius:2px;" id="reg-line-1-2"></div>
-        <div class="reg-step-dot" id="reg-dot-1b"></div>
-        <div style="flex:1;height:2px;background:var(--border);border-radius:2px;" id="reg-line-1b-2"></div>
         <div class="reg-step-dot" id="reg-dot-2"></div>
+        <div style="flex:1;height:2px;background:var(--border);border-radius:2px;" id="reg-line-2-photo"></div>
+        <div class="reg-step-dot" id="reg-dot-photo"></div>
         <div style="flex:1;height:2px;background:var(--border);border-radius:2px;" id="reg-line-2-3"></div>
         <div class="reg-step-dot" id="reg-dot-3"></div>
       </div>
@@ -582,10 +620,10 @@
 
       <!-- STEP 1 — Dados pessoais -->
       <div id="reg-step1">
-        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 1 de 2 — Dados pessoais</div>
+        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 1 de 3 — Dados pessoais</div>
 
         <!-- Banner de indicação — só aparece quando vem via ?ref= -->
-        <div id="reg-referral-banner" style="display:none;background:var(--green-dim);border:1px solid rgba(46,125,82,.2);border-radius:var(--r);padding:11px 14px;margin-bottom:16px;font-size:.8rem;color:var(--green);font-weight:600;line-height:1.5;">
+        <div id="reg-referral-banner" style="display:none;background:var(--green-dim);border:1px solid var(--green-soft);border-radius:var(--r);padding:11px 14px;margin-bottom:16px;font-size:.8rem;color:var(--green);font-weight:600;line-height:1.5;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
             <polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/>
             <line x1="12" y1="22" x2="12" y2="7"/>
@@ -626,9 +664,9 @@
           <input type="checkbox" id="reg-terms" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
           <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">
             Li e concordo com os
-            <a href="#" onclick="openTermsModal('uso');return false;" style="color:#111110;font-weight:700;text-decoration:underline;">Termos de Uso</a>
+            <a href="#" onclick="openTermsModal('uso');return false;" style="color:var(--text);font-weight:700;text-decoration:underline;">Termos de Uso</a>
             e a
-            <a href="#" onclick="openTermsModal('privacidade');return false;" style="color:#111110;font-weight:700;text-decoration:underline;">Política de Privacidade</a>.
+            <a href="#" onclick="openTermsModal('privacidade');return false;" style="color:var(--text);font-weight:700;text-decoration:underline;">Política de Privacidade</a>.
           </span>
         </label>
 
@@ -639,38 +677,9 @@
         </div>
       </div>
 
-      <!-- STEP 1b — Escolha de profissão -->
-      <div id="reg-step1b" style="display:none;">
-        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;">Etapa 2 de 4 — Área de atuação</div>
-        <div style="font-family:var(--head);font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px;">Você é qual profissional?</div>
-        <div style="font-size:.83rem;color:var(--text2);margin-bottom:22px;line-height:1.5;">Selecione sua área para que possamos validar seu registro profissional corretamente.</div>
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
-          <div id="reg-prof-personal" onclick="selectProfType('personal')" style="display:flex;align-items:center;gap:14px;padding:16px;border:2px solid var(--border);border-radius:var(--r2);cursor:pointer;transition:all .2s;background:var(--surface);">
-            <div style="width:44px;height:44px;border-radius:12px;background:var(--accent-dim);border:1.5px solid var(--accent-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;">🏋️</div>
-            <div>
-              <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:var(--text);">Personal Trainer</div>
-              <div style="font-size:.78rem;color:var(--text2);margin-top:2px;font-weight:500;">Profissional de Educação Física · CREF</div>
-            </div>
-            <div style="margin-left:auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;" id="reg-prof-personal-check"></div>
-          </div>
-          <div id="reg-prof-nutri" onclick="selectProfType('nutri')" style="display:flex;align-items:center;gap:14px;padding:16px;border:2px solid var(--border);border-radius:var(--r2);cursor:pointer;transition:all .2s;background:var(--surface);">
-            <div style="width:44px;height:44px;border-radius:12px;background:rgba(46,125,82,.08);border:1.5px solid rgba(46,125,82,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;">🥗</div>
-            <div>
-              <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:var(--text);">Nutricionista</div>
-              <div style="font-size:.78rem;color:var(--text2);margin-top:2px;font-weight:500;">Profissional de Nutrição · CRN</div>
-            </div>
-            <div style="margin-left:auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;" id="reg-prof-nutri-check"></div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;margin-top:4px;">
-          <button class="btn btn-ghost" onclick="regStepBack(1)" style="flex:0 0 auto;">← Voltar</button>
-          <button class="btn btn-primary" onclick="regStep1bNext()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Continuar →</button>
-        </div>
-      </div>
-
       <!-- STEP 2 — CREF (Personal) -->
       <div id="reg-step2" style="display:none;">
-        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 3 de 4 — Dados profissionais</div>
+        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 2 de 3 — Dados profissionais</div>
         <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px;"><span>🏋️</span> Registro no CREF</div>
         <div style="font-size:.8rem;color:var(--text2);margin-bottom:16px;">Informe seu número de registro como Profissional de Educação Física.</div>
         <div class="form-group">
@@ -682,27 +691,27 @@
           <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">Declaro que sou profissional de educação física com registro ativo no CREF, sendo responsável pelas orientações fornecidas.</span>
         </label>
         <div style="display:flex;gap:10px;margin-top:16px;">
-          <button class="btn btn-ghost" onclick="regStepBack('1b')" style="flex:0 0 auto;">← Voltar</button>
-          <button class="btn btn-primary" onclick="regStep2Next()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Criar conta →</button>
+          <button class="btn btn-ghost" onclick="regStepBack(1)" style="flex:0 0 auto;">← Voltar</button>
+          <button class="btn btn-primary" onclick="regStep2Next()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Continuar →</button>
         </div>
       </div>
 
-      <!-- STEP 2b — CRN (Nutricionista) -->
-      <div id="reg-step2b" style="display:none;">
-        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 3 de 4 — Dados profissionais</div>
-        <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px;"><span>🥗</span> Registro no CRN</div>
-        <div style="font-size:.8rem;color:var(--text2);margin-bottom:16px;">Informe seu número de registro como Nutricionista.</div>
-        <div class="form-group">
-          <label>Número de registro CRN</label>
-          <input id="reg-crn" class="form-control" type="text" placeholder="Ex: 12345/SP" />
+      <!-- STEP — Foto de perfil (opcional) -->
+      <div id="reg-step-photo" style="display:none;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Etapa 3 de 3 — Foto de perfil</div>
+        <div style="font-family:var(--head);font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:4px;">Adicione sua foto <span style="font-weight:600;color:var(--text3);font-size:.8rem;">(opcional)</span></div>
+        <div style="font-size:.8rem;color:var(--text2);margin-bottom:16px;line-height:1.5;">Ela aparece no seu perfil e você pode trocar ou remover depois, quando quiser.</div>
+        <div class="cad-photo-center">
+          <button type="button" class="cad-photo-preview" id="reg-photo-preview" onclick="cadPickPhoto('reg')" aria-label="Escolher foto de perfil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+          <button type="button" class="btn btn-ghost" onclick="cadPickPhoto('reg')"><span id="reg-photo-btn-txt">Escolher foto</span></button>
+          <button type="button" class="cad-photo-rm cad-hide" id="reg-photo-rm" onclick="cadRemovePhoto('reg')">Remover foto</button>
+          <input type="file" id="reg-photo-input" accept="image/*" class="cad-hide" onchange="cadPhotoChosen('reg',this)" />
         </div>
-        <label style="display:flex;align-items:flex-start;gap:10px;margin-top:14px;margin-bottom:4px;cursor:pointer;user-select:none;">
-          <input type="checkbox" id="reg-crn-decl" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
-          <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">Declaro que sou nutricionista com registro ativo no CRN, sendo responsável pelas orientações nutricionais fornecidas.</span>
-        </label>
         <div style="display:flex;gap:10px;margin-top:16px;">
-          <button class="btn btn-ghost" onclick="regStepBack('1b')" style="flex:0 0 auto;">← Voltar</button>
-          <button class="btn btn-primary" onclick="regStep2bNext()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Criar conta →</button>
+          <button class="btn btn-ghost" onclick="regPhotoBack()" style="flex:0 0 auto;">← Voltar</button>
+          <button class="btn btn-primary" id="reg-photo-create" onclick="regPhotoCreate()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Pular e criar conta →</button>
         </div>
       </div>
 
@@ -844,7 +853,7 @@
     var _regPricing = { monthly: 0, discount: 0 };
     var _regNewId = null;
     window._pendingRefCode = '';
-    window._selectedProfType = null;
+    window._selectedProfType = 'personal';
 
     // ── Detect ?ref= or ?invite= ───────────────────────────
     (function detectParams() {
@@ -958,24 +967,24 @@
 
     // ── Step indicator ─────────────────────────────────────
     function regShowStep(n) {
-      var allSteps = ['reg-step1','reg-step1b','reg-step2','reg-step2b','reg-step3'];
+      var allSteps = ['reg-step1','reg-step2','reg-step-photo','reg-step3'];
       allSteps.forEach(function(id) {
         var s = document.getElementById(id);
         if (s) s.style.display = 'none';
       });
-      var target = n === '1b' ? 'reg-step1b' : n === '2b' ? 'reg-step2b' : 'reg-step' + n;
+      var target = n === 'photo' ? 'reg-step-photo' : 'reg-step' + n;
       var targetEl = document.getElementById(target);
       if (targetEl) targetEl.style.display = 'block';
 
       // Update dots
-      var dots = ['reg-dot-1','reg-dot-1b','reg-dot-2','reg-dot-3'];
-      var lines = ['reg-line-1-2','reg-line-1b-2','reg-line-2-3'];
+      var dots = ['reg-dot-1','reg-dot-2','reg-dot-photo','reg-dot-3'];
+      var lines = ['reg-line-1-2','reg-line-2-photo','reg-line-2-3'];
       dots.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) { el.classList.remove('active','done'); }
       });
 
-      var stepOrder = { '1':0, '1b':1, '2':2, '2b':2, '3':3 };
+      var stepOrder = { '1':0, '2':1, 'photo':2, '3':3 };
       var nKey = String(n);
       var currentIdx = stepOrder[nKey] !== undefined ? stepOrder[nKey] : 0;
       dots.forEach(function(id, i) {
@@ -1053,7 +1062,7 @@
         }
       }
 
-      regShowStep('1b');
+      regShowStep(2);
     };
 
     // ── STEP BACK ─────────────────────────────────────────
@@ -1062,58 +1071,76 @@
       regShowStep(to);
     };
 
-    // ── STEP 1b ────────────────────────────────────────────
-    window.selectProfType = function(type) {
-      window._selectedProfType = type;
-      var personal = document.getElementById('reg-prof-personal');
-      var nutri    = document.getElementById('reg-prof-nutri');
-      var pCheck   = document.getElementById('reg-prof-personal-check');
-      var nCheck   = document.getElementById('reg-prof-nutri-check');
-      if (type === 'personal') {
-        personal.style.border = '2px solid var(--accent)';
-        personal.style.background = 'var(--accent-dim)';
-        nutri.style.border = '2px solid var(--border)';
-        nutri.style.background = 'var(--surface)';
-        pCheck.style.background = 'var(--accent)';
-        pCheck.style.border = '2px solid var(--accent)';
-        nCheck.style.background = '';
-        nCheck.style.border = '2px solid var(--border2)';
-      } else {
-        nutri.style.border = '2px solid var(--green)';
-        nutri.style.background = 'rgba(46,125,82,.06)';
-        personal.style.border = '2px solid var(--border)';
-        personal.style.background = 'var(--surface)';
-        nCheck.style.background = 'var(--green)';
-        nCheck.style.border = '2px solid var(--green)';
-        pCheck.style.background = '';
-        pCheck.style.border = '2px solid var(--border2)';
-      }
-    };
-
-    window.regStep1bNext = function() {
-      var errEl = document.getElementById('reg-error');
-      if (!window._selectedProfType) { errEl.textContent = 'Selecione seu tipo de profissional para continuar.'; return; }
-      errEl.textContent = '';
-      if (window._selectedProfType === 'personal') regShowStep(2);
-      else regShowStep('2b');
-    };
-
     // ── STEP 3 back ────────────────────────────────────────
     window.regStep3Back = function() {
       document.getElementById('reg-error').textContent = '';
-      if (window._selectedProfType === 'nutri') regShowStep('2b');
-      else regShowStep(2);
+      regShowStep('photo');
+    };
+
+    // ── Foto de perfil (opcional) ───────────────────────────
+    window._cadPhotos = { reg: '', inv: '' };
+    function cadErrEl(k) { return document.getElementById(k === 'inv' ? 'inv-error' : 'reg-error'); }
+    function cadRenderPhoto(k) {
+      var ph = window._cadPhotos[k], prev = document.getElementById(k + '-photo-preview');
+      if (prev) {
+        prev.classList.toggle('has-photo', !!ph);
+        if (ph) prev.innerHTML = '<img src="' + ph + '" alt="Foto de perfil">';
+        else prev.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+      }
+      var rm = document.getElementById(k + '-photo-rm'); if (rm) rm.classList.toggle('cad-hide', !ph);
+      var tx = document.getElementById(k + '-photo-btn-txt'); if (tx) tx.textContent = ph ? 'Trocar foto' : 'Escolher foto';
+      var cb = document.getElementById('reg-photo-create');
+      if (k === 'reg' && cb) cb.textContent = ph ? 'Criar conta →' : 'Pular e criar conta →';
+    }
+    // PC: abre o explorador de arquivos. Celular: o navegador oferece Câmera ou Galeria.
+    window.cadPickPhoto = function(k) { var i = document.getElementById(k + '-photo-input'); if (i) { i.value = ''; i.click(); } };
+    window.cadRemovePhoto = function(k) { window._cadPhotos[k] = ''; cadRenderPhoto(k); };
+    window.cadPhotoChosen = function(k, input) {
+      var file = input.files && input.files[0]; if (!file) return;
+      var err = cadErrEl(k); err.textContent = '';
+      if (!/^image\//.test(file.type)) { err.textContent = 'Escolha um arquivo de imagem.'; return; }
+      var reader = new FileReader();
+      reader.onerror = function() { err.textContent = 'Não foi possível ler a imagem.'; };
+      reader.onload = function() {
+        var img = new Image();
+        img.onerror = function() { err.textContent = 'Imagem inválida ou formato não suportado.'; };
+        img.onload = function() {
+          var S = 320, w = img.width, h = img.height, side = Math.min(w, h);
+          var c = document.createElement('canvas'); c.width = S; c.height = S;
+          var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, S, S);
+          ctx.drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, S, S);
+          window._cadPhotos[k] = c.toDataURL('image/jpeg', 0.82); cadRenderPhoto(k);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // CREF → foto (opcional) → criar conta
+    window.regStep2Next = function() {
+      var errEl = document.getElementById('reg-error'); errEl.textContent = '';
+      var cref = (document.getElementById('reg-cref').value || '').trim();
+      if (!cref) { errEl.textContent = 'Informe seu número de registro no CREF.'; return; }
+      if (!document.getElementById('reg-cref-decl').checked) { errEl.textContent = 'Você precisa marcar a declaração profissional.'; return; }
+      regShowStep('photo');
+    };
+    window.regPhotoBack = function() {
+      document.getElementById('reg-error').textContent = '';
+      regShowStep(2);
+    };
+    window.regPhotoCreate = function() {
+      return window.regDoCreatePersonal();
     };
 
     // ── STEP 2 — Personal (CREF) ────────────────────────────
-    window.regStep2Next = async function() {
+    window.regDoCreatePersonal = async function() {
       var errEl = document.getElementById('reg-error');
       errEl.textContent = '';
       var cref = (document.getElementById('reg-cref').value || '').trim();
       if (!cref) { errEl.textContent = 'Informe seu número de registro no CREF.'; return; }
       if (!document.getElementById('reg-cref-decl').checked) { errEl.textContent = 'Você precisa marcar a declaração profissional.'; return; }
 
-      ['reg-step1','reg-step1b','reg-step2','reg-step2b','reg-step3'].forEach(function(id) {
+      ['reg-step1','reg-step2','reg-step-photo','reg-step3'].forEach(function(id) {
         var el = document.getElementById(id); if (el) el.style.display = 'none';
       });
       document.getElementById('reg-processing').style.display = 'block';
@@ -1123,7 +1150,7 @@
       function showErr(msg) {
         document.getElementById('reg-processing').style.display = 'none';
         errEl.textContent = msg;
-        regShowStep(2);
+        regShowStep('photo');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
@@ -1165,6 +1192,7 @@
           await _db.collection('managers').doc(_regNewId).set({
             username: user, passwordHash: hash, name: name, cref: cref, crefDeclared: true,
             profType: 'personal',
+            photoURL: (window._cadPhotos && window._cadPhotos.reg) || '',
             email: email || authEmail,
             authUid: uid,
             role: 'comum', isMaster: false,
@@ -1193,93 +1221,6 @@
       } catch(e) { showErr('Erro: ' + e.message); }
     };
 
-    // ── STEP 2b — Nutricionista (CRN) ──────────────────────
-    window.regStep2bNext = async function() {
-      var errEl = document.getElementById('reg-error');
-      errEl.textContent = '';
-      var crn = (document.getElementById('reg-crn').value || '').trim();
-      if (!crn) { errEl.textContent = 'Informe seu número de registro no CRN.'; return; }
-      if (!document.getElementById('reg-crn-decl').checked) { errEl.textContent = 'Você precisa marcar a declaração profissional.'; return; }
-
-      ['reg-step1','reg-step1b','reg-step2','reg-step2b','reg-step3'].forEach(function(id) {
-        var el = document.getElementById(id); if (el) el.style.display = 'none';
-      });
-      document.getElementById('reg-processing').style.display = 'block';
-      var _rpt = document.getElementById('reg-processing-title');
-      if (_rpt) _rpt.textContent = 'Criando sua conta...';
-
-      function showErr(msg) {
-        document.getElementById('reg-processing').style.display = 'none';
-        errEl.textContent = msg;
-        regShowStep('2b');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      try {
-        var attempts = 0;
-        while ((!window.firebase || !window.firebase.firestore || !_auth) && attempts < 40) {
-          await new Promise(function(r) { setTimeout(r, 100); }); attempts++;
-        }
-        if (!window.firebase || !window.firebase.firestore || !_auth) { showErr('Erro de conexão. Tente novamente.'); return; }
-
-        var user     = (document.getElementById('reg-user').value || '').trim().toLowerCase();
-        var name     = (document.getElementById('reg-name').value || '').trim();
-        var email    = (document.getElementById('reg-email-step1').value || '').trim().toLowerCase();
-        var password = document.getElementById('reg-pass').value;
-
-        if (!user)     { showErr('Nome de usuário obrigatório.'); return; }
-        if (!password) { showErr('Senha obrigatória.'); return; }
-
-        var existing = await _db.collection('managers').where('username', '==', user).get();
-        if (!existing.empty) { showErr('Este usuário já está em uso. Escolha outro.'); return; }
-
-        var authEmail = _authEmail(user);
-        var uid = null;
-        try {
-          uid = await _ensureAuthAccount(authEmail, password);
-        } catch(authErr) { showErr(_authErrMsg(authErr)); return; }
-
-        var hash = await window._sha256(password);
-        _regNewId = 'mgr_' + Date.now();
-
-        var refCode = window._pendingRefCode
-          || (document.getElementById('reg-ref-code') ? document.getElementById('reg-ref-code').value.trim() : '')
-          || '';
-        var isDebugMode = refCode.toUpperCase() === 'DEBUGMODE';
-        var trialDays = isDebugMode ? 60 : (refCode ? 14 : 7);
-        var trialEndsAt = Date.now() + trialDays * 24 * 60 * 60 * 1000;
-
-        try {
-          await _db.collection('managers').doc(_regNewId).set({
-            username: user, passwordHash: hash, name: name, crn: crn, crnDeclared: true,
-            profType: 'nutri',
-            email: email || authEmail,
-            authUid: uid,
-            role: 'comum', isMaster: false,
-            trialEndsAt: trialEndsAt, subEndsAt: null,
-            blocked: false, createdAt: Date.now(),
-            referredBy: isDebugMode ? '' : refCode
-          });
-        } catch(fsErr) {
-          try { var authUser = _auth.currentUser; if (authUser) await authUser.delete(); } catch(e2) {}
-          showErr('Erro ao salvar conta: ' + fsErr.message); return;
-        }
-
-        if (refCode && !isDebugMode) { try { await _applyReferralBonus(refCode); } catch(e) {} }
-        try { await _auth.signOut(); } catch(e) {}
-
-        document.getElementById('reg-processing').style.display = 'none';
-        document.querySelector('.reg-step-indicator').style.display = 'none';
-        var foot = document.getElementById('reg-foot'); if (foot) foot.style.display = 'none';
-        document.getElementById('reg-success').style.display = 'block';
-        document.getElementById('reg-success-msg').textContent = 'Redirecionando para o login...';
-
-        setTimeout(function() {
-          window.location.replace('https://trainly.online/login');
-        }, 2800);
-
-      } catch(e) { showErr('Erro: ' + e.message); }
-    };
 
     // ── Card number / MP (mantido para step3 se necessário) ──
     window.regCardNumberInput = function(input) {
@@ -1397,9 +1338,9 @@
             <input type="checkbox" id="inv-terms" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
             <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">
               Li e concordo com os
-              <a href="#" onclick="openTermsModal('uso');return false;" style="color:#111110;font-weight:700;text-decoration:underline;">Termos de Uso</a>
+              <a href="#" onclick="openTermsModal('uso');return false;" style="color:var(--text);font-weight:700;text-decoration:underline;">Termos de Uso</a>
               e a
-              <a href="#" onclick="openTermsModal('privacidade');return false;" style="color:#111110;font-weight:700;text-decoration:underline;">Política de Privacidade</a>.
+              <a href="#" onclick="openTermsModal('privacidade');return false;" style="color:var(--text);font-weight:700;text-decoration:underline;">Política de Privacidade</a>.
             </span>
           </label>
           <button class="btn btn-primary" onclick="inviteStep1Next()" style="width:100%;justify-content:center;padding:13px;margin-top:12px;font-size:.95rem;">Continuar →</button>
@@ -1415,6 +1356,19 @@
             <input type="checkbox" id="inv-cref-decl" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
             <span style="font-size:.8rem;color:var(--text2);line-height:1.5;">Declaro que sou profissional de educação física com registro ativo no CREF, sendo responsável pelas orientações fornecidas.</span>
           </label>
+          <div class="form-group" style="margin-top:16px;">
+            <label>Foto de perfil <span style="font-weight:500;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+            <div class="cad-photo-inline">
+              <button type="button" class="cad-photo-preview" id="inv-photo-preview" onclick="cadPickPhoto('inv')" aria-label="Escolher foto de perfil">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </button>
+              <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
+                <button type="button" class="btn btn-ghost" onclick="cadPickPhoto('inv')" style="padding:8px 14px;"><span id="inv-photo-btn-txt">Escolher foto</span></button>
+                <button type="button" class="cad-photo-rm cad-hide" id="inv-photo-rm" onclick="cadRemovePhoto('inv')">Remover foto</button>
+              </div>
+              <input type="file" id="inv-photo-input" accept="image/*" class="cad-hide" onchange="cadPhotoChosen('inv',this)" />
+            </div>
+          </div>
           <div style="display:flex;gap:10px;margin-top:16px;">
             <button class="btn btn-ghost" onclick="inviteStep2Back()" style="flex:0 0 auto;">← Voltar</button>
             <button class="btn btn-primary" id="inv-btn" onclick="inviteRegister()" style="flex:1;justify-content:center;padding:13px;font-size:.95rem;">Criar conta →</button>
@@ -1546,6 +1500,7 @@
           role: 'comum', isMaster: false,
           cref: cref, crefDeclared: true,
           profType: 'personal',
+          photoURL: (window._cadPhotos && window._cadPhotos.inv) || '',
           authUid: uid,
           trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
           blocked: false, createdAt: Date.now(),
