@@ -8673,6 +8673,26 @@
   <!-- Compose-only: propositalmente NÃO carrega o histórico da conversa do aluno
        com o personal responsável — o CEO só pode enviar uma nova mensagem,
        identificada como vinda do CEO, sem ler a conversa privada de outro personal. -->
+  <!-- Pop-up: novidade da foto de perfil (gestores antigos sem foto) -->
+  <div id="modal-photo-prompt" class="modal-overlay hidden tn">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Novidade: foto de perfil</h3>
+        <button class="close-btn" onclick="ppSkip()" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body pp-body">
+        <button type="button" class="pf-av pp-av" id="pp-avatar" onclick="ppPick()" aria-label="Escolher foto de perfil">?</button>
+        <p class="pp-title">Agora você pode ter uma foto no seu perfil!</p>
+        <p class="pp-text">Seus alunos passam a ver a sua foto, e o Trainly fica com a sua cara. Escolha uma foto da galeria ou tire uma agora.</p>
+        <button type="button" class="btn btn-ghost" onclick="ppPick()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span id="pp-pick-txt">Escolher foto</span></button>
+        <input type="file" id="pp-photo-input" accept="image/*" class="hidden" onchange="ppChosen(this)" />
+        <div id="pp-error" class="pp-error"></div>
+        <button type="button" class="btn btn-primary pp-save" id="pp-save" onclick="ppSave()" disabled>Salvar foto</button>
+        <button type="button" class="pp-skip" onclick="ppSkip()">Agora não</button>
+      </div>
+    </div>
+  </div>
+
   <div id="modal-ceo-message" class="modal-overlay hidden tn">
     <div class="modal modal-sm">
       <div class="modal-header">
@@ -9675,6 +9695,8 @@
       }, 5 * 60 * 1000);
       // Verifica notificação pendente de revogação de bônus de indicação
       setTimeout(function () { if (window._checkPendingReferralRevokeNotice) _checkPendingReferralRevokeNotice(); }, 1500);
+      // Pop-up da novidade "foto de perfil" (só gestores antigos sem foto)
+      setTimeout(function () { if (window.checkPhotoPrompt) window.checkPhotoPrompt().catch(function (e) { console.warn('[foto-prompt]', e); }); }, 6000);
       // ── Popup global/individual: tenta após 3s, com retry em 8s se falhar ──
       (function _schedulePopup() {
         var _u = window.CURRENT_USER || {};
@@ -14793,6 +14815,108 @@
       openModal('modal-profile');
       setTimeout(() => document.getElementById('profile-phone').focus(), 100);
     };
+
+    /* ── [PHOTO-PROMPT-MGR] Pop-up "novidade: foto de perfil" ──
+       Aparece uma vez para gestores já existentes que ainda não têm foto.
+       Quem se cadastrou depois da novidade já nasce com photoPromptSeen = true. */
+    var _ppPhoto = '', _ppDocId = null, _ppBusy = false;
+    function _ppKey() { return 'trainly-photo-prompt-' + ((window.CURRENT_USER || {}).username || 'x'); }
+    function _ppRememberLocal() { try { localStorage.setItem(_ppKey(), '1'); } catch (e) { } }
+    function _ppSeenLocal() { try { return !!localStorage.getItem(_ppKey()); } catch (e) { return false; } }
+    function _ppScreenBusy() {
+      var g = document.getElementById('modal-global-popup-display');
+      if (g && g.classList.contains('on')) return true;
+      if ((window._openModalCount || 0) > 0) return true;
+      var ids = ['screen-sub-wall', 'screen-blocked'];
+      for (var i = 0; i < ids.length; i++) {
+        var el = document.getElementById(ids[i]);
+        if (el && getComputedStyle(el).display !== 'none') return true;
+      }
+      return false;
+    }
+    function _ppRender() {
+      _setAvatarEl(document.getElementById('pp-avatar'), _ppPhoto, _mgrInitials());
+      document.getElementById('pp-save').disabled = !_ppPhoto;
+      document.getElementById('pp-pick-txt').textContent = _ppPhoto ? 'Trocar foto' : 'Escolher foto';
+    }
+    function _ppOpen() {
+      _ppPhoto = ''; _ppBusy = false;
+      document.getElementById('pp-error').textContent = '';
+      var b = document.getElementById('pp-save'); b.textContent = 'Salvar foto';
+      _ppRender();
+      window.openModal('modal-photo-prompt');
+    }
+    window.checkPhotoPrompt = async function () {
+      if (window._ppChecked) return; window._ppChecked = true;
+      var u = window.CURRENT_USER || {};
+      if (!u.username || _mgrCurrentPhoto() || _ppSeenLocal()) return;
+      // Confere no banco (a sessão guardada no aparelho pode estar desatualizada)
+      var snap = await _getDocs(_query(_col(_db, 'managers'), _where('username', '==', u.username)));
+      if (snap.empty) return;
+      var d = snap.docs[0].data(); _ppDocId = snap.docs[0].id;
+      if (d.photoURL) {
+        u.photoURL = d.photoURL; u.photoKey = d.photoKey || '';
+        try { localStorage.setItem(LS_GESTOR, JSON.stringify(u)); } catch (e) { }
+        if (window.applyMgrPhoto) window.applyMgrPhoto();
+        _ppRememberLocal(); return;
+      }
+      if (d.photoPromptSeen) { _ppRememberLocal(); return; }
+      // Espera outros avisos/telas fecharem antes de aparecer
+      var tries = 0;
+      (function wait() {
+        if (!_ppScreenBusy()) { _ppOpen(); return; }
+        if (++tries < 40) setTimeout(wait, 3000);
+      })();
+    };
+    window.ppPick = function () { var i = document.getElementById('pp-photo-input'); if (i) { i.value = ''; i.click(); } };
+    window.ppChosen = function (input) {
+      var file = input.files && input.files[0]; if (!file) return;
+      var err = document.getElementById('pp-error'); err.textContent = '';
+      if (!/^image\//.test(file.type)) { err.textContent = 'Escolha um arquivo de imagem.'; return; }
+      var reader = new FileReader();
+      reader.onerror = function () { err.textContent = 'Não foi possível ler a imagem.'; };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { err.textContent = 'Imagem inválida ou formato não suportado.'; };
+        img.onload = function () {
+          var S = 320, w = img.width, h = img.height, side = Math.min(w, h);
+          var c = document.createElement('canvas'); c.width = S; c.height = S;
+          var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, S, S);
+          ctx.drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, S, S);
+          _ppPhoto = c.toDataURL('image/jpeg', 0.82); _ppRender();
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    };
+    window.ppSkip = async function () {
+      window.closeModal('modal-photo-prompt');
+      _ppRememberLocal();
+      try { if (_ppDocId) await _updateDoc(_doc(_db, 'managers', _ppDocId), { photoPromptSeen: true }); } catch (e) { console.warn('photoPromptSeen:', e); }
+    };
+    window.ppSave = async function () {
+      if (_ppBusy || !_ppPhoto || !_ppDocId) return; _ppBusy = true;
+      var btn = document.getElementById('pp-save'), err = document.getElementById('pp-error');
+      btn.disabled = true; btn.textContent = 'Salvando...'; err.textContent = '';
+      var u = window.CURRENT_USER || {}, url = _ppPhoto, key = '';
+      try {
+        if (window.TrainlyFotos && TrainlyFotos.ativo()) {
+          var up = await TrainlyFotos.enviar(_ppPhoto, { kind: 'manager', id: _ppDocId });
+          url = up.url; key = up.key;
+        }
+        await _updateDoc(_doc(_db, 'managers', _ppDocId), { photoURL: url, photoKey: key, photoPromptSeen: true });
+        u.photoURL = url; u.photoKey = key;
+        try { localStorage.setItem(LS_GESTOR, JSON.stringify(u)); localStorage.setItem(_mgrPhotoKey(), url); } catch (e) { }
+        _ppRememberLocal();
+        if (window.applyMgrPhoto) window.applyMgrPhoto();
+        window.closeModal('modal-photo-prompt');
+        toast('Foto de perfil salva!');
+      } catch (e) {
+        err.textContent = 'Não foi possível salvar a foto. ' + ((e && e.message) || 'Tente de novo.');
+        btn.disabled = false; btn.textContent = 'Salvar foto';
+      } finally { _ppBusy = false; }
+    };
+    /* ── [/PHOTO-PROMPT-MGR] ── */
 
     window.saveProfile = async function () {
       var u = window.CURRENT_USER || {}; // #14 — fallback seguro
@@ -20314,6 +20438,14 @@
 .pf-av img, .tn-acc-av img, .gear-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pf-photo-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .pf-photo-rm { background: none; border: 0; color: var(--red); font-size: .78rem; font-weight: 700; cursor: pointer; padding: 2px 4px; font-family: inherit; }
+.pp-body { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+.pp-av { width: 104px; height: 104px; font-size: 2rem; }
+.pp-title { font-weight: 800; font-size: 1.05rem; margin: 4px 0 0; }
+.pp-text { font-size: .86rem; color: var(--text2, var(--text3)); line-height: 1.5; margin: 0; max-width: 340px; }
+.pp-error { color: var(--red); font-size: .8rem; font-weight: 600; min-height: 18px; }
+.pp-save { width: 100%; }
+.pp-save:disabled { opacity: .5; cursor: not-allowed; }
+.pp-skip { background: none; border: 0; color: var(--text3); font-family: inherit; font-weight: 700; font-size: .85rem; cursor: pointer; padding: 6px 10px; }
 .tn .tn-acc-av { overflow: hidden; }
 .gear-btn { overflow: hidden; position: relative; }
 .gear-btn img { position: absolute; inset: 0; border-radius: 50%; }
