@@ -20368,7 +20368,10 @@ html[data-theme="light"] .tn .tn-skel { background: linear-gradient(90deg, #f0f0
 /* ═══════════ REFINAMENTO — visual sóbrio e profissional (modo escuro) ═══════════ */
 /* Fundo: brilho quase imperceptível */
 #screen-dashboard.tn, #screen-sub-wall.tn, #screen-blocked.tn {
-  background: radial-gradient(520px 320px at 100% 0%, rgba(61, 187, 134, .07), transparent 70%), var(--bg);
+  background:
+    radial-gradient(560px 380px at 100% 0%, rgba(34, 224, 138, .20), transparent 70%),
+    radial-gradient(460px 320px at 0% 100%, rgba(74, 148, 255, .06), transparent 70%),
+    #09111a;
   background-attachment: fixed;
 }
 /* Sem halos nem brilhos */
