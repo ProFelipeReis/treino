@@ -7451,54 +7451,79 @@
             </div>
           </div>
         </div>
-        <div id="tab-ceo" class="tab-panel">
-          <div class="page-header">
-            <div class="page-title" style="display:flex;align-items:center;gap:10px;">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="2">
-                <polygon
-                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              Administrativo
+        <div id="tab-ceo" class="tab-panel tn">
+          <div class="ceo-hero">
+            <div>
+              <h1 class="ceo-hero-title">Painel CEO</h1>
+              <p class="ceo-hero-sub">Gestão de gestores, assinaturas, receita e comunicação da plataforma.</p>
             </div>
-          </div>
-          <!-- Stats -->
-          <div class="ceo-stats" style="margin-bottom:24px;">
-            <div class="ceo-stat">
-              <div class="ceo-stat-num" id="ceo-stat-total">—</div>
-              <div class="ceo-stat-lbl">Gestores</div>
-            </div>
-            <div class="ceo-stat">
-              <div class="ceo-stat-num green" id="ceo-stat-active">—</div>
-              <div class="ceo-stat-lbl">Assinaturas ativas</div>
-            </div>
-            <div class="ceo-stat">
-              <div class="ceo-stat-num yellow" id="ceo-stat-trial">—</div>
-              <div class="ceo-stat-lbl">Em teste</div>
-            </div>
-            <div class="ceo-stat">
-              <div class="ceo-stat-num red" id="ceo-stat-expired">—</div>
-              <div class="ceo-stat-lbl">Expirados</div>
-            </div>
+            <span class="ceo-hero-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Administrador</span>
           </div>
 
-          <div class="cref-review-card" id="cref-review-section">
-            <div class="cref-review-head">
-              <div class="ceo-section-title" style="margin:0;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-                </svg> Análise de Documentos
-                <span class="cref-stat-badge" id="cref-pending-count" style="display:none;">0</span>
-              </div>
-              <button class="btn btn-ghost btn-sm" onclick="loadCrefPending()">↺ Atualizar</button>
+          <!-- ── Visão geral ── -->
+          <div class="tn-sec-head"><div class="dash-section-title">Visão geral</div></div>
+          <div class="tn-kpis">
+            <div class="tn-kpi k-blue">
+              <div class="tn-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div class="tn-kpi-lbl">Gestores</div>
+              <div class="stat-num" id="ceo-stat-total">—</div>
+              <div class="tn-kpi-sub"><span>Contas cadastradas</span></div>
+              <i class="tn-kpi-bar"></i>
             </div>
-            <div id="cref-pending-list">
-              <div class="cref-empty">Carregando...</div>
+            <div class="tn-kpi k-green">
+              <div class="tn-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
+              <div class="tn-kpi-lbl">Assinaturas ativas</div>
+              <div class="stat-num" id="ceo-stat-active">—</div>
+              <div class="tn-kpi-sub"><span>Receita recorrente</span></div>
+              <i class="tn-kpi-bar"></i>
+            </div>
+            <div class="tn-kpi k-purple">
+              <div class="tn-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+              <div class="tn-kpi-lbl">Em teste</div>
+              <div class="stat-num" id="ceo-stat-trial">—</div>
+              <div class="tn-kpi-sub"><span>Período de avaliação</span></div>
+              <i class="tn-kpi-bar"></i>
+            </div>
+            <div class="tn-kpi k-red">
+              <div class="tn-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+              <div class="tn-kpi-lbl">Expirados</div>
+              <div class="stat-num" id="ceo-stat-expired">—</div>
+              <div class="tn-kpi-sub"><span>Renovação pendente</span></div>
+              <i class="tn-kpi-bar"></i>
             </div>
           </div>
 
+          <!-- ── Gestores ── -->
+          <div class="tn-sec-head"><div class="dash-section-title">Gestores</div></div>
+          <section class="dp-card ceo-card ceo-managers-card">
+            <header class="dp-head">
+              <h3 class="dp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Gestores cadastrados</h3>
+              <input id="ceo-search" class="form-control ceo-search" type="text" placeholder="Buscar gestor..." oninput="filterCeoManagers()" />
+            </header>
+            <div class="ceo-table-wrap">
+            <table class="ceo-table">
+              <thead>
+                <tr>
+                  <th>Gestor</th>
+                  <th>Role</th>
+                  <th>Assinatura</th>
+                  <th>Vencimento</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="ceo-managers-tbody">
+                <tr>
+                  <td colspan="5">
+                    <div class="spinner"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          </section>
 
+          <!-- ── Financeiro ── -->
+          <div class="tn-sec-head" style="margin-top:28px;"><div class="dash-section-title">Financeiro</div></div>
           <div class="ceo-payment-section" id="ceo-payment-section">
             <div class="ceo-payment-section-head">
               <div class="ceo-section-title" style="margin:0;"><svg width="14" height="14" viewBox="0 0 24 24"
@@ -7572,7 +7597,31 @@
           </div>
 
 
-          <div class="pricing-card">
+          
+          <!-- ── Operação ── -->
+          <div class="tn-sec-head" style="margin-top:28px;"><div class="dash-section-title">Operação</div></div>
+          <div class="ceo-grid">
+            <div class="cref-review-card" id="cref-review-section">
+            <div class="cref-review-head">
+              <div class="ceo-section-title" style="margin:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                </svg> Análise de Documentos
+                <span class="cref-stat-badge" id="cref-pending-count" style="display:none;">0</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="loadCrefPending()">↺ Atualizar</button>
+            </div>
+            <div id="cref-pending-list">
+              <div class="cref-empty">Carregando...</div>
+            </div>
+          </div>
+
+
+          
+            <div class="ceo-col">
+              <div class="pricing-card">
             <div class="ceo-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 style="vertical-align:middle">
@@ -7600,8 +7649,8 @@
             </div>
           </div>
 
-          <!-- ══ LANÇADOR DE POP-UP GLOBAL ══ -->
-          <div class="ceo-popup-launcher-card" id="ceo-popup-launcher">
+          
+              <div class="ceo-popup-launcher-card" id="ceo-popup-launcher">
             <div class="ceo-popup-launcher-head">
               <div class="ceo-section-title" style="margin:0;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
@@ -7636,40 +7685,8 @@
             </div>
           </div>
 
-          <div
-            style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-            <div class="ceo-section-title" style="margin:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                style="vertical-align:middle">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg> Gestores cadastrados</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <input id="ceo-search" class="form-control" type="text" placeholder="Buscar gestor..."
-                style="max-width:220px;padding:8px 12px;" oninput="filterCeoManagers()" />
+          
             </div>
-          </div>
-          <div class="ceo-table-wrap">
-            <table class="ceo-table">
-              <thead>
-                <tr>
-                  <th>Gestor</th>
-                  <th>Role</th>
-                  <th>Assinatura</th>
-                  <th>Vencimento</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="ceo-managers-tbody">
-                <tr>
-                  <td colspan="5">
-                    <div class="spinner"></div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
 
@@ -16658,10 +16675,8 @@
       window.CURRENT_USER.isMaster = true;
       // Mostra o dashboard completo
       window.showDashboardAfterLogin(window.CURRENT_USER);
-      // Após carregar, abre a aba CEO
+      // CEO sempre entra na Dashboard; o Painel CEO só abre pelo menu lateral
       setTimeout(function () {
-        var ceoTab = document.querySelector('[data-tab="tab-ceo"]');
-        if (ceoTab) switchTab('tab-ceo', ceoTab);
         loadCrefPending();
         loadCeoPaymentHistory();
         if (window.loadGlobalPopupStatus) loadGlobalPopupStatus();
@@ -21191,6 +21206,27 @@ html[data-theme="light"] .tn { --dp-g: #3f9170; }
 .tn .dp-rowwrap > .dp-row { width: 100%; box-sizing: border-box; }
 .tn .dp-row > * { min-width: 0; }
 .tn .dp-row .dp-c-act, .tn .dp-thead .c-act { justify-self: end; }
+
+/* ══ Painel CEO — mesmo estilo da Dashboard ══ */
+#tab-ceo .ceo-hero { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:6px 0 26px; }
+#tab-ceo .ceo-hero-title { margin:0; font-family:var(--head); font-size:2rem; font-weight:800; letter-spacing:-.03em; color:var(--text); }
+#tab-ceo .ceo-hero-sub { margin:6px 0 0; font-size:.9rem; color:var(--text2); max-width:560px; }
+#tab-ceo .ceo-hero-badge { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px; font-size:.78rem; font-weight:700; color:var(--accent); background:var(--surface); border:1px solid var(--border2); }
+#tab-ceo .ceo-hero-badge svg { width:16px; height:16px; }
+#tab-ceo .tn-kpi-sub span { color:inherit; }
+#tab-ceo .ceo-card, #tab-ceo .ceo-payment-section, #tab-ceo .cref-review-card, #tab-ceo .pricing-card, #tab-ceo .ceo-popup-launcher-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:20px; box-shadow:inset 0 1px 0 rgba(255,255,255,.04); margin:0; overflow:hidden; }
+#tab-ceo .pricing-card { padding:20px 22px; }
+#tab-ceo .ceo-popup-launcher-card { padding:20px 22px; }
+#tab-ceo .ceo-managers-card { padding:20px 22px; }
+#tab-ceo .ceo-managers-card .ceo-table-wrap { border:0; border-radius:12px; box-shadow:none; background:transparent; margin:0; }
+#tab-ceo .ceo-search { max-width:240px; padding:8px 14px; border-radius:12px; }
+#tab-ceo .ceo-section-title { display:flex; align-items:center; gap:10px; margin:0 !important; font-family:var(--head); font-size:1rem; font-weight:700; color:var(--text); }
+#tab-ceo .ceo-section-title svg { width:20px; height:20px; color:var(--accent); flex-shrink:0; }
+#tab-ceo .pricing-card > .ceo-section-title { margin-bottom:16px !important; }
+#tab-ceo .ceo-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+#tab-ceo .ceo-col { display:flex; flex-direction:column; gap:16px; }
+@media (min-width:1000px) { #tab-ceo .ceo-grid { grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); } }
 </style>
 <script>
 /* Dashboard Pro — sparklines, gráfico de performance e atividades (dados reais de ST.students / planos) */
