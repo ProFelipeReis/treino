@@ -7200,9 +7200,8 @@
           </div>
 
           <!-- ── Alunos em Treino Agora ── -->
-          <div class="tn-live">
+          <div class="tn-live" id="tn-live-wrap" style="display:none;">
             <div class="tn-live-head">
-              <span class="tn-live-badge"><i></i>AO VIVO</span>
               <span class="tn-live-title">Alunos em treino agora</span>
               <span id="training-now-count" style="display:none;"></span>
             </div>
@@ -10569,6 +10568,7 @@
       var el = document.getElementById('training-now-list');
       var countEl = document.getElementById('training-now-count');
       if (!el) return;
+      var liveWrap = document.getElementById('tn-live-wrap');
 
       // Agrupa por studentId: pega o evento mais recente por aluno
       var byStudent = {};
@@ -10594,6 +10594,8 @@
           countEl.style.display = 'none';
         }
       }
+
+      if (liveWrap) liveWrap.style.display = training.length ? '' : 'none';
 
       if (!training.length) {
         el.innerHTML = '<div class="training-now-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>Nenhum aluno treinando no momento</div>';
