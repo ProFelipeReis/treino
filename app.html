@@ -21182,6 +21182,13 @@ html[data-theme="light"] .tn { --dp-g: #3f9170; }
 #tab-dashboard .training-now-pulse { animation: none; box-shadow: none; }
 #tab-dashboard .tn-live-badge { box-shadow: none; }
 .tn .dp-sc-ico, .tn .dp-sc { box-shadow: none; }
+
+/* fix: linhas da tabela ocupam a largura toda (o layout antigo de cards usava align-items:start) */
+.tn .dp-list { align-items: stretch; grid-template-columns: none; }
+.tn .dp-list > .dp-row, .tn .dp-list > .dp-rowwrap, .tn .dp-list > .lc-sep { width: 100%; box-sizing: border-box; align-self: stretch; }
+.tn .dp-rowwrap > .dp-row { width: 100%; box-sizing: border-box; }
+.tn .dp-row > * { min-width: 0; }
+.tn .dp-row .dp-c-act, .tn .dp-thead .c-act { justify-self: end; }
 </style>
 <script>
 /* Dashboard Pro — sparklines, gráfico de performance e atividades (dados reais de ST.students / planos) */
