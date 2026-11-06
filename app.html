@@ -7650,6 +7650,19 @@
           </div>
 
           
+              <div class="ceo-popup-launcher-card" id="ceo-ex-editor-card">
+            <div class="ceo-popup-launcher-head">
+              <div class="ceo-section-title" style="margin:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>
+                Editor de exercícios
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openExerciseEditor()">Abrir editor →</button>
+            </div>
+            <div style="font-size:.8rem;color:var(--text2);line-height:1.55;margin-top:10px;">
+              Biblioteca de exercícios do Trainly por grupo muscular: edite nomes, cadastre ou troque o link do vídeo e adicione novos exercícios.
+            </div>
+          </div>
+
               <div class="ceo-popup-launcher-card" id="ceo-popup-launcher">
             <div class="ceo-popup-launcher-head">
               <div class="ceo-section-title" style="margin:0;">
@@ -7688,6 +7701,112 @@
           
             </div>
           </div>
+        </div>
+
+        <!-- ══ ABA EDITOR DE EXERCÍCIOS (apenas CEO) ══ -->
+        <div id="tab-ceo-exercises" class="tab-panel">
+          <style>
+            #tab-ceo-exercises .exe-top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:6px 0 18px}
+            #tab-ceo-exercises .exe-title{margin:0;font-family:var(--head);font-size:1.7rem;font-weight:800;letter-spacing:-.03em;color:var(--text)}
+            #tab-ceo-exercises .exe-sub{margin:6px 0 0;font-size:.86rem;color:var(--text2);max-width:620px;line-height:1.5}
+            #tab-ceo-exercises .exe-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+            #tab-ceo-exercises .exe-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+            #tab-ceo-exercises .exe-stat b{display:block;font-family:var(--head);font-size:1.4rem;color:var(--text)}
+            #tab-ceo-exercises .exe-stat span{font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+            #tab-ceo-exercises .exe-filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr)) auto;gap:10px;align-items:center;margin-bottom:12px}
+            #tab-ceo-exercises .exe-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;-webkit-overflow-scrolling:touch}
+            #tab-ceo-exercises .exe-chip{flex:0 0 auto;border:1px solid var(--border2);background:var(--surface);color:var(--text2);border-radius:999px;padding:6px 12px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+            #tab-ceo-exercises .exe-chip.active{background:var(--accent);border-color:var(--accent);color:#111}
+            #tab-ceo-exercises .exe-chip i{font-style:normal;opacity:.65;margin-left:4px;font-weight:600}
+            #tab-ceo-exercises .exe-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+            #tab-ceo-exercises .exe-count{font-size:.8rem;color:var(--text3);font-weight:600}
+            #tab-ceo-exercises .exe-newbox{display:none;background:var(--accent-dim);border:1px solid var(--accent-soft);border-radius:var(--r);padding:14px;margin-bottom:14px}
+            #tab-ceo-exercises .exe-newbox.open{display:block}
+            #tab-ceo-exercises .exe-newgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:10px;align-items:center}
+            #tab-ceo-exercises .exe-group{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+            #tab-ceo-exercises .exe-ghead{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;user-select:none}
+            #tab-ceo-exercises .exe-ghead:hover{background:var(--surface2)}
+            #tab-ceo-exercises .exe-gname{font-family:var(--head);font-weight:700;font-size:1rem;color:var(--text);flex:1;min-width:0}
+            #tab-ceo-exercises .exe-gcat{font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-left:8px}
+            #tab-ceo-exercises .exe-badge{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+            #tab-ceo-exercises .exe-badge.warn{background:rgba(224,62,62,.1);color:var(--red);border-color:rgba(224,62,62,.25)}
+            #tab-ceo-exercises .exe-caret{transition:transform .15s;color:var(--text3)}
+            #tab-ceo-exercises .exe-group.open .exe-caret{transform:rotate(90deg)}
+            #tab-ceo-exercises .exe-rows{display:none;border-top:1px solid var(--border)}
+            #tab-ceo-exercises .exe-group.open .exe-rows{display:block}
+            #tab-ceo-exercises .exe-row{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
+            #tab-ceo-exercises .exe-row:last-child{border-bottom:0}
+            #tab-ceo-exercises .exe-row.dirty{background:var(--accent-dim)}
+            #tab-ceo-exercises .exe-thumb{width:72px;height:42px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--text3);font-size:.64rem;font-weight:700;text-align:center;line-height:1.1;text-decoration:none}
+            #tab-ceo-exercises .exe-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+            #tab-ceo-exercises .exe-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px}
+            #tab-ceo-exercises .exe-fields .form-control{font-size:.84rem;padding:8px 10px}
+            #tab-ceo-exercises .exe-meta{grid-column:1 / -1;font-size:.68rem;color:var(--text3);font-weight:600;margin-top:-2px}
+            #tab-ceo-exercises .exe-meta em{font-style:normal;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-soft);border-radius:999px;padding:1px 7px;margin-right:6px}
+            #tab-ceo-exercises .exe-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+            #tab-ceo-exercises .exe-empty{text-align:center;padding:40px 16px;color:var(--text3);font-size:.9rem}
+            #tab-ceo-exercises .exe-note{font-size:.76rem;color:var(--text3);line-height:1.5;margin:4px 0 16px}
+            @media (max-width:900px){
+              #tab-ceo-exercises .exe-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+              #tab-ceo-exercises .exe-filters{grid-template-columns:1fr 1fr}
+              #tab-ceo-exercises .exe-filters #exe-q{grid-column:1 / -1}
+              #tab-ceo-exercises .exe-newgrid{grid-template-columns:1fr}
+              #tab-ceo-exercises .exe-row{grid-template-columns:56px minmax(0,1fr)}
+              #tab-ceo-exercises .exe-thumb{width:56px;height:34px}
+              #tab-ceo-exercises .exe-fields{grid-template-columns:1fr}
+              #tab-ceo-exercises .exe-actions{grid-column:1 / -1;justify-content:flex-start}
+            }
+          </style>
+
+          <div class="exe-top">
+            <div>
+              <button class="btn btn-ghost btn-sm" onclick="closeExerciseEditor()" style="margin-bottom:10px;">← Voltar ao Painel CEO</button>
+              <h1 class="exe-title">Editor de exercícios</h1>
+              <p class="exe-sub">Todos os exercícios da biblioteca do Trainly, organizados por grupo muscular. Edite o nome, cole o link do vídeo e clique em <b>Inserir vídeo</b> para salvar.</p>
+            </div>
+            <button class="btn btn-primary" onclick="exeToggleNew()">+ Novo exercício</button>
+          </div>
+
+          <div class="exe-stats" id="exe-stats"></div>
+
+          <div class="exe-newbox" id="exe-newbox">
+            <div class="exe-newgrid">
+              <select id="exe-new-group" class="form-control"></select>
+              <input id="exe-new-name" class="form-control" type="text" placeholder="Nome do exercício" maxlength="80" />
+              <input id="exe-new-url" class="form-control" type="url" placeholder="Link do vídeo (opcional)" />
+              <button class="btn btn-primary" id="exe-new-save" onclick="exeCreate()">Adicionar</button>
+            </div>
+          </div>
+
+          <div class="exe-filters">
+            <input id="exe-q" class="form-control" type="text" placeholder="Buscar exercício pelo nome..." autocomplete="off" />
+            <select id="exe-cat" class="form-control" title="Categoria"></select>
+            <select id="exe-vid" class="form-control" title="Situação do vídeo">
+              <option value="all">Vídeo: todos</option>
+              <option value="with">Com vídeo</option>
+              <option value="without">Sem vídeo</option>
+              <option value="edited">Editados / novos</option>
+            </select>
+            <select id="exe-sort" class="form-control" title="Ordenação">
+              <option value="orig">Ordem original</option>
+              <option value="az">A → Z</option>
+              <option value="novid">Sem vídeo primeiro</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="exeClearFilters()">Limpar</button>
+          </div>
+
+          <div class="exe-chips" id="exe-chips"></div>
+
+          <div class="exe-toolbar">
+            <div class="exe-count" id="exe-count"></div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost btn-sm" onclick="exeExpandAll(true)">Expandir tudo</button>
+              <button class="btn btn-ghost btn-sm" onclick="exeExpandAll(false)">Recolher tudo</button>
+            </div>
+          </div>
+          <div class="exe-note">As alterações valem para novos treinos e para quando o exercício for selecionado novamente. Fichas já salvas mantêm o nome e o vídeo gravados nelas.</div>
+
+          <div id="exe-list"><div class="exe-empty">Carregando...</div></div>
         </div>
 
         <!-- ══ ABA REPORT (apenas testadores) ══ -->
@@ -9662,6 +9781,7 @@
     window.showDashboardAfterLogin = window.showDashboard = function (userData) {
       var u = userData || window.CURRENT_USER || {};
       window.CURRENT_USER = u;
+      if (window.loadExerciseLibraryOverrides) window.loadExerciseLibraryOverrides(); // aplica edições do CEO na biblioteca
       // Garante que isTester começa como false até o Firestore confirmar
       if (window.CURRENT_USER.isTester === undefined) window.CURRENT_USER.isTester = false;
 
@@ -9805,7 +9925,7 @@
     window.switchTab = (tabId, el) => {
       // Protege abas restritas
       if (tabId === 'tab-report' && !(window.CURRENT_USER || {}).isTester) return;
-      if ((tabId === 'tab-ceo' || tabId === 'tab-ceo-reports') && (window.CURRENT_USER || {}).role !== 'ceo') return;
+      if ((tabId === 'tab-ceo' || tabId === 'tab-ceo-reports' || tabId === 'tab-ceo-exercises') && (window.CURRENT_USER || {}).role !== 'ceo') return;
       document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       document.querySelectorAll('.sidebar-item,.mobile-nav-item').forEach(i => i.classList.remove('active'));
@@ -17427,6 +17547,289 @@
         toast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Preços salvos!');
       } catch (e) { toast('Erro: ' + e.message, 'error'); }
     };
+
+    // ══════════════════════════════════════════════════════════
+    // EDITOR DE EXERCÍCIOS (CEO) + OVERRIDES DA BIBLIOTECA
+    // Firestore: settings/exerciseLibrary
+    //   urls:    { [chave]: url }            ('' = vídeo removido)
+    //   renames: { [chave]: novoNome }
+    //   added:   { [chave]: {group, name} }  (exercícios criados no editor)
+    // "chave" = nome original do exercício (ou id gerado, nos adicionados).
+    // ══════════════════════════════════════════════════════════
+    (function () {
+      var EXE_CATS = [
+        { id: 'sup', label: 'Superiores', groups: ['Peito', 'Costas', 'Ombro', 'Bíceps', 'Tríceps'] },
+        { id: 'inf', label: 'Inferiores', groups: ['Quadríceps', 'Posteriores', 'Glúteos', 'Adutores', 'Panturrilha'] },
+        { id: 'core', label: 'Core e Lombar', groups: ['Abdômen', 'Lombar'] },
+        { id: 'mob', label: 'Alongamento e Mobilidade', groups: ['Alongamento'] }
+      ];
+      var cfg = { urls: {}, renames: {}, added: {} };
+      var ui = { q: '', cat: 'all', group: 'all', vid: 'all', sort: 'orig', open: {}, loaded: false };
+      var busy = false;
+
+      function docRef() { return _db.collection('settings').doc('exerciseLibrary'); }
+      function FV() { return firebase.firestore.FieldValue; }
+      function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+      function norm(v) { return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+      function clean(c) { c = c || {}; return { urls: c.urls || {}, renames: c.renames || {}, added: c.added || {} }; }
+      function catOf(g) { for (var i = 0; i < EXE_CATS.length; i++) if (EXE_CATS[i].groups.indexOf(g) !== -1) return EXE_CATS[i]; return { id: 'other', label: 'Outros' }; }
+
+      function base() {
+        if (!window._EX_BASE) window._EX_BASE = { lib: JSON.parse(JSON.stringify(window.EX_LIB || {})), urls: Object.assign({}, window.EX_URLS || {}) };
+        return window._EX_BASE;
+      }
+      function display(k, c) { c = c || cfg; return c.renames[k] || (c.added[k] && c.added[k].name) || k; }
+      function urlOf(k, c) { c = c || cfg; if (Object.prototype.hasOwnProperty.call(c.urls, k)) return c.urls[k] || ''; return base().urls[k] || ''; }
+      function isAdded(k) { return !!cfg.added[k]; }
+      function isEdited(k) { return isAdded(k) || Object.prototype.hasOwnProperty.call(cfg.urls, k) || Object.prototype.hasOwnProperty.call(cfg.renames, k); }
+      function ytId(u) {
+        var m = String(u || '').match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/);
+        return m ? m[1] : '';
+      }
+      function normalizeUrl(u) { var id = ytId(u); return id ? 'https://www.youtube.com/watch?v=' + id : u; }
+
+      // Aplica as edições sobre EX_LIB / EX_URLS (usados pelo seletor de exercícios do app inteiro)
+      function applyOverrides(c) {
+        c = clean(c); var b = base();
+        Object.keys(b.lib).forEach(function (g) {
+          var arr = b.lib[g].map(function (k) { return display(k, c); });
+          Object.keys(c.added).forEach(function (k) { if (c.added[k] && c.added[k].group === g) arr.push(display(k, c)); });
+          window.EX_LIB[g] = arr.filter(function (n, i) { return arr.indexOf(n) === i; });
+        });
+        var U = window.EX_URLS; Object.keys(U).forEach(function (n) { delete U[n]; });
+        Object.keys(b.urls).forEach(function (k) { if (!Object.prototype.hasOwnProperty.call(c.urls, k)) U[display(k, c)] = b.urls[k]; });
+        Object.keys(c.urls).forEach(function (k) { var n = display(k, c); if (c.urls[k]) U[n] = c.urls[k]; else delete U[n]; });
+      }
+
+      window.loadExerciseLibraryOverrides = async function () {
+        try {
+          base();
+          var snap = await docRef().get();
+          if (snap.exists) { cfg = clean(snap.data()); applyOverrides(cfg); }
+        } catch (e) { console.warn('exerciseLibrary overrides:', e && e.message); }
+      };
+
+      // ── Modelo de linhas ──
+      function allGroups() {
+        var b = base(), g = Object.keys(b.lib);
+        Object.keys(cfg.added).forEach(function (k) { var x = cfg.added[k].group; if (g.indexOf(x) === -1) g.push(x); });
+        return g;
+      }
+      function keysOf(g) {
+        var b = base(), ks = (b.lib[g] || []).slice();
+        Object.keys(cfg.added).forEach(function (k) { if (cfg.added[k].group === g) ks.push(k); });
+        return ks;
+      }
+      function groupsOfKey(k) { return allGroups().filter(function (g) { return keysOf(g).indexOf(k) !== -1; }); }
+      function nameTaken(name, exceptKey) {
+        var n = norm(name), seen = {};
+        allGroups().forEach(function (g) { keysOf(g).forEach(function (k) { seen[k] = 1; }); });
+        return Object.keys(seen).some(function (k) { return k !== exceptKey && norm(display(k)) === n; });
+      }
+
+      function matches(k) {
+        var u = urlOf(k);
+        if (ui.q && norm(display(k)).indexOf(norm(ui.q)) === -1) return false;
+        if (ui.vid === 'with' && !u) return false;
+        if (ui.vid === 'without' && u) return false;
+        if (ui.vid === 'edited' && !isEdited(k)) return false;
+        return true;
+      }
+      function visibleGroups() {
+        return allGroups().filter(function (g) {
+          if (ui.cat !== 'all' && catOf(g).id !== ui.cat) return false;
+          if (ui.group !== 'all' && g !== ui.group) return false;
+          return true;
+        });
+      }
+      function filtersActive() { return !!(ui.q || ui.cat !== 'all' || ui.group !== 'all' || ui.vid !== 'all'); }
+
+      // ── Render ──
+      function renderStats() {
+        var seen = {}; allGroups().forEach(function (g) { keysOf(g).forEach(function (k) { seen[k] = 1; }); });
+        var ks = Object.keys(seen), com = ks.filter(function (k) { return urlOf(k); }).length;
+        var ed = ks.filter(isEdited).length;
+        document.getElementById('exe-stats').innerHTML =
+          '<div class="exe-stat"><b>' + ks.length + '</b><span>Exercícios</span></div>' +
+          '<div class="exe-stat"><b style="color:var(--green)">' + com + '</b><span>Com vídeo</span></div>' +
+          '<div class="exe-stat"><b style="color:' + (ks.length - com ? 'var(--red)' : 'var(--text)') + '">' + (ks.length - com) + '</b><span>Sem vídeo</span></div>' +
+          '<div class="exe-stat"><b>' + ed + '</b><span>Editados / novos</span></div>';
+      }
+      function renderFilters() {
+        var cs = document.getElementById('exe-cat');
+        var opts = '<option value="all">Categoria: todas</option>';
+        var used = {}; allGroups().forEach(function (g) { used[catOf(g).id] = catOf(g).label; });
+        EXE_CATS.concat([{ id: 'other', label: 'Outros' }]).forEach(function (c) { if (used[c.id]) opts += '<option value="' + c.id + '">' + esc(c.label) + '</option>'; });
+        cs.innerHTML = opts; cs.value = ui.cat;
+        var ch = '<button class="exe-chip' + (ui.group === 'all' ? ' active' : '') + '" data-g="all">Todos os grupos</button>';
+        allGroups().forEach(function (g) {
+          if (ui.cat !== 'all' && catOf(g).id !== ui.cat) return;
+          ch += '<button class="exe-chip' + (ui.group === g ? ' active' : '') + '" data-g="' + esc(g) + '">' + esc(g) + '<i>' + keysOf(g).length + '</i></button>';
+        });
+        document.getElementById('exe-chips').innerHTML = ch;
+        var ng = document.getElementById('exe-new-group'), cur = ng.value;
+        ng.innerHTML = allGroups().map(function (g) { return '<option value="' + esc(g) + '">' + esc(g) + '</option>'; }).join('');
+        if (cur) ng.value = cur;
+      }
+      function rowHtml(k, g) {
+        var name = display(k), url = urlOf(k), id = ytId(url), grp = groupsOfKey(k).filter(function (x) { return x !== g; });
+        var thumb = url
+          ? '<a class="exe-thumb" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" title="Abrir vídeo">' + (id ? '<img loading="lazy" src="https://i.ytimg.com/vi/' + id + '/mqdefault.jpg" alt="" onerror="this.remove()">' : '▶ vídeo') + '</a>'
+          : '<div class="exe-thumb">sem<br>vídeo</div>';
+        var meta = (isAdded(k) ? '<em>novo</em>' : (isEdited(k) ? '<em>editado</em>' : '')) + (grp.length ? 'também em: ' + esc(grp.join(', ')) : '');
+        return '<div class="exe-row" data-key="' + esc(k) + '" data-name="' + esc(name) + '" data-url="' + esc(url) + '">' + thumb +
+          '<div class="exe-fields">' +
+          '<input class="form-control exe-name" type="text" maxlength="80" value="' + esc(name) + '" placeholder="Nome do exercício" />' +
+          '<input class="form-control exe-url" type="url" value="' + esc(url) + '" placeholder="Cole o link do vídeo (YouTube...)" />' +
+          (meta ? '<div class="exe-meta">' + meta + '</div>' : '') +
+          '</div><div class="exe-actions">' +
+          '<button class="btn btn-primary btn-sm exe-save" disabled>' + (url ? 'Atualizar' : 'Inserir vídeo') + '</button>' +
+          (url ? '<button class="btn btn-ghost btn-sm exe-rmvid" title="Remover vídeo">✕ Vídeo</button>' : '') +
+          (!isAdded(k) && isEdited(k) ? '<button class="btn btn-ghost btn-sm exe-restore" title="Voltar ao original">↺</button>' : '') +
+          (isAdded(k) ? '<button class="btn btn-ghost btn-sm exe-del" title="Excluir exercício" style="color:var(--red)">🗑</button>' : '') +
+          '</div></div>';
+      }
+      function render() {
+        renderStats(); renderFilters();
+        var force = filtersActive(), total = 0, html = '';
+        visibleGroups().forEach(function (g) {
+          var all = keysOf(g), ks = all.filter(matches);
+          if (!ks.length && filtersActive()) return;
+          if (ui.sort === 'az') ks.sort(function (a, b) { return norm(display(a)).localeCompare(norm(display(b))); });
+          if (ui.sort === 'novid') ks.sort(function (a, b) { return (urlOf(a) ? 1 : 0) - (urlOf(b) ? 1 : 0); });
+          total += ks.length;
+          var open = force || ui.open[g], semVid = all.filter(function (k) { return !urlOf(k); }).length;
+          html += '<div class="exe-group' + (open ? ' open' : '') + '" data-g="' + esc(g) + '">' +
+            '<div class="exe-ghead"><span class="exe-caret">▶</span><div class="exe-gname">' + esc(g) + '<span class="exe-gcat">' + esc(catOf(g).label) + '</span></div>' +
+            (semVid ? '<span class="exe-badge warn">' + semVid + ' sem vídeo</span>' : '') +
+            '<span class="exe-badge">' + (filtersActive() ? ks.length + ' de ' + all.length : all.length) + ' exercícios</span></div>' +
+            '<div class="exe-rows">' + (open ? ks.map(function (k) { return rowHtml(k, g); }).join('') : '') + '</div></div>';
+        });
+        document.getElementById('exe-list').innerHTML = html || '<div class="exe-empty">Nenhum exercício encontrado com esses filtros.</div>';
+        document.getElementById('exe-count').textContent = total + ' exercício' + (total === 1 ? '' : 's') + ' listado' + (total === 1 ? '' : 's');
+      }
+
+      // ── Persistência ──
+      async function persist(upd) {
+        if (busy) return false; busy = true;
+        try {
+          upd.updatedAt = FV().serverTimestamp();
+          upd.updatedBy = (window.CURRENT_USER && window.CURRENT_USER.username) || 'ceo';
+          await docRef().set(upd, { merge: true });
+          var snap = await docRef().get();
+          cfg = clean(snap.exists ? snap.data() : {}); applyOverrides(cfg);
+          return true;
+        } catch (e) {
+          toast('Erro ao salvar: ' + (e && e.message ? e.message : e), 'error'); return false;
+        } finally { busy = false; }
+      }
+      function checkUrl(url) {
+        if (!url) return '';
+        if (!/^https?:\/\/[^\s]+\.[^\s]+/i.test(url)) return null;
+        return normalizeUrl(url);
+      }
+      function urlUpdate(upd, k, url) {
+        upd.urls = upd.urls || {};
+        if (isAdded(k)) upd.urls[k] = url ? url : FV().delete();
+        else upd.urls[k] = (url === (base().urls[k] || '')) ? FV().delete() : url;
+      }
+
+      async function saveRow(row) {
+        var k = row.dataset.key, name = row.querySelector('.exe-name').value.replace(/\s+/g, ' ').trim();
+        var rawUrl = row.querySelector('.exe-url').value.trim(), url = checkUrl(rawUrl), upd = {};
+        if (!name) { toast('O nome não pode ficar vazio.', 'error'); return; }
+        if (url === null) { toast('Link inválido. Use um endereço completo, ex.: https://youtube.com/watch?v=...', 'error'); return; }
+        if (name !== display(k) && nameTaken(name, k)) { toast('Já existe um exercício com esse nome.', 'error'); return; }
+        if (name !== display(k)) {
+          upd.renames = {}; upd.added = upd.added || {};
+          if (isAdded(k)) { upd.added[k] = { name: name }; delete upd.renames; }
+          else upd.renames[k] = (name === k) ? FV().delete() : name;
+        }
+        if (url !== urlOf(k)) urlUpdate(upd, k, url);
+        if (!upd.renames && !upd.added && !upd.urls) return;
+        if (await persist(upd)) { toast('Exercício salvo.'); render(); }
+      }
+
+      // ── Eventos ──
+      var list = document.getElementById('exe-list');
+      list.addEventListener('click', async function (e) {
+        var head = e.target.closest('.exe-ghead');
+        if (head) { if (filtersActive()) return; var g = head.parentNode.dataset.g; ui.open[g] = !ui.open[g]; render(); return; }
+        var row = e.target.closest('.exe-row'); if (!row) return;
+        var k = row.dataset.key;
+        if (e.target.closest('.exe-save')) return saveRow(row);
+        if (e.target.closest('.exe-rmvid')) {
+          if (!confirm('Remover o vídeo de "' + display(k) + '"?')) return;
+          var u = {}; urlUpdate(u, k, ''); if (await persist(u)) { toast('Vídeo removido.'); render(); } return;
+        }
+        if (e.target.closest('.exe-restore')) {
+          if (!confirm('Voltar "' + display(k) + '" ao nome e vídeo originais?')) return;
+          var r = { urls: {}, renames: {} }; r.urls[k] = FV().delete(); r.renames[k] = FV().delete();
+          if (await persist(r)) { toast('Original restaurado.'); render(); } return;
+        }
+        if (e.target.closest('.exe-del')) {
+          if (!confirm('Excluir "' + display(k) + '" da biblioteca? Fichas já salvas não são alteradas.')) return;
+          var d = { added: {}, urls: {}, renames: {} }; d.added[k] = FV().delete(); d.urls[k] = FV().delete(); d.renames[k] = FV().delete();
+          if (await persist(d)) { toast('Exercício excluído.'); render(); }
+        }
+      });
+      function dirtyCheck(row) {
+        var n = row.querySelector('.exe-name').value.replace(/\s+/g, ' ').trim(), u = row.querySelector('.exe-url').value.trim();
+        var dirty = (n !== row.dataset.name) || (u !== row.dataset.url);
+        row.classList.toggle('dirty', dirty);
+        var b = row.querySelector('.exe-save'); b.disabled = !dirty;
+        if (dirty) b.textContent = u ? (row.dataset.url ? 'Atualizar' : 'Inserir vídeo') : 'Salvar';
+      }
+      list.addEventListener('input', function (e) { var row = e.target.closest('.exe-row'); if (row) dirtyCheck(row); });
+      list.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.closest('.exe-row')) { e.preventDefault(); var row = e.target.closest('.exe-row'); if (!row.querySelector('.exe-save').disabled) saveRow(row); } });
+      document.getElementById('exe-chips').addEventListener('click', function (e) { var c = e.target.closest('.exe-chip'); if (!c) return; ui.group = c.dataset.g; render(); });
+      var qT; document.getElementById('exe-q').addEventListener('input', function (e) { clearTimeout(qT); var v = e.target.value; qT = setTimeout(function () { ui.q = v; render(); }, 180); });
+      document.getElementById('exe-cat').addEventListener('change', function (e) { ui.cat = e.target.value; if (ui.group !== 'all' && ui.cat !== 'all' && catOf(ui.group).id !== ui.cat) ui.group = 'all'; render(); });
+      document.getElementById('exe-vid').addEventListener('change', function (e) { ui.vid = e.target.value; render(); });
+      document.getElementById('exe-sort').addEventListener('change', function (e) { ui.sort = e.target.value; render(); });
+
+      window.exeClearFilters = function () {
+        ui.q = ''; ui.cat = 'all'; ui.group = 'all'; ui.vid = 'all'; ui.sort = 'orig';
+        document.getElementById('exe-q').value = ''; document.getElementById('exe-vid').value = 'all'; document.getElementById('exe-sort').value = 'orig'; render();
+      };
+      window.exeExpandAll = function (open) { ui.open = {}; if (open) allGroups().forEach(function (g) { ui.open[g] = true; }); render(); };
+      window.exeToggleNew = function () {
+        var b = document.getElementById('exe-newbox'); b.classList.toggle('open');
+        if (b.classList.contains('open')) { if (ui.group !== 'all') document.getElementById('exe-new-group').value = ui.group; document.getElementById('exe-new-name').focus(); }
+      };
+      window.exeCreate = async function () {
+        var g = document.getElementById('exe-new-group').value, name = document.getElementById('exe-new-name').value.replace(/\s+/g, ' ').trim();
+        var url = checkUrl(document.getElementById('exe-new-url').value.trim());
+        if (!name) { toast('Informe o nome do exercício.', 'error'); return; }
+        if (url === null) { toast('Link do vídeo inválido.', 'error'); return; }
+        if (nameTaken(name, null)) { toast('Já existe um exercício com esse nome.', 'error'); return; }
+        var k = 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), upd = { added: {} };
+        upd.added[k] = { group: g, name: name };
+        if (url) { upd.urls = {}; upd.urls[k] = url; }
+        if (await persist(upd)) {
+          document.getElementById('exe-new-name').value = ''; document.getElementById('exe-new-url').value = '';
+          ui.open[g] = true; toast('Exercício adicionado em ' + g + '.'); render();
+        }
+      };
+
+      // ── Navegação ──
+      window.openExerciseEditor = async function () {
+        if (!window.CURRENT_USER || window.CURRENT_USER.role !== 'ceo') return;
+        switchTab('tab-ceo-exercises', null);
+        window.scrollTo(0, 0);
+        if (!ui.loaded) {
+          base();
+          try { var snap = await docRef().get(); cfg = clean(snap.exists ? snap.data() : {}); applyOverrides(cfg); }
+          catch (e) { toast('Não foi possível ler as edições salvas: ' + (e && e.message), 'error'); }
+          ui.loaded = true;
+        }
+        render();
+      };
+      window.closeExerciseEditor = function () {
+        switchTab('tab-ceo', document.querySelector('.sidebar-item-ceo[data-tab="tab-ceo"]'));
+        window.scrollTo(0, 0);
+      };
+    })();
 
     // ══════════════════════════════════════════════════════════
     // POP-UP GLOBAL — BUILDER (CEO) + EXIBIÇÃO (usuários)
