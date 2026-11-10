@@ -330,10 +330,75 @@
       box-shadow: 0 0 0 3px rgba(245, 200, 0, .15);
     }
 
+
+    /* ── ABA DE CARGA (por exercício) ── */
+    .ex-load { margin-top: 10px; }
+    .ex-load-tab {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 11px; border-radius: 999px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      color: var(--text2); font-family: var(--body); font-size: .74rem; font-weight: 700;
+      cursor: pointer; transition: background .15s, border-color .15s, color .15s;
+    }
+    .ex-load-tab:hover { border-color: var(--accent); }
+    .ex-load-tab svg { flex-shrink: 0; }
+    .ex-load-tab .ex-load-val {
+      padding: 1px 8px; border-radius: 999px; font-weight: 800; font-size: .72rem;
+      background: var(--accent-dim); border: 1px solid var(--accent-soft); color: var(--text);
+    }
+    .ex-load-tab .ex-load-val:empty { display: none; }
+    .ex-load-caret { transition: transform .15s; }
+    .ex-load.open .ex-load-caret { transform: rotate(180deg); }
+    .ex-load.open .ex-load-tab { border-color: var(--accent); color: var(--text); }
+    .ex-load-panel {
+      display: none; margin-top: 8px; padding: 12px;
+      border: 1px solid var(--border); border-radius: 12px; background: var(--surface2);
+    }
+    .ex-load.open .ex-load-panel { display: block; }
+    .ex-load-label { font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+    .ex-load-form { display: flex; gap: 8px; align-items: stretch; }
+    .ex-load-field { position: relative; flex: 1; min-width: 0; }
+    .ex-load-input {
+      width: 100%; box-sizing: border-box; padding: 10px 38px 10px 12px;
+      border: 1px solid var(--border2); border-radius: 10px; background: var(--surface);
+      color: var(--text); font-family: var(--body); font-size: 1rem; font-weight: 700;
+    }
+    .ex-load-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .ex-load-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: .78rem; font-weight: 700; color: var(--text3); pointer-events: none; }
+    .ex-load-save {
+      flex-shrink: 0; padding: 0 16px; border: 0; border-radius: 10px; cursor: pointer;
+      background: var(--accent); color: #111110; font-family: var(--body); font-weight: 800; font-size: .82rem;
+    }
+    .ex-load-save:disabled { opacity: .55; cursor: default; }
+    .ex-load-hist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
+    .ex-load-hist:empty { display: none; }
+    .ex-load-hist-lbl { font-size: .68rem; font-weight: 700; color: var(--text3); }
+    .ex-load-chip { font-size: .7rem; font-weight: 700; color: var(--text2); padding: 2px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+
+    /* ── POP-UP GLOBAL (enviado pelo administrador) ── */
+    #gp-overlay { position: fixed; inset: 0; z-index: 3100; background: rgba(0, 0, 0, .5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    #gp-overlay.hidden { display: none; }
+    #gp-box { background: var(--surface); border-radius: 18px; width: 100%; max-width: 400px; max-height: calc(100dvh - 40px); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 16px 60px rgba(0, 0, 0, .3); animation: modalIn .25s cubic-bezier(.22, 1, .36, 1); }
+    .gp-head { flex-shrink: 0; display: flex; align-items: center; gap: 14px; padding: 18px 20px; background: #000; }
+    .gp-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.4rem; background: rgba(245, 200, 0, .22); }
+    .gp-tag { display: inline-block; font-size: .62rem; font-weight: 900; text-transform: uppercase; letter-spacing: .09em; border-radius: 99px; padding: 2px 9px; margin-bottom: 4px; background: rgba(245, 200, 0, .25); color: var(--accent); }
+    .gp-title { font-family: var(--head); font-size: 1rem; font-weight: 800; color: #fff; line-height: 1.25; }
+    .gp-body { flex: 1; overflow-y: auto; padding: 18px 20px; font-size: .88rem; color: var(--text2); line-height: 1.7; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+    .gp-body ul, .gp-body ol { padding-left: 18px; margin: 8px 0; }
+    .gp-body li { margin-bottom: 4px; }
+    .gp-body b, .gp-body strong { color: var(--text); font-weight: 700; }
+    .gp-foot { flex-shrink: 0; padding: 14px 20px 18px; }
+    .gp-ok { width: 100%; padding: 12px; border: 0; border-radius: 12px; cursor: pointer; background: var(--accent); color: #111110; font-family: var(--body); font-weight: 800; font-size: .9rem; }
+    .gp-theme-update .gp-icon { background: rgba(59, 130, 246, .18); }
+    .gp-theme-update .gp-tag { background: rgba(59, 130, 246, .15); color: #93c5fd; }
+    .gp-theme-warning .gp-icon { background: rgba(245, 158, 11, .18); }
+    .gp-theme-warning .gp-tag { background: rgba(245, 158, 11, .15); color: #fcd34d; }
+
     /* CRONÔMETRO */
     /* ── EXERCISE CHECKED: colapsa tudo exceto número + nome ── */
     .exercise-row.checked .ex-inline,
     .exercise-row.checked .ex-obs,
+    .exercise-row.checked .ex-load,
     .exercise-row.checked .ex-video-wrap {
       display: none !important;
     }
@@ -3632,6 +3697,20 @@
   <div id="toast-container"></div>
 
   <!-- ALERT POPUP (treinador) -->
+  <div id="gp-overlay" class="hidden">
+    <div id="gp-box">
+      <div class="gp-head" id="gp-head">
+        <div class="gp-icon" id="gp-icon"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="gp-tag" id="gp-tag"></div>
+          <div class="gp-title" id="gp-title"></div>
+        </div>
+      </div>
+      <div class="gp-body" id="gp-desc"></div>
+      <div class="gp-foot"><button class="gp-ok" onclick="dismissGlobalPopupAluno()">Entendido ✓</button></div>
+    </div>
+  </div>
+
   <div id="alert-popup-overlay" class="hidden">
     <div id="alert-popup-box">
       <div class="alert-popup-header">
@@ -5114,6 +5193,8 @@
       }
       // Restore active timer if any
       restoreActiveTimer(student);
+      // Pop-up global (se o administrador marcou "Enviar para alunos também")
+      setTimeout(() => { if (window.checkAndShowGlobalPopupAluno) window.checkAndShowGlobalPopupAluno(student); }, 2500);
       loadPlans(student).catch(err => {
         console.error('loadPlans erro:', err);
         const content = document.getElementById('content');
@@ -5687,6 +5768,155 @@
       if (tab === 'evolucao' && _currentStudent) loadEvolucao(_currentStudent.id);
     };
 
+    // ── Pop-up global do administrador (só aparece se foi enviado com "Enviar para alunos também") ──
+    const _GP_TYPES = {
+      update:  { icon: '🚀', tag: 'Atualização', theme: 'gp-theme-update' },
+      warning: { icon: '⚠️', tag: 'Aviso',       theme: 'gp-theme-warning' },
+      promo:   { icon: '🎁', tag: 'Promoção',    theme: '' }
+    };
+    // Mantém só formatação básica (negrito, itálico, listas, quebras); remove tags e atributos perigosos
+    function _gpSanitize(html) {
+      const ALLOWED = ['B', 'STRONG', 'I', 'EM', 'U', 'BR', 'P', 'DIV', 'UL', 'OL', 'LI'];
+      const tpl = document.createElement('template');
+      tpl.innerHTML = String(html || '');
+      (function clean(node) {
+        Array.from(node.childNodes).forEach(ch => {
+          if (ch.nodeType === 1) {
+            clean(ch);
+            if (ALLOWED.indexOf(ch.tagName) === -1) {
+              if (['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED'].indexOf(ch.tagName) !== -1) { ch.remove(); return; }
+              while (ch.firstChild) node.insertBefore(ch.firstChild, ch);
+              ch.remove();
+            } else {
+              Array.from(ch.attributes).forEach(a => ch.removeAttribute(a.name));
+            }
+          } else if (ch.nodeType !== 3) { ch.remove(); }
+        });
+      })(tpl.content);
+      return tpl.innerHTML;
+    }
+    window.checkAndShowGlobalPopupAluno = async function (student) {
+      try {
+        if (!student || !student.id) return;
+        await ensureAuth();
+        const snap = await getDoc(doc(db, 'settings', 'global_popup'));
+        if (!snap.exists()) return;
+        const d = snap.data();
+        if (!d.active || !d.forStudents || !d.title) return;
+        const pid = d.popupId || String(d.createdAt || '');
+        const seenKey = 'trainly_aluno_popup_seen_' + student.id + '_' + pid;
+        try { if (localStorage.getItem(seenKey)) return; } catch (e) { }
+        // não sobrepõe o aviso de conta suspensa
+        const sp = document.getElementById('suspended-popup-overlay');
+        if (sp && !sp.classList.contains('hidden')) return;
+        const cfg = _GP_TYPES[d.type] || _GP_TYPES.update;
+        document.getElementById('gp-head').className = 'gp-head ' + cfg.theme;
+        document.getElementById('gp-icon').textContent = cfg.icon;
+        document.getElementById('gp-tag').textContent = cfg.tag;
+        document.getElementById('gp-title').textContent = d.title;
+        document.getElementById('gp-desc').innerHTML = _gpSanitize(d.desc);
+        window._gpAlunoKey = seenKey;
+        document.getElementById('gp-overlay').classList.remove('hidden');
+      } catch (e) { console.warn('popup global (aluno):', e && e.message); }
+    };
+    window.dismissGlobalPopupAluno = function () {
+      document.getElementById('gp-overlay').classList.add('hidden');
+      try { if (window._gpAlunoKey) localStorage.setItem(window._gpAlunoKey, '1'); } catch (e) { }
+    };
+
+    // ── Carga por exercício ──
+    // Salva em students/{id}.loads.{chave} = { name, kg, at, hist: [{kg, at}] }
+    // A chave vem do NOME do exercício, então a carga acompanha o exercício em qualquer treino/plano.
+    function _loadKey(name) {
+      const base = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60);
+      return base || 'exercicio';
+    }
+    function _alEscAttr(v) {
+      return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function _fmtKg(n) {
+      return String(Math.round(n * 100) / 100).replace('.', ',');
+    }
+    function _fmtLoadDate(ts) {
+      try { return new Date(ts).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); } catch (e) { return ''; }
+    }
+    function _loadHistHtml(entry) {
+      const h = (entry && Array.isArray(entry.hist)) ? entry.hist.slice(-5).reverse() : [];
+      if (h.length < 1) return '';
+      return '<span class="ex-load-hist-lbl">Anteriores:</span>' +
+        h.map(x => `<span class="ex-load-chip">${_fmtKg(x.kg)} kg · ${_fmtLoadDate(x.at)}</span>`).join('');
+    }
+    function _loadTabHtml(ex, planId, wi, ei) {
+      const key = _loadKey(ex.name);
+      const entry = ((_currentStudent && _currentStudent.loads) || {})[key];
+      const val = entry && typeof entry.kg === 'number' ? _fmtKg(entry.kg) : '';
+      return `
+          <div class="ex-load" data-key="${key}" data-exname="${_alEscAttr(ex.name)}">
+            <button type="button" class="ex-load-tab" onclick="toggleLoadTab(this)" aria-label="Carga do exercício">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>
+              Carga
+              <span class="ex-load-val">${val ? val + ' kg' : ''}</span>
+              <svg class="ex-load-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="ex-load-panel">
+              <div class="ex-load-label">Carga que estou usando</div>
+              <div class="ex-load-form">
+                <div class="ex-load-field">
+                  <input class="ex-load-input" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 40" value="${val}" maxlength="6" onkeydown="if(event.key==='Enter'){event.preventDefault();saveLoad(this);}" />
+                  <span class="ex-load-unit">kg</span>
+                </div>
+                <button type="button" class="ex-load-save" onclick="saveLoad(this)">Salvar</button>
+              </div>
+              <div class="ex-load-hist">${_loadHistHtml(entry)}</div>
+            </div>
+          </div>`;
+    }
+    window.toggleLoadTab = function (btn) {
+      const wrap = btn.closest('.ex-load');
+      if (!wrap) return;
+      wrap.classList.toggle('open');
+      if (wrap.classList.contains('open')) {
+        const inp = wrap.querySelector('.ex-load-input');
+        if (inp && !inp.value) setTimeout(() => { try { inp.focus(); } catch (e) { } }, 50);
+      }
+    };
+    window.saveLoad = async function (el) {
+      const wrap = el.closest('.ex-load');
+      if (!wrap || !_currentStudent || !_currentStudent.id) return;
+      const input = wrap.querySelector('.ex-load-input');
+      const saveBtn = wrap.querySelector('.ex-load-save');
+      const kg = parseFloat(String(input.value || '').replace(',', '.').trim());
+      if (!isFinite(kg) || kg < 0 || kg > 999) { toast('Informe uma carga válida (ex.: 40 ou 12,5).', 'error'); return; }
+      const key = wrap.dataset.key, name = wrap.dataset.exname;
+      const prev = (_currentStudent.loads || {})[key] || {};
+      const hist = Array.isArray(prev.hist) ? prev.hist.slice(-9) : [];
+      const now = Date.now();
+      if (!hist.length || hist[hist.length - 1].kg !== kg) hist.push({ kg, at: now });
+      const entry = { name, kg, at: now, hist };
+      saveBtn.disabled = true;
+      try {
+        await ensureAuth();
+        await updateDoc(doc(db, 'students', _currentStudent.id), { ['loads.' + key]: entry });
+        _currentStudent = { ..._currentStudent, loads: { ...(_currentStudent.loads || {}), [key]: entry } };
+        window._alStudent = _currentStudent;
+        saveSession(_currentStudent);
+        // atualiza todas as abas do mesmo exercício na tela
+        document.querySelectorAll('.ex-load[data-key="' + key + '"]').forEach(w => {
+          w.querySelector('.ex-load-val').textContent = _fmtKg(kg) + ' kg';
+          w.querySelector('.ex-load-input').value = _fmtKg(kg);
+          w.querySelector('.ex-load-hist').innerHTML = _loadHistHtml(entry);
+        });
+        wrap.classList.remove('open');
+        toast('Carga salva!');
+      } catch (e) {
+        console.error('saveLoad', e);
+        toast('Não foi possível salvar a carga. Tente de novo.', 'error');
+      } finally {
+        saveBtn.disabled = false;
+      }
+    };
+
     // ── Check ──
     window.toggleCheck = async function (planId, wi, ei, total, progressId, planTitle, workoutTitle, studentName) {
       const key = `${planId}_${wi}_${ei}`;
@@ -5829,6 +6059,7 @@
           </div>
           ${ex.obs ? '<div class="ex-obs">' + ex.obs + '</div>' : ''}
           ${videoHtml}
+          ${_loadTabHtml(ex, p.id, wi, ei)}
         </div>
         <div class="ex-right">${rightHtml}</div>
       </div>`;
