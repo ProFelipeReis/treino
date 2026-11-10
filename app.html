@@ -6854,7 +6854,9 @@
           <select id="ceo-edit-role" class="form-control">
             <option value="comum">Comum</option>
             <option value="master">Master</option>
-            <option value="ceo">CEO</option>
+            <option value="admin1">Administrador grau 1 (A1)</option>
+            <option value="admin2">Administrador grau 2 (A2)</option>
+            <option value="ceo">Administrador grau 3 (A3)</option>
           </select>
         </div>
         <div style="height:1px;background:var(--border);margin:16px 0;"></div>
@@ -7073,7 +7075,9 @@
           <select id="ceo-new-role" class="form-control">
             <option value="comum">Comum</option>
             <option value="master">Master</option>
-            <option value="ceo">CEO</option>
+            <option value="admin1">Administrador grau 1 (A1)</option>
+            <option value="admin2">Administrador grau 2 (A2)</option>
+            <option value="ceo">Administrador grau 3 (A3)</option>
           </select>
         </div>
         <div id="ceo-add-error"
@@ -7159,15 +7163,14 @@
           </svg>
           Report
         </div>
-        <div class="sidebar-item sidebar-item-ceo hidden" data-tab="tab-ceo" onclick="switchTab('tab-ceo',this)"
+        <div class="sidebar-item sidebar-item-admin hidden" data-tab="tab-ceo" onclick="switchTab('tab-ceo',this)"
           style="margin-top:8px;border-top:1px solid var(--border);padding-top:12px;">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <polygon
               points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
-          <span
-            style="background:linear-gradient(135deg,#f5c800,#e0a800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">Painel
-            CEO</span>
+          <span class="adm-label">Painel Administrativo</span>
+          <span id="adm-pending-badge" class="sidebar-item-chat-badge hidden" style="background:var(--red);" title="Alterações de exercícios aguardando aprovação">0</span>
         </div>
         <div class="sidebar-item sidebar-item-ceo hidden" data-tab="tab-ceo-reports" onclick="switchTab('tab-ceo-reports',this)">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -7454,10 +7457,10 @@
         <div id="tab-ceo" class="tab-panel tn">
           <div class="ceo-hero">
             <div>
-              <h1 class="ceo-hero-title">Painel CEO</h1>
-              <p class="ceo-hero-sub">Gestão de gestores, assinaturas, receita e comunicação da plataforma.</p>
+              <h1 class="ceo-hero-title">Painel Administrativo</h1>
+              <p class="ceo-hero-sub" id="adm-hero-sub">Gestão de gestores, assinaturas, receita e comunicação da plataforma.</p>
             </div>
-            <span class="ceo-hero-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Administrador</span>
+            <span class="ceo-hero-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> <span id="adm-hero-badge-txt">Administrador</span></span>
           </div>
 
           <!-- ── Visão geral ── -->
@@ -7494,8 +7497,8 @@
           </div>
 
           <!-- ── Gestores ── -->
-          <div class="tn-sec-head"><div class="dash-section-title">Gestores</div></div>
-          <section class="dp-card ceo-card ceo-managers-card">
+          <div class="tn-sec-head" data-admin-min="3"><div class="dash-section-title">Gestores</div></div>
+          <section class="dp-card ceo-card ceo-managers-card" data-admin-min="3">
             <header class="dp-head">
               <h3 class="dp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Gestores cadastrados</h3>
               <input id="ceo-search" class="form-control ceo-search" type="text" placeholder="Buscar gestor..." oninput="filterCeoManagers()" />
@@ -7523,8 +7526,8 @@
           </section>
 
           <!-- ── Financeiro ── -->
-          <div class="tn-sec-head" style="margin-top:28px;"><div class="dash-section-title">Financeiro</div></div>
-          <div class="ceo-payment-section" id="ceo-payment-section">
+          <div class="tn-sec-head" data-admin-min="3" style="margin-top:28px;"><div class="dash-section-title">Financeiro</div></div>
+          <div class="ceo-payment-section" id="ceo-payment-section" data-admin-min="3">
             <div class="ceo-payment-section-head">
               <div class="ceo-section-title" style="margin:0;"><svg width="14" height="14" viewBox="0 0 24 24"
                   fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -7601,7 +7604,7 @@
           <!-- ── Operação ── -->
           <div class="tn-sec-head" style="margin-top:28px;"><div class="dash-section-title">Operação</div></div>
           <div class="ceo-grid">
-            <div class="cref-review-card" id="cref-review-section">
+            <div class="cref-review-card" id="cref-review-section" data-admin-min="2">
             <div class="cref-review-head">
               <div class="ceo-section-title" style="margin:0;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -7621,7 +7624,7 @@
 
           
             <div class="ceo-col">
-              <div class="pricing-card">
+              <div class="pricing-card" data-admin-min="3">
             <div class="ceo-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 style="vertical-align:middle">
@@ -7650,6 +7653,21 @@
           </div>
 
           
+              <div class="ceo-popup-launcher-card" id="exe-approvals-card" data-admin-min="3">
+            <div class="ceo-popup-launcher-head">
+              <div class="ceo-section-title" style="margin:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Aprovação de exercícios
+                <span class="cref-stat-badge" id="exe-approvals-count" style="display:none;">0</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="loadExeApprovals()">↺ Atualizar</button>
+            </div>
+            <div style="font-size:.8rem;color:var(--text2);line-height:1.55;margin:10px 0 12px;">
+              Alterações enviadas por A1 e A2 no editor de exercícios. Só entram na biblioteca depois da sua aprovação.
+            </div>
+            <div id="exe-approvals-list" class="exa-list"><div class="cref-empty">Carregando...</div></div>
+          </div>
+
               <div class="ceo-popup-launcher-card" id="ceo-ex-editor-card">
             <div class="ceo-popup-launcher-head">
               <div class="ceo-section-title" style="margin:0;">
@@ -7661,9 +7679,10 @@
             <div style="font-size:.8rem;color:var(--text2);line-height:1.55;margin-top:10px;">
               Biblioteca de exercícios do Trainly por grupo muscular: edite nomes, cadastre ou troque o link do vídeo e adicione novos exercícios.
             </div>
+            <div id="exe-card-note" class="exa-note" style="display:none;">Suas alterações não são aplicadas na hora: ao salvar, elas são enviadas ao A3 para aprovação.</div>
           </div>
 
-              <div class="ceo-popup-launcher-card" id="ceo-popup-launcher">
+              <div class="ceo-popup-launcher-card" id="ceo-popup-launcher" data-admin-min="2">
             <div class="ceo-popup-launcher-head">
               <div class="ceo-section-title" style="margin:0;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
@@ -7760,12 +7779,15 @@
 
           <div class="exe-top">
             <div>
-              <button class="btn btn-ghost btn-sm" onclick="closeExerciseEditor()" style="margin-bottom:10px;">← Voltar ao Painel CEO</button>
+              <button class="btn btn-ghost btn-sm" onclick="closeExerciseEditor()" style="margin-bottom:10px;">← Voltar ao Painel Administrativo</button>
               <h1 class="exe-title">Editor de exercícios</h1>
               <p class="exe-sub">Todos os exercícios da biblioteca do Trainly, organizados por grupo muscular. Edite o nome, cole o link do vídeo e clique em <b>Inserir vídeo</b> para salvar.</p>
             </div>
             <button class="btn btn-primary" onclick="exeToggleNew()">+ Novo exercício</button>
           </div>
+
+          <div class="exa-note exa-banner" id="exe-approval-banner" style="display:none;"><b>Modo de aprovação.</b> Ao salvar, sua alteração é enviada ao Administrador grau 3 (A3) e só entra na biblioteca depois de aprovada. Os exercícios abaixo mostram a biblioteca atual.</div>
+          <div class="exa-mine" id="exe-mine" style="display:none;"></div>
 
           <div class="exe-stats" id="exe-stats"></div>
 
@@ -7982,7 +8004,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
           <span class="mobile-nav-label">Report</span>
         </div>
-        <div class="mobile-nav-item sidebar-item-ceo hidden" data-tab="tab-ceo" onclick="switchTab('tab-ceo',this)">
+        <div class="mobile-nav-item sidebar-item-admin hidden" data-tab="tab-ceo" onclick="switchTab('tab-ceo',this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <span class="mobile-nav-label">Admin</span>
         </div>
@@ -8810,7 +8832,7 @@
   <!-- MODAL: MENSAGEM DIRETA DO CEO PARA QUALQUER ALUNO -->
   <!-- Compose-only: propositalmente NÃO carrega o histórico da conversa do aluno
        com o personal responsável — o CEO só pode enviar uma nova mensagem,
-       identificada como vinda do CEO, sem ler a conversa privada de outro personal. -->
+       identificada como vinda do Administrador, sem ler a conversa privada de outro personal. -->
   <!-- Pop-up: novidade da foto de perfil (gestores antigos sem foto) -->
   <div id="modal-photo-prompt" class="modal-overlay hidden tn">
     <div class="modal modal-sm">
@@ -8846,15 +8868,15 @@
           </div>
         </div>
         <p style="font-size:.8rem;color:var(--text2);margin-bottom:12px;line-height:1.5;">
-          Por privacidade, o CEO não visualiza o histórico da conversa deste aluno com o personal responsável.
-          A mensagem abaixo será enviada diretamente e aparecerá para o aluno identificada como <strong>CEO</strong>.
+          Por privacidade, o Administrador não visualiza o histórico da conversa deste aluno com o personal responsável.
+          A mensagem abaixo será enviada diretamente e aparecerá para o aluno identificada como <strong>Administrador</strong>.
         </p>
         <textarea id="ceo-msg-text" rows="4" placeholder="Escreva sua mensagem..." style="width:100%;resize:vertical;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:.88rem;"></textarea>
         <div id="ceo-msg-error" style="color:var(--red);font-size:.8rem;font-weight:600;min-height:18px;margin-top:8px;"></div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('modal-ceo-message')">Cancelar</button>
-        <button id="btn-send-ceo-msg" class="btn btn-primary" onclick="sendCeoMessageDirect()">Enviar como CEO →</button>
+        <button id="btn-send-ceo-msg" class="btn btn-primary" onclick="sendCeoMessageDirect()">Enviar como Administrador →</button>
       </div>
     </div>
   </div>
@@ -9922,10 +9944,43 @@
       toast('Sessão encerrada.');
       setTimeout(function () { window.location.replace('https://trainly.online/login'); }, 800);
     };
+    // ── Hierarquia de administradores ──
+    //   A1 = role 'admin1' · A2 = role 'admin2' · A3 = role 'ceo' (valor interno mantido por compatibilidade)
+    window.adminLevel = function (u) {
+      u = u || window.CURRENT_USER || {};
+      return u.role === 'ceo' ? 3 : u.role === 'admin2' ? 2 : u.role === 'admin1' ? 1 : 0;
+    };
+    window.ADMIN_META = {
+      1: { tag: 'A1', name: 'Administrador grau 1', sub: 'Acompanhe a visão geral da plataforma e envie alterações da biblioteca de exercícios para aprovação do A3.' },
+      2: { tag: 'A2', name: 'Administrador grau 2', sub: 'Visão geral, análise de documentos, pop-ups globais e envio de alterações de exercícios para aprovação do A3.' },
+      3: { tag: 'A3', name: 'Administrador grau 3', sub: 'Gestão de gestores, assinaturas, receita e comunicação da plataforma.' }
+    };
+    // Mostra/esconde o Painel Administrativo de acordo com o grau do usuário
+    window.applyAdminUI = function (u) {
+      u = u || window.CURRENT_USER || {};
+      var lv = window.adminLevel(u);
+      document.querySelectorAll('.sidebar-item-admin').forEach(function (el) { el.classList.toggle('hidden', lv < 1); });
+      document.querySelectorAll('.sidebar-item-ceo').forEach(function (el) { el.classList.toggle('hidden', lv < 3); });
+      if (lv) document.body.setAttribute('data-admin-level', lv); else document.body.removeAttribute('data-admin-level');
+      var tab = document.getElementById('tab-ceo');
+      if (!tab) return;
+      tab.setAttribute('data-admin-level', lv);
+      tab.querySelectorAll('[data-admin-min]').forEach(function (el) {
+        el.classList.toggle('hidden', lv < parseInt(el.getAttribute('data-admin-min'), 10));
+      });
+      var meta = window.ADMIN_META[lv];
+      if (meta) {
+        var b = document.getElementById('adm-hero-badge-txt'); if (b) b.textContent = meta.tag + ' · ' + meta.name;
+        var sb = document.getElementById('adm-hero-sub'); if (sb) sb.textContent = meta.sub;
+      }
+      var note = document.getElementById('exe-card-note'); if (note) note.style.display = (lv && lv < 3) ? 'block' : 'none';
+    };
+
     window.switchTab = (tabId, el) => {
       // Protege abas restritas
       if (tabId === 'tab-report' && !(window.CURRENT_USER || {}).isTester) return;
-      if ((tabId === 'tab-ceo' || tabId === 'tab-ceo-reports' || tabId === 'tab-ceo-exercises') && (window.CURRENT_USER || {}).role !== 'ceo') return;
+      if ((tabId === 'tab-ceo' || tabId === 'tab-ceo-exercises') && window.adminLevel() < 1) return;
+      if (tabId === 'tab-ceo-reports' && window.adminLevel() < 3) return;
       document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       document.querySelectorAll('.sidebar-item,.mobile-nav-item').forEach(i => i.classList.remove('active'));
@@ -9941,7 +9996,13 @@
       if (tabId === 'tab-dashboard') {
         if (typeof window.startTrainingNowListener === 'function') window.startTrainingNowListener();
       }
-      if (tabId === 'tab-ceo') { loadCeoManagers(); loadPricing(); loadCrefPending(); }
+      if (tabId === 'tab-ceo') {
+        var _al = window.adminLevel();
+        window.applyAdminUI();
+        loadCeoManagers(); // alimenta a Visão geral (todos os graus)
+        if (_al >= 3) { loadPricing(); if (window.loadExeApprovals) loadExeApprovals(); }
+        if (_al >= 2) { loadCrefPending(); if (window.loadGlobalPopupStatus) loadGlobalPopupStatus(); }
+      }
     };
     window.goToAlunos = () => switchTab('tab-alunos', document.querySelector('[data-tab="tab-alunos"]'));
     window.goToExpiredPlans = async () => {
@@ -10949,7 +11010,7 @@
         ${s.email ? `<div style="font-size:.82rem;color:var(--text2);margin-top:2px;font-weight:500;">✉️ ${s.email}</div>` : ''}
       </div>
       <div class="detail-actions" style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
-        ${isForeignStudent ? `<button class="btn btn-primary btn-sm" onclick="openCeoMessageModal('${sid}','${(s.name||'').replace(/'/g,"\\'")}')">⭐ Mensagem como CEO</button>` : ''}
+        ${isForeignStudent ? `<button class="btn btn-primary btn-sm" onclick="openCeoMessageModal('${sid}','${(s.name||'').replace(/'/g,"\\'")}')">⭐ Mensagem como Administrador</button>` : ''}
         ${s.phone ? `<button class="btn btn-whatsapp btn-sm" onclick="${active.length ? `sendWhatsAppPlan('${sid}','${active[0].id}')` : `contactWhatsApp('${sid}')`}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Enviar via WhatsApp</button>` : ''}
         <button class="btn btn-ghost btn-sm" onclick="openEditStudentModal('${sid}')">✏️ Editar</button>
         <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">Excluir</button>
@@ -15379,11 +15440,8 @@
       document.querySelectorAll('.sidebar-item-gestores,.mobile-nav-item-gestores').forEach(function (el) {
         el.classList.toggle('hidden', !showGestores);
       });
-      // CEO tab: visível apenas para CEO
-      var showCeo = u.role === 'ceo';
-      document.querySelectorAll('.sidebar-item-ceo').forEach(function (el) {
-        el.classList.toggle('hidden', !showCeo);
-      });
+      // Painel Administrativo: A1/A2/A3 (Reports: só A3)
+      if (window.applyAdminUI) window.applyAdminUI(u);
       // Report tab: visível apenas para testadores
       var showReport = !!u.isTester;
       document.querySelectorAll('.sidebar-item-report,.mobile-nav-item-report').forEach(function (el) {
@@ -15391,13 +15449,21 @@
       });
       // Badge de role na topbar
       var existingBadge = document.getElementById('role-topbar-badge');
-      if (!existingBadge && (u.role === 'master' || u.role === 'ceo')) {
+      if (!existingBadge && (u.role === 'master' || (window.adminLevel && window.adminLevel(u)))) {
         var pill2 = document.getElementById('topbar-user-pill');
         if (pill2) {
           var span = document.createElement('span');
           span.id = 'role-topbar-badge';
-          span.style.cssText = 'background:' + (u.role === 'ceo' ? 'linear-gradient(135deg,#45c492,#34a876)' : 'rgba(61,187,134,.15)') + ';color:' + (u.role === 'ceo' ? '#03150b' : '#3dbb86') + ';border-radius:6px;padding:2px 8px;font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-left:6px;';
-          span.textContent = u.role === 'ceo' ? '⭐ CEO' : 'Master';
+          var _lv = window.adminLevel ? window.adminLevel(u) : 0;
+          if (_lv) {
+            span.className = 'adm-badge a' + _lv;
+            span.style.marginLeft = '6px';
+            span.textContent = 'A' + _lv;
+            span.title = window.ADMIN_META[_lv].name;
+          } else {
+            span.style.cssText = 'background:rgba(61,187,134,.15);color:#3dbb86;border-radius:6px;padding:2px 8px;font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-left:6px;';
+            span.textContent = 'Master';
+          }
           pill2.after(span);
         }
       }
@@ -15499,7 +15565,7 @@
     window._mgrBilling = function (m) {
       const ms = v => !v ? 0 : v.toMillis ? v.toMillis() : v.seconds ? v.seconds * 1000 : typeof v === 'number' ? v : +new Date(v);
       const now = Date.now(), tr = ms(m.trialEndsAt), sb = ms(m.subEndsAt), dl = x => Math.ceil((x - now) / 86400000);
-      if (m.role === 'ceo') return { k: 'ok', label: 'Em dia', title: 'Conta do CEO' };
+      if (m.role === 'ceo') return { k: 'ok', label: 'Em dia', title: 'Conta A3' };
       if (sb && sb > now) return { k: 'ok', label: 'Em dia', title: 'Vence em ' + dl(sb) + ' dia(s)' };
       if (tr && tr > now) return { k: 'trial', label: 'Período teste · ' + dl(tr) + 'd', title: 'Termina em ' + dl(tr) + ' dia(s)' };
       return { k: 'late', label: 'Inadimplente', title: 'Sem assinatura nem teste vigente' };
@@ -15529,7 +15595,7 @@
       <div class="dp-row cols-m">
         <div class="dp-c-name"><div class="avatar" style="${m.isMaster ? 'background:var(--accent-dim);border-color:var(--accent-soft);' : ''}">${studentAvatar({ name: m.name || m.username || '?', photoURL: m.photoURL || ((window.CURRENT_USER || {}).username === m.username ? (window.CURRENT_USER || {}).photoURL : '') })}</div>
           <div class="dp-name-txt"><div class="student-name">${escHtml(m.name || m.username)}</div><div class="dp-sub">@${escHtml(m.username)}</div></div></div>
-        <div class="dp-c-code c-code"><span class="mgr-badge ${m.role === 'ceo' ? 'mgr-ceo' : m.isMaster ? 'mgr-master' : 'mgr-comum'}">${m.role === 'ceo' ? '⭐ CEO' : m.isMaster ? '⭐ Master' : 'Comum'}</span>${extra ? `<div class="dp-sub">${escHtml(extra)}</div>` : ''}</div>
+        <div class="dp-c-code c-code"><span class="mgr-badge ${m.role === 'ceo' ? 'mgr-ceo' : m.role === 'admin2' ? 'mgr-admin2' : m.role === 'admin1' ? 'mgr-admin1' : m.isMaster ? 'mgr-master' : 'mgr-comum'}">${m.role === 'ceo' ? 'A3' : m.role === 'admin2' ? 'A2' : m.role === 'admin1' ? 'A1' : m.isMaster ? '⭐ Master' : 'Comum'}</span>${extra ? `<div class="dp-sub">${escHtml(extra)}</div>` : ''}</div>
         <div class="dp-c-status"><span class="dp-pill ${bl.k}" title="${bl.title}">${bl.label}</span></div>
         <div class="dp-c-act">
           <button class="dp-ibtn" title="Editar" aria-label="Editar" onclick="openAddManagerModal(${JSON.stringify(m).replace(/"/g, '&quot;')})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
@@ -15566,14 +15632,14 @@
 
     // Quem pode ter a senha trocada por quem:
     //  • CEO    → qualquer gestor, exceto ele mesmo
-    //  • MASTER → somente gestores comuns (nunca CEO nem outro MASTER)
+    //  • MASTER → somente gestores comuns (nunca A1/A2/A3 nem outro MASTER)
     function _canResetMgrPassword(m) {
       var u = window.CURRENT_USER || {};
       var me = _roleOf(u);
       if (me !== 'ceo' && me !== 'master') return false;
       if (!m || m.username === u.username) return false;
       var target = _roleOf(m);
-      if (target === 'ceo') return false;
+      if (target === 'ceo' || target === 'admin1' || target === 'admin2') return false;
       if (me === 'master' && target !== 'comum') return false;
       return true;
     }
@@ -15706,7 +15772,7 @@
           var reject = '<button class="btn btn-ghost btn-sm" data-user="' + enc + '" onclick="pwReqReject(this)">Recusar</button>';
           var actions, name = escHtml((m && m.name) || r.username);
           if (m === null) actions = '<span class="pwreq-note">Usuário não encontrado</span>' + reject;
-          else if (m && !_canResetMgrPassword(m)) actions = '<span class="pwreq-note">Somente o CEO pode aprovar</span>' + reject;
+          else if (m && !_canResetMgrPassword(m)) actions = '<span class="pwreq-note">Somente o A3 pode aprovar</span>' + reject;
           else actions = reject + '<button class="btn btn-primary btn-sm" data-user="' + enc + '" onclick="pwReqApprove(this)">Aprovar</button>';
           return '<div class="pwreq-item">'
             + '<div class="pwreq-info"><div class="pwreq-name">' + name + ' <span style="color:var(--text3);font-weight:600;">@' + escHtml(r.username) + '</span></div>'
@@ -16235,7 +16301,7 @@
       if (!sid) return;
       if (!text) { errEl.textContent = 'Escreva uma mensagem antes de enviar.'; return; }
       var u = window.CURRENT_USER || {};
-      if (u.role !== 'ceo') { errEl.textContent = 'Apenas o CEO pode usar este envio.'; return; }
+      if (u.role !== 'ceo') { errEl.textContent = 'Apenas o A3 pode usar este envio.'; return; }
       var btn = document.getElementById('btn-send-ceo-msg');
       btn.disabled = true; btn.textContent = 'Enviando...';
       try {
@@ -16248,12 +16314,12 @@
           readByManager: true,
           readByStudent: false,
         });
-        toast('Mensagem enviada como CEO!');
+        toast('Mensagem enviada como Administrador!');
         window.closeModal('modal-ceo-message');
       } catch (e) {
         errEl.textContent = 'Erro ao enviar: ' + e.message;
       } finally {
-        btn.disabled = false; btn.textContent = 'Enviar como CEO →';
+        btn.disabled = false; btn.textContent = 'Enviar como Administrador →';
       }
     };
 
@@ -16800,6 +16866,7 @@
         loadCrefPending();
         loadCeoPaymentHistory();
         if (window.loadGlobalPopupStatus) loadGlobalPopupStatus();
+        if (window.loadExeApprovals) loadExeApprovals();
       }, 300);
     };
 
@@ -16810,7 +16877,7 @@
         var snap = await _getDocs(_query(_col(_db, 'managers'), _orderBy('createdAt', 'desc')));
         window._ceoAllManagers = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
         renderCeoTable(window._ceoAllManagers);
-        loadCeoPaymentHistory();
+        if (window.adminLevel() >= 3) loadCeoPaymentHistory();
         // Update stats
         var total = window._ceoAllManagers.length;
         var now = Date.now();
@@ -16840,13 +16907,15 @@
       var now = Date.now();
       tbody.innerHTML = list.map(function (m) {
         var sub = (m.role !== 'ceo') ? _checkSubscription(m) : null;
-        var subBadge = !sub ? '<span class="sub-status-badge sub-active">⭐ CEO</span>'
+        var subBadge = !sub ? '<span class="sub-status-badge sub-active">A3</span>'
           : sub.type === 'trial' ? '<span class="sub-status-badge sub-trial"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Teste (' + sub.daysLeft + 'd)</span>'
             : sub.type === 'active' ? '<span class="sub-status-badge sub-active">✓ Ativo (' + sub.daysLeft + 'd)</span>'
               : '<span class="sub-status-badge sub-expired">✕ Expirado</span>';
         if (m.blocked) subBadge = '<span class="sub-status-badge sub-blocked"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bloqueado</span>';
 
-        var roleBadge = m.role === 'ceo' ? '<span class="role-badge role-ceo">CEO</span>'
+        var roleBadge = m.role === 'ceo' ? '<span class="role-badge role-ceo">A3</span>'
+          : m.role === 'admin2' ? '<span class="role-badge role-admin2">A2</span>'
+          : m.role === 'admin1' ? '<span class="role-badge role-admin1">A1</span>'
           : m.role === 'master' ? '<span class="role-badge role-master">Master</span>'
             : '<span class="role-badge role-comum">Comum</span>';
 
@@ -16898,7 +16967,7 @@
       // Status badge
       var sub = (m.role !== 'ceo') ? _checkSubscription(m) : null;
       var badge = document.getElementById('ceo-edit-status-badge');
-      if (!sub) badge.innerHTML = '<span class="sub-status-badge sub-active">CEO</span>';
+      if (!sub) badge.innerHTML = '<span class="sub-status-badge sub-active">A3</span>';
       else if (sub.type === 'trial') badge.innerHTML = '<span class="sub-status-badge sub-trial">Teste · ' + sub.daysLeft + 'd</span>';
       else if (sub.type === 'active') badge.innerHTML = '<span class="sub-status-badge sub-active">Ativo · ' + sub.daysLeft + 'd</span>';
       else badge.innerHTML = '<span class="sub-status-badge sub-expired">Expirado</span>';
@@ -17549,11 +17618,13 @@
     };
 
     // ══════════════════════════════════════════════════════════
-    // EDITOR DE EXERCÍCIOS (CEO) + OVERRIDES DA BIBLIOTECA
+    // EDITOR DE EXERCÍCIOS (A1/A2/A3) + OVERRIDES DA BIBLIOTECA
     // Firestore: settings/exerciseLibrary
     //   urls:    { [chave]: url }            ('' = vídeo removido)
     //   renames: { [chave]: novoNome }
     //   added:   { [chave]: {group, name} }  (exercícios criados no editor)
+    // A3 grava direto aqui. A1/A2 enviam a alteração para a coleção exerciseProposals
+    // (status pending) e ela só é aplicada quando o A3 aprova.
     // "chave" = nome original do exercício (ou id gerado, nos adicionados).
     // ══════════════════════════════════════════════════════════
     (function () {
@@ -17566,6 +17637,9 @@
       var cfg = { urls: {}, renames: {}, added: {} };
       var ui = { q: '', cat: 'all', group: 'all', vid: 'all', sort: 'orig', open: {}, loaded: false };
       var busy = false;
+      function lvl() { return window.adminLevel ? window.adminLevel() : 0; }
+      function proposing() { return lvl() < 3; }          // A1/A2 → precisa de aprovação
+      function DEL() { return proposing() ? null : FV().delete(); } // null = "apagar" dentro de uma proposta
 
       function docRef() { return _db.collection('settings').doc('exerciseLibrary'); }
       function FV() { return firebase.firestore.FieldValue; }
@@ -17710,15 +17784,31 @@
       }
 
       // ── Persistência ──
-      async function persist(upd) {
+      async function persist(upd, label) {
         if (busy) return false; busy = true;
         try {
+          var cu = window.CURRENT_USER || {};
+          if (proposing()) {
+            // A1/A2: não altera a biblioteca — cria uma solicitação para o A3 aprovar
+            await propRef().add({
+              status: 'pending',
+              createdBy: cu.username || '',
+              createdByName: cu.displayName || cu.username || '',
+              createdByRole: cu.role || '',
+              createdAt: FV().serverTimestamp(),
+              changes: [label || 'Alteração na biblioteca'],
+              payload: JSON.stringify(upd)
+            });
+            toast('Enviado para aprovação do A3.');
+            loadMine();
+            return 'sent';
+          }
           upd.updatedAt = FV().serverTimestamp();
-          upd.updatedBy = (window.CURRENT_USER && window.CURRENT_USER.username) || 'ceo';
+          upd.updatedBy = (window.CURRENT_USER && window.CURRENT_USER.username) || 'a3';
           await docRef().set(upd, { merge: true });
           var snap = await docRef().get();
           cfg = clean(snap.exists ? snap.data() : {}); applyOverrides(cfg);
-          return true;
+          return 'applied';
         } catch (e) {
           toast('Erro ao salvar: ' + (e && e.message ? e.message : e), 'error'); return false;
         } finally { busy = false; }
@@ -17730,8 +17820,8 @@
       }
       function urlUpdate(upd, k, url) {
         upd.urls = upd.urls || {};
-        if (isAdded(k)) upd.urls[k] = url ? url : FV().delete();
-        else upd.urls[k] = (url === (base().urls[k] || '')) ? FV().delete() : url;
+        if (isAdded(k)) upd.urls[k] = url ? url : DEL();
+        else upd.urls[k] = (url === (base().urls[k] || '')) ? DEL() : url;
       }
 
       async function saveRow(row) {
@@ -17740,14 +17830,18 @@
         if (!name) { toast('O nome não pode ficar vazio.', 'error'); return; }
         if (url === null) { toast('Link inválido. Use um endereço completo, ex.: https://youtube.com/watch?v=...', 'error'); return; }
         if (name !== display(k) && nameTaken(name, k)) { toast('Já existe um exercício com esse nome.', 'error'); return; }
+        var parts = [];
+        if (name !== display(k)) parts.push('Renomear "' + display(k) + '" → "' + name + '"');
+        if (url !== urlOf(k)) parts.push(url ? 'Vídeo de "' + name + '": ' + url : 'Remover vídeo de "' + name + '"');
         if (name !== display(k)) {
           upd.renames = {}; upd.added = upd.added || {};
           if (isAdded(k)) { upd.added[k] = { name: name }; delete upd.renames; }
-          else upd.renames[k] = (name === k) ? FV().delete() : name;
+          else upd.renames[k] = (name === k) ? DEL() : name;
         }
         if (url !== urlOf(k)) urlUpdate(upd, k, url);
         if (!upd.renames && !upd.added && !upd.urls) return;
-        if (await persist(upd)) { toast('Exercício salvo.'); render(); }
+        var pr = await persist(upd, parts.join(' · '));
+        if (pr) { if (pr === 'applied') toast('Exercício salvo.'); render(); }
       }
 
       // ── Eventos ──
@@ -17760,17 +17854,17 @@
         if (e.target.closest('.exe-save')) return saveRow(row);
         if (e.target.closest('.exe-rmvid')) {
           if (!confirm('Remover o vídeo de "' + display(k) + '"?')) return;
-          var u = {}; urlUpdate(u, k, ''); if (await persist(u)) { toast('Vídeo removido.'); render(); } return;
+          var u = {}; urlUpdate(u, k, ''); var p1 = await persist(u, 'Remover vídeo de "' + display(k) + '"'); if (p1) { if (p1 === 'applied') toast('Vídeo removido.'); render(); } return;
         }
         if (e.target.closest('.exe-restore')) {
           if (!confirm('Voltar "' + display(k) + '" ao nome e vídeo originais?')) return;
-          var r = { urls: {}, renames: {} }; r.urls[k] = FV().delete(); r.renames[k] = FV().delete();
-          if (await persist(r)) { toast('Original restaurado.'); render(); } return;
+          var r = { urls: {}, renames: {} }; r.urls[k] = DEL(); r.renames[k] = DEL();
+          var p2 = await persist(r, 'Restaurar "' + display(k) + '" ao original'); if (p2) { if (p2 === 'applied') toast('Original restaurado.'); render(); } return;
         }
         if (e.target.closest('.exe-del')) {
           if (!confirm('Excluir "' + display(k) + '" da biblioteca? Fichas já salvas não são alteradas.')) return;
-          var d = { added: {}, urls: {}, renames: {} }; d.added[k] = FV().delete(); d.urls[k] = FV().delete(); d.renames[k] = FV().delete();
-          if (await persist(d)) { toast('Exercício excluído.'); render(); }
+          var d = { added: {}, urls: {}, renames: {} }; d.added[k] = DEL(); d.urls[k] = DEL(); d.renames[k] = DEL();
+          var p3 = await persist(d, 'Excluir exercício "' + display(k) + '"'); if (p3) { if (p3 === 'applied') toast('Exercício excluído.'); render(); }
         }
       });
       function dirtyCheck(row) {
@@ -17806,16 +17900,111 @@
         var k = 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), upd = { added: {} };
         upd.added[k] = { group: g, name: name };
         if (url) { upd.urls = {}; upd.urls[k] = url; }
-        if (await persist(upd)) {
+        var p4 = await persist(upd, 'Novo exercício "' + name + '" em ' + g + (url ? ' · vídeo: ' + url : ''));
+        if (p4) {
           document.getElementById('exe-new-name').value = ''; document.getElementById('exe-new-url').value = '';
-          ui.open[g] = true; toast('Exercício adicionado em ' + g + '.'); render();
+          ui.open[g] = true; if (p4 === 'applied') toast('Exercício adicionado em ' + g + '.'); render();
         }
+      };
+
+      // ── Solicitações (A1/A2 → A3) ──
+      function propRef() { return _db.collection('exerciseProposals'); }
+      function tsMs(t) { return t && t.toMillis ? t.toMillis() : (t && t.seconds ? t.seconds * 1000 : 0); }
+      function fmtDt(t) { var m = tsMs(t); return m ? new Date(m).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'agora'; }
+      function roleTag(r) { return r === 'admin2' ? 'A2' : r === 'admin1' ? 'A1' : r === 'ceo' ? 'A3' : ''; }
+      var props = {};
+
+      // A1/A2: painel "Minhas solicitações" dentro do editor
+      async function loadMine() {
+        var box = document.getElementById('exe-mine'); if (!box) return;
+        var ban = document.getElementById('exe-approval-banner');
+        if (ban) ban.style.display = proposing() ? 'block' : 'none';
+        if (!proposing()) { box.style.display = 'none'; return; }
+        var u = window.CURRENT_USER || {};
+        try {
+          var snap = await propRef().where('createdBy', '==', u.username).get();
+          var arr = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); })
+            .sort(function (a, b) { return tsMs(b.createdAt) - tsMs(a.createdAt); }).slice(0, 12);
+          if (!arr.length) { box.style.display = 'none'; return; }
+          var lbl = { pending: 'Aguardando A3', approved: 'Aprovado', rejected: 'Rejeitado' };
+          box.innerHTML = '<div class="exa-mine-title">Minhas solicitações</div>' + arr.map(function (p) {
+            var st = lbl[p.status] ? p.status : 'pending';
+            return '<div class="exa-mine-row"><div class="exa-mine-txt">' + esc((p.changes || []).join(' · ')) +
+              (st === 'rejected' && p.reviewNote ? '<span class="exa-reason">Motivo: ' + esc(p.reviewNote) + '</span>' : '') +
+              '<span class="exa-reason">' + fmtDt(p.createdAt) + '</span></div><span class="exa-st ' + st + '">' + lbl[st] + '</span></div>';
+          }).join('');
+          box.style.display = 'block';
+        } catch (e) { console.warn('exerciseProposals (minhas):', e && e.message); }
+      }
+
+      // A3: lista de solicitações pendentes
+      function setPendingBadges(n) {
+        var c = document.getElementById('exe-approvals-count');
+        if (c) { c.style.display = n ? 'inline-flex' : 'none'; c.textContent = n > 9 ? '9+' : n; }
+        var sb = document.getElementById('adm-pending-badge');
+        if (sb) { sb.classList.toggle('hidden', !(n && lvl() >= 3)); sb.textContent = n > 9 ? '9+' : n; }
+      }
+      window.loadExeApprovals = async function () {
+        if (lvl() < 3) return;
+        var list = document.getElementById('exe-approvals-list'); if (!list) return;
+        try {
+          var snap = await propRef().where('status', '==', 'pending').get();
+          var arr = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); })
+            .sort(function (a, b) { return tsMs(a.createdAt) - tsMs(b.createdAt); });
+          props = {}; arr.forEach(function (p) { props[p.id] = p; });
+          setPendingBadges(arr.length);
+          if (!arr.length) { list.innerHTML = '<div class="cref-empty">Nenhuma alteração aguardando aprovação.</div>'; return; }
+          list.innerHTML = arr.map(function (p) {
+            var tag = roleTag(p.createdByRole);
+            return '<div class="exa-item" data-id="' + esc(p.id) + '"><div class="exa-head">' +
+              (tag ? '<span class="adm-badge a' + tag.charAt(1) + '">' + tag + '</span>' : '') +
+              '<span class="exa-who">' + esc(p.createdByName || p.createdBy) + '</span>' +
+              '<span class="exa-when">' + fmtDt(p.createdAt) + '</span></div>' +
+              '<ul class="exa-changes">' + (p.changes || []).map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul>' +
+              '<div class="exa-actions"><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="exeReject(\'' + esc(p.id) + '\')">Rejeitar</button>' +
+              '<button class="btn btn-primary btn-sm" onclick="exeApprove(\'' + esc(p.id) + '\')">Aprovar</button></div></div>';
+          }).join('');
+        } catch (e) {
+          list.innerHTML = '<div class="cref-empty">Não foi possível carregar as solicitações.</div>';
+          console.warn('exerciseProposals (pendentes):', e && e.message);
+        }
+      };
+      window.exeApprove = async function (id) {
+        var p = props[id]; if (!p || busy || lvl() < 3) return;
+        busy = true;
+        try {
+          var payload = JSON.parse(p.payload || '{}'), upd = {};
+          ['urls', 'renames', 'added'].forEach(function (f) {
+            if (!payload[f]) return; upd[f] = {};
+            Object.keys(payload[f]).forEach(function (k) { var v = payload[f][k]; upd[f][k] = (v === null) ? FV().delete() : v; });
+          });
+          upd.updatedAt = FV().serverTimestamp();
+          upd.updatedBy = p.createdBy || 'admin';
+          await docRef().set(upd, { merge: true });
+          await propRef().doc(id).update({ status: 'approved', reviewedBy: (window.CURRENT_USER || {}).username || '', reviewedAt: FV().serverTimestamp() });
+          var snap = await docRef().get(); cfg = clean(snap.exists ? snap.data() : {}); applyOverrides(cfg);
+          toast('Alterações aprovadas e aplicadas na biblioteca.');
+        } catch (e) { toast('Erro ao aprovar: ' + (e && e.message ? e.message : e), 'error'); }
+        finally { busy = false; }
+        window.loadExeApprovals(); if (ui.loaded) render();
+      };
+      window.exeReject = async function (id) {
+        var p = props[id]; if (!p || busy || lvl() < 3) return;
+        var reason = prompt('Motivo da rejeição (opcional):'); if (reason === null) return;
+        busy = true;
+        try {
+          await propRef().doc(id).update({ status: 'rejected', reviewNote: String(reason).trim().slice(0, 300), reviewedBy: (window.CURRENT_USER || {}).username || '', reviewedAt: FV().serverTimestamp() });
+          toast('Solicitação rejeitada.');
+        } catch (e) { toast('Erro ao rejeitar: ' + (e && e.message ? e.message : e), 'error'); }
+        finally { busy = false; }
+        window.loadExeApprovals();
       };
 
       // ── Navegação ──
       window.openExerciseEditor = async function () {
-        if (!window.CURRENT_USER || window.CURRENT_USER.role !== 'ceo') return;
+        if (lvl() < 1) return;
         switchTab('tab-ceo-exercises', null);
+        loadMine();
         window.scrollTo(0, 0);
         if (!ui.loaded) {
           base();
@@ -17826,7 +18015,7 @@
         render();
       };
       window.closeExerciseEditor = function () {
-        switchTab('tab-ceo', document.querySelector('.sidebar-item-ceo[data-tab="tab-ceo"]'));
+        switchTab('tab-ceo', document.querySelector('.sidebar-item-admin[data-tab="tab-ceo"]'));
         window.scrollTo(0, 0);
       };
     })();
@@ -19184,9 +19373,7 @@
       document.querySelectorAll('.sidebar-item-report,.mobile-nav-item-report').forEach(function (el) {
         el.classList.toggle('hidden', !u.isTester);
       });
-      document.querySelectorAll('.sidebar-item-ceo').forEach(function (el) {
-        el.classList.toggle('hidden', u.role !== 'ceo');
-      });
+      if (window.applyAdminUI) window.applyAdminUI(u);
     }
     window._applyUserUI = _applyUserUI;
     window._applyUserUIEarly = _applyUserUI;
@@ -20806,7 +20993,11 @@
 
 /* ── CEO / gestores / assinatura ── */
 .tn .ceo-topbar { background: transparent; border-bottom: 1px solid var(--border); box-shadow: none; }
-.tn .ceo-badge, .tn .role-ceo, .tn .mgr-ceo { background: linear-gradient(135deg, #45c492, #34a876); color: var(--on-accent); box-shadow: none; }
+.tn .ceo-badge { background: linear-gradient(135deg, #45c492, #34a876); color: var(--on-accent); box-shadow: none; }
+/* A3 = grau mais alto → cor premium (dourado) */
+.tn .role-ceo, .tn .mgr-ceo { background: linear-gradient(135deg, #f8d84a, #e0a800 55%, #c78f00); color: #1a1300; border: 0; box-shadow: 0 0 0 1px rgba(245, 200, 0, .4), 0 2px 10px rgba(224, 168, 0, .35); }
+.tn .role-admin1, .tn .mgr-admin1 { background: rgba(79, 140, 255, .14); color: #4f8cff; border: 1px solid rgba(79, 140, 255, .38); }
+.tn .role-admin2, .tn .mgr-admin2 { background: rgba(166, 120, 240, .15); color: #a678f0; border: 1px solid rgba(166, 120, 240, .4); }
 .tn .role-master, .tn .mgr-master { background: var(--accent-dim); color: var(--accent-ink); border: 1px solid var(--accent-soft); }
 .tn .mgr-comum, .tn .sub-blocked { background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); }
 .tn .sub-trial, .tn .pay-pending, .tn .cref-badge-pending { background: rgba(217, 164, 65, .13); color: var(--amber); border: 1px solid rgba(217, 164, 65, .32); }
@@ -21630,6 +21821,43 @@ html[data-theme="light"] .tn { --dp-g: #3f9170; }
 #tab-ceo .ceo-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
 #tab-ceo .ceo-col { display:flex; flex-direction:column; gap:16px; }
 @media (min-width:1000px) { #tab-ceo .ceo-grid { grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); } }
+
+/* ══ Hierarquia de administradores (A1 / A2 / A3) ══ */
+.role-admin1, .mgr-admin1 { background: rgba(79, 140, 255, .14); color: #4f8cff; border: 1px solid rgba(79, 140, 255, .38); }
+.role-admin2, .mgr-admin2 { background: rgba(166, 120, 240, .15); color: #a678f0; border: 1px solid rgba(166, 120, 240, .4); }
+.adm-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 9px; border-radius: 6px; font-size: .68rem; font-weight: 900; letter-spacing: .08em; line-height: 1.4; }
+.adm-badge.a1 { background: rgba(79, 140, 255, .14); color: #4f8cff; border: 1px solid rgba(79, 140, 255, .38); }
+.adm-badge.a2 { background: rgba(166, 120, 240, .15); color: #a678f0; border: 1px solid rgba(166, 120, 240, .4); }
+.adm-badge.a3 { background: linear-gradient(135deg, #f8d84a, #e0a800 55%, #c78f00); color: #1a1300; box-shadow: 0 0 0 1px rgba(245, 200, 0, .4), 0 2px 10px rgba(224, 168, 0, .35); }
+body { --adm-grad: linear-gradient(135deg, #f8d84a, #e0a800); }
+body[data-admin-level="1"] { --adm-grad: linear-gradient(135deg, #7aa8ff, #4f8cff); }
+body[data-admin-level="2"] { --adm-grad: linear-gradient(135deg, #c3a0f7, #a678f0); }
+body[data-admin-level="3"] { --adm-grad: linear-gradient(135deg, #f8d84a, #e0a800); }
+.adm-label { background: var(--adm-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+#tab-ceo .ceo-hero-badge { background: var(--adm-grad); color: #1a1300; border: 0; font-weight: 800; }
+body[data-admin-level="1"] #tab-ceo .ceo-hero-badge, body[data-admin-level="2"] #tab-ceo .ceo-hero-badge { color: #0b0b14; }
+#tab-ceo[data-admin-level="1"] .ceo-grid { grid-template-columns: minmax(0, 1fr); }
+
+/* Aprovação de exercícios */
+.exa-note { font-size: .78rem; color: var(--text2); line-height: 1.5; margin-top: 10px; padding: 9px 12px; border-radius: 10px; background: var(--accent-dim); border: 1px solid var(--accent-soft); }
+.exa-banner { margin: 0 0 14px; }
+.exa-list { display: flex; flex-direction: column; gap: 10px; }
+.exa-item { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: var(--surface); }
+.exa-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.exa-who { font-weight: 700; font-size: .86rem; color: var(--text); }
+.exa-when { font-size: .72rem; color: var(--text3); margin-left: auto; }
+.exa-changes { margin: 0 0 10px; padding-left: 18px; font-size: .8rem; color: var(--text2); line-height: 1.5; word-break: break-word; }
+.exa-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.exa-mine { margin: 0 0 16px; border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); padding: 12px 14px; }
+.exa-mine-title { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); margin-bottom: 8px; }
+.exa-mine-row { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-top: 1px solid var(--border); font-size: .8rem; color: var(--text2); }
+.exa-mine-row:first-of-type { border-top: 0; }
+.exa-mine-txt { flex: 1; min-width: 0; word-break: break-word; }
+.exa-st { flex-shrink: 0; font-size: .68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+.exa-st.pending { color: var(--amber, #d9a441); border-color: rgba(217, 164, 65, .4); background: rgba(217, 164, 65, .12); }
+.exa-st.approved { color: var(--green); border-color: rgba(76, 195, 138, .35); background: var(--green-dim, rgba(76, 195, 138, .12)); }
+.exa-st.rejected { color: var(--red); border-color: rgba(224, 62, 62, .3); background: rgba(224, 62, 62, .08); }
+.exa-reason { display: block; font-size: .74rem; color: var(--text3); margin-top: 2px; }
 </style>
 <script>
 /* Dashboard Pro — sparklines, gráfico de performance e atividades (dados reais de ST.students / planos) */
