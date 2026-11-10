@@ -23,6 +23,8 @@
   <script src="fotos-config.js"></script>
   <script src="fotos.js"></script>
   <script src="pdf-export.js"></script>
+  <script src="termos-aluno.js"></script>
+  <script src="termos-pdf.js"></script>
   <!-- Firebase SDK loaded early so login can query Firestore immediately -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
@@ -7186,6 +7188,12 @@
           <span style="background:linear-gradient(135deg,#f5c800,#e0a800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">Reports</span>
           <span id="ceo-reports-badge" class="sidebar-item-chat-badge hidden" style="background:var(--red);">0</span>
         </div>
+        <div class="sidebar-item sidebar-item-ceo hidden" data-tab="tab-ceo-termos" onclick="switchTab('tab-ceo-termos',this)">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/>
+          </svg>
+          Aceite dos Termos
+        </div>
       </div>
       <div class="main-content">
         <div id="tab-dashboard" class="tab-panel active">
@@ -7675,6 +7683,19 @@
             <div id="exe-approvals-list" class="exa-list"><div class="cref-empty">Carregando...</div></div>
           </div>
 
+              <div class="ceo-popup-launcher-card" id="ceo-terms-card" data-admin-min="3">
+            <div class="ceo-popup-launcher-head">
+              <div class="ceo-section-title" style="margin:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg>
+                Aceite dos Termos
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="switchTab('tab-ceo-termos',document.querySelector('.sidebar-item[data-tab=&quot;tab-ceo-termos&quot;]'))">Abrir →</button>
+            </div>
+            <div style="font-size:.8rem;color:var(--text2);line-height:1.55;margin-top:10px;">
+              Veja quem aceitou os Termos de Uso e a Política de Privacidade (alunos e gestores, separados), com data e hora, e gere o relatório completo em PDF.
+            </div>
+          </div>
+
               <div class="ceo-popup-launcher-card" id="ceo-ex-editor-card">
             <div class="ceo-popup-launcher-head">
               <div class="ceo-section-title" style="margin:0;">
@@ -7882,6 +7903,69 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
             Enviar Report
           </button>
+        </div>
+
+        <!-- ══ ABA ACEITE DOS TERMOS (apenas A3) ══ -->
+        <div id="tab-ceo-termos" class="tab-panel">
+          <style>
+            .tm-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+            .tm-title { font-family:var(--head); font-size:1.35rem; font-weight:800; color:var(--text); margin:0 0 4px; }
+            .tm-sub { font-size:.82rem; color:var(--text2); line-height:1.55; margin:0; max-width:620px; }
+            .tm-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+            .tm-seg { display:inline-flex; padding:4px; gap:4px; border:1px solid var(--border); border-radius:14px; background:var(--surface); margin-bottom:16px; }
+            .tm-seg button { border:0; background:transparent; color:var(--text2); font-family:var(--head); font-size:.84rem; font-weight:800; padding:9px 18px; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+            .tm-seg button.on { background:var(--accent); color:#111110; }
+            .tm-seg .tm-n { font-size:.68rem; font-weight:800; padding:1px 7px; border-radius:99px; background:rgba(0,0,0,.12); }
+            .tm-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+            .tm-kpi { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:14px 16px; }
+            .tm-kpi-l { font-size:.62rem; font-weight:800; color:var(--text3); text-transform:uppercase; letter-spacing:.09em; margin-bottom:6px; }
+            .tm-kpi-v { font-family:var(--head); font-size:1.6rem; font-weight:800; line-height:1; color:var(--text); }
+            .tm-kpi-s { font-size:.7rem; color:var(--text3); margin-top:5px; line-height:1.4; }
+            .tm-note { font-size:.76rem; line-height:1.55; color:var(--text2); background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:11px 14px; margin-bottom:16px; }
+            .tm-tools { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+            .tm-tools input, .tm-tools select { padding:9px 13px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:.82rem; font-family:inherit; }
+            .tm-tools input { flex:1; min-width:180px; max-width:320px; }
+            .tm-card { background:var(--surface); border:1px solid var(--border); border-radius:18px; overflow:hidden; }
+            .tm-scroll { overflow-x:auto; }
+            .tm-table { width:100%; border-collapse:collapse; min-width:720px; }
+            .tm-table th { text-align:left; font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); padding:12px 14px; border-bottom:1px solid var(--border); white-space:nowrap; }
+            .tm-table td { padding:12px 14px; border-bottom:1px solid var(--border); font-size:.82rem; color:var(--text); vertical-align:middle; }
+            .tm-table tr.tm-row { cursor:pointer; }
+            .tm-table tr.tm-row:hover td { background:var(--surface2); }
+            .tm-name { font-weight:700; }
+            .tm-mute { color:var(--text3); font-size:.74rem; }
+            .tm-pill { display:inline-block; font-size:.66rem; font-weight:800; letter-spacing:.04em; padding:3px 10px; border-radius:99px; white-space:nowrap; }
+            .tm-pill.ok { background:rgba(46,125,82,.14); color:#2e7d52; }
+            .tm-pill.pend { background:rgba(224,62,62,.12); color:#e03e3e; }
+            .tm-pill.leg { background:rgba(245,200,0,.18); color:#a37a00; }
+            .tm-detail td { background:var(--surface2); padding:14px 18px; }
+            .tm-dgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px 22px; }
+            .tm-dk { font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); }
+            .tm-dv { font-size:.8rem; color:var(--text); word-break:break-word; margin-top:2px; }
+            .tm-dv.mono { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.7rem; }
+            .tm-empty { padding:36px 18px; text-align:center; color:var(--text3); font-size:.84rem; }
+          </style>
+
+          <div class="tm-head">
+            <div>
+              <h1 class="tm-title">Aceite dos Termos</h1>
+              <p class="tm-sub">Confirmação, data e hora em que cada pessoa aceitou os Termos de Uso e a Política de Privacidade. Alunos e gestores ficam separados.</p>
+            </div>
+            <div class="tm-actions">
+              <button class="btn btn-ghost btn-sm" onclick="loadTermsAcceptance(true)">↺ Atualizar</button>
+              <button class="btn btn-primary btn-sm" id="tm-pdf-btn" onclick="tmGeneratePdf(this)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span id="tm-pdf-label">Gerar relatório PDF</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="tm-seg" role="tablist">
+            <button type="button" class="on" id="tm-seg-aluno" onclick="tmSetKind('aluno')">Alunos <span class="tm-n" id="tm-n-aluno">–</span></button>
+            <button type="button" id="tm-seg-gestor" onclick="tmSetKind('gestor')">Gestores <span class="tm-n" id="tm-n-gestor">–</span></button>
+          </div>
+
+          <div id="tm-body"><div class="tm-empty">Carregando...</div></div>
         </div>
 
         <!-- ══ ABA REPORTS RECEBIDOS (apenas CEO) ══ -->
@@ -9988,6 +10072,7 @@
       if (tabId === 'tab-report' && !(window.CURRENT_USER || {}).isTester) return;
       if ((tabId === 'tab-ceo' || tabId === 'tab-ceo-exercises') && window.adminLevel() < 1) return;
       if (tabId === 'tab-ceo-reports' && window.adminLevel() < 3) return;
+      if (tabId === 'tab-ceo-termos' && window.adminLevel() < 3) return;
       document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       document.querySelectorAll('.sidebar-item,.mobile-nav-item').forEach(i => i.classList.remove('active'));
@@ -10592,7 +10677,8 @@
           managerId: u.username || '',
           managerName: u.displayName || u.username || '',
           managerPhone: u.phone || '',
-          createdAt: Date.now()
+          createdAt: Date.now(),
+          termsRequired: true // aluno novo: deve aceitar os termos no primeiro acesso (alunos antigos não têm este campo)
         };
         await _setDoc(_doc(_db, 'students', studentId), studentData);
         // Save initial assessment if physical data provided
@@ -17576,6 +17662,264 @@
       } catch (e) { toast('Erro: ' + e.message, 'error'); if (btn) { btn.disabled = false; btn.textContent = 'Arquivar'; } }
     };
 
+    // ══════════════════════════════════════════════════════════
+    // A3 › ACEITE DOS TERMOS (alunos e gestores, separados)
+    // ══════════════════════════════════════════════════════════
+    (function () {
+      var TM = { kind: 'aluno', data: { aluno: null, gestor: null }, filter: 'all', q: '', open: {} };
+
+      function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+      function p2(n) { return (n < 10 ? '0' : '') + n; }
+      function fmtDT(ms) {
+        if (!ms) return '—';
+        var d = new Date(ms); if (isNaN(d.getTime())) return '—';
+        return p2(d.getDate()) + '/' + p2(d.getMonth() + 1) + '/' + d.getFullYear() + ' às ' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds());
+      }
+      function tsToMs(t) { return t && typeof t.toMillis === 'function' ? t.toMillis() : (typeof t === 'number' ? t : null); }
+      function isAdminRole(m) { return m.role === 'ceo' || m.role === 'admin1' || m.role === 'admin2'; }
+
+      async function loadAlunos() {
+        var res = await Promise.all([
+          _db.collection('students').where('termsRequired', '==', true).get(),
+          _db.collection('termsAcceptances').where('type', '==', 'aluno').get()
+        ]);
+        var stuSnap = res[0], recSnap = res[1];
+        var recs = {}; // userId -> registro mais recente
+        recSnap.docs.forEach(function (d) {
+          var r = d.data(), cur = recs[r.userId];
+          if (!cur || (r.acceptedAt || 0) > (cur.acceptedAt || 0)) recs[r.userId] = r;
+        });
+        var rows = [], seen = {};
+        stuSnap.docs.forEach(function (d) {
+          var s = d.data(), r = recs[d.id]; seen[d.id] = 1;
+          var base = { userId: d.id, name: s.name || '—', ref: s.code || '', manager: s.managerName || s.managerId || '—', createdAt: s.createdAt || null };
+          if (r) rows.push(Object.assign(base, rowFromRec(r)));
+          else if (s.termsAcceptedAt) rows.push(Object.assign(base, { status: 'accepted', acceptedAt: s.termsAcceptedAt, version: s.termsVersion || '' }));
+          else rows.push(Object.assign(base, { status: 'pending' }));
+        });
+        // aceites de alunos que já não existem mais (cadastro excluído): o histórico permanece
+        Object.keys(recs).forEach(function (uid) {
+          if (seen[uid]) return; var r = recs[uid];
+          rows.push(Object.assign({ userId: uid, name: (r.userName || '—') + ' (cadastro excluído)', ref: r.userCode || '', manager: r.managerName || r.managerId || '—', createdAt: null }, rowFromRec(r)));
+        });
+        var total = null;
+        try { var q = _db.collection('students'); if (typeof q.count === 'function') { var c = await q.count().get(); total = c.data().count; } } catch (e) { }
+        var flagged = stuSnap.size;
+        var accepted = rows.filter(function (r) { return r.status === 'accepted'; }).length;
+        return {
+          rows: sortRows(rows),
+          summary: { total: rows.length, accepted: accepted, pending: rows.length - accepted, legacy: 0, exempt: total == null ? null : Math.max(0, total - flagged) }
+        };
+      }
+
+      function rowFromRec(r) {
+        return {
+          status: 'accepted', acceptedAt: r.acceptedAt || null, acceptedAtServer: tsToMs(r.acceptedAtServer), version: r.version || '',
+          hash: r.textHash || '', method: r.method || '', consents: r.consents || null, ua: r.userAgent || '',
+          platform: r.platform || '', language: r.language || '', timezone: r.timezone || '', screen: r.screen || ''
+        };
+      }
+
+      async function loadGestores() {
+        var snap = await _db.collection('managers').get();
+        var rows = [];
+        snap.docs.forEach(function (d) {
+          var m = d.data(); if (isAdminRole(m)) return;
+          var base = { userId: d.id, name: m.name || m.username || '—', ref: m.username || '', createdAt: m.createdAt || null, profType: m.profType || '', cref: m.cref || '' };
+          if (m.termsAcceptedAt) rows.push(Object.assign(base, { status: 'accepted', acceptedAt: m.termsAcceptedAt, version: m.termsVersion || '', method: 'cadastro', ua: m.termsUserAgent || '' }));
+          else rows.push(Object.assign(base, { status: 'legacy' }));
+        });
+        var accepted = rows.filter(function (r) { return r.status === 'accepted'; }).length;
+        return { rows: sortRows(rows), summary: { total: rows.length, accepted: accepted, pending: 0, legacy: rows.length - accepted, exempt: 0 } };
+      }
+
+      function sortRows(rows) {
+        var order = { accepted: 0, pending: 1, legacy: 2 };
+        return rows.sort(function (a, b) {
+          if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+          return (b.acceptedAt || b.createdAt || 0) - (a.acceptedAt || a.createdAt || 0);
+        });
+      }
+
+      async function load(kind, force) {
+        var body = document.getElementById('tm-body');
+        if (!force && TM.data[kind]) { render(); return; }
+        if (body) body.innerHTML = '<div class="tm-empty">Carregando...</div>';
+        try {
+          TM.data[kind] = kind === 'aluno' ? await loadAlunos() : await loadGestores();
+        } catch (e) {
+          console.error('Aceite dos termos:', e);
+          if (body) body.innerHTML = '<div class="tm-empty">Não foi possível carregar: ' + esc(e.message || e) + '<br><br>Confira se as regras do Firebase foram publicadas (coleção termsAcceptances).</div>';
+          return;
+        }
+        // contador do outro lado, em segundo plano
+        var other = kind === 'aluno' ? 'gestor' : 'aluno';
+        if (!TM.data[other]) {
+          (other === 'aluno' ? loadAlunos() : loadGestores()).then(function (d) { TM.data[other] = d; updateCounts(); }).catch(function () { });
+        }
+        updateCounts(); render();
+      }
+
+      function updateCounts() {
+        ['aluno', 'gestor'].forEach(function (k) {
+          var el = document.getElementById('tm-n-' + k);
+          if (el) el.textContent = TM.data[k] ? TM.data[k].summary.total : '–';
+        });
+      }
+
+      function statusPill(r) {
+        return r.status === 'accepted' ? '<span class="tm-pill ok">ACEITO</span>'
+          : r.status === 'legacy' ? '<span class="tm-pill leg" title="Cadastro anterior ao registro de data e hora do aceite">SEM REGISTRO</span>'
+            : '<span class="tm-pill pend" title="O aluno ainda não fez o primeiro acesso">PENDENTE</span>';
+      }
+
+      function detailHtml(r, isAl) {
+        function kv(k, v, mono) { return '<div><div class="tm-dk">' + esc(k) + '</div><div class="tm-dv' + (mono ? ' mono' : '') + '">' + (v ? esc(v) : '—') + '</div></div>'; }
+        var h = '';
+        if (isAl) { h += kv('Código de acesso', r.ref) + kv('Gestor vinculado', r.manager); }
+        else { h += kv('Usuário', r.ref) + kv('Tipo', r.profType === 'nutri' ? 'Nutricionista' : 'Personal / Educador físico') + kv('Registro profissional', r.cref); }
+        h += kv('ID', r.userId, true);
+        if (r.status === 'accepted') {
+          h += kv('Data e hora do aceite', fmtDT(r.acceptedAt) + ' (aparelho)');
+          if (r.acceptedAtServer) h += kv('Horário do servidor (oficial)', fmtDT(r.acceptedAtServer));
+          h += kv('Versão aceita', r.version);
+          if (r.hash) h += kv('Verificação SHA-256', r.hash, true);
+          if (r.consents) {
+            var cs = [];
+            if (r.consents.termsAndPrivacy) cs.push('Termos de Uso e Política de Privacidade ✓');
+            if (r.consents.healthData) cs.push('Dados de saúde e declaração de veracidade ✓');
+            h += kv('Confirmações marcadas', cs.join(' · '));
+          }
+          h += kv('Idioma / fuso / tela', [r.language, r.timezone, r.screen].filter(Boolean).join(' · '));
+          if (r.ua) h += kv('Aparelho (user-agent)', r.ua, true);
+        } else if (r.status === 'legacy') {
+          h += kv('Situação', 'Conta criada antes do registro de data e hora do aceite.') + kv('Conta criada em', fmtDT(r.createdAt));
+        } else {
+          h += kv('Situação', 'Aguardando o primeiro acesso do aluno.') + kv('Cadastro criado em', fmtDT(r.createdAt));
+        }
+        return '<div class="tm-dgrid">' + h + '</div>';
+      }
+
+      function render() {
+        var body = document.getElementById('tm-body'); if (!body) return;
+        var d = TM.data[TM.kind]; if (!d) return;
+        var isAl = TM.kind === 'aluno', s = d.summary;
+        var pct = s.total ? Math.round((s.accepted / s.total) * 100) : 0;
+        var kpis = '<div class="tm-kpis">' +
+          '<div class="tm-kpi"><div class="tm-kpi-l">Total</div><div class="tm-kpi-v">' + s.total + '</div></div>' +
+          '<div class="tm-kpi"><div class="tm-kpi-l">Aceites</div><div class="tm-kpi-v" style="color:var(--green)">' + s.accepted + '</div><div class="tm-kpi-s">' + pct + '% do total</div></div>' +
+          (isAl
+            ? '<div class="tm-kpi"><div class="tm-kpi-l">Aguardando 1º acesso</div><div class="tm-kpi-v" style="color:var(--red)">' + s.pending + '</div></div>' +
+            '<div class="tm-kpi"><div class="tm-kpi-l">Alunos anteriores</div><div class="tm-kpi-v">' + (s.exempt == null ? '—' : s.exempt) + '</div><div class="tm-kpi-s">Isentos: não veem os termos</div></div>'
+            : '<div class="tm-kpi"><div class="tm-kpi-l">Sem registro</div><div class="tm-kpi-v" style="color:#a37a00">' + s.legacy + '</div><div class="tm-kpi-s">Cadastro anterior ao registro</div></div>') +
+          '</div>';
+        var note = isAl
+          ? 'Aparecem aqui apenas os alunos criados depois da exigência do aceite. Alunos anteriores continuam entrando normalmente, sem ver a tela de termos.'
+          : 'O cadastro de gestor sempre exigiu a marcação dos termos, mas só os cadastros novos guardam data e hora. Contas antigas aparecem como “Sem registro” (mostramos só a data de criação como referência).';
+        var tools = '<div class="tm-tools">' +
+          '<input type="search" id="tm-q" placeholder="Buscar por nome, ' + (isAl ? 'código ou gestor' : 'usuário') + '..." value="' + esc(TM.q) + '" oninput="tmFilter()">' +
+          '<select id="tm-f" onchange="tmFilter()">' +
+          '<option value="all"' + (TM.filter === 'all' ? ' selected' : '') + '>Todas as situações</option>' +
+          '<option value="accepted"' + (TM.filter === 'accepted' ? ' selected' : '') + '>Aceitos</option>' +
+          (isAl ? '<option value="pending"' + (TM.filter === 'pending' ? ' selected' : '') + '>Pendentes</option>' : '<option value="legacy"' + (TM.filter === 'legacy' ? ' selected' : '') + '>Sem registro</option>') +
+          '</select></div>';
+        body.innerHTML = kpis + '<div class="tm-note">' + esc(note) + '</div>' + tools + '<div class="tm-card"><div class="tm-scroll" id="tm-list"></div></div>';
+        renderList();
+        var lab = document.getElementById('tm-pdf-label');
+        if (lab) lab.textContent = 'Gerar relatório PDF · ' + (isAl ? 'Alunos' : 'Gestores');
+      }
+
+      function renderList() {
+        var el = document.getElementById('tm-list'); if (!el) return;
+        var d = TM.data[TM.kind], isAl = TM.kind === 'aluno';
+        var q = TM.q.trim().toLowerCase();
+        var rows = d.rows.filter(function (r) {
+          if (TM.filter !== 'all' && r.status !== TM.filter) return false;
+          if (!q) return true;
+          return [r.name, r.ref, r.manager].join(' ').toLowerCase().indexOf(q) >= 0;
+        });
+        if (!rows.length) { el.innerHTML = '<div class="tm-empty">' + (d.rows.length ? 'Nenhum resultado para o filtro.' : (isAl ? 'Nenhum aluno novo ainda. Os alunos criados a partir de agora aparecerão aqui.' : 'Nenhum gestor encontrado.')) + '</div>'; return; }
+        var html = '<table class="tm-table"><thead><tr><th>Nome</th><th>' + (isAl ? 'Código' : 'Usuário') + '</th>' + (isAl ? '<th>Gestor</th>' : '') + '<th>Situação</th><th>Data e hora do aceite</th><th>Versão</th></tr></thead><tbody>';
+        rows.forEach(function (r) {
+          var key = r.userId, open = !!TM.open[key];
+          var when = r.status === 'accepted' ? esc(fmtDT(r.acceptedAt)) : r.status === 'legacy' ? '<span class="tm-mute">Conta criada em ' + esc(fmtDT(r.createdAt).split(' às')[0]) + '</span>' : '<span class="tm-mute">—</span>';
+          html += '<tr class="tm-row" onclick="tmToggle(\'' + esc(String(key).replace(/'/g, '')) + '\')"><td class="tm-name">' + esc(r.name) + '</td><td>' + esc(r.ref) + '</td>' + (isAl ? '<td>' + esc(r.manager) + '</td>' : '') +
+            '<td>' + statusPill(r) + '</td><td>' + when + '</td><td class="tm-mute">' + esc(r.version || '—') + '</td></tr>';
+          if (open) html += '<tr class="tm-detail"><td colspan="' + (isAl ? 6 : 5) + '">' + detailHtml(r, isAl) + '</td></tr>';
+        });
+        el.innerHTML = html + '</tbody></table>';
+      }
+
+      window.tmSetKind = function (k) {
+        TM.kind = k; TM.filter = 'all'; TM.q = '';
+        document.getElementById('tm-seg-aluno').classList.toggle('on', k === 'aluno');
+        document.getElementById('tm-seg-gestor').classList.toggle('on', k === 'gestor');
+        load(k);
+      };
+      window.tmFilter = function () {
+        var q = document.getElementById('tm-q'), f = document.getElementById('tm-f');
+        TM.q = q ? q.value : ''; TM.filter = f ? f.value : 'all'; renderList();
+      };
+      window.tmToggle = function (key) { TM.open[key] = !TM.open[key]; renderList(); };
+      window.loadTermsAcceptance = function (force) { return load(TM.kind, !!force); };
+
+      // ── Texto dos termos para o anexo do PDF ──
+      function htmlToSections(html) {
+        function strip(x) { return String(x).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim(); }
+        var out = [];
+        String(html || '').split(/<h2>/).slice(1).forEach(function (chunk) {
+          var parts = chunk.split('</h2>');
+          out.push({ h: strip(parts[0]), p: (parts[1] || '').split(/<\/p>/).map(strip).filter(Boolean) });
+        });
+        return out;
+      }
+      async function sha256Hex(text) {
+        try {
+          var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+          return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+        } catch (e) { return ''; }
+      }
+      async function termsTextFor(kind) {
+        if (kind === 'aluno') {
+          var T = window.TRAINLY_TERMS && window.TRAINLY_TERMS.aluno;
+          if (!T) return null;
+          return { version: T.version, versionLabel: T.versionLabel, effectiveDate: T.effectiveDate, hash: (await window.TRAINLY_TERMS.hash(T)) || '', docs: T.docs, consents: T.consents };
+        }
+        var G = window._TRAINLY_GESTOR_TERMS; if (!G) return null;
+        var docs = [{ title: 'Termos de Uso', sections: htmlToSections(G.uso) }, { title: 'Política de Privacidade', sections: htmlToSections(G.privacidade) }];
+        var flat = docs.map(function (d) { return d.title + '\n' + d.sections.map(function (s) { return s.h + '\n' + s.p.join('\n'); }).join('\n'); }).join('\n\n');
+        return { version: 'gestor-v1', versionLabel: '1.0', effectiveDate: '', hash: await sha256Hex(flat), docs: docs, consents: null };
+      }
+
+      window.tmGeneratePdf = async function (btn) {
+        var d = TM.data[TM.kind]; if (!d) { toast('Aguarde o carregamento da lista.', 'error'); return; }
+        var lab = document.getElementById('tm-pdf-label'), old = lab ? lab.textContent : '';
+        if (btn) btn.disabled = true; if (lab) lab.textContent = 'Gerando PDF...';
+        try {
+          if (!window.TrainlyTermsPDF) throw new Error('Gerador de PDF não carregado. Atualize a página.');
+          var u = window.CURRENT_USER || {};
+          var res = await window.TrainlyTermsPDF.build({
+            kind: TM.kind,
+            generatedBy: { name: u.displayName || '', username: u.username || '' },
+            rows: d.rows, summary: d.summary, termsText: await termsTextFor(TM.kind)
+          });
+          window.TrainlyPDF.downloadBlob(res.blob, res.filename);
+          toast('Relatório gerado: ' + res.filename);
+        } catch (e) {
+          console.error(e); toast('Erro ao gerar PDF: ' + (e.message || e), 'error');
+        } finally {
+          if (btn) btn.disabled = false; if (lab) lab.textContent = old;
+        }
+      };
+
+      // abre a aba
+      var _prevSwitch = window.switchTab;
+      window.switchTab = function (tabId, el) {
+        _prevSwitch(tabId, el);
+        if (tabId === 'tab-ceo-termos' && window.adminLevel() >= 3) load(TM.kind, true);
+      };
+    })();
+
     // ── Carregar reports ao entrar na aba CEO Reports ──
     (function () {
       var origSwitch = window.switchTab;
@@ -18332,6 +18676,7 @@
     window.closeTermsModal = function () {
       document.getElementById('modal-terms').classList.remove('on');
     };
+    window._TRAINLY_GESTOR_TERMS = { uso: _TERMS_USO, privacidade: _TERMS_PRIVACIDADE }; // usado no anexo do PDF (A3 › Aceite dos Termos)
 
     // ════════════════════════════════════════════════════════
     // SISTEMA DE INDICAÇÃO (REFERRAL) — todos os gestores
@@ -18608,7 +18953,7 @@
           username, passwordHash: hash, name: invName, role: 'comum', isMaster: false,
           cref, crefDeclared: true,
           trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
-          blocked: false, createdAt: Date.now(), invitedBy: invBy, referredBy: invByRefCode
+          blocked: false, createdAt: Date.now(), termsAcceptedAt: Date.now(), termsVersion: 'gestor-v1', termsUserAgent: String(navigator.userAgent || '').slice(0, 300), invitedBy: invBy, referredBy: invByRefCode
         });
         await _db.collection('invites').doc(window._invDocId).update({
           used: true, usedAt: Date.now(), usedBy: username
@@ -18966,7 +19311,7 @@
           username: user, passwordHash: hash, name, cref, crefDeclared: true,
           role: 'comum', isMaster: false,
           trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
-          blocked: false, createdAt: Date.now()
+          blocked: false, createdAt: Date.now(), termsAcceptedAt: Date.now(), termsVersion: 'gestor-v1', termsUserAgent: String(navigator.userAgent || '').slice(0, 300)
         });
 
         // Processa pagamento
@@ -19617,7 +19962,7 @@
             authUid: uid,
             role: 'comum', isMaster: false,
             trialEndsAt: trialEndsAt, subEndsAt: null,
-            blocked: false, createdAt: Date.now(),
+            blocked: false, createdAt: Date.now(), termsAcceptedAt: Date.now(), termsVersion: 'gestor-v1', termsUserAgent: String(navigator.userAgent || '').slice(0, 300),
             referredBy: isDebugMode ? '' : refCode
           });
         } catch (fsErr) {
@@ -19724,7 +20069,7 @@
             authUid: uid,
             role: 'comum', isMaster: false,
             trialEndsAt: trialEndsAt, subEndsAt: null,
-            blocked: false, createdAt: Date.now(),
+            blocked: false, createdAt: Date.now(), termsAcceptedAt: Date.now(), termsVersion: 'gestor-v1', termsUserAgent: String(navigator.userAgent || '').slice(0, 300),
             referredBy: isDebugMode ? '' : refCode
           });
         } catch (fsErr) {
@@ -19811,7 +20156,7 @@
           email: authEmail,
           authUid: uid,
           trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
-          blocked: false, createdAt: Date.now(), invitedBy: invBy, referredBy: invByRefCode
+          blocked: false, createdAt: Date.now(), termsAcceptedAt: Date.now(), termsVersion: 'gestor-v1', termsUserAgent: String(navigator.userAgent || '').slice(0, 300), invitedBy: invBy, referredBy: invByRefCode
         });
 
         await _db.collection('invites').doc(window._invDocId).update({
