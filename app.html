@@ -7927,7 +7927,7 @@
             .tm-tools input { flex:1; min-width:180px; max-width:320px; }
             .tm-card { background:var(--surface); border:1px solid var(--border); border-radius:18px; overflow:hidden; }
             .tm-scroll { overflow-x:auto; }
-            .tm-table { width:100%; border-collapse:collapse; min-width:720px; }
+            .tm-table { width:100%; border-collapse:collapse; min-width:780px; }
             .tm-table th { text-align:left; font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); padding:12px 14px; border-bottom:1px solid var(--border); white-space:nowrap; }
             .tm-table td { padding:12px 14px; border-bottom:1px solid var(--border); font-size:.82rem; color:var(--text); vertical-align:middle; }
             .tm-table tr.tm-row { cursor:pointer; }
@@ -7938,6 +7938,10 @@
             .tm-pill.ok { background:rgba(46,125,82,.14); color:#2e7d52; }
             .tm-pill.pend { background:rgba(224,62,62,.12); color:#e03e3e; }
             .tm-pill.leg { background:rgba(245,200,0,.18); color:#a37a00; }
+            .tm-act { width:1%; white-space:nowrap; text-align:right; }
+            .tm-rowpdf { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); background:var(--surface); color:var(--text2); font-family:var(--head); font-size:.7rem; font-weight:800; padding:5px 10px; border-radius:9px; cursor:pointer; }
+            .tm-rowpdf:hover { background:var(--accent); border-color:var(--accent); color:#111110; }
+            .tm-rowpdf:disabled { opacity:.55; cursor:wait; }
             .tm-detail td { background:var(--surface2); padding:14px 18px; }
             .tm-dgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px 22px; }
             .tm-dk { font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); }
@@ -7955,7 +7959,7 @@
               <button class="btn btn-ghost btn-sm" onclick="loadTermsAcceptance(true)">↺ Atualizar</button>
               <button class="btn btn-primary btn-sm" id="tm-pdf-btn" onclick="tmGeneratePdf(this)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                <span id="tm-pdf-label">Gerar relatório PDF</span>
+                <span id="tm-pdf-label">Relatório coletivo em PDF</span>
               </button>
             </div>
           </div>
@@ -17826,7 +17830,7 @@
         body.innerHTML = kpis + '<div class="tm-note">' + esc(note) + '</div>' + tools + '<div class="tm-card"><div class="tm-scroll" id="tm-list"></div></div>';
         renderList();
         var lab = document.getElementById('tm-pdf-label');
-        if (lab) lab.textContent = 'Gerar relatório PDF · ' + (isAl ? 'Alunos' : 'Gestores');
+        if (lab) lab.textContent = 'Relatório coletivo em PDF · ' + (isAl ? 'Alunos' : 'Gestores');
       }
 
       function renderList() {
@@ -17839,13 +17843,15 @@
           return [r.name, r.ref, r.manager].join(' ').toLowerCase().indexOf(q) >= 0;
         });
         if (!rows.length) { el.innerHTML = '<div class="tm-empty">' + (d.rows.length ? 'Nenhum resultado para o filtro.' : (isAl ? 'Nenhum aluno novo ainda. Os alunos criados a partir de agora aparecerão aqui.' : 'Nenhum gestor encontrado.')) + '</div>'; return; }
-        var html = '<table class="tm-table"><thead><tr><th>Nome</th><th>' + (isAl ? 'Código' : 'Usuário') + '</th>' + (isAl ? '<th>Gestor</th>' : '') + '<th>Situação</th><th>Data e hora do aceite</th><th>Versão</th></tr></thead><tbody>';
+        var html = '<table class="tm-table"><thead><tr><th>Nome</th><th>' + (isAl ? 'Código' : 'Usuário') + '</th>' + (isAl ? '<th>Gestor</th>' : '') + '<th>Situação</th><th>Data e hora do aceite</th><th>Versão</th><th class="tm-act">PDF</th></tr></thead><tbody>';
         rows.forEach(function (r) {
           var key = r.userId, open = !!TM.open[key];
           var when = r.status === 'accepted' ? esc(fmtDT(r.acceptedAt)) : r.status === 'legacy' ? '<span class="tm-mute">Conta criada em ' + esc(fmtDT(r.createdAt).split(' às')[0]) + '</span>' : '<span class="tm-mute">—</span>';
           html += '<tr class="tm-row" onclick="tmToggle(\'' + esc(String(key).replace(/'/g, '')) + '\')"><td class="tm-name">' + esc(r.name) + '</td><td>' + esc(r.ref) + '</td>' + (isAl ? '<td>' + esc(r.manager) + '</td>' : '') +
-            '<td>' + statusPill(r) + '</td><td>' + when + '</td><td class="tm-mute">' + esc(r.version || '—') + '</td></tr>';
-          if (open) html += '<tr class="tm-detail"><td colspan="' + (isAl ? 6 : 5) + '">' + detailHtml(r, isAl) + '</td></tr>';
+            '<td>' + statusPill(r) + '</td><td>' + when + '</td><td class="tm-mute">' + esc(r.version || '—') + '</td>' +
+            '<td class="tm-act"><button type="button" class="tm-rowpdf" data-k="' + esc(key) + '" title="Baixar o PDF individual de ' + esc(r.name) + '" onclick="event.stopPropagation();tmRowPdf(this)">' +
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button></td></tr>';
+          if (open) html += '<tr class="tm-detail"><td colspan="' + (isAl ? 7 : 6) + '">' + detailHtml(r, isAl) + '</td></tr>';
         });
         el.innerHTML = html + '</tbody></table>';
       }
@@ -17891,25 +17897,39 @@
         return { version: 'gestor-v1', versionLabel: '1.0', effectiveDate: '', hash: await sha256Hex(flat), docs: docs, consents: null };
       }
 
-      window.tmGeneratePdf = async function (btn) {
+      // Gera o PDF (coletivo ou individual) e baixa o arquivo
+      async function runPdf(opts) {
         var d = TM.data[TM.kind]; if (!d) { toast('Aguarde o carregamento da lista.', 'error'); return; }
+        if (!window.TrainlyTermsPDF) throw new Error('Gerador de PDF não carregado. Atualize a página.');
+        var u = window.CURRENT_USER || {};
+        var res = await window.TrainlyTermsPDF.build({
+          kind: TM.kind,
+          individual: !!opts.individual,
+          generatedBy: { name: u.displayName || '', username: u.username || '' },
+          rows: opts.rows || d.rows, summary: d.summary, termsText: await termsTextFor(TM.kind)
+        });
+        window.TrainlyPDF.downloadBlob(res.blob, res.filename);
+        toast('PDF gerado: ' + res.filename);
+      }
+
+      // Relatório coletivo (todos os alunos ou todos os gestores)
+      window.tmGeneratePdf = async function (btn) {
         var lab = document.getElementById('tm-pdf-label'), old = lab ? lab.textContent : '';
         if (btn) btn.disabled = true; if (lab) lab.textContent = 'Gerando PDF...';
-        try {
-          if (!window.TrainlyTermsPDF) throw new Error('Gerador de PDF não carregado. Atualize a página.');
-          var u = window.CURRENT_USER || {};
-          var res = await window.TrainlyTermsPDF.build({
-            kind: TM.kind,
-            generatedBy: { name: u.displayName || '', username: u.username || '' },
-            rows: d.rows, summary: d.summary, termsText: await termsTextFor(TM.kind)
-          });
-          window.TrainlyPDF.downloadBlob(res.blob, res.filename);
-          toast('Relatório gerado: ' + res.filename);
-        } catch (e) {
-          console.error(e); toast('Erro ao gerar PDF: ' + (e.message || e), 'error');
-        } finally {
-          if (btn) btn.disabled = false; if (lab) lab.textContent = old;
-        }
+        try { await runPdf({}); }
+        catch (e) { console.error(e); toast('Erro ao gerar PDF: ' + (e.message || e), 'error'); }
+        finally { if (btn) btn.disabled = false; if (lab) lab.textContent = old; }
+      };
+
+      // Relatório individual (um aluno ou um gestor)
+      window.tmRowPdf = async function (btn) {
+        var d = TM.data[TM.kind], key = btn && btn.getAttribute('data-k');
+        var row = d && d.rows.filter(function (r) { return String(r.userId) === String(key); })[0];
+        if (!row) { toast('Registro não encontrado. Atualize a lista.', 'error'); return; }
+        var old = btn.innerHTML; btn.disabled = true; btn.textContent = 'Gerando...';
+        try { await runPdf({ individual: true, rows: [row] }); }
+        catch (e) { console.error(e); toast('Erro ao gerar PDF: ' + (e.message || e), 'error'); }
+        finally { btn.disabled = false; btn.innerHTML = old; }
       };
 
       // abre a aba
