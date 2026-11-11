@@ -15,6 +15,7 @@
   <script>try { localStorage.setItem('trainly_role', 'aluno') } catch (e) { }</script>
   <script src="fotos-config.js"></script>
   <script src="fotos.js"></script>
+  <script src="termos-aluno.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -4255,6 +4256,64 @@
     </div>
   </div>
 
+  <!-- ══ TERMOS DE USO — primeiro acesso do aluno ══ -->
+  <style>
+    #screen-terms { position: fixed; inset: 0; z-index: 99990; display: none; align-items: center; justify-content: center; padding: 16px;
+      background: #0b1219; font-family: var(--body); color: #f5f8fb; }
+    #screen-terms.on { display: flex; }
+    #screen-terms .tg-card { width: 100%; max-width: 560px; max-height: 100%; display: flex; flex-direction: column; background: #141b23;
+      border: 1px solid rgba(170, 190, 210, .18); border-radius: 22px; overflow: hidden; box-shadow: 0 24px 70px rgba(0, 0, 0, .55); }
+    #screen-terms .tg-head { padding: 20px 22px 14px; }
+    #screen-terms .tg-eyebrow { font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #3dbb86; margin-bottom: 6px; }
+    #screen-terms .tg-title { font-family: var(--head); font-size: 1.28rem; font-weight: 800; line-height: 1.2; margin: 0 0 6px; }
+    #screen-terms .tg-sub { font-size: .8rem; line-height: 1.55; color: #aab6c2; margin: 0; }
+    #screen-terms .tg-tabs { display: flex; gap: 6px; padding: 0 22px 12px; }
+    #screen-terms .tg-tab { flex: 1; padding: 9px 10px; border-radius: 10px; border: 1px solid rgba(170, 190, 210, .18); background: transparent;
+      color: #aab6c2; font-family: var(--head); font-size: .78rem; font-weight: 800; cursor: pointer; }
+    #screen-terms .tg-tab.on { background: rgba(61, 187, 134, .14); border-color: rgba(61, 187, 134, .5); color: #3dbb86; }
+    #screen-terms .tg-body { flex: 1 1 auto; min-height: 120px; overflow-y: auto; margin: 0 22px; padding: 14px 16px; border-radius: 14px;
+      background: #0b1219; border: 1px solid rgba(170, 190, 210, .12); -webkit-overflow-scrolling: touch; }
+    #screen-terms .tg-body h2 { font-family: var(--head); font-size: .86rem; font-weight: 800; color: #f5f8fb; margin: 16px 0 6px; }
+    #screen-terms .tg-body h2:first-child { margin-top: 0; }
+    #screen-terms .tg-body p { font-size: .8rem; line-height: 1.65; color: #aab6c2; margin: 0 0 8px; }
+    #screen-terms .tg-body strong { color: #f5f8fb; }
+    #screen-terms .tg-foot { padding: 14px 22px 20px; }
+    #screen-terms .tg-chk { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; cursor: pointer; font-size: .78rem; line-height: 1.5; color: #d5dde5; }
+    #screen-terms .tg-chk input { width: 18px; height: 18px; margin-top: 1px; flex-shrink: 0; accent-color: #3dbb86; cursor: pointer; }
+    #screen-terms .tg-err { min-height: 18px; font-size: .76rem; font-weight: 700; color: #e5707a; margin: 2px 0 8px; }
+    #screen-terms .tg-actions { display: flex; flex-direction: column; gap: 8px; }
+    #screen-terms .tg-accept { width: 100%; padding: 14px; border: 0; border-radius: 12px; background: #3dbb86; color: #03150b;
+      font-family: var(--head); font-size: .95rem; font-weight: 800; cursor: pointer; transition: opacity .15s; }
+    #screen-terms .tg-accept:disabled { opacity: .35; cursor: not-allowed; }
+    #screen-terms .tg-decline { width: 100%; padding: 10px; border: 0; background: transparent; color: #8793a0; font-family: var(--head);
+      font-size: .8rem; font-weight: 700; cursor: pointer; }
+    #screen-terms .tg-decline:hover { color: #aab6c2; }
+    @media (max-width: 480px) { #screen-terms { padding: 0; } #screen-terms .tg-card { border-radius: 0; max-width: none; height: 100%; } }
+  </style>
+  <div id="screen-terms" role="dialog" aria-modal="true" aria-labelledby="tg-title">
+    <div class="tg-card">
+      <div class="tg-head">
+        <div class="tg-eyebrow">Primeiro acesso</div>
+        <h1 class="tg-title" id="tg-title">Antes de começar, leia e aceite os termos</h1>
+        <p class="tg-sub" id="tg-sub">Para usar o Trainly precisamos do seu aceite aos Termos de Uso e à Política de Privacidade. Leva menos de um minuto.</p>
+      </div>
+      <div class="tg-tabs">
+        <button type="button" class="tg-tab on" id="tg-tab-uso" onclick="alTermsTab('uso')">Termos de Uso</button>
+        <button type="button" class="tg-tab" id="tg-tab-privacidade" onclick="alTermsTab('privacidade')">Política de Privacidade</button>
+      </div>
+      <div class="tg-body" id="tg-body" tabindex="0"></div>
+      <div class="tg-foot">
+        <label class="tg-chk"><input type="checkbox" id="tg-chk-1" onchange="alTermsCheck()" /><span id="tg-lbl-1"></span></label>
+        <label class="tg-chk"><input type="checkbox" id="tg-chk-2" onchange="alTermsCheck()" /><span id="tg-lbl-2"></span></label>
+        <div class="tg-err" id="tg-err"></div>
+        <div class="tg-actions">
+          <button type="button" class="tg-accept" id="tg-accept" disabled onclick="alTermsAccept()">Aceitar e continuar</button>
+          <button type="button" class="tg-decline" onclick="alTermsDecline()">Não aceito</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- APP -->
   <div id="screen-app">
 
@@ -5109,6 +5168,112 @@
       });
     }
 
+    // ══ TERMOS DE USO — aceite no primeiro acesso ══
+    // Só exige o aceite quem foi criado já com `termsRequired: true` (alunos novos).
+    // Alunos antigos não têm esse campo e continuam entrando direto.
+    function alNeedsTerms(s) { return !!s && s.termsRequired === true && !s.termsAcceptedAt; }
+    window._alNeedsTerms = alNeedsTerms;
+
+    let _tgStudent = null, _tgDone = null, _tgBusy = false;
+
+    function showTermsGate(student, onAccepted) {
+      const T = window.TRAINLY_TERMS && window.TRAINLY_TERMS.aluno;
+      if (!T) { // texto não carregou: nunca libera sem mostrar os termos
+        const e = document.getElementById('login-error');
+        if (e) e.textContent = 'Não foi possível carregar os termos. Atualize a página e tente novamente.';
+        return;
+      }
+      _tgStudent = student; _tgDone = onAccepted; _tgBusy = false;
+      const first = String(student.name || '').trim().split(' ')[0];
+      document.getElementById('tg-title').textContent = first ? 'Olá, ' + first + '! Leia e aceite os termos' : 'Antes de começar, leia e aceite os termos';
+      document.getElementById('tg-lbl-1').textContent = T.consents[0].label;
+      document.getElementById('tg-lbl-2').textContent = T.consents[1].label;
+      document.getElementById('tg-chk-1').checked = false;
+      document.getElementById('tg-chk-2').checked = false;
+      document.getElementById('tg-err').textContent = '';
+      window.alTermsTab('uso');
+      window.alTermsCheck();
+      document.getElementById('screen-terms').classList.add('on');
+    }
+
+    window.alTermsTab = function (id) {
+      const T = window.TRAINLY_TERMS;
+      ['uso', 'privacidade'].forEach(k => document.getElementById('tg-tab-' + k).classList.toggle('on', k === id));
+      const body = document.getElementById('tg-body');
+      body.innerHTML = T.html(T.aluno, id);
+      body.scrollTop = 0;
+    };
+
+    window.alTermsCheck = function () {
+      const ok = document.getElementById('tg-chk-1').checked && document.getElementById('tg-chk-2').checked;
+      document.getElementById('tg-accept').disabled = !ok || _tgBusy;
+    };
+
+    window.alTermsDecline = function () {
+      document.getElementById('screen-terms').classList.remove('on');
+      _tgStudent = null; _tgDone = null;
+      const e = document.getElementById('login-error');
+      if (e) e.textContent = 'Para usar o Trainly é necessário aceitar os termos.';
+    };
+
+    window.alTermsAccept = async function () {
+      if (_tgBusy || !_tgStudent) return;
+      const c1 = document.getElementById('tg-chk-1').checked, c2 = document.getElementById('tg-chk-2').checked;
+      const errEl = document.getElementById('tg-err'), btn = document.getElementById('tg-accept');
+      if (!c1 || !c2) { errEl.textContent = 'Marque as duas confirmações para continuar.'; return; }
+      _tgBusy = true; errEl.textContent = ''; btn.disabled = true; btn.textContent = 'Registrando aceite...';
+      try {
+        const updated = await recordStudentTerms(_tgStudent, { termsAndPrivacy: c1, healthData: c2 });
+        document.getElementById('screen-terms').classList.remove('on');
+        const done = _tgDone; _tgStudent = null; _tgDone = null;
+        if (done) done(updated);
+      } catch (err) {
+        console.error('Aceite dos termos falhou:', err);
+        errEl.textContent = 'Não foi possível registrar o aceite. Verifique sua conexão e tente de novo.';
+      } finally {
+        _tgBusy = false; btn.textContent = 'Aceitar e continuar'; window.alTermsCheck();
+      }
+    };
+
+    // Grava o aceite (registro imutável em termsAcceptances + marcação no aluno)
+    async function recordStudentTerms(student, consents) {
+      await ensureAuth();
+      const TT = window.TRAINLY_TERMS, T = TT.aluno;
+      const textHash = await TT.hash(T);
+      const recRef = doc(db, 'termsAcceptances', 'aluno_' + student.id + '_' + T.version);
+      let acceptedAt = Date.now();
+      let existing = null;
+      try { const ex = await getDoc(recRef); if (ex.exists()) existing = ex.data(); } catch (e) { }
+      if (existing) {
+        acceptedAt = existing.acceptedAt || acceptedAt; // tentativa anterior já gravou o registro
+      } else {
+        let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { }
+        await setDoc(recRef, {
+          type: 'aluno',
+          userId: String(student.id),
+          userName: String(student.name || '').slice(0, 120),
+          userCode: String(student.code || ''),
+          managerId: String(student.managerId || ''),
+          managerName: String(student.managerName || '').slice(0, 120),
+          version: T.version,
+          versionLabel: T.versionLabel,
+          docs: T.docs.map(d => d.id),
+          textHash: textHash || '',
+          consents: consents,
+          method: 'primeiro-acesso-codigo',
+          acceptedAt: acceptedAt,
+          acceptedAtServer: serverTimestamp(),
+          userAgent: String(navigator.userAgent || '').slice(0, 300),
+          platform: String(navigator.platform || '').slice(0, 60),
+          language: String(navigator.language || '').slice(0, 20),
+          timezone: tz.slice(0, 60),
+          screen: (window.screen ? window.screen.width + 'x' + window.screen.height : '')
+        });
+      }
+      await updateDoc(doc(db, 'students', student.id), { termsAcceptedAt: acceptedAt, termsVersion: T.version });
+      return { ...student, termsAcceptedAt: acceptedAt, termsVersion: T.version };
+    }
+
     // ── Login ──
     window.handleLogin = async e => {
       e.preventDefault();
@@ -5122,6 +5287,11 @@
         const snap = await getDocs(query(collection(db, 'students'), where('code', '==', code)));
         if (snap.empty) { errEl.textContent = 'Código não encontrado.'; return; }
         const student = { id: snap.docs[0].id, ...snap.docs[0].data() };
+        if (alNeedsTerms(student)) {
+          // Primeiro acesso: só cria a sessão depois do aceite
+          showTermsGate(student, function (s) { saveSession(s); showApp(s); });
+          return;
+        }
         saveSession(student); showApp(student);
       } catch (err) { errEl.textContent = 'Erro: ' + err.message; }
       finally { btn.disabled = false; btn.textContent = 'Acessar ficha →'; }
@@ -6256,7 +6426,10 @@
 
     (async function init() {
       const saved = loadSession();
-      if (saved) { showApp(saved); }
+      if (saved) {
+        if (alNeedsTerms(saved)) showTermsGate(saved, function (s) { saveSession(s); showApp(s); });
+        else showApp(saved);
+      }
     })();
   </script>
   <script>
