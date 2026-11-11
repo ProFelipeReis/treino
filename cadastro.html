@@ -1211,7 +1211,7 @@
             authUid: uid,
             role: 'comum', isMaster: false,
             trialEndsAt: trialEndsAt, subEndsAt: null,
-            blocked: false, createdAt: Date.now(),
+            blocked: false, createdAt: Date.now(), termsAcceptedAt: Date.now(), termsVersion: 'gestor-v1', termsUserAgent: String(navigator.userAgent || '').slice(0, 300),
             referredBy: isDebugMode ? '' : refCode
           });
         } catch(fsErr) {
@@ -1518,7 +1518,7 @@
           photoURL: _phInv.url, photoKey: _phInv.key, photoPromptSeen: true,
           authUid: uid,
           trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000, subEndsAt: null,
-          blocked: false, createdAt: Date.now(),
+          blocked: false, createdAt: Date.now(), termsAcceptedAt: Date.now(), termsVersion: 'gestor-v1', termsUserAgent: String(navigator.userAgent || '').slice(0, 300),
           invitedBy: invBy, referredBy: invByRefCode
         });
 
