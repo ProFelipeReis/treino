@@ -80,11 +80,33 @@
   // ------------------------------------------------------------ layout do PDF
   var DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   var PW = 210, PH = 297, M = 15, CW = PW - 2 * M, BOTTOM = PH - 20;
-  var C = {
-    ink: [17, 17, 16], mute: [136, 136, 128], soft: [247, 247, 245], line: [228, 228, 224],
-    yellow: [245, 200, 0], green: [46, 125, 82], greenBg: [240, 250, 244], greenLine: [190, 225, 203],
-    red: [224, 62, 62], redBg: [254, 242, 242], redLine: [254, 202, 202]
+  // Temas do PDF: 'light' (claro) e 'dark' (escuro). O ativo fica em C.
+  var THEMES = {
+    light: {
+      bg: [255, 255, 255], paintBg: false,
+      ink: [24, 24, 27], sub: [82, 82, 91], mute: [113, 113, 122], faint: [161, 161, 170], obs: [100, 100, 108],
+      soft: [248, 248, 246], line: [228, 228, 224], rule: [24, 24, 27],
+      yellow: [245, 200, 0], onYellow: [24, 24, 27],
+      green: [30, 122, 78], greenBg: [238, 249, 243], greenLine: [186, 224, 201],
+      red: [208, 48, 48], redBg: [254, 242, 242], redLine: [250, 200, 200]
+    },
+    dark: {
+      bg: [15, 15, 18], paintBg: true,
+      ink: [244, 244, 246], sub: [190, 190, 198], mute: [150, 150, 160], faint: [110, 110, 120], obs: [165, 165, 174],
+      soft: [27, 27, 32], line: [48, 48, 56], rule: [245, 200, 0],
+      yellow: [245, 200, 0], onYellow: [17, 17, 16],
+      green: [84, 200, 143], greenBg: [20, 40, 31], greenLine: [38, 84, 62],
+      red: [244, 108, 108], redBg: [46, 23, 25], redLine: [98, 42, 46]
+    }
   };
+  var C = THEMES.light;
+  function setTheme(name) { C = THEMES[name] || THEMES.light; return C; }
+  function paintBg(doc) {
+    if (!C.paintBg) return;
+    doc.setFillColor.apply(doc, C.bg);
+    doc.rect(0, 0, PW, PH, 'F');
+  }
+  function addPageBg(doc) { doc.addPage(); paintBg(doc); }
   // colunas da tabela
   var X_NUM = M + 3, X_NAME = M + 14, W_NAME = 112, X_SER = M + 142, X_REPS = M + 163;
 
@@ -115,7 +137,7 @@
     this.doc = doc; this.y = M; this.studentName = studentName; this.planTitle = planTitle;
   }
   Page.prototype.newPage = function (running) {
-    this.doc.addPage(); this.y = M;
+    addPageBg(this.doc); this.y = M;
     if (running) {
       var d = this.doc;
       d.setFont('helvetica', 'normal'); d.setFontSize(7.5); d.setTextColor.apply(d, C.mute);
@@ -146,9 +168,9 @@
     d.roundedRect(M, pg.y, CW, h, 2, 2, 'FD');
     d.setFillColor.apply(d, C.yellow);
     d.roundedRect(M + 3, pg.y + 2, 9, 9, 1.8, 1.8, 'F');
-    d.setFont('helvetica', 'bold'); d.setFontSize(10); d.setTextColor.apply(d, C.ink);
+    d.setFont('helvetica', 'bold'); d.setFontSize(10); d.setTextColor.apply(d, C.onYellow);
     d.text(letter, M + 7.5, pg.y + 8.2, { align: 'center' });
-    d.setFontSize(10.5);
+    d.setFontSize(10.5); d.setTextColor.apply(d, C.ink);
     var t = clean(title) + (cont ? ' (continuação)' : '');
     d.text(d.splitTextToSize(t, 100)[0], M + 15, pg.y + 6);
     d.setFont('helvetica', 'normal'); d.setFontSize(7.5); d.setTextColor.apply(d, C.mute);
@@ -185,7 +207,7 @@
       L.tagLines.forEach(function (ln) { d.text(ln, X_NAME, y); y += 3.5; });
     }
     if (L.obsLines.length) {
-      d.setFont('helvetica', 'italic'); d.setFontSize(7.5); d.setTextColor(110, 110, 104);
+      d.setFont('helvetica', 'italic'); d.setFontSize(7.5); d.setTextColor.apply(d, C.obs);
       L.obsLines.forEach(function (ln) { d.text(ln, X_NAME, y); y += 3.5; });
     }
     d.setFont('helvetica', 'bold'); d.setFontSize(9.5); d.setTextColor.apply(d, C.ink);
@@ -212,7 +234,7 @@
     var nl = d.splitTextToSize(clean(studentName) || 'Aluno', 105);
     var y = top + 11;
     nl.slice(0, 2).forEach(function (ln) { d.text(ln, M, y); y += 8; });
-    d.setFont('helvetica', 'bold'); d.setFontSize(11); d.setTextColor(85, 85, 80);
+    d.setFont('helvetica', 'bold'); d.setFontSize(11); d.setTextColor.apply(d, C.sub);
     var tl = d.splitTextToSize(clean(plan.title) || 'Ficha de treino', 105);
     tl.slice(0, 2).forEach(function (ln) { d.text(ln, M, y); y += 5.2; });
 
@@ -223,11 +245,11 @@
     var pl = d.splitTextToSize(clean(period) + (expired ? ' (vencido)' : ''), 70);
     var py = top + 8.5;
     pl.forEach(function (ln) { d.text(ln, rx, py, { align: 'right' }); py += 4.6; });
-    d.setFont('helvetica', 'normal'); d.setFontSize(7.5); d.setTextColor(170, 170, 165);
+    d.setFont('helvetica', 'normal'); d.setFontSize(7.5); d.setTextColor.apply(d, C.faint);
     d.text('Gerado em ' + todayLong(), rx, Math.max(py + 1, top + 16), { align: 'right' });
 
     y = Math.max(y, py + 4) + 1;
-    d.setDrawColor.apply(d, C.ink); d.setLineWidth(0.7);
+    d.setDrawColor.apply(d, C.rule); d.setLineWidth(0.7);
     d.line(M, y, M + CW, y);
     y += 6;
 
@@ -288,7 +310,7 @@
       doc.setPage(i);
       doc.setDrawColor.apply(doc, C.line); doc.setLineWidth(0.3);
       doc.line(M, PH - 13, M + CW, PH - 13);
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(170, 170, 165);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor.apply(doc, C.faint);
       doc.text('Trainly  |  Ficha gerada automaticamente', M, PH - 8);
       doc.text('Página ' + i + ' de ' + n, M + CW, PH - 8, { align: 'right' });
     }
@@ -300,8 +322,10 @@
     var jsPDF = root.jspdf && root.jspdf.jsPDF;
     if (!jsPDF) throw new Error('Biblioteca de PDF não carregada.');
     var getStatus = opts.getPlanStatus || defaultStatus;
+    setTheme(opts.theme);
     var list = (plans || []).filter(Boolean);
     var doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
+    paintBg(doc);
     doc.setProperties({
       title: clean('Ficha de Treino - ' + studentName),
       subject: 'Ficha de treino', creator: 'Trainly', author: 'Trainly'
@@ -311,7 +335,7 @@
       drawPlan(pg0, studentName, { title: 'Sem plano', workouts: [] }, 'active');
     }
     list.forEach(function (plan, i) {
-      if (i > 0) doc.addPage();
+      if (i > 0) addPageBg(doc);
       var pg = new Page(doc, studentName, plan.title || '');
       drawPlan(pg, studentName, plan, getStatus(plan));
     });
@@ -384,7 +408,7 @@
             var base = safeFileName(s.name, 'aluno'), fn = base, n = 2;
             while (used[fn.toLowerCase()]) fn = base + ' (' + (n++) + ')';
             used[fn.toLowerCase()] = true;
-            var doc = createPdf(s.name || 'Aluno', plans, { getPlanStatus: getStatus });
+            var doc = createPdf(s.name || 'Aluno', plans, { getPlanStatus: getStatus, theme: opts.theme });
             zip.file(fn + '.pdf', doc.output('arraybuffer'));
             exported.push({ name: s.name || '(sem nome)', file: fn + '.pdf', plans: plans.length });
           }
@@ -423,7 +447,7 @@
 
   root.TrainlyPDF = {
     clean: clean, safeFileName: safeFileName, ensureLibs: ensureLibs,
-    createPdf: createPdf, pdfBlob: pdfBlob, downloadBlob: downloadBlob, exportAllToZip: exportAllToZip
+    themes: ['light', 'dark'], createPdf: createPdf, pdfBlob: pdfBlob, downloadBlob: downloadBlob, exportAllToZip: exportAllToZip
   };
 
   // ============================================================== WhatsApp
