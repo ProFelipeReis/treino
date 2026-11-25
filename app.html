@@ -8858,7 +8858,30 @@
     </div>
   </div>
 
-  <!-- MODAL: TRANSFERIR ALUNO -->
+  <!-- MODAL: TEMA DO PDF -->
+  <div id="modal-pdf-theme" class="modal-overlay hidden tn">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Tema do PDF</h3>
+        <button class="close-btn" onclick="pdfThemeCancel()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:.85rem;color:var(--text2);margin-bottom:14px;">Escolha como a ficha será gerada.</p>
+        <div class="pdf-theme-opts" id="pdf-theme-opts">
+          <button type="button" class="pdf-theme-opt" data-theme="light" onclick="pdfThemePick('light')">
+            <div class="pdf-theme-prev light"><div class="bar"><b></b><i style="width:50%"></i></div><i style="width:90%"></i><i style="width:70%"></i><i style="width:80%"></i></div>☀️ Claro</button>
+          <button type="button" class="pdf-theme-opt" data-theme="dark" onclick="pdfThemePick('dark')">
+            <div class="pdf-theme-prev dark"><div class="bar"><b></b><i style="width:50%"></i></div><i style="width:90%"></i><i style="width:70%"></i><i style="width:80%"></i></div>🌙 Escuro</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="pdfThemeCancel()">Cancelar</button>
+        <button class="btn btn-primary" onclick="pdfThemeConfirm()">Gerar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EXPORTAR TUDO -->
   <div id="modal-export-all" class="modal-overlay hidden tn">
     <div class="modal modal-sm">
       <div class="modal-header">
@@ -8870,6 +8893,11 @@
           Gera um PDF para cada aluno com os planos ativos e futuros e baixa tudo em um arquivo ZIP.
         </p>
         <div id="export-all-info" style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:12px;"></div>
+        <div style="font-size:.78rem;font-weight:700;color:var(--text2);margin-bottom:8px;">Tema dos PDFs</div>
+        <div class="pdf-theme-opts" id="export-all-theme" style="margin-bottom:14px;">
+          <button type="button" class="pdf-theme-opt" data-theme="light" onclick="exportAllTheme('light')">☀️ Claro</button>
+          <button type="button" class="pdf-theme-opt" data-theme="dark" onclick="exportAllTheme('dark')">🌙 Escuro</button>
+        </div>
         <label style="display:flex;align-items:center;gap:8px;font-size:.83rem;color:var(--text2);cursor:pointer;margin-bottom:14px;">
           <input type="checkbox" id="export-all-expired" /> Incluir também planos vencidos
         </label>
@@ -11609,11 +11637,34 @@
       return ('Ficha - ' + a + ' - ' + b).slice(0, 100) + '.pdf';
     }
 
-    async function _buildPlanPdf(planId, sidOrName) {
+    // ── Tema do PDF (claro/escuro): lembra a última escolha ──
+    const _PDF_THEME_KEY = 'trainly_pdf_theme';
+    const _getPdfTheme = () => { try { return localStorage.getItem(_PDF_THEME_KEY) === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; } };
+    const _setPdfTheme = (t) => { try { localStorage.setItem(_PDF_THEME_KEY, t); } catch (e) { } };
+    const _markThemeOpts = (sel, t) => document.querySelectorAll(sel + ' .pdf-theme-opt').forEach(b => b.classList.toggle('selected', b.dataset.theme === t));
+    let _pdfThemeResolve = null, _pdfThemeCur = 'light';
+
+    window.askPdfTheme = function () {
+      _pdfThemeCur = _getPdfTheme();
+      _markThemeOpts('#pdf-theme-opts', _pdfThemeCur);
+      openModal('modal-pdf-theme');
+      return new Promise(res => { _pdfThemeResolve = res; });
+    };
+    function _pdfThemeDone(v) {
+      closeModal('modal-pdf-theme');
+      const r = _pdfThemeResolve; _pdfThemeResolve = null;
+      if (r) r(v);
+    }
+    window.pdfThemePick = (t) => { _pdfThemeCur = t; _markThemeOpts('#pdf-theme-opts', t); };
+    window.pdfThemeConfirm = () => { _setPdfTheme(_pdfThemeCur); _pdfThemeDone(_pdfThemeCur); };
+    window.pdfThemeCancel = () => _pdfThemeDone(null);
+    window.exportAllTheme = (t) => { _setPdfTheme(t); _markThemeOpts('#export-all-theme', t); };
+
+    async function _buildPlanPdf(planId, sidOrName, theme) {
       const plan = window.__gestorPlans && window.__gestorPlans[planId];
       if (!plan) throw new Error('Plano não encontrado.');
       const student = _studentById(sidOrName) || { name: sidOrName || '' };
-      const blob = await TrainlyPDF.pdfBlob(student.name || 'Aluno', [plan], { getPlanStatus: getPlanStatus });
+      const blob = await TrainlyPDF.pdfBlob(student.name || 'Aluno', [plan], { getPlanStatus: getPlanStatus, theme: theme });
       return { blob: blob, student: student, plan: plan };
     }
 
@@ -11630,8 +11681,10 @@
     // Baixa a ficha em PDF
     window.exportPlanPDF = async function (planId, sidOrName) {
       try {
+        const theme = await askPdfTheme();
+        if (!theme) return;
         toast('Gerando PDF...');
-        const r = await _buildPlanPdf(planId, sidOrName);
+        const r = await _buildPlanPdf(planId, sidOrName, theme);
         TrainlyPDF.downloadBlob(r.blob, _pdfFileName(r.student, r.plan));
         toast('PDF gerado!');
       } catch (e) {
@@ -11645,8 +11698,10 @@
     window.sendPlanPdfWhatsApp = async function (sid, planId) {
       try {
         const student = _studentById(sid) || {};
+        const theme = await askPdfTheme();
+        if (!theme) return;
         toast('Preparando PDF...');
-        const r = await _buildPlanPdf(planId, sid);
+        const r = await _buildPlanPdf(planId, sid, theme);
         const fname = _pdfFileName(r.student, r.plan);
         const text = 'Olá ' + _firstName(student.name) + ', segue sua ficha de treino em PDF. 🏋️';
         let file = null;
@@ -11749,6 +11804,7 @@
         ? list.length + (list.length === 1 ? ' aluno será processado.' : ' alunos serão processados.')
         : 'Você ainda não tem alunos cadastrados.';
       _exportAllReset();
+      _markThemeOpts('#export-all-theme', _getPdfTheme());
       _exportAllUI({ busy: false, showProgress: false, percent: 0, status: '', error: '', hideGo: !list.length });
       openModal('modal-export-all');
     };
@@ -11776,6 +11832,7 @@
         const result = await TrainlyPDF.exportAllToZip({
           students: students,
           includeExpired: includeExpired,
+          theme: _getPdfTheme(),
           getPlanStatus: getPlanStatus,
           fetchPlans: _fetchPlansForStudents,
           isCancelled: () => X.cancelled,
@@ -22250,6 +22307,17 @@ body[data-admin-level="1"] #tab-ceo .ceo-hero-badge, body[data-admin-level="2"] 
 .qp-summary { position: sticky; bottom: -1px; margin: 14px -4px -4px; padding: 10px 14px; background: var(--surface3, var(--surface2)); border: 1px solid var(--accent); border-radius: 14px; font-size: .78rem; line-height: 1.45; color: var(--text); box-shadow: 0 -6px 18px rgba(0,0,0,.18); z-index: 2; }
 .qp-summary b { display: block; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin-bottom: 3px; }
 .qp-summary.empty { border-color: var(--border); color: var(--text3); }
+/* ── Escolha do tema do PDF ── */
+.pdf-theme-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pdf-theme-opt { padding: 10px; border: 1.5px solid var(--border); border-radius: 16px; background: var(--surface2); cursor: pointer; font-family: var(--body); color: var(--text); font-weight: 700; font-size: .85rem; text-align: center; transition: all .15s; }
+.pdf-theme-opt:hover { border-color: var(--border2); }
+.pdf-theme-opt.selected { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 0 0 1px var(--accent) inset; }
+.pdf-theme-prev { height: 92px; border-radius: 10px; margin-bottom: 8px; padding: 9px; text-align: left; display: flex; flex-direction: column; gap: 5px; border: 1px solid rgba(128,128,128,.3); }
+.pdf-theme-prev i { display: block; height: 7px; border-radius: 3px; }
+.pdf-theme-prev .bar { height: 16px; border-radius: 5px; display: flex; align-items: center; gap: 5px; padding: 0 4px; }
+.pdf-theme-prev .bar b { width: 9px; height: 9px; border-radius: 3px; background: #F5C800; }
+.pdf-theme-prev.light { background: #fff; } .pdf-theme-prev.light .bar { background: #F8F8F6; } .pdf-theme-prev.light i { background: #D4D4D8; }
+.pdf-theme-prev.dark { background: #0F0F12; } .pdf-theme-prev.dark .bar { background: #1B1B20; } .pdf-theme-prev.dark i { background: #3A3A44; }
 </style>
 <script>
 /* Dashboard Pro — sparklines, gráfico de performance e atividades (dados reais de ST.students / planos) */
