@@ -13462,7 +13462,8 @@
           </div>`).join('');
         body.innerHTML = `
           <input class="form-control" type="text" placeholder="🔍 Buscar exercício..." oninput="qpFilter(this.value)" style="margin-bottom:14px;"/>
-          ${mods}${err}`;
+          ${mods}${err}<div class="qp-summary" id="qp-summary"></div>`;
+        qpUpdateSummary();
         foot.innerHTML = `${btnBack('qpBack()')}<button class="btn btn-primary" id="qp-confirm-btn" onclick="qpNext()">Confirmar treino ${L} (<span id="qp-count">${sel.length}</span>)</button>`;
         return;
       }
@@ -13483,6 +13484,13 @@
       foot.innerHTML = `${btnBack('qpBack()')}<button class="btn btn-primary" onclick="qpNext()">${last ? 'Criar plano' : 'Confirmar e ir para o Treino ' + letters[Q.idx + 1]}</button>`;
     }
 
+    window.qpUpdateSummary = () => {
+      const el = document.getElementById('qp-summary'); if (!el) return;
+      const arr = _QP.picks[_QP.idx] || [];
+      el.classList.toggle('empty', !arr.length);
+      el.innerHTML = arr.length ? `<b>Selecionados (${arr.length})</b>${arr.map(qpEsc).join(', ')}` : 'Nenhum exercício selecionado ainda.';
+    };
+
     window.qpSetSets = (k, v) => { (_QP.sets[_QP.idx] = _QP.sets[_QP.idx] || { series: '3', reps: '12' })[k] = v; };
 
     window.qpToggle = (el) => {
@@ -13491,6 +13499,7 @@
       if (i === -1) arr.push(n); else arr.splice(i, 1);
       document.querySelectorAll('#qp-body .qp-chip').forEach(c => { if (c.dataset.name === n) c.classList.toggle('selected', i === -1); });
       const c = document.getElementById('qp-count'); if (c) c.textContent = arr.length;
+      qpUpdateSummary();
       _QP.err = '';
     };
 
@@ -22233,6 +22242,14 @@ body[data-admin-level="1"] #tab-ceo .ceo-hero-badge, body[data-admin-level="2"] 
 .exa-st.approved { color: var(--green); border-color: rgba(76, 195, 138, .35); background: var(--green-dim, rgba(76, 195, 138, .12)); }
 .exa-st.rejected { color: var(--red); border-color: rgba(224, 62, 62, .3); background: rgba(224, 62, 62, .08); }
 .exa-reason { display: block; font-size: .74rem; color: var(--text3); margin-top: 2px; }
+/* ── Criação rápida: estado selecionado visível ── */
+.tn .qp-chip { position: relative; }
+.tn .qp-chip.selected, .tn .qp-chip.selected:hover { border-color: var(--accent); background: var(--accent-dim); color: var(--accent-ink, var(--accent)); font-weight: 700; box-shadow: 0 0 0 1px var(--accent) inset; }
+.tn .qp-chip.selected::before { content: '✓'; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-right: 7px; border-radius: 5px; background: var(--accent); color: #111; font-size: .68rem; font-weight: 900; vertical-align: middle; }
+.tn .qp-type.selected { border-color: var(--accent); background: var(--accent-dim); color: var(--accent-ink, var(--accent)); box-shadow: 0 0 0 1px var(--accent) inset; }
+.qp-summary { position: sticky; bottom: -1px; margin: 14px -4px -4px; padding: 10px 14px; background: var(--surface3, var(--surface2)); border: 1px solid var(--accent); border-radius: 14px; font-size: .78rem; line-height: 1.45; color: var(--text); box-shadow: 0 -6px 18px rgba(0,0,0,.18); z-index: 2; }
+.qp-summary b { display: block; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin-bottom: 3px; }
+.qp-summary.empty { border-color: var(--border); color: var(--text3); }
 </style>
 <script>
 /* Dashboard Pro — sparklines, gráfico de performance e atividades (dados reais de ST.students / planos) */
